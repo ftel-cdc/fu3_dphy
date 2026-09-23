@@ -1,0 +1,32 @@
+# ---- VCS / Verdi simulation output -------------------------------------------
+simv
+simv_*
+simv.daidir/
+simv.vdb/
+csrc/
+ucli.key
+vc_hdrs.h
+*.fsdb
+*.vpd
+verdiLog/
+novas.*
+urgReport/
+coverage_report/
+ip/*/sim/*.log
+
+# ---- Design Compiler ---------------------------------------------------------
+*.ddc
+*.mr
+*.pvl
+*.syn
+*.svf
+alib-52/
+command.log
+ip/*/syn/work/
+ip/*/syn/netlist/
+ip/*/syn/output/
+
+# ---- SpyGlass ----------------------------------------------------------------
+spyglass*/
+cksum_dir/
+ip/*/lint/lint_results/
