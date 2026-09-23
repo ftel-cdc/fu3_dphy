@@ -3,8 +3,10 @@
 MIPI D-PHY receiver controller: receives one clock lane and up to four data lanes and
 presents the received data on the PHY-Protocol Interface (PPI) toward a CSI-2 receiver.
 
-> Status (2026-09-23): directory structure only. The architecture specification
-> (`doc/spec.md`) is the next deliverable; no RTL has been written yet.
+> Status (2026-09-23): research and planning phase — see
+> [`doc/DPHY_RX_RESEARCH_PLAN.md`](doc/DPHY_RX_RESEARCH_PLAN.md) (requirements, change analysis,
+> Tx sync-up list, work plan). The architecture specification (`doc/spec.md`) follows after the
+> first sync-up with the Tx team; no RTL has been written yet.
 
 ---
 
