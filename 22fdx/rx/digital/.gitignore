@@ -30,3 +30,7 @@ ip/*/syn/output/
 spyglass*/
 cksum_dir/
 ip/*/lint/lint_results/
+
+# ---- Office lock files (LibreOffice / MS Office) ------------------------------
+.~lock.*#
+~$*

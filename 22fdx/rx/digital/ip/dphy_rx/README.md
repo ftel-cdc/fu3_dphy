@@ -3,10 +3,9 @@
 MIPI D-PHY receiver controller: receives one clock lane and up to four data lanes and
 presents the received data on the PHY-Protocol Interface (PPI) toward a CSI-2 receiver.
 
-> Status (2026-09-23): research and planning phase — see
-> [`doc/DPHY_RX_RESEARCH_PLAN.md`](doc/DPHY_RX_RESEARCH_PLAN.md) (requirements, change analysis,
-> Tx sync-up list, work plan). The architecture specification (`doc/spec.md`) follows after the
-> first sync-up with the Tx team; no RTL has been written yet.
+> Status (2026-09-25): architecture draft — [`doc/spec.md`](doc/spec.md) is HAS **draft v0.1**
+> (open items in its chapter 9). Research, change analysis and sync-up lists are in
+> [`doc/DPHY_RX_RESEARCH_PLAN.md`](doc/DPHY_RX_RESEARCH_PLAN.md). No RTL has been written yet.
 
 ---
 
@@ -44,7 +43,8 @@ in v1.2 (data rates above 1.5 Gbps, the deskew calibration sequence) are defined
 dphy_rx/
 ├── README.md          ← this file
 ├── doc/
-│   ├── spec.md        ← architecture specification (HAS), next deliverable
+│   ├── spec.md        ← architecture specification (HAS), draft v0.1
+│   ├── DPHY_RX_RESEARCH_PLAN.md ← research, change analysis, sync-up lists, plan
 │   └── figures/       ← diagrams referenced by spec.md (SVG + PNG)
 ├── logical/           ← RTL source (flat — all .sv at the same level) + filelist.f
 ├── sim/               ← testbenches tb_*.sv + Makefile (VCS)
