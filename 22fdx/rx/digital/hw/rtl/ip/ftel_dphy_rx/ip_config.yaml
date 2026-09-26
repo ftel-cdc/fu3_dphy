@@ -1,0 +1,36 @@
+# Optional per-design overrides. Rename to ip_config.yaml or top_config.yaml.
+
+# top_module: custom_top
+# filelist: logical/custom_filelist.f
+
+# constraint:
+#   lint: lint/custom_constraint.tcl
+# waiver:
+#   lint: lint/custom_waiver.tcl
+
+# compile_mode:
+#   debug:
+#     define:
+#       - IP_DEBUG
+#   early_pdk:
+#     kind: cell
+#     define:
+#       - FPT_SIGNOFF
+#     tech: new_pdk
+#     tech_config: tech/new_pdk.yaml
+#     required_lib:
+#       - stdcell_verilog
+#       - io_verilog
+
+# vcs:
+#   tb_top: custom_tb_top
+#   filelist:
+#     rtl: logical/custom_compile.f
+#     cell: logical/custom_compile.f
+#     netlist: logical/custom_netlist.f
+#   run_filelist:
+#     rtl: logical/custom_sim.f
+#     cell: logical/custom_sim.f
+#     netlist: logical/custom_netlist_sim.f
+#   compile_options: []
+#   run_options: []

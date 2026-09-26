@@ -12,7 +12,7 @@ verdiLog/
 novas.*
 urgReport/
 coverage_report/
-ip/*/sim/*.log
+hw/rtl/ip/*/sim/*.log
 
 # ---- Design Compiler ---------------------------------------------------------
 *.ddc
@@ -22,15 +22,16 @@ ip/*/sim/*.log
 *.svf
 alib-52/
 command.log
-ip/*/syn/work/
-ip/*/syn/netlist/
-ip/*/syn/output/
+hw/rtl/ip/*/syn/work/
+hw/rtl/ip/*/syn/netlist/
+hw/rtl/ip/*/syn/output/
 
 # ---- SpyGlass ----------------------------------------------------------------
 spyglass*/
 cksum_dir/
-ip/*/lint/lint_results/
+hw/rtl/ip/*/lint/lint_results/
 
 # ---- Office lock files (LibreOffice / MS Office) ------------------------------
 .~lock.*#
 ~$*
+__pycache__/

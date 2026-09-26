@@ -1,6 +1,6 @@
-# m_fpt_dphy_rx — MIPI D-PHY Receiver High-Level Architecture Specification
+# ftel_dphy_rx — MIPI D-PHY Receiver High-Level Architecture Specification
 
-**DRAFT v0.2** — architecture level. Items that are not yet agreed are marked **OPEN** with the
+**DRAFT v0.3** — architecture level. Items that are not yet agreed are marked **OPEN** with the
 default assumption used by this draft; they are tracked in chapter 9 and in
 [`DPHY_RX_RESEARCH_PLAN.md`](DPHY_RX_RESEARCH_PLAN.md).
 
@@ -10,6 +10,7 @@ default assumption used by this draft; they are tracked in chapter 9 and in
 |---|---|---|---|
 | v0.1 (draft) | 2026-09-25 | Ho Khanh Linh | First draft: block partitioning, PPI contract, lane/clock-lane behaviour, open decisions |
 | v0.2 (draft) | 2026-09-25 | Ho Khanh Linh | §1 restructured: system context across the two chips (1.1), layer view (1.2), data versus control direction (1.3) |
+| v0.3 (draft) | 2026-09-26 | Ho Khanh Linh | Renamed to the FX1 ip-dev convention: IP `ftel_dphy_rx` (wrapper `m_ftel_dphy_rx_wrap`), synthesis parameters prefixed `PARA_`; no technical change |
 
 ## Conventions
 
@@ -40,7 +41,7 @@ Signal names ending in `_x` exist once per data lane. Unless stated otherwise, s
 
 ## 1. Overview
 
-`m_fpt_dphy_rx` is the digital controller of a MIPI D-PHY receiver. On the physical signal path it
+`ftel_dphy_rx` is the digital controller of a MIPI D-PHY receiver. On the physical signal path it
 sits **after** the analog front-end (AFE: HS-RX, LP-RX, termination, deserializer) and **before**
 the CSI-2 Rx controller, to which it presents the received lanes on the PHY-Protocol Interface
 (PPI). In HAS-CSI terms it is the "D-PHY macro".
@@ -50,7 +51,7 @@ the CSI-2 Rx controller, to which it presents the received lanes on the PHY-Prot
 ```
         Sensor chip (transmit side)                         Receiving SoC (FX1, receive side)
  ┌──────────────────────────────────────┐          ┌─────────────────────────────────────────────────────────────┐
- │ CSI-2 Tx      ──PPI──► D-PHY Tx      │ PCB      │ AFE ──► m_fpt_dphy_rx ──PPI──► CSI-2 Rx ──► ISP / DDR       │
+ │ CSI-2 Tx      ──PPI──► D-PHY Tx      │ PCB      │ AFE ──► ftel_dphy_rx ──PPI──► CSI-2 Rx ──► ISP / DDR        │
  │ protocol               (digital +    │ lanes    │ (analog)  (D-PHY Rx,           controller                   │
  │ (builds packets)       analog driver)│ ════════►│           digital, this IP)    (HAS-CSI)                    │
  │                                      │ 1 clock +│                                                             │
@@ -65,7 +66,7 @@ the CSI-2 Rx controller, to which it presents the received lanes on the PHY-Prot
 | D-PHY Tx | Sensor chip | Serializes bytes, drives the HS and LP line levels, performs SoT/EoT, drives the clock lane | Sensor vendor / Tx side |
 | Lanes | PCB | One differential clock lane and 1, 2 or 4 differential data lanes | Board |
 | AFE | Receiving chip, at the pins | Receives the analog line levels — HS: \|VOD\| 140–270 mV around a ~200 mV common mode; LP: 1.1–1.3 V single-ended (D-PHY v1.1 §9 ✅) — plus termination and deserializer | Analog team (OPEN ADR-001) |
-| `m_fpt_dphy_rx` | Receiving chip | Line-state FSMs, SoT sync and byte alignment, EoT, escape/ULPS, errors; outputs bytes on the PPI | This IP |
+| `ftel_dphy_rx` | Receiving chip | Line-state FSMs, SoT sync and byte alignment, EoT, escape/ULPS, errors; outputs bytes on the PPI | This IP |
 | CSI-2 Rx controller | Receiving chip | Lane merging, header ECC, payload CRC, frame handling, pixel unpacking | CSI team (HAS-CSI) |
 
 The order AFE → D-PHY Rx → CSI-2 Rx is fixed by what each stage needs as input:
@@ -87,7 +88,7 @@ References:
    └──────────┬──────────┘   (no direct wire)          └──────────▲──────────┘
               │ PPI                                               │ PPI
    ┌──────────▼──────────┐                             ┌──────────┴──────────┐
-   │ D-PHY Tx (digital)  │                             │ D-PHY Rx (digital)  │  m_fpt_dphy_rx (this IP)
+   │ D-PHY Tx (digital)  │                             │ D-PHY Rx (digital)  │  ftel_dphy_rx (this IP)
    ├─────────────────────┤                             ├─────────────────────┤
    │ D-PHY Tx (analog)   │ ═════════ PCB lanes ══════► │ D-PHY Rx (analog)   │  AFE
    └─────────────────────┘                             └─────────────────────┘
@@ -111,18 +112,18 @@ make the controller look as if it were "in front of" the D-PHY. The data path ru
 
 ```
                  data ───────────────────────────────────────────►
-  pins ─► AFE ─► m_fpt_dphy_rx ════════ PPI ════════ CSI-2 Rx controller ◄── software (AXI4-Lite CSR)
+  pins ─► AFE ─► ftel_dphy_rx ═════════ PPI ════════ CSI-2 Rx controller ◄── software (AXI4-Lite CSR)
                  ◄─────────────────────────────────────────── control
                        cl_enable, dl_enable_x, forcerxmode_x, phy_core_rst
 ```
 
 | Path | Direction | Signals | Reference |
 |---|---|---|---|
-| Received data and lane status | AFE → `m_fpt_dphy_rx` → CSI-2 Rx controller | `rxbyteclkhs`, `rxdatahs_x`, `rxvalidhs_x`, `rxactivehs_x`, `rxsynchs_x`, `rxskewcalhs_x`, Stop / ULPS / trigger / error indications, `init_done` | HAS-CSI Table 4-3: *Input* to the controller **[CSI]** |
-| Link control | CSI-2 Rx controller → `m_fpt_dphy_rx` | `cl_enable`, `dl_enable_x`, `forcerxmode_x`, `phy_core_rst` | HAS-CSI Table 4-3: *Output* of the controller, driven from its CSR **[CSI]** |
-| AFE control | `m_fpt_dphy_rx` → AFE | HS-RX enable, termination enable, delay taps | §5.2 |
-| Reference clock | System → `m_fpt_dphy_rx` | `core_clk` (200 MHz) | HAS-CSI Table 4-1 **[CSI]** |
-| Timer configuration | Configuration bus → `m_fpt_dphy_rx` | Timer values, lane map, polarity | §4.10, OPEN K3 |
+| Received data and lane status | AFE → `ftel_dphy_rx` → CSI-2 Rx controller | `rxbyteclkhs`, `rxdatahs_x`, `rxvalidhs_x`, `rxactivehs_x`, `rxsynchs_x`, `rxskewcalhs_x`, Stop / ULPS / trigger / error indications, `init_done` | HAS-CSI Table 4-3: *Input* to the controller **[CSI]** |
+| Link control | CSI-2 Rx controller → `ftel_dphy_rx` | `cl_enable`, `dl_enable_x`, `forcerxmode_x`, `phy_core_rst` | HAS-CSI Table 4-3: *Output* of the controller, driven from its CSR **[CSI]** |
+| AFE control | `ftel_dphy_rx` → AFE | HS-RX enable, termination enable, delay taps | §5.2 |
+| Reference clock | System → `ftel_dphy_rx` | `core_clk` (200 MHz) | HAS-CSI Table 4-1 **[CSI]** |
+| Timer configuration | Configuration bus → `ftel_dphy_rx` | Timer values, lane map, polarity | §4.10, OPEN K3 |
 
 ### 1.4 Baselines, release plan and features
 
@@ -140,7 +141,7 @@ make the controller look as if it were "in front of" the D-PHY. The data path ru
 | R2 | 80–1792 Mb/s | Calibration active (Block No. 5) | 4K staggered HDR RAW12 **[CSI]** §7.3 |
 
 **Features.**
-- One clock lane and 1, 2 or 4 data lanes (`NUM_LANES` = 4) **[CSI]** C2.
+- One clock lane and 1, 2 or 4 data lanes (`PARA_NUM_LANES` = 4) **[CSI]** C2.
 - PPI with an 8-bit data path per lane on one shared `rxbyteclkhs` = HS DDR clock / 8 **[CSI]** C3.
 - Clock lane: HS entry and exit, continuous-clock operation (mandatory, CSI-2 §7.1 ✅), and
   clock-lane ULPS (D-PHY §6.8 ✅). The clock-lane FSM also handles LP entry between bursts, so
@@ -167,7 +168,7 @@ are not supported (unidirectional slave per CSI-2 §7.1 ✅).
 ## 2. Block Diagram
 
 ```
-                ┌───────────────────────────────── m_fpt_dphy_rx ─────────────────────────────────┐
+                ┌───────────────────────────────── ftel_dphy_rx ──────────────────────────────────┐
                 │                                                                                 │
  AFE data lane x│  ┌────────────┐  lp_x (core_clk)  ┌───────────────────┐                         │
  lp_dp/dn_x ───►│─►│ No.1 AFE   │──────────────────►│ No.3 Data Lane    │──► stopstate_x, ulps,   │
@@ -220,16 +221,16 @@ Synthesis-time parameters. Values that depend on an open item show the default u
 
 | # | Parameter | Value / formula | Type | Description |
 |---|---|---|---|---|
-| 1 | `NUM_LANES` | 4 | Configurable | Data lane slices instantiated: 1, 2 or 4 **[CSI]** C2. Lanes are enabled at run time by `dl_enable_x` |
-| 2 | `DESER_RATIO` | 8 | Fixed | Width of the AFE word per lane and of `rxdatahs_x` **[CSI]** C3. Kept as a parameter so a 1:16 AFE can be supported later (V11) |
-| 3 | `CORE_CLK_MHZ` | 200 | Fixed | Reference clock of all timers **[CSI]** C15; resolution 5 ns |
-| 4 | `DESKEW_EN` | 0 (R1), 1 (R2) | Configurable | Instantiates Block No. 5. When 0, deskew bursts are still detected (Block No. 4) |
-| 5 | `LPDT_EN` | 0 | Configurable | Instantiates LPDT reception. When 0, LPDT PPI outputs are tied inactive (OPEN K2) |
-| 6 | `LP_SYNC_STAGES` | 2 | Fixed | Synchronizer depth of the LP-RX inputs into `core_clk` |
-| 7 | `LP_FILTER_CYC` | 2 ⚠️ | Configurable | Glitch filter on LP states, in `core_clk` cycles. Bounded by the termination-enable budget (Appendix B) |
-| 8 | `EOT_DELAY_BYTES` | 32 ⚠️ | Configurable | Depth of the EoT delay line (Block No. 4). Shall cover THS-TRAIL + THS-SKIP + LP-11 detection latency at the highest line rate (OPEN S5) |
-| 9 | `SYNC_SEARCH_BYTES` | 16 ⚠️ | Configurable | Bytes searched for the sync sequence after THS-SETTLE before `errsotsynchs_x` is raised |
-| 10 | `DLY_TAP_WIDTH` | To be determined | Configurable | Width of the AFE delay-tap control (R2, ADR-004) |
+| 1 | `PARA_NUM_LANES` | 4 | Configurable | Data lane slices instantiated: 1, 2 or 4 **[CSI]** C2. Lanes are enabled at run time by `dl_enable_x` |
+| 2 | `PARA_DESER_RATIO` | 8 | Fixed | Width of the AFE word per lane and of `rxdatahs_x` **[CSI]** C3. Kept as a parameter so a 1:16 AFE can be supported later (V11) |
+| 3 | `PARA_CORE_CLK_MHZ` | 200 | Fixed | Reference clock of all timers **[CSI]** C15; resolution 5 ns |
+| 4 | `PARA_DESKEW_EN` | 0 (R1), 1 (R2) | Configurable | Instantiates Block No. 5. When 0, deskew bursts are still detected (Block No. 4) |
+| 5 | `PARA_LPDT_EN` | 0 | Configurable | Instantiates LPDT reception. When 0, LPDT PPI outputs are tied inactive (OPEN K2) |
+| 6 | `PARA_LP_SYNC_STAGES` | 2 | Fixed | Synchronizer depth of the LP-RX inputs into `core_clk` |
+| 7 | `PARA_LP_FILTER_CYC` | 2 ⚠️ | Configurable | Glitch filter on LP states, in `core_clk` cycles. Bounded by the termination-enable budget (Appendix B) |
+| 8 | `PARA_EOT_DELAY_BYTES` | 32 ⚠️ | Configurable | Depth of the EoT delay line (Block No. 4). Shall cover THS-TRAIL + THS-SKIP + LP-11 detection latency at the highest line rate (OPEN S5) |
+| 9 | `PARA_SYNC_SEARCH_BYTES` | 16 ⚠️ | Configurable | Bytes searched for the sync sequence after THS-SETTLE before `errsotsynchs_x` is raised |
+| 10 | `PARA_DLY_TAP_WIDTH` | To be determined | Configurable | Width of the AFE delay-tap control (R2, ADR-004) |
 
 Run-time programmable timing values (reset defaults; the configuration path is OPEN K3):
 
@@ -257,7 +258,7 @@ Clock-domain crossings:
 
 | From → To | Signals | Method |
 |---|---|---|
-| AFE LP-RX (asynchronous) → `core_clk` | `lp_dp/dn_x`, `cl_lp_dp/dn` | `LP_SYNC_STAGES` flip-flops + `LP_FILTER_CYC` glitch filter |
+| AFE LP-RX (asynchronous) → `core_clk` | `lp_dp/dn_x`, `cl_lp_dp/dn` | `PARA_LP_SYNC_STAGES` flip-flops + `PARA_LP_FILTER_CYC` glitch filter |
 | `core_clk` → `rxbyteclkhs` | HS entry, settle done, EoT request (Block No. 3 → No. 4) | Level signals through 2-flop synchronizers. The receiving logic returns to idle when the byte clock stops (clock-lane ULPS) |
 | `rxbyteclkhs` → `core_clk` | EoT done, error events for status counters | Toggle synchronizers |
 | Enables (`lite_aclk`) → `core_clk` | `cl_enable`, `dl_enable_x`, `forcerxmode_x` | Level, 2-flop synchronizers; the PPI defines them as level sensitive **[CSI]** C14 |
@@ -353,7 +354,7 @@ entry commands of Table 8 to `rxtriggeresc_x[3:0]` follows the order of Table 8 
   - Exact match: the byte offset is locked; `rxsynchs_x` pulses in the **same cycle** as the first
     payload byte **[CSI]** C6.
   - Single-bit error: as above, plus a one-cycle `errsoths_x` (D-PHY §7.2.1 ✅).
-  - No match within `SYNC_SEARCH_BYTES`: one-cycle `errsotsynchs_x`; no `rxsynchs_x` and no
+  - No match within `PARA_SYNC_SEARCH_BYTES`: one-cycle `errsotsynchs_x`; no `rxsynchs_x` and no
     `rxvalidhs_x` for the rest of the burst, while `rxactivehs_x` stays asserted until EoT
     **[CSI]** C8.
 - **Deskew-burst detection (R1 and R2).** A run of ≥ 16 ones after HS-0 (v1.2 skew-calibration sync,
@@ -361,7 +362,7 @@ entry commands of Table 8 to `rxtriggeresc_x[3:0]` follows the order of Table 8 
   `rxvalidhs_x` or `rxsynchs_x` is produced **[CSI]** C9. In R2 the burst is forwarded to Block No. 5.
 - **Byte alignment.** A barrel shifter over two consecutive words produces `rxdatahs_x` with bit 0
   received first. `rxvalidhs_x` is asserted for every aligned byte.
-- **EoT and trailer removal.** Bytes pass through an `EOT_DELAY_BYTES` delay line. On the EoT request
+- **EoT and trailer removal.** Bytes pass through an `PARA_EOT_DELAY_BYTES` delay line. On the EoT request
   (LP-11 seen by Block No. 3) the stored tail is scanned backwards: the bits of the THS-SKIP interval
   are discarded, the last transition marks the end of the flipped trailer, and only bytes before it
   are delivered (D-PHY §6.4.3, Table 4 ✅). A last transition that is not on a byte boundary raises
@@ -391,7 +392,7 @@ at the low-rate corner.
 - The algorithm, the tap resolution and the use of periodic calibration are decided in R2
   (ADR-004), once the AFE delay-line capability is known.
 - RxErrorCalHS is not required **[CSI]** C9.
-- With `DESKEW_EN` = 0 the block is absent and the taps are held at their reset value.
+- With `PARA_DESKEW_EN` = 0 the block is absent and the taps are held at their reset value.
 
 ### 4.9 PPI Output Stage (Block No. 7)
 
@@ -404,7 +405,7 @@ at the low-rate corner.
 ### 4.10 Configuration & Status (Block No. 8)
 
 Configuration fields: the timer values of §3, lane polarity inversion and lane mapping (V9),
-`DESKEW_EN` run-time bypass (R2).
+`PARA_DESKEW_EN` run-time bypass (R2).
 
 Status: the lane FSM states, and sticky flags with counters for EoT sync errors, HS RX timeouts,
 SoT errors and escape errors.
@@ -465,7 +466,7 @@ Assumes the AFE delivers deserialized, **unaligned** 8-bit words per lane on a c
 | `afe_cl_clk_active` | In | 1 | async | Clock-activity detector for TCLK-MISS (§4.4 note) ⚠️ |
 | `afe_hs_en_x`, `afe_cl_hs_en` | Out | 1 each | `core_clk` | HS-RX (and deserializer) enable |
 | `afe_term_en_x`, `afe_cl_term_en` | Out | 1 each | `core_clk` | HS termination enable |
-| `afe_dly_tap_x` | Out | `DLY_TAP_WIDTH` | `rxbyteclkhs` | Delay-line setting (R2) |
+| `afe_dly_tap_x` | Out | `PARA_DLY_TAP_WIDTH` | `rxbyteclkhs` | Delay-line setting (R2) |
 
 ### 5.3 Configuration and status interface
 
@@ -577,7 +578,7 @@ THS-SKIP interval. Discarding a fixed number of bytes fails when the Tx trail le
 | K6 | `phy_core_rst` polarity and synchronicity; exact `init_done` and `forcerxmode_x` semantics | Active High, asynchronous | CSI team |
 | ADR-001 | AFE boundary, clock-activity detection, termination timing, delay taps | Option B | AFE team |
 | S4 | Tx deskew behaviour (initial / periodic, exact pattern) | D-PHY v1.2 pattern (🌐) | Tx side |
-| S5 | Tx timing table, in particular the maximum THS-TRAIL (sizes `EOT_DELAY_BYTES`) | Specification minimums | Tx side |
+| S5 | Tx timing table, in particular the maximum THS-TRAIL (sizes `PARA_EOT_DELAY_BYTES`) | Specification minimums | Tx side |
 | T1 | Mapping of the four trigger commands to `rxtriggeresc_x[3:0]` | Order of D-PHY Table 8 | Specification check |
 
 ---
@@ -592,7 +593,7 @@ IDs refer to `DPHY_RX_RESEARCH_PLAN.md` §2.1 (Q) and §2.4 (C).
 | Q2 Unidirectional slave, CIL-SFEN / CIL-SCNN | §4.4, §4.5 |
 | Q3 Continuous clock mandatory | §4.4 |
 | Q4 Forward escape ULPS on all data lanes | §4.5 |
-| Q5 Deskew mechanism, bypassable | §4.6, §4.8, `DESKEW_EN` |
+| Q5 Deskew mechanism, bypassable | §4.6, §4.8, `PARA_DESKEW_EN` |
 | Q6 N-lane Rx with M ≤ N lane Tx | `dl_enable_x`, §4.2 |
 | Q7 EoT–LPS–SoT between packets | §4.5, §4.6 |
 | Q8 D-PHY-level error reporting | §4.5, §4.6, §5.1 |
@@ -609,7 +610,7 @@ IDs refer to `DPHY_RX_RESEARCH_PLAN.md` §2.1 (Q) and §2.4 (C).
 ## Appendix B. Receiver Timing Parameters
 
 From D-PHY v1.1 Table 14 ✅. `core_clk` period = 5 ns; the LP detection latency is
-(`LP_SYNC_STAGES` + `LP_FILTER_CYC`) × 5 ns ≈ 20 ns with the defaults.
+(`PARA_LP_SYNC_STAGES` + `PARA_LP_FILTER_CYC`) × 5 ns ≈ 20 ns with the defaults.
 
 | Parameter | Specification | Implementation |
 |---|---|---|
