@@ -1,0 +1,86 @@
+{
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "structured_spec — requirements extracted from a HAS spec.md (req_flow phase P1)",
+  "type": "object",
+  "required": ["metadata", "requirements", "findings"],
+  "additionalProperties": false,
+  "properties": {
+    "metadata": {
+      "type": "object",
+      "required": ["ip_name", "spec_path", "spec_sha256", "spec_revision", "mode", "generated_by", "gate_1"],
+      "additionalProperties": false,
+      "properties": {
+        "ip_name": {"type": "string", "pattern": "^ftel_[a-z0-9_]+$"},
+        "spec_path": {"type": "string", "minLength": 1},
+        "spec_sha256": {"type": "string", "pattern": "^[0-9a-f]{64}$"},
+        "spec_revision": {"type": "string", "minLength": 1},
+        "mode": {"type": "string", "enum": ["review", "gate"]},
+        "generated_by": {"type": "string", "minLength": 1},
+        "gate_1": {
+          "type": "object",
+          "required": ["status", "by", "at"],
+          "additionalProperties": false,
+          "properties": {
+            "status": {"type": "string", "enum": ["draft", "approved", "rejected"]},
+            "by": {"type": ["string", "null"]},
+            "at": {"type": ["string", "null"]}
+          }
+        }
+      }
+    },
+    "requirements": {
+      "type": "array",
+      "minItems": 1,
+      "items": {
+        "type": "object",
+        "required": ["req_id", "text", "category", "block", "clock_domain", "release", "spec_status",
+                     "source_section", "source_line", "source_quote", "source_ids", "parameters_affected",
+                     "ambiguity_score", "needs_review", "needs_human_decision", "open_item_ref",
+                     "sva_hint", "verification_method"],
+        "additionalProperties": false,
+        "properties": {
+          "req_id": {"type": "string", "pattern": "^REQ-[0-9]{3}$"},
+          "text": {"type": "string", "minLength": 10},
+          "category": {"type": "string",
+                       "enum": ["functional", "interface", "timing", "constraint", "parameter",
+                                "clocking", "reset", "decision", "verification"]},
+          "block": {"type": "string", "pattern": "^(No\\.[1-8]|top|wrap|all)$"},
+          "clock_domain": {"type": "string",
+                           "enum": ["core_clk", "rxbyteclkhs", "cfg_clk", "async", "multi", "none"]},
+          "release": {"type": "string", "enum": ["R1", "R2", "both"]},
+          "spec_status": {"type": "string", "enum": ["verified", "contract", "assumed", "open", "design"]},
+          "source_section": {"type": "string", "minLength": 1},
+          "source_line": {"type": "integer", "minimum": 1},
+          "source_quote": {"type": "string", "minLength": 8},
+          "source_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
+          "parameters_affected": {"type": "array", "items": {"type": "string", "pattern": "^(PARA_[A-Z0-9_]+|[a-z_]+_cyc)$"}},
+          "ambiguity_score": {"type": "number", "minimum": 0, "maximum": 1},
+          "needs_review": {"type": "boolean"},
+          "needs_human_decision": {"type": "boolean"},
+          "open_item_ref": {"type": "array", "items": {"type": "string", "pattern": "^(K[0-9]+|S[0-9]+|T[0-9]+|ADR-[0-9]{3})$"}},
+          "sva_hint": {"type": "string", "enum": ["property", "static", "cover", "assume", "sequence", "none"]},
+          "verification_method": {"type": "string",
+                                  "enum": ["sva", "sim", "sva+sim", "review", "cdc", "sta", "analysis"]},
+          "notes": {"type": "string"}
+        }
+      }
+    },
+    "findings": {
+      "type": "array",
+      "items": {
+        "type": "object",
+        "required": ["finding_id", "type", "text", "source_line", "source_quote", "proposed_default", "owner"],
+        "additionalProperties": false,
+        "properties": {
+          "finding_id": {"type": "string", "pattern": "^F-[0-9]{3}$"},
+          "type": {"type": "string", "enum": ["new_ambiguity", "inconsistency", "missing", "question"]},
+          "text": {"type": "string", "minLength": 10},
+          "source_line": {"type": "integer", "minimum": 1},
+          "source_quote": {"type": "string", "minLength": 8},
+          "proposed_default": {"type": "string", "minLength": 1},
+          "owner": {"type": "string", "enum": ["CSI team", "AFE team", "Tx side", "internal"]}
+        }
+      }
+    }
+  }
+}
