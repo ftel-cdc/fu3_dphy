@@ -6,7 +6,10 @@ Checks (each issue carries a code consumed by flow_check.py):
   SCHEMA   schema errors, duplicate / non-sequential ids, unknown enum-like references
   QUOTE    source_quote not found verbatim (whitespace-collapsed) at source_line..source_line+2
   COVER    a graded inventory row is the source of no REQ, or a Q/C id is cited by no REQ
-  OPEN     a REQ sourced from a line tagged OPEN is not flagged needs_human_decision / 'open'
+  OPEN     a REQ sourced from a line that depends on an open item (spec_inventory.open_scope) is
+           not flagged needs_human_decision / 'open'
+  DERIVE   a field set by rule (derive_rules.py) differs from the rule: block / category of a table
+           row, open_item_ref of an open line, 'open' or needs_human_decision without an open basis
   CONSIST  flag rules: ⚠️ line => ambiguity >= 0.35 + needs_review; needs_human_decision =>
            needs_review; (ambiguity > 0.3) == needs_review
   NAME     superseded names (m_fpt_) in REQ text
@@ -30,6 +33,7 @@ HERE = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, HERE)
 import jsonschema_lite  # noqa: E402
 import spec_inventory   # noqa: E402
+import derive_rules     # noqa: E402
 
 SCHEMA_PATH = os.path.join(HERE, "schemas", "structured_spec.schema.json")
 DESKEW_CUE = re.compile(r"deskew|R2|No\.5|calibrat", re.I)
@@ -69,8 +73,9 @@ def check(doc, spec_path, mode):
     if fids != [f"F-{i:03d}" for i in range(1, len(fids) + 1)]:
         add("SCHEMA", "findings", "finding_id sequence is not F-001..F-NNN in order")
 
-    # rows of the Open Items table are open decisions even though they do not repeat the word OPEN
-    open_lines = set(inv["open_lines"]) | {it["line"] for it in inv["items"] if it["kind"] == "open"}
+    # lines depending on an open item: OPEN word, Open Items rows, OPEN heading/caption scope,
+    # citation of an open id, 'To be determined' (spec_inventory.open_scope)
+    open_lines = {int(k) for k in inv["open_derived"]}
     assume_lines = set(inv["assume_lines"])
     blocks = set(inv["blocks"]) | {"top", "wrap", "all"}
     param_names = {it["key"].split(":", 1)[1] for it in inv["items"] if it["kind"] in ("param", "runtime")}
@@ -95,8 +100,12 @@ def check(doc, spec_path, mode):
         ln = r["source_line"]
         if ln in open_lines:
             if not r["needs_human_decision"] or r["spec_status"] != "open":
-                add("OPEN", w, f"line {ln} is tagged OPEN but needs_human_decision={r['needs_human_decision']}, "
-                               f"spec_status={r['spec_status']!r}")
+                add("OPEN", w, f"line {ln} depends on an open item but needs_human_decision="
+                               f"{r['needs_human_decision']}, spec_status={r['spec_status']!r}")
+        for f, have, want in derive_rules.differences(r, inv, lines):
+            if f in ("category", "block", "open_item_ref") or \
+                    (f in ("spec_status", "needs_human_decision") and ln not in open_lines):
+                add("DERIVE", w, f"{f} is {have!r}, the rule gives {want!r}")
         if ln in assume_lines:
             if r["ambiguity_score"] < 0.35 or not r["needs_review"] or r["spec_status"] not in ("assumed", "open"):
                 add("CONSIST", w, f"line {ln} carries ⚠️ but ambiguity={r['ambiguity_score']}, "

@@ -7,7 +7,7 @@ rationale in req/waivers.yaml where the code allows it). No LLM is involved here
 
 Conflict codes implemented for phase P1 (spec parse):
   CF-SPEC    spec changed since the artifact was built           (not waivable)
-  CF-SCHEMA  schema / flag-consistency / name errors              (auto-fix by regeneration, max 2)
+  CF-SCHEMA  schema / flag-consistency / name / derived-field errors (auto-fix by regeneration, max 2)
   CF-QUOTE   a source_quote is not verbatim at its line           (not waivable)
   CF-COVER   inventory row or Q/C id without a REQ                (auto-fix by regeneration, max 2)
   CF-OPEN    OPEN-tagged source not flagged; in --mode gate also every REQ still needing a
@@ -34,6 +34,7 @@ import validate_req  # noqa: E402
 
 REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
 CODE_MAP = {"SPEC": "CF-SPEC", "SCHEMA": "CF-SCHEMA", "CONSIST": "CF-SCHEMA", "NAME": "CF-SCHEMA",
+            "DERIVE": "CF-SCHEMA",
             "QUOTE": "CF-QUOTE", "COVER": "CF-COVER", "OPEN": "CF-OPEN", "GATE_OPEN": "CF-OPEN"}
 NOT_WAIVABLE = {"CF-SPEC", "CF-QUOTE", "CF-INDEP"}
 OWNER = {"CF-SPEC": "rerun P1", "CF-SCHEMA": "prompt / regeneration", "CF-QUOTE": "prompt / regeneration",
@@ -205,6 +206,20 @@ def selftest_negative(ip, workdir):
         ok4 = any(x["code"] == "CF-OPEN" and x["rule"] == "OPEN" and x["where"] == tgt["req_id"] for x in c)
         results.append((f"4 OPEN flag cleared on {tgt['req_id']} (gate) -> CF-OPEN", ok4,
                         [x["rule"] for x in c if x["where"] == tgt["req_id"]]))
+
+    # 6. block of a REQ sourced from a data-lane FSM row changed -> CF-SCHEMA (rule DERIVE)
+    fsm = next(it for it in inv["items"] if it["kind"] == "fsm_dl")
+    d6 = copy.deepcopy(base_doc)
+    tgt6 = next((r for r in d6["requirements"] if r["source_line"] == fsm["line"]), None)
+    if tgt6 is None:
+        results.append(("6 derived block changed -> CF-SCHEMA/DERIVE", False, f"no REQ on {fsm['key']}"))
+    else:
+        tgt6["block"] = "No.8" if tgt6["block"] != "No.8" else "No.1"
+        write(d6)
+        c, _ = codes("review")
+        ok6 = any(x["code"] == "CF-SCHEMA" and x["rule"] == "DERIVE" and x["where"] == tgt6["req_id"] for x in c)
+        results.append((f"6 block of {tgt6['req_id']} ({fsm['key']}) changed -> CF-SCHEMA/DERIVE", ok6,
+                        [x["rule"] for x in c if x["where"] == tgt6["req_id"]]))
 
     print("NEGATIVE SELFTEST")
     for name, ok, detail in results:

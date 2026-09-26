@@ -4,8 +4,10 @@
 The extraction step (an LLM following .claude/commands/dphy_spec_parse.md) writes one JSON chunk
 per spec section:  {"section": str, "requirements": [...], "findings": [...]}
 Requirement and finding objects carry every schema field EXCEPT the ids. This script does the
-deterministic part: orders everything by source line, assigns REQ-NNN / F-NNN, and fills the
-metadata (spec sha256 and revision are read from the spec itself, never typed by hand).
+deterministic part: orders everything by source line, assigns REQ-NNN / F-NNN, fills the
+metadata (spec sha256 and revision are read from the spec itself, never typed by hand), and sets
+the fields that follow from the spec by rule (derive_rules.py: open status, block and category of
+table rows); the number of values it overrode is printed per field.
 
 Usage:
   assemble_req.py --chunks <dir> --spec <spec.md> --ip <ip_name> --mode review|gate --out <json>
@@ -17,6 +19,10 @@ import json
 import os
 import re
 import sys
+
+sys.path.insert(0, os.path.dirname(os.path.abspath(__file__)))
+import derive_rules    # noqa: E402
+import spec_inventory  # noqa: E402
 
 
 def spec_revision(text):
@@ -79,12 +85,15 @@ def main():
         "requirements": out_reqs,
         "findings": out_finds,
     }
+    inv = spec_inventory.build(a.spec)
+    changed = derive_rules.apply(doc, inv, raw.decode("utf-8").splitlines())
     if len(out_reqs) > 999 or len(out_finds) > 999:
         sys.exit("more than 999 items: widen the id format first")
     with open(a.out, "w", encoding="utf-8") as f:
         json.dump(doc, f, ensure_ascii=False, indent=1)
         f.write("\n")
     print(f"assembled {len(out_reqs)} requirements, {len(out_finds)} findings from {len(files)} chunks -> {a.out}")
+    print("derived-field overrides: " + ", ".join(f"{k} {v}" for k, v in changed.items()))
 
 
 if __name__ == "__main__":

@@ -311,3 +311,61 @@ Lưu ý: bước 1 làm tập dòng OPEN thay đổi, nhưng các số trong `EX
 - **TRUNG BÌNH** cho các default đề xuất ở §3 và §4: dựa trên đọc spec, chưa có ý kiến của các team.
 - **CAO** cho kết quả và phân loại nguyên nhân ở §5: số liệu lấy từ `compare_req.py`, và cả 22/22 neo lệch đã được đối chiếu từng cái.
 - **THẤP** cho việc cho rằng Phương án 1 sẽ đưa kết quả vượt 90%: chưa đo, phải chạy lại mới biết.
+
+## 7. Trạng thái xử lý (2026-09-26)
+
+D1–D6 đã được duyệt và đã áp dụng. Review này vẫn là review của **spec v0.3**.
+
+| # | Đã làm | File |
+|---|---|---|
+| D1 | Mở rộng K6: phân loại port theo Wrapper Guideline, cực tính bit CSR | Research plan §5.2; spec §9 dòng K6 |
+| D2 | Thêm §5.3 "Với team AFE" (A1–A5); §6 P1 thêm team AFE | Research plan |
+| D3 | Spec **v0.4**. Làm rõ: P1 F-001…F-003, F-005; A6/F-004, F-005, F-006, F-008…F-016, F-019. Sơ đồ §2 vẽ lại mũi tên `init_done`; thêm 1 dòng CDC (gate output PPI); §8 thêm kịch bản test | `doc/spec.md` |
+| D4 | S5 thêm THS-ZERO max; thêm K8 vào spec §9 và research plan §5.2 | Spec §9; research plan |
+| D5 | Thêm hai loại bảng `path` (5 dòng) và `release` (2 dòng). `EXPECTED` tách theo revision; số của v0.4 được ghi trước khi sửa spec | `hw/utils/req_flow/spec_inventory.py` |
+| D6 | Thêm Bước 4b: lượt dò finding độc lập, chạy nền song song với lượt trích chính, hợp nhất trước khi assemble | `.claude/commands/dphy_spec_parse.md`, `dphy_autoflow.md` |
+
+Kiểm chứng:
+
+- ✅ `spec_inventory.py --selftest`: PASS trên v0.2, v0.3 và v0.4. Các số của v0.4 là: cdc 6, open 12, c_ids 16, path 5, release 2.
+- ✅ `flow_check.py --phase P1 --no-state` trên artifact hiện có cho **exit 2, CF-SPEC**: artifact được dựng trên v0.3, còn spec đã là v0.4. Flow dừng đúng như thiết kế.
+- ⚠️ `req/structured_spec.json` và các con số ở §1–§2 là của v0.3. Chúng phải được đồng bộ lại với v0.4 trước khi dùng tiếp. Phân loại 195 trích dẫn (190 REQ + 5 finding) so với v0.4:
+
+  | Trạng thái | Số lượng |
+  |---|---|
+  | Vẫn đúng dòng | 13 |
+  | Còn nguyên văn nhưng dịch dòng | 164 |
+  | Câu gốc đã bị sửa | 18 (REQ-029, 031, 033, 034, 036, 037, 041, 057, 086, 109, 162, 166, 176, 177, 179, 183; F-001, F-003) |
+
+### 7.1 Phương án 1 cho A6 (đã duyệt, đã làm)
+
+4 luật RC1–RC4 ở §5.3 nay do script tính (`hw/utils/req_flow/derive_rules.py`). `assemble_req.py` áp các luật này; validator kiểm lại bằng luật `DERIVE`, map sang CF-SCHEMA. Hai lần trích v0.3 **không phải sinh lại**: chúng được assemble lại từ chunk có sẵn, rồi chấm bằng cùng metric và cùng ngưỡng 90%.
+
+| Tập neo | Trước | Sau | Chỗ lệch còn lại |
+|---|---|---|---|
+| 108 neo của lần đo đầu | 79,6% | **99,1%** (107/108) | `errsyncesc_x`: `design` vs `contract`. Nguyên nhân là spec thiếu dẫn chiếu K2; v0.4 đã bổ sung |
+| 115 neo (thêm bảng Path, Release theo D5) | — | 94,8% (109/115) | Thêm 5 dòng Path mà P1 chưa có REQ, đã bổ sung khi đồng bộ v0.4 |
+
+⚠️ Cách đọc đúng cho con số này:
+- Ở các neo, `category`, `block` và phần `open` của `spec_status` giờ **khớp nhau vì luật tính ra**, không phải vì LLM ổn định hơn.
+- Luật được thiết kế sau khi đã thấy 22 chỗ lệch.
+- Phần metric còn đo được phán đoán của LLM là: neo có REQ hay không, và `spec_status` ngoài `open` (`assumed`/`contract`/`verified`/`design`).
+- Độ ổn định của REQ văn xuôi (Jaccard 0,58) và của finding chưa có metric riêng.
+
+### 7.2 Đồng bộ P1 với spec v0.4 (chế độ tăng dần)
+
+| Bước | Kết quả |
+|---|---|
+| `rebase_req.py` | Giữ 166/190 REQ với số dòng mới, không cần sinh lại; 24 REQ lỗi thời; 23 vùng spec mới hoặc đã đổi |
+| Finding cũ | Cả 5 finding (F-001…F-005) được bỏ vì vấn đề đã sửa trong v0.4 (F-005: C1 đã có trong Appendix A) |
+| Sửa tay chunk | Thêm `C1` vào `source_ids` của REQ Baselines, vì Appendix A v0.4 ánh xạ C1 → §1.4 |
+| Chunk bổ sung | 42 REQ: 24 REQ sinh lại, nội dung mới, 5 dòng Path. Thêm 1 finding mới về v0.4: giữ `errcontrol_x` bao lâu khi lỗi do chính LP-11 gây ra (C13), chủ là CSI team |
+| `validate_req.py` | 208 REQ · 1 finding · trích dẫn 209/209 · độ phủ 100% ở 15 nhóm · 0 lỗi · 0 cảnh báo |
+| `flow_check.py` | review: 0 xung đột, `flow_state.json` đã cập nhật · gate: dừng với 45 CF-OPEN · test âm **7/7 PASS** (thêm test DERIVE) |
+
+`needs_human_decision` tăng từ 37 lên 45, do:
+- K8 và ADR-004 là mục mở mới;
+- 8 dòng AFE nay thuộc phạm vi OPEN của heading §5.2;
+- 5 dòng Path có tag OPEN.
+
+Các con số ở §1–§2 là của v0.3 và được giữ nguyên làm hồ sơ review.

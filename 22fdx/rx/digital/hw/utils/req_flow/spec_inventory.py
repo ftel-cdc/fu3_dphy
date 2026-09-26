@@ -10,8 +10,8 @@ Usage:
   spec_inventory.py <spec.md> [--json out.json] [--selftest]
 
   --json      write the inventory as JSON (deterministic: no timestamps)
-  --selftest  compare the item counts with EXPECTED (pre-registered on spec v0.2, 2026-09-26)
-              and exit 1 on any mismatch
+  --selftest  compare the item counts with EXPECTED[<revision of the spec>] and exit 1 on any
+              mismatch (the revision is read from the "**DRAFT vX.Y**" line)
 """
 import argparse
 import hashlib
@@ -32,22 +32,52 @@ TABLE_KINDS = {
     ("Signal", "Dir", "Width", "Domain", "Description"): "afe",
     ("ID", "Item", "Default in this draft", "Owner / with"): "open",
     ("Parameter", "Specification", "Implementation"): "timing",
+    ("Path", "Direction", "Signals", "Reference"): "path",
+    ("Release", "Line rate per lane", "Deskew", "Target use"): "release",
     # vocabulary tables: not graded for coverage, used to validate enum-like fields
     ("Block", "Name", "Instances", "Clock domain", "Release"): "block",
 }
 GRADED_KINDS = ("param", "runtime", "clock", "cdc", "reset", "fsm_cl", "fsm_dl",
-                "ppi", "afe", "open", "timing")
+                "ppi", "afe", "open", "timing", "path", "release")
 # Column holding the item name, where it is not the first one (the parameter table starts with '#').
 KEY_COLUMN = {"param": 1}
 
-# Pre-registered answer key (counted on spec.md v0.2 before any extraction prompt was written;
-# the v0.3 rename changed names only). C1 is not referenced by the spec; C7 is only reached
-# through the range "C6–C9" of Appendix A.
-EXPECTED = {
+# Deterministic fields of a graded row (spec_review §5.4, option 1: rules RC3 and RC4).
+# category follows the table kind; block follows the row (see row_block).
+CATEGORY_BY_KIND = {
+    "param": "parameter", "runtime": "parameter", "clock": "clocking", "cdc": "clocking",
+    "reset": "reset", "fsm_cl": "functional", "fsm_dl": "functional", "ppi": "interface",
+    "afe": "interface", "open": "decision", "timing": "timing", "path": "interface",
+    "release": "constraint",
+}
+FIXED_BLOCK = {"fsm_cl": "No.2", "fsm_dl": "No.3", "afe": "No.1", "path": "top", "release": "all"}
+PPI_SOURCE_COLUMN = 4
+BLOCK_RE = re.compile(r"\bNo\.\s?([1-8])\b")
+OPEN_ID_RE = re.compile(r"\b(K[0-9]+|S[0-9]+|T[0-9]+|ADR-[0-9]{3})\b")
+TBD_RE = re.compile(r"\bTo be determined\b|\bTBD\b")
+HEADING_RE = re.compile(r"^(#{1,6})\s")
+CAPTION_RE = re.compile(r"^\*\*[^|]*\*\*\s*$")
+
+# Pre-registered answer key per spec revision. Never edit a count to make a run pass: a count
+# changes only when the spec changes, and the new count is written here BEFORE the spec is edited.
+#  2026-09-26  v0.2/v0.3 counted by hand on v0.2 before any extraction prompt was written (the v0.3
+#              rename changed names only). C1 is not referenced; C7 is only reached through "C6–C9".
+#  2026-09-26  path/release added (spec_review D5): the §1.3 and §1.4 tables carry [CSI] rows but were
+#              not graded. Counted by hand on v0.2 and v0.3 (5 and 2 rows). This also enlarges the
+#              anchor set of compare_req.py: the A6 result of 2026-09-26 (79.6 %) used 108 anchors.
+#  2026-09-26  v0.4 written before the spec edit (spec_review D3/D4): cdc +1 (enable gating of the
+#              rxbyteclkhs-domain PPI outputs), open +2 (K8, ADR-004), c_ids +1 (C1 in Appendix A).
+_V03 = {
     "param": 10, "runtime": 5, "clock": 3, "cdc": 5, "reset": 3,
     "fsm_cl": 10, "fsm_dl": 16, "ppi": 29, "afe": 8, "open": 10, "timing": 9,
-    "q_ids": 9, "c_ids": 15,
+    "path": 5, "release": 2, "q_ids": 9, "c_ids": 15,
 }
+EXPECTED = {
+    "v0.2": _V03,
+    "v0.3": _V03,
+    "v0.4": dict(_V03, cdc=6, open=12, c_ids=16),
+}
+REVISION_RE = re.compile(r"\*\*DRAFT (v[0-9]+\.[0-9]+)\*\*")
 
 OPEN_RE = re.compile(r"\bOPEN\b")
 ASSUME_MARK = "⚠️"
@@ -93,6 +123,63 @@ def item_key(kind, first_cell):
     if kind == "open":
         key = key.split("/")[0].strip()          # "K3 / ADR-005" -> "K3"
     return f"{kind}:{key}"
+
+
+def row_block(kind, cells, text):
+    """RC3: block of a graded row. Fixed per kind for FSM / AFE / path / release tables; the Source
+    column for the PPI table (no block source, i.e. an input or a tie-off at the IP boundary -> 'top');
+    otherwise the single block the row names, and 'all' when it names none or several."""
+    if kind in FIXED_BLOCK:
+        return FIXED_BLOCK[kind]
+    if kind == "ppi":
+        src = clean(cells[PPI_SOURCE_COLUMN]) if len(cells) > PPI_SOURCE_COLUMN else ""
+        found = set(BLOCK_RE.findall(src))
+        return f"No.{found.pop()}" if len(found) == 1 else "top"
+    if re.search(r"\bBlocks\b", text):
+        return "all"
+    found = set(BLOCK_RE.findall(text))
+    return f"No.{found.pop()}" if len(found) == 1 else "all"
+
+
+def open_scope(lines, open_table_lines, open_ids):
+    """RC1 + RC2: every line whose content depends on an open item, mapped to the open ids involved.
+    A line is open when it (a) carries the word OPEN, (b) is a row of the Open Items table, (c) lies in
+    the scope of a heading that carries OPEN (until the next heading of the same or a higher level),
+    (d) is a row of the table introduced by a bold caption that carries OPEN, (e) cites the id of an
+    open item, or (f) gives a value as 'To be determined'."""
+    out = {}
+
+    def add(n, text):
+        out.setdefault(n, set()).update(i for i in OPEN_ID_RE.findall(text) if i in open_ids)
+
+    in_code, headings = False, []
+    for n, l in enumerate(lines, 1):
+        if l.strip().startswith("```"):
+            in_code = not in_code
+            continue
+        if not in_code:
+            m = HEADING_RE.match(l)
+            if m:
+                headings.append((n, len(m.group(1)), l))
+    for idx, (n, level, text) in enumerate(headings):
+        if not OPEN_RE.search(text):
+            continue
+        end = next((h[0] for h in headings[idx + 1:] if h[1] <= level), len(lines) + 1)
+        for k in range(n, end):
+            add(k, text)
+    for n, l in enumerate(lines, 1):
+        if CAPTION_RE.match(l.strip()) and OPEN_RE.search(l):
+            k = n + 1
+            while k <= len(lines) and not lines[k - 1].strip():
+                k += 1
+            while k <= len(lines) and lines[k - 1].lstrip().startswith("|"):
+                add(k, l)
+                k += 1
+    for n, l in enumerate(lines, 1):
+        if OPEN_RE.search(l) or n in open_table_lines or TBD_RE.search(l) or \
+                any(i in open_ids for i in OPEN_ID_RE.findall(l)):
+            add(n, l)
+    return {n: sorted(v) for n, v in sorted(out.items())}
 
 
 def expand_ids(text):
@@ -146,6 +233,8 @@ def build(path):
                         "line": j + 1,
                         "section": section,
                         "text": lines[j].strip(),
+                        "block": row_block(kind, cells, lines[j]),
+                        "category": CATEGORY_BY_KIND.get(kind),
                     })
                 j += 1
             if not kind:
@@ -160,6 +249,13 @@ def build(path):
             inv["open_lines"].append(n)
         if ASSUME_MARK in l:
             inv["assume_lines"].append(n)
+    open_rows = [it for it in inv["items"] if it["kind"] == "open"]
+    open_ids = set()
+    for it in open_rows:
+        open_ids.update(OPEN_ID_RE.findall(clean(split_row(it["text"])[0])))
+    inv["open_ids"] = sorted(open_ids)
+    # JSON object keys are strings; users convert back with int()
+    inv["open_derived"] = {str(n): v for n, v in open_scope(lines, {it["line"] for it in open_rows}, open_ids).items()}
     ids = expand_ids(text)
     inv["q_ids"] = sorted((x for x in ids if x[0] == "Q"), key=lambda s: int(s[1:]))
     inv["c_ids"] = sorted((x for x in ids if x[0] == "C"), key=lambda s: int(s[1:]))
@@ -169,15 +265,22 @@ def build(path):
     counts["q_ids"] = len(inv["q_ids"])
     counts["c_ids"] = len(inv["c_ids"])
     inv["counts"] = counts
+    m = REVISION_RE.search(text)
+    inv["revision"] = m.group(1) if m else None
     dup = sorted({it["key"] for it in inv["items"] if sum(1 for x in inv["items"] if x["key"] == it["key"]) > 1})
     inv["duplicate_keys"] = dup
     return inv
 
 
 def selftest(inv):
+    rev = inv.get("revision")
+    if rev not in EXPECTED:
+        print(f"SELFTEST FAIL: no pre-registered counts for revision {rev!r} (known: {', '.join(EXPECTED)})")
+        return False
     ok = True
+    print(f"revision {rev}")
     print(f"{'kind':<8} {'expected':>8} {'actual':>7}  result")
-    for k, exp in EXPECTED.items():
+    for k, exp in EXPECTED[rev].items():
         act = inv["counts"].get(k, 0)
         res = "PASS" if act == exp else "FAIL"
         ok &= act == exp
@@ -187,7 +290,8 @@ def selftest(inv):
         print("FAIL duplicate item keys:", ", ".join(inv["duplicate_keys"]))
     print(f"blocks (vocabulary): {', '.join(inv['blocks'])}")
     print(f"unrecognised tables (not graded): {len(inv['unrecognised_tables'])}")
-    print(f"lines tagged OPEN: {len(inv['open_lines'])}, lines tagged ⚠️: {len(inv['assume_lines'])}")
+    print(f"lines tagged OPEN: {len(inv['open_lines'])}, lines tagged ⚠️: {len(inv['assume_lines'])}, "
+          f"lines depending on an open item (derived): {len(inv['open_derived'])}")
     print("SELFTEST", "PASS" if ok else "FAIL")
     return ok
 

@@ -1,6 +1,6 @@
 # ftel_dphy_rx — MIPI D-PHY Receiver High-Level Architecture Specification
 
-**DRAFT v0.3** — architecture level. Items that are not yet agreed are marked **OPEN** with the
+**DRAFT v0.4** — architecture level. Items that are not yet agreed are marked **OPEN** with the
 default assumption used by this draft; they are tracked in chapter 9 and in
 [`DPHY_RX_RESEARCH_PLAN.md`](DPHY_RX_RESEARCH_PLAN.md).
 
@@ -11,6 +11,7 @@ default assumption used by this draft; they are tracked in chapter 9 and in
 | v0.1 (draft) | 2026-09-25 | Ho Khanh Linh | First draft: block partitioning, PPI contract, lane/clock-lane behaviour, open decisions |
 | v0.2 (draft) | 2026-09-25 | Ho Khanh Linh | §1 restructured: system context across the two chips (1.1), layer view (1.2), data versus control direction (1.3) |
 | v0.3 (draft) | 2026-09-26 | Ho Khanh Linh | Renamed to the FX1 ip-dev convention: IP `ftel_dphy_rx` (wrapper `m_ftel_dphy_rx_wrap`), synthesis parameters prefixed `PARA_`; no technical change |
+| v0.4 (draft) | 2026-09-26 | Ho Khanh Linh | Clarifications from the requirement review (`req/spec_review.md`): sync-search window and start, output gating while the byte clock is stopped, run-time deskew bypass field, LP-path polarity and lane map, FSM precedence and aborted requests, escape-watchdog scope, rate-dependent settle values; new open items K8 and ADR-004; S5 and K6 extended; `errsyncesc_x` tie-off linked to K2; C1 traced; marker 🌐 defined |
 
 ## Conventions
 
@@ -19,6 +20,7 @@ default assumption used by this draft; they are tracked in chapter 9 and in
 | ✅ | Verified against a specification in `ref/spec/` (clause cited) |
 | **[CSI]** | Requirement taken from the CSI-2 Rx controller HAS (HAS-CSI = `ref/spec/FTEL_IP_MIPI_CSI-2_CONTROLLER_HAS_v1.2.docx`) |
 | ⚠️ | Assumption or proposal of this draft, not yet agreed |
+| 🌐 | Taken from a secondary (web) source; not verified against a specification in `ref/spec/` |
 | **OPEN Kx / Sx / ADR-nnn** | Open point; see chapter 7 (decisions) and chapter 9 (open items) |
 
 Signal names ending in `_x` exist once per data lane. Unless stated otherwise, signals are active High.
@@ -194,13 +196,15 @@ are not supported (unidirectional slave per CSI-2 §7.1 ✅).
                 │  ┌──────────────────────────────┐   ┌────────────────────────────┐               │
  phy_core_rst ─►│─►│ No.6 Timing & Init Control   │◄──│ No.8 Configuration & Status│◄── cfg bus ───│◄─ OPEN K3
  cl/dl_enable ─►│─►│ timers, TINIT, init_done,    │   │ timer values, lane map,    │               │
- forcerxmode_x─►│─►│ HS RX timeout, reset sync    │──►│ status, counters           │──► init_done ─│─►
- core_clk ─────►│  └──────────────────────────────┘   └────────────────────────────┘               │
+ forcerxmode_x─►│─►│ HS RX timeout, reset sync    │──►│ status, counters           │               │
+ core_clk ─────►│  └──────────────┬───────────────┘   └────────────────────────────┘               │
+                │                 └──► init_done ──────────────────────────────────────────────────│─► PPI
                 └─────────────────────────────────────────────────────────────────────────────────┘
 ```
 
 A drawn figure following the repository diagram conventions will replace this sketch once the
-block partitioning is agreed.
+block partitioning is agreed. The AFE-side names in the sketch are abbreviated; the port names are
+the `afe_*` names of §5.2.
 
 | Block | Name | Instances | Clock domain | Release |
 |---|---|---|---|---|
@@ -227,20 +231,20 @@ Synthesis-time parameters. Values that depend on an open item show the default u
 | 4 | `PARA_DESKEW_EN` | 0 (R1), 1 (R2) | Configurable | Instantiates Block No. 5. When 0, deskew bursts are still detected (Block No. 4) |
 | 5 | `PARA_LPDT_EN` | 0 | Configurable | Instantiates LPDT reception. When 0, LPDT PPI outputs are tied inactive (OPEN K2) |
 | 6 | `PARA_LP_SYNC_STAGES` | 2 | Fixed | Synchronizer depth of the LP-RX inputs into `core_clk` |
-| 7 | `PARA_LP_FILTER_CYC` | 2 ⚠️ | Configurable | Glitch filter on LP states, in `core_clk` cycles. Bounded by the termination-enable budget (Appendix B) |
+| 7 | `PARA_LP_FILTER_CYC` | 2 ⚠️ | Configurable | Glitch filter on LP states, in `core_clk` cycles. Bounded by the termination-enable budget (Appendix B) and by the maximum LP glitch width passed by the AFE (OPEN ADR-001) |
 | 8 | `PARA_EOT_DELAY_BYTES` | 32 ⚠️ | Configurable | Depth of the EoT delay line (Block No. 4). Shall cover THS-TRAIL + THS-SKIP + LP-11 detection latency at the highest line rate (OPEN S5) |
-| 9 | `PARA_SYNC_SEARCH_BYTES` | 16 ⚠️ | Configurable | Bytes searched for the sync sequence after THS-SETTLE before `errsotsynchs_x` is raised |
+| 9 | `PARA_SYNC_SEARCH_BYTES` | 16 ⚠️ | Configurable | Byte clocks searched for the sync sequence before `errsotsynchs_x` is raised, counted from the first non-zero word after the HS entry signal ⚠️ (§4.6) |
 | 10 | `PARA_DLY_TAP_WIDTH` | To be determined | Configurable | Width of the AFE delay-tap control (R2, ADR-004) |
 
 Run-time programmable timing values (reset defaults; the configuration path is OPEN K3):
 
 | Field | Default | Basis |
 |---|---|---|
-| `hs_settle_cyc` | 20 ⚠️ | Centre of the THS-SETTLE window at 1500 Mb/s (89–151.7 ns → ~120 ns) minus LP detection latency (~20 ns); Appendix B |
-| `clk_settle_cyc` | 36 ⚠️ | Centre of TCLK-SETTLE (95–300 ns → ~200 ns) minus latency |
+| `hs_settle_cyc` | 20 ⚠️ | Centre of the THS-SETTLE window at 1500 Mb/s (89–151.7 ns → ~120 ns) minus LP detection latency (~20 ns). Rate dependent: software programs the value of Appendix B for the line rate before enabling the lanes ⚠️ |
+| `clk_settle_cyc` | 36 ⚠️ | Centre of TCLK-SETTLE (95–300 ns → ~200 ns) minus the LP detection latency (~20 ns); counted from entry into CL_HS_TERM |
 | `tinit_cyc` | 20 000 | TINIT,SLAVE ≥ 100 µs (D-PHY §6.11 ✅) |
-| `hs_rx_timeout_cyc` | 2^18 (1.31 ms) ⚠️ | Longer than the longest burst: 5802-byte line at 80 Mb/s on one lane ≈ 580 µs |
-| `esc_timeout_cyc` | 2^18 ⚠️ | Escape-mode watchdog (D-PHY §7.3.3 ✅, informative) |
+| `hs_rx_timeout_cyc` | 2^18 (1.31 ms) ⚠️ | Longer than the longest burst: 5802-byte line at 80 Mb/s on one lane ≈ 580 µs; the longest burst per lane is OPEN K8 |
+| `esc_timeout_cyc` | 2^18 ⚠️ | Escape-mode watchdog (D-PHY §7.3.3 ✅, informative); scope and expiry in §4.7 |
 
 ---
 
@@ -258,11 +262,12 @@ Clock-domain crossings:
 
 | From → To | Signals | Method |
 |---|---|---|
-| AFE LP-RX (asynchronous) → `core_clk` | `lp_dp/dn_x`, `cl_lp_dp/dn` | `PARA_LP_SYNC_STAGES` flip-flops + `PARA_LP_FILTER_CYC` glitch filter |
+| AFE LP-RX (asynchronous) → `core_clk` | `afe_lp_dp_x`, `afe_lp_dn_x`, `afe_cl_lp_dp`, `afe_cl_lp_dn` | `PARA_LP_SYNC_STAGES` flip-flops + `PARA_LP_FILTER_CYC` glitch filter |
 | `core_clk` → `rxbyteclkhs` | HS entry, settle done, EoT request (Block No. 3 → No. 4) | Level signals through 2-flop synchronizers. The receiving logic returns to idle when the byte clock stops (clock-lane ULPS) |
 | `rxbyteclkhs` → `core_clk` | EoT done, error events for status counters | Toggle synchronizers |
 | Enables (`lite_aclk`) → `core_clk` | `cl_enable`, `dl_enable_x`, `forcerxmode_x` | Level, 2-flop synchronizers; the PPI defines them as level sensitive **[CSI]** C14 |
 | Configuration clock → `core_clk` / `rxbyteclkhs` | Timer values, lane map, polarity | Quasi-static: software changes them only while the affected lanes are disabled |
+| `core_clk` → PPI outputs of the `rxbyteclkhs` domain | Synchronized lane enables | Combinational gating at the output stage (§4.9) ⚠️; an enable changes only while its lane is in Stop state or the byte clock is stopped |
 
 ### 4.2 Reset
 
@@ -282,8 +287,11 @@ block that changes when the AFE changes.
   LP-10, LP-01, LP-00 per lane.
 - HS path: registers the raw deserialized word of each lane on `rxbyteclkhs`; applies optional
   P/N polarity inversion and logical-to-physical lane mapping (V9, configuration fields).
+- The same P/N polarity inversion (Dp/Dn swapped before LP decoding) and the same lane mapping
+  apply to the LP path, from the same configuration fields ⚠️.
 - Drives the AFE controls requested by Blocks No. 2, 3 and 5: HS-RX enable, termination enable,
-  delay taps (R2).
+  delay taps (R2). The FSM outputs `hs_en_x`, `term_en_x`, `cl_hs_en` and `cl_term_en` are internal
+  requests; this block drives them to the AFE ports `afe_*` of §5.2.
 
 **Design note ⚠️.** TD-TERM-EN (≤ 35 ns + 4·UI) and TCLK-TERM-EN (≤ 38 ns) are measured from the
 LP-00 crossing. With 2 synchronizer and 2 filter cycles the digital path already spends ~20 ns, so
@@ -301,7 +309,7 @@ clock-lane ULPS (D-PHY §6.8, Table 13 ✅).
 |---|---|---|---|
 | CL_INIT | any | LP-11 held for `tinit_cyc` → CL_STOP | — |
 | CL_STOP | LP-11 | LP-01 → CL_HS_RQST; LP-10 → CL_ULPS_RQST | `cl_stopstate` = 1 |
-| CL_HS_RQST | LP-01 | LP-00 → CL_HS_PRPR; LP-11 → CL_STOP | — |
+| CL_HS_RQST | LP-01 | LP-00 → CL_HS_PRPR; LP-11 → CL_STOP; LP-10 → aborted request: wait for LP-11, then CL_STOP, with a status flag and no PPI error ⚠️ | — |
 | CL_HS_PRPR | LP-00 | termination enable issued → CL_HS_TERM | `cl_term_en` = 1 |
 | CL_HS_TERM | LP-00 → HS | `clk_settle_cyc` elapsed → CL_HS_CLK | `cl_hs_en` = 1 |
 | CL_HS_CLK | HS clock | clock activity lost (TCLK-MISS) → CL_HS_END | `cl_rxclkactivehs` = 1 |
@@ -341,7 +349,9 @@ entry (D-PHY §6.4.2, Table 3 ✅), EoT hand-over (§6.4.3 ✅) and escape mode 
 | DL_ESC_WAIT | any | LP-11 → DL_STOP | Trigger bit held on `rxtriggeresc_x` until Stop (Annex A ✅) |
 | DL_ERR | any | LP-11 → DL_STOP | `errcontrol_x` held until the next line-state change **[CSI]** C13 |
 
-Any state returns to DL_STOP on LP-11 (Table 9, "Any RX state" ✅). The mapping of the four trigger
+Any state returns to DL_STOP on LP-11 (Table 9, "Any RX state" ✅). Where a row names LP-11 or
+"other" as a path to DL_ERR (DL_HS_RQST, DL_LP_RQST, DL_ESC_RQST), that row takes precedence: the
+lane passes through DL_ERR, raising `errcontrol_x`, and then returns to DL_STOP ⚠️. The mapping of the four trigger
 entry commands of Table 8 to `rxtriggeresc_x[3:0]` follows the order of Table 8 ⚠️ (to confirm).
 
 ### 4.6 HS Receive Datapath (Block No. 4)
@@ -349,8 +359,12 @@ entry commands of Table 8 to `rxtriggeresc_x[3:0]` follows the order of Table 8 
 **Overview.** Per data lane, in `rxbyteclkhs`. Turns the raw AFE words into aligned PPI bytes.
 
 **Function.**
-- **Sync search.** After the HS entry signal from Block No. 3, searches a 2-word window for the
-  leader `…00011101` (first bit received first), accepting any single-bit error (D-PHY §6.4.4 ✅).
+- **Sync search.** After the HS entry signal from Block No. 3, compares a 2-word window (two
+  consecutive AFE words, every byte clock) with the leader `…00011101` (first bit received first),
+  accepting any single-bit error (D-PHY §6.4.4 ✅). The search lasts at most
+  `PARA_SYNC_SEARCH_BYTES` byte clocks, counted from the first non-zero word after the HS entry
+  signal ⚠️: D-PHY Table 14 ✅ gives only a minimum for THS-PREPARE + THS-ZERO, so a compliant Tx
+  may drive HS-0 for longer than any fixed window.
   - Exact match: the byte offset is locked; `rxsynchs_x` pulses in the **same cycle** as the first
     payload byte **[CSI]** C6.
   - Single-bit error: as above, plus a one-cycle `errsoths_x` (D-PHY §7.2.1 ✅).
@@ -374,8 +388,8 @@ entry commands of Table 8 to `rxtriggeresc_x[3:0]` follows the order of Table 8 
 **Design note ⚠️.** At 80 Mb/s one byte clock is 100 ns. The core_clk → byte-clock crossing of the
 HS entry signal adds 2–3 byte cycles, which approaches the minimum HS-0 duration
 (THS-PREPARE + THS-ZERO ≥ 145 ns + 10·UI = 270 ns). The search therefore qualifies the sync on a
-preceding run of zeros rather than relying only on the settle timer; micro-architecture to confirm
-at the low-rate corner.
+preceding run of zeros rather than relying only on the settle timer: the leader is accepted only
+after at least one all-zero word has been received after the HS entry signal ⚠️ (test in §8).
 
 ### 4.7 Timing & Init Control (Block No. 6)
 
@@ -384,6 +398,10 @@ at the low-rate corner.
   ignores all line states until it has observed LP-11 for `tinit_cyc`. `init_done` rises when the
   clock lane and every enabled data lane have completed initialization **[CSI]** C14, C16.
 - Hosts the HS RX and escape watchdogs (D-PHY §7.3 ✅).
+- Escape watchdog ⚠️: runs only in DL_LP_RQST, DL_LP_YIELD, DL_ESC_RQST, DL_ESC_GO and DL_ESC_CMD,
+  not in DL_ULPS, DL_ULPS_EXIT or DL_ESC_WAIT (ULPS may last indefinitely and the Mark-1 exit
+  lasts TWAKEUP ≥ 1 ms). On expiry the lane goes to DL_ESC_WAIT, which waits for LP-11 without a
+  PPI error, and the escape-timeout sticky flag of Block No. 8 is set.
 
 ### 4.8 Deskew Controller (Block No. 5, R2)
 
@@ -399,16 +417,19 @@ at the low-rate corner.
 - Maps internal signals to the PPI names of HAS-CSI Table 4-3 (§5.1), so a change of the PPI
   contract stays inside this block (V16).
 - Forces the inactive value of every output of a lane whose enable is Low (D-PHY Annex A ✅).
+  The outputs of the `rxbyteclkhs` domain are gated combinationally with the synchronized enable,
+  so their inactive values hold while the byte clock is stopped ⚠️ (crossing listed in §4.1).
 - Generates `rxclkesc_x` as the XOR of the synchronized LP lines for PPI completeness; no logic
   inside this IP is clocked by it (ADR-002).
 
 ### 4.10 Configuration & Status (Block No. 8)
 
-Configuration fields: the timer values of §3, lane polarity inversion and lane mapping (V9),
-`PARA_DESKEW_EN` run-time bypass (R2).
+Configuration fields: the timer values of §3, lane polarity inversion and lane mapping (V9), and a
+run-time deskew bypass `deskew_bypass` (R2, present only when `PARA_DESKEW_EN` = 1; holds the taps
+at their reset value) ⚠️.
 
 Status: the lane FSM states, and sticky flags with counters for EoT sync errors, HS RX timeouts,
-SoT errors and escape errors.
+SoT errors, escape errors, escape timeouts and aborted clock-lane requests.
 
 The bus and register map are OPEN (K3, ADR-005); chapter 6.
 
@@ -449,7 +470,7 @@ Direction is seen from this IP. Signal list and semantics follow HAS-CSI Table 4
 | `errsoths_x` | Out | 1 | `rxbyteclkhs` | No.4 | 0 | Yes |
 | `errsotsynchs_x` | Out | 1 | `rxbyteclkhs` | No.4 | 0 | Yes |
 | `erresc_x` | Out | 1 | async | No.3 | 0 | Yes |
-| `errsyncesc_x` | Out | 1 | async | — | 0 | Tied 0 (no LPDT) |
+| `errsyncesc_x` | Out | 1 | async | — | 0 | Tied 0 (no LPDT, K2) |
 | `errcontrol_x` | Out | 1 | async | No.3 | 0 | Yes |
 
 ### 5.2 AFE interface (proposed, OPEN ADR-001)
@@ -551,12 +572,14 @@ THS-SKIP interval. Discarding a fixed number of bytes fails when the Tx trail le
 - **Scenarios.**
   - 1/2/4 lanes, including bursts whose length is not a multiple of the lane count.
   - Rate sweep 80–1500 Mb/s (R1).
-  - Timing corners of THS-SETTLE, TCLK-SETTLE and the trail length.
+  - Timing corners of THS-SETTLE, TCLK-SETTLE and the trail length; at 80 Mb/s the minimum
+    THS-PREPARE + THS-ZERO, and an HS-0 much longer than the minimum (§4.6).
   - SoT with a single-bit error (`errsoths_x`) and with a corrupted leader (`errsotsynchs_x`).
   - EoT on and off a byte boundary.
   - Clock-lane and data-lane ULPS entry/exit; the four triggers; unknown escape command
     (`erresc_x`); false control (`errcontrol_x`).
-  - HS RX timeout.
+  - HS RX timeout and escape watchdog expiry.
+  - P/N-swapped and remapped lanes, in both HS and LP.
   - Enables, `forcerxmode_x`, `phy_core_rst`, TINIT and `init_done`.
   - Deskew burst detection (R1) and calibration (R2).
 - **Integration.** Co-simulation with the CSI-2 Rx controller RTL, checking HAS-CSI Lane Management
@@ -575,10 +598,12 @@ THS-SKIP interval. Discarding a fixed number of bytes fails when the Tx trail le
 | K3 / ADR-005 | Configuration path of the timers | Own APB subordinate | CSI team |
 | K4 | Inter-lane byte divergence budget at the PPI | ≤ 6 byte cycles | CSI team |
 | K5 | Register map v1.4 (PHY_CONFIG, PHY_STATUS, LANE_STATUS) | — | CSI team |
-| K6 | `phy_core_rst` polarity and synchronicity; exact `init_done` and `forcerxmode_x` semantics | Active High, asynchronous | CSI team |
-| ADR-001 | AFE boundary, clock-activity detection, termination timing, delay taps | Option B | AFE team |
+| K6 | `phy_core_rst` polarity and synchronicity; whether it is a reset-type port under the FX1 IP Wrapper Guideline (active-low `_n` at the wrapper); exact `init_done` and `forcerxmode_x` semantics | Active High, asynchronous; wrapper port active-low with the inverter inside `m_ftel_dphy_rx_wrap` | CSI team |
+| K8 | Longest HS burst per lane over all sensor modes and lane/rate combinations (sizes `hs_rx_timeout_cyc`) | 5802-byte line at 80 Mb/s on one lane | CSI team |
+| ADR-001 | AFE boundary, clock-activity detection, termination timing, delay taps, maximum LP glitch width | Option B | AFE team |
+| ADR-004 | Deskew algorithm, tap resolution and periodic calibration (R2) | Centre of the passing window; initial calibration only | This IP, after ADR-001 and S4 |
 | S4 | Tx deskew behaviour (initial / periodic, exact pattern) | D-PHY v1.2 pattern (🌐) | Tx side |
-| S5 | Tx timing table, in particular the maximum THS-TRAIL (sizes `PARA_EOT_DELAY_BYTES`) | Specification minimums | Tx side |
+| S5 | Tx timing table, in particular the maximum THS-TRAIL (sizes `PARA_EOT_DELAY_BYTES`) and the maximum THS-ZERO (sync search, §4.6) | Specification minimums | Tx side |
 | T1 | Mapping of the four trigger commands to `rxtriggeresc_x[3:0]` | Order of D-PHY Table 8 | Specification check |
 
 ---
@@ -598,6 +623,7 @@ IDs refer to `DPHY_RX_RESEARCH_PLAN.md` §2.1 (Q) and §2.4 (C).
 | Q7 EoT–LPS–SoT between packets | §4.5, §4.6 |
 | Q8 D-PHY-level error reporting | §4.5, §4.6, §5.1 |
 | Q9 ULPS and Triggers mandatory | §4.5 |
+| C1 Baseline CSI-2 v1.3 + D-PHY v1.2 | §1.4 Baselines |
 | C2, C3 Lanes and PPI width | §3 (#1, #2), §5.1 |
 | C4 Rate envelope, deskew above 1.5 Gb/s | §1 release plan |
 | C5 Continuous clock | §1, §4.4 |
@@ -614,8 +640,8 @@ From D-PHY v1.1 Table 14 ✅. `core_clk` period = 5 ns; the LP detection latency
 
 | Parameter | Specification | Implementation |
 |---|---|---|
-| THS-SETTLE | 85 ns + 6·UI … 145 ns + 10·UI, from the start of THS-PREPARE | `hs_settle_cyc` = round((window centre − latency) / 5 ns); at 1500 Mb/s: (120 − 20) / 5 = 20 |
-| TCLK-SETTLE | 95 … 300 ns | `clk_settle_cyc` = (~200 − 20) / 5 = 36 |
+| THS-SETTLE | 85 ns + 6·UI … 145 ns + 10·UI, from the start of THS-PREPARE | `hs_settle_cyc` = round((window centre − latency) / 5 ns), window centre = 115 ns + 8·UI; at 1500 Mb/s: (120 − 20) / 5 = 20. Other rates: 80 Mb/s 39, 750 Mb/s 21, 1792 Mb/s 20 |
+| TCLK-SETTLE | 95 … 300 ns | `clk_settle_cyc` = (~200 − 20) / 5 = 36, counted from entry into CL_HS_TERM |
 | TD-TERM-EN | ≤ 35 ns + 4·UI | Issued on LP-00 detection (~20 ns) |
 | TCLK-TERM-EN | ≤ 38 ns | Issued on LP-00 detection (~20 ns) |
 | THS-SKIP | 40 … 55 ns + 4·UI | Bits discarded before the last-transition search (Block No. 4) |

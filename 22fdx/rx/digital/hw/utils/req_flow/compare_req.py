@@ -10,7 +10,13 @@ Pre-registered on 2026-09-26, before the second extraction was looked at:
 Also reported (not graded): per-field agreement, REQ / finding counts, and the Jaccard overlap of
 the source lines of the non-anchor (prose) REQs.
 
-Usage: compare_req.py <a.json> <b.json> --spec <spec.md> [--threshold 0.90]
+Since 2026-09-26 (spec_review §5.4) category, block, needs_human_decision and the 'open' part of
+spec_status of table rows are computed by derive_rules.py when a chunk set is assembled, so they agree
+by construction; the anchor metric then measures whether both extractions cover each row and the
+non-open spec_status the extraction chooses (assumed / contract / verified / design).
+--kinds restricts the anchors to some inventory kinds (e.g. the 11 kinds of the first A6 run).
+
+Usage: compare_req.py <a.json> <b.json> --spec <spec.md> [--threshold 0.90] [--kinds k1,k2,...]
 Exit status: 0 = agreement >= threshold, 1 = below.
 """
 import argparse
@@ -38,10 +44,15 @@ def main():
     ap.add_argument("b")
     ap.add_argument("--spec", required=True)
     ap.add_argument("--threshold", type=float, default=0.90)
+    ap.add_argument("--kinds", help="comma-separated inventory kinds to use as anchors (default: all graded)")
     a = ap.parse_args()
     da, db = json.load(open(a.a, encoding="utf-8")), json.load(open(a.b, encoding="utf-8"))
     inv = spec_inventory.build(a.spec)
-    anchors = [it for it in inv["items"] if it["kind"] in spec_inventory.GRADED_KINDS]
+    kinds = a.kinds.split(",") if a.kinds else spec_inventory.GRADED_KINDS
+    unknown = set(kinds) - set(spec_inventory.GRADED_KINDS)
+    if unknown:
+        ap.error(f"unknown kinds: {sorted(unknown)}")
+    anchors = [it for it in inv["items"] if it["kind"] in kinds]
     fa, fb = first_by_line(da), first_by_line(db)
     agree, field_ok, diffs = 0, {f: 0 for f in FIELDS}, []
     for it in anchors:
