@@ -369,3 +369,24 @@ Kiểm chứng:
 - 5 dòng Path có tag OPEN.
 
 Các con số ở §1–§2 là của v0.3 và được giữ nguyên làm hồ sơ review.
+
+### 7.3 Đồng bộ P1 với spec v0.5 (hình vẽ, 2026-09-29)
+
+Spec v0.5 thay khung ASCII ở §2 bằng hình vẽ (Figure 2-1…2-4), thêm §2.1 (Universal Lane Module của
+D-PHY và nơi hiện thực từng chức năng) và bổ sung việc đồng bộ `afe_cl_clk_active`. Chỗ thiếu này lộ
+ra khi vẽ Figure 2-4: spec chưa nói block nào đồng bộ input bất đồng bộ đó.
+
+| Bước | Kết quả |
+|---|---|
+| `spec_inventory.py` | Đếm trước cho v0.5, ghi trước khi sửa spec: cdc 6 → 7. Bảng ánh xạ ULM của §2.1 đăng ký là bảng từ vựng (`ulm`), không chấm coverage. Selftest PASS |
+| `rebase_req.py` | Giữ 208/208 REQ và 1/1 finding với số dòng mới; 0 mục lỗi thời; 6 vùng mới hoặc đã đổi |
+| Chunk bổ sung `20_v05_delta.json` | 2 REQ: dòng CDC mới của §4.1 (OPEN theo ADR-001) và bullet mới của §4.3 (⚠️). §2.1 và §2.2 không sinh REQ: đó là mô tả tham chiếu D-PHY, định nghĩa nhãn của hình và một bảng từ vựng; các câu có tính quy định đã có REQ ở §1.4, §4.4, §4.5. Dòng version và dòng revision không phải yêu cầu |
+| So nội dung | 208 REQ cũ giống hệt v0.4, trừ `req_id` và `source_line` |
+| `validate_req.py` | 210 REQ · 1 finding · trích dẫn 211/211 · độ phủ 100% ở 15 nhóm (cdc 7/7) · 0 lỗi · 0 cảnh báo |
+| `flow_check.py` | review: 0 xung đột, `flow_state.json` đã cập nhật · test âm **7/7 PASS** |
+
+`needs_human_decision` tăng từ 45 lên 46 (REQ mới phụ thuộc ADR-001). File hỏi team AFE cập nhật
+theo: ADR-001 chặn 17 REQ, và A2 có thêm câu về glitch của `afe_cl_clk_active`.
+
+`req_id` được gán theo thứ tự dòng trong spec, nên hai REQ mới làm 161 ID phía sau dịch +1 hoặc +2
+(ví dụ REQ-048 cũ nay là REQ-049). Các ID nhắc trong §1–§7.2 là ID tại thời điểm viết mục đó.

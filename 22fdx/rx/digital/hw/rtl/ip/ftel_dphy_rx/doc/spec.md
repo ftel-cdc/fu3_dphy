@@ -1,6 +1,6 @@
 # ftel_dphy_rx — MIPI D-PHY Receiver High-Level Architecture Specification
 
-**DRAFT v0.4** — architecture level. Items that are not yet agreed are marked **OPEN** with the
+**DRAFT v0.5** — architecture level. Items that are not yet agreed are marked **OPEN** with the
 default assumption used by this draft; they are tracked in chapter 9 and in
 [`DPHY_RX_RESEARCH_PLAN.md`](DPHY_RX_RESEARCH_PLAN.md).
 
@@ -12,6 +12,7 @@ default assumption used by this draft; they are tracked in chapter 9 and in
 | v0.2 (draft) | 2026-09-25 | Ho Khanh Linh | §1 restructured: system context across the two chips (1.1), layer view (1.2), data versus control direction (1.3) |
 | v0.3 (draft) | 2026-09-26 | Ho Khanh Linh | Renamed to the FX1 ip-dev convention: IP `ftel_dphy_rx` (wrapper `m_ftel_dphy_rx_wrap`), synthesis parameters prefixed `PARA_`; no technical change |
 | v0.4 (draft) | 2026-09-26 | Ho Khanh Linh | Clarifications from the requirement review (`req/spec_review.md`): sync-search window and start, output gating while the byte clock is stopped, run-time deskew bypass field, LP-path polarity and lane map, FSM precedence and aborted requests, escape-watchdog scope, rate-dependent settle values; new open items K8 and ADR-004; S5 and K6 extended; `errsyncesc_x` tie-off linked to K2; C1 traced; marker 🌐 defined |
+| v0.5 (draft) | 2026-09-29 | Ho Khanh Linh | Drawn figures replace the ASCII block sketch: D-PHY lane modules and where each of their functions is implemented (§2.1, Figures 2-1 to 2-3), top level (§2.2, Figure 2-4); synchronization of `afe_cl_clk_active` made explicit (§4.1, §4.3) |
 
 ## Conventions
 
@@ -169,42 +170,56 @@ are not supported (unidirectional slave per CSI-2 §7.1 ✅).
 
 ## 2. Block Diagram
 
-```
-                ┌───────────────────────────────── ftel_dphy_rx ──────────────────────────────────┐
-                │                                                                                 │
- AFE data lane x│  ┌────────────┐  lp_x (core_clk)  ┌───────────────────┐                         │
- lp_dp/dn_x ───►│─►│ No.1 AFE   │──────────────────►│ No.3 Data Lane    │──► stopstate_x, ulps,   │
- hs_data_x[7:0]►│─►│ Adapter    │                   │ Control (CIL-SFEN)│    trigger, errors ────►│─► PPI
- ◄── hs_en_x,   │◄─│ polarity,  │ hs_word_x         │ LP FSM, escape    │                         │
-     term_en_x  │  │ lane map,  │ (rxbyteclkhs)     └───────┬───────────┘                         │
-                │  │ LP sync    │───────┐                   │ hs_entry / eot_req (CDC)            │
-                │  └────────────┘       ▼                   ▼                                     │
-                │                ┌─────────────────────────────────┐   ┌───────────────┐          │
-                │                │ No.4 HS Receive Datapath         │──►│ No.7 PPI      │──────────►│─► PPI
-                │                │ sync search, byte align,         │   │ Output Stage  │ rxdatahs, │   HS
-                │                │ deskew-burst detect, EoT trailer │   │ enable gating │ valid,    │
-                │                └───────────────┬──────────────────┘   └───────────────┘ sync ...  │
-                │                                │ R2                                              │
-                │                ┌───────────────▼──────────┐                                      │
- ◄── dly_tap_x  │◄───────────────│ No.5 Deskew Controller   │  (R2 only; bypass in R1)             │
-                │                └──────────────────────────┘                                      │
- AFE clock lane │  ┌─────────────────────────┐                                                     │
- cl_lp_dp/dn ──►│─►│ No.2 Clock Lane Control │──► cl_stopstate, cl_rxclkactivehs, cl_ulps* ──────►│─► PPI
- byteclk ──────►│─►│ (CIL-SCNN)              │                                                     │
- ◄── cl_hs_en,  │◄─│ HS entry/exit, ULPS     │                                                     │
-     cl_term_en │  └─────────────────────────┘                                                     │
-                │  ┌──────────────────────────────┐   ┌────────────────────────────┐               │
- phy_core_rst ─►│─►│ No.6 Timing & Init Control   │◄──│ No.8 Configuration & Status│◄── cfg bus ───│◄─ OPEN K3
- cl/dl_enable ─►│─►│ timers, TINIT, init_done,    │   │ timer values, lane map,    │               │
- forcerxmode_x─►│─►│ HS RX timeout, reset sync    │──►│ status, counters           │               │
- core_clk ─────►│  └──────────────┬───────────────┘   └────────────────────────────┘               │
-                │                 └──► init_done ──────────────────────────────────────────────────│─► PPI
-                └─────────────────────────────────────────────────────────────────────────────────┘
-```
+### 2.1 Lane modules (D-PHY reference)
 
-A drawn figure following the repository diagram conventions will replace this sketch once the
-block partitioning is agreed. The AFE-side names in the sketch are abbreviated; the port names are
-the `afe_*` names of §5.2.
+D-PHY describes every lane as a Universal Lane Module: a Lane Control and Interface Logic (CIL)
+block between the PPI and the line-side functions HS-TX, HS-RX, LP-TX, LP-RX and LP-CD (D-PHY v1.1
+§5.1 Figure 1, §5.6 Figure 4 ✅). A PHY implements a stripped-down module per lane type, named after
+Table 1 ✅. The slave side of a unidirectional data lane contains HS-RX, LP-RX and a CIL-SFXN
+(§5.6.1 ✅); the slave side of a clock lane contains HS-RX, LP-RX and a CIL-SCNN (§5.6.3 ✅). CSI-2
+v1.3 Annex B, Figure 146 ✅ uses CIL-SFEN for the data lanes.
+
+- **CIL-SFEN.** Slave side, Forward-only high-speed, Escape mode with Events only (triggers and
+  ULPS), No reverse escape. With LPDT (OPEN K2) the data lanes become CIL-SFAN.
+- **AFE share.** The line-side receivers are in the AFE. With ADR-001 option B the data sampler and
+  the 1:8 deserializer are in the AFE too: the clock-lane DDR clock samples the data lanes and,
+  divided by 8, becomes `afe_byteclk` ⚠️.
+- **Clock lane.** It has no escape decoder: its ULPS entry is a line-state sequence handled by the
+  clock-lane FSM (D-PHY §5.6 note, §6.8 ✅).
+- **Wires.** One clock lane and N data lanes use 2 × (N + 1) interconnect wires (D-PHY §5.7.1.2 ✅).
+
+![Figure 2-1 — data lane module: Universal Lane Module reduced to CIL-SFEN](figures/ftel_dphy_rx_ulm_data.svg)
+
+![Figure 2-2 — clock lane module: Universal Lane Module reduced to CIL-SCNN](figures/ftel_dphy_rx_ulm_clock.svg)
+
+![Figure 2-3 — lane configuration: one clock lane and N forward-only data lanes](figures/ftel_dphy_rx_lanes.svg)
+
+Where each function of the Universal Lane Module (D-PHY Figure 4) is implemented:
+
+| ULM function | Data lane (CIL-SFEN) | Clock lane (CIL-SCNN) |
+|---|---|---|
+| HS-RX with termination, LP-RX | AFE | AFE |
+| HS-TX, LP-TX, LP-CD | Not used: unidirectional slave, no turnaround | Not used |
+| TX Ctrl Logic, Esc Encoder, HS-Serialize, Sequences | Not used: transmit side | Not used |
+| Data Sampler | AFE (ADR-001 option B) | Not used: the HS-RX output is the DDR clock, divided by 8 in the AFE |
+| HS-Deserialize | AFE: 1:8, arbitrary byte phase. No.4: sync search and byte alignment | Not used |
+| Ctrl Decoder | No.1: synchronization, glitch filter, LP state. No.3: line-state sequences | No.1, also for `afe_cl_clk_active`. No.2: line-state sequences |
+| Esc Decoder | No.3: ULPS and trigger commands | Not used |
+| State Machine | No.3; timers and initialization in No.6 | No.2; timers and initialization in No.6 |
+| Error detect | No.3: `errcontrol_x`, `erresc_x`. No.4: `errsoths_x`, `errsotsynchs_x`, EoT sync error | No.2: aborted HS request, status only (No.8) |
+| Data IF logic | No.4: EoT trailer removal. No.7: PPI data outputs | Not used |
+| Ctrl IF logic | No.6: `dl_enable_x`, `forcerxmode_x`. No.7: PPI outputs | No.6: `cl_enable`. No.7: PPI outputs |
+| Not in the v1.1 module | No.5: deskew (D-PHY v1.2, R2). No.8: configuration and status | No.8: configuration and status |
+
+### 2.2 Top level
+
+![Figure 2-4 — ftel_dphy_rx top-level block diagram](figures/ftel_dphy_rx_top.svg)
+
+Each data lane slice is the CIL-SFEN of Figure 2-1; the clock lane slice is the CIL-SCNN of
+Figure 2-2. Output groups in the figure, by the Source column of §5.1:
+- HS outputs: the `rxbyteclkhs` outputs from No.4.
+- LP / escape outputs: the outputs from No.3, `rxclkesc_x` and the LPDT outputs tied to 0 (K2).
+- Clock-lane outputs: the outputs from No.2.
 
 | Block | Name | Instances | Clock domain | Release |
 |---|---|---|---|---|
@@ -263,6 +278,7 @@ Clock-domain crossings:
 | From → To | Signals | Method |
 |---|---|---|
 | AFE LP-RX (asynchronous) → `core_clk` | `afe_lp_dp_x`, `afe_lp_dn_x`, `afe_cl_lp_dp`, `afe_cl_lp_dn` | `PARA_LP_SYNC_STAGES` flip-flops + `PARA_LP_FILTER_CYC` glitch filter |
+| AFE clock-activity detector (asynchronous) → `core_clk` | `afe_cl_clk_active` | `PARA_LP_SYNC_STAGES` flip-flops in Block No. 1 ⚠️; whether a filter is needed depends on the detector (ADR-001) |
 | `core_clk` → `rxbyteclkhs` | HS entry, settle done, EoT request (Block No. 3 → No. 4) | Level signals through 2-flop synchronizers. The receiving logic returns to idle when the byte clock stops (clock-lane ULPS) |
 | `rxbyteclkhs` → `core_clk` | EoT done, error events for status counters | Toggle synchronizers |
 | Enables (`lite_aclk`) → `core_clk` | `cl_enable`, `dl_enable_x`, `forcerxmode_x` | Level, 2-flop synchronizers; the PPI defines them as level sensitive **[CSI]** C14 |
@@ -285,6 +301,8 @@ block that changes when the AFE changes.
 **Function.**
 - LP path: synchronizes and filters the LP-RX outputs into `core_clk` and presents one of LP-11,
   LP-10, LP-01, LP-00 per lane.
+- Clock activity: synchronizes `afe_cl_clk_active` into `core_clk` for Block No. 2 ⚠️ (§4.4
+  design note).
 - HS path: registers the raw deserialized word of each lane on `rxbyteclkhs`; applies optional
   P/N polarity inversion and logical-to-physical lane mapping (V9, configuration fields).
 - The same P/N polarity inversion (Dp/Dn swapped before LP decoding) and the same lane mapping

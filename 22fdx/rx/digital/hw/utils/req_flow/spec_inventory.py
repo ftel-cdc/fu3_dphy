@@ -36,6 +36,7 @@ TABLE_KINDS = {
     ("Release", "Line rate per lane", "Deskew", "Target use"): "release",
     # vocabulary tables: not graded for coverage, used to validate enum-like fields
     ("Block", "Name", "Instances", "Clock domain", "Release"): "block",
+    ("ULM function", "Data lane (CIL-SFEN)", "Clock lane (CIL-SCNN)"): "ulm",
 }
 GRADED_KINDS = ("param", "runtime", "clock", "cdc", "reset", "fsm_cl", "fsm_dl",
                 "ppi", "afe", "open", "timing", "path", "release")
@@ -67,6 +68,9 @@ CAPTION_RE = re.compile(r"^\*\*[^|]*\*\*\s*$")
 #              anchor set of compare_req.py: the A6 result of 2026-09-26 (79.6 %) used 108 anchors.
 #  2026-09-26  v0.4 written before the spec edit (spec_review D3/D4): cdc +1 (enable gating of the
 #              rxbyteclkhs-domain PPI outputs), open +2 (K8, ADR-004), c_ids +1 (C1 in Appendix A).
+#  2026-09-29  v0.5 written before the spec edit (Track Doc, figures): cdc +1 (synchronizer of
+#              afe_cl_clk_active, a gap found while drawing Figure 2-4). The §2.1 table mapping the
+#              D-PHY Universal Lane Module to the blocks is a vocabulary table ("ulm"), not graded.
 _V03 = {
     "param": 10, "runtime": 5, "clock": 3, "cdc": 5, "reset": 3,
     "fsm_cl": 10, "fsm_dl": 16, "ppi": 29, "afe": 8, "open": 10, "timing": 9,
@@ -76,6 +80,7 @@ EXPECTED = {
     "v0.2": _V03,
     "v0.3": _V03,
     "v0.4": dict(_V03, cdc=6, open=12, c_ids=16),
+    "v0.5": dict(_V03, cdc=7, open=12, c_ids=16),
 }
 REVISION_RE = re.compile(r"\*\*DRAFT (v[0-9]+\.[0-9]+)\*\*")
 
@@ -203,6 +208,7 @@ def build(path):
         "spec_sha256": hashlib.sha256(raw).hexdigest(),
         "items": [],
         "blocks": [],
+        "ulm_functions": [],
         "unrecognised_tables": [],
         "open_lines": [],
         "assume_lines": [],
@@ -226,6 +232,8 @@ def build(path):
                 cells = split_row(lines[j])
                 if kind == "block":
                     inv["blocks"].append(clean(cells[0]))
+                elif kind == "ulm":
+                    inv["ulm_functions"].append(clean(cells[0]))
                 elif kind:
                     inv["items"].append({
                         "kind": kind,
@@ -289,6 +297,7 @@ def selftest(inv):
         ok = False
         print("FAIL duplicate item keys:", ", ".join(inv["duplicate_keys"]))
     print(f"blocks (vocabulary): {', '.join(inv['blocks'])}")
+    print(f"ULM functions (vocabulary): {len(inv['ulm_functions'])}")
     print(f"unrecognised tables (not graded): {len(inv['unrecognised_tables'])}")
     print(f"lines tagged OPEN: {len(inv['open_lines'])}, lines tagged ⚠️: {len(inv['assume_lines'])}, "
           f"lines depending on an open item (derived): {len(inv['open_derived'])}")

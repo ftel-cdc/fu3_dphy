@@ -17,3 +17,5 @@ syn/work
 cdc/cdc
 rdc/rdc
 req/_work
+doc/figures/.drawio_cache
+doc/figures/*.png
