@@ -1,0 +1,85 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="ftel_dphy_rx_deskew" id="FtelDphyRxDeskew0">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="frame" value="No.5 Deskew Controller  --  detail of Figure 2-4, per data lane, R2 (rxbyteclkhs)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;fontStyle=1;verticalAlign=top;strokeWidth=2;fillColor=none;arcSize=4;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="0" y="0" width="1560" height="380" as="geometry" />
+        </mxCell>
+        <mxCell id="blk" value="&lt;b&gt;content OPEN (ADR-004)&lt;/b&gt;&lt;br&gt;&lt;br&gt;drives the delay taps of its lane and selects&lt;br&gt;the tap in the centre of the passing window;&lt;br&gt;algorithm, tap resolution and periodic&lt;br&gt;calibration decided in R2" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFE6CC;align=center;verticalAlign=middle;spacing=4;dashed=1;dashPattern=8 4;" vertex="1" parent="1">
+          <mxGeometry x="520" y="80" width="520" height="250" as="geometry" />
+        </mxCell>
+        <mxCell id="i_burst" value="deskew burst: aligned bytes,&lt;br&gt;skew cal. flag (No.4)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=right;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="10" y="115" width="420" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="w_burst" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=4;edgeStyle=none;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="440" y="145" as="sourcePoint" />
+            <mxPoint x="520" y="145" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="i_byp" value="deskew_bypass (No.8): taps held&lt;br&gt;at their reset value" style="text;html=1;whiteSpace=wrap;fontSize=18;align=right;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;fontColor=#2D7600;" vertex="1" parent="1">
+          <mxGeometry x="10" y="235" width="420" height="60" as="geometry" />
+        </mxCell>
+        <mxCell id="w_byp" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;dashed=1;dashPattern=2 4;strokeColor=#2D7600;fontColor=#2D7600;edgeStyle=none;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="440" y="265" as="sourcePoint" />
+            <mxPoint x="520" y="265" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="w_tap" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;edgeStyle=none;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1040" y="205" as="sourcePoint" />
+            <mxPoint x="1110" y="205" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="o_tap" value="delay tap [PARA_DLY_TAP_WIDTH-1:0]&lt;br&gt;(No.1, inverse lane map,&lt;br&gt;to afe_dly_tap_x)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="1120" y="160" width="430" height="90" as="geometry" />
+        </mxCell>
+        <mxCell id="n_en" value="PARA_DESKEW_EN = 0: block absent, taps held at their reset value." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="520" y="336" width="1020" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=none;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="0" y="410" width="1560" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_title" value="&lt;b&gt;Legend&lt;/b&gt;" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="10" y="414" width="100" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_f_byte" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFE6CC;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="10" y="456" width="40" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_ft_byte" value="rxbyteclkhs domain" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="58" y="450" width="335" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_k_data" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=4;edgeStyle=none;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="395" y="468" as="sourcePoint" />
+            <mxPoint x="435" y="468" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg_kt_data" value="HS data (bus)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="443" y="450" width="335" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_k_ctrl" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;edgeStyle=none;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="780" y="468" as="sourcePoint" />
+            <mxPoint x="820" y="468" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg_kt_ctrl" value="control / status" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="828" y="450" width="335" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_k_cfg" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;dashed=1;dashPattern=2 4;strokeColor=#2D7600;fontColor=#2D7600;edgeStyle=none;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="1165" y="468" as="sourcePoint" />
+            <mxPoint x="1205" y="468" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg_kt_cfg" value="configuration" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="1213" y="450" width="335" height="36" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

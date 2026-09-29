@@ -390,3 +390,48 @@ theo: ADR-001 chặn 17 REQ, và A2 có thêm câu về glitch của `afe_cl_clk
 
 `req_id` được gán theo thứ tự dòng trong spec, nên hai REQ mới làm 161 ID phía sau dịch +1 hoặc +2
 (ví dụ REQ-048 cũ nay là REQ-049). Các ID nhắc trong §1–§7.2 là ID tại thời điểm viết mục đó.
+
+### 7.4 Đồng bộ P1 với spec v0.6 (hình chi tiết từng block, 2026-09-29)
+
+Spec v0.6 thêm Figure 4-1…4-13, vẽ từng block tới phần tử chuẩn. Theo luật "text first" của
+`doc/figures/README.md`, chỗ nào hình cần thì text được viết rõ ra trước. Khi vẽ cũng lộ ra các vấn đề
+thiết kế ở tốc độ thấp; chúng được ghi thành design note ⚠️ ở §4.5 và §4.6, và ADR-006 được mở lại
+cho dải dưới ~270 Mb/s.
+
+| Bước | Kết quả |
+|---|---|
+| `spec_inventory.py` | Số đếm cho v0.6 lấy từ danh sách thay đổi: runtime 5 → 6 (`eot_skip_bytes`), cdc 7 → 8 (crossing của status), fsm_cl 10 → 11 (CL_WAIT), open 12 → 13 (ADR-006). Lần này số đếm được đăng ký **sau** khi sửa spec (các sửa đổi phát sinh trong lúc vẽ) nhưng **trước** khi chạy inventory trên v0.6. Selftest PASS 15/15 |
+| `rebase_req.py` | Giữ 191/210 REQ với số dòng mới; 19 REQ và 1 finding lỗi thời vì text của chúng đã đổi; 29 vùng mới hoặc đã đổi |
+| Chunk bổ sung `21_v06_delta.json` | 73 REQ: 19 chủ đề cũ viết lại theo text mới, 54 REQ mới. Câu trích được script cắt từ spec giữa hai mốc và kiểm theo đúng cửa sổ của validator. Finding F-001 giữ nguyên nội dung vì câu hỏi về `errcontrol_x` vẫn chưa có câu trả lời; nó chỉ dời sang dòng mới |
+| Schema | `parameters_affected` chấp nhận thêm `*_bytes`, vì trường run-time mới `eot_skip_bytes` đếm theo byte chứ không theo chu kỳ `core_clk`. Validator vẫn kiểm tên đó có trong bảng của spec |
+| `validate_req.py` | 264 REQ · 1 finding · trích dẫn 265/265 · độ phủ 100% ở 15 nhóm (runtime 6/6, cdc 8/8, fsm_cl 11/11, open 13/13, c_ids 16/16) · 0 lỗi · 0 cảnh báo |
+| `flow_check.py` | review: 0 xung đột · test âm **7/7 PASS** |
+
+`needs_human_decision` tăng từ 46 lên 54: ADR-006 +5, K2 +1 (tie-off LPDT ở §4.9), K6 +1
+(`init_done` ở §4.7), T1 +1 (thứ tự bit trigger ở §4.5). Trong 191 REQ giữ nguyên nội dung, 149 REQ
+bị đánh lại ID theo thứ tự dòng.
+
+Lượt dò finding độc lập (Bước 4b của `/dphy_spec_parse`) không chạy cho lần đồng bộ này. Các vấn đề
+tìm được khi vẽ đã nằm trong spec, dưới dạng design note ⚠️ và mục ADR-006 của §9.
+
+### 7.5 Đồng bộ lại sau quyết định ADR-006 (vẫn là v0.6, 2026-09-29)
+
+Người thiết kế chọn cho ADR-006 phương án lane vẫn đợi EoT done rồi mới về Stop. Phương án không đợi
+được giữ trong §4.5 dưới dạng ghi chú "faster option". Khi viết lại design note, lộ thêm một điểm:
+EoT done rời Block No. 4 trước khi delay line xả hết. Vì vậy `stopstate_x` có thể lên trước byte cuối,
+sớm hơn khoảng mà HAS-CSI Figure 4-1 để ngỏ (từ byte cuối trở đi). Điểm này có ở cả hai phương án.
+Nó được ghi là OPEN ADR-006 và hỏi team CSI, không tự quyết. Ràng buộc THS-EXIT + TLPX dưới khoảng
+240 Mb/s được hỏi phía Tx ở S5. K3 được bổ sung trường `eot_skip_bytes` còn thiếu.
+
+| Bước | Kết quả |
+|---|---|
+| `spec_inventory.py` | Không đổi số dòng của bảng nào, nên EXPECTED v0.6 giữ nguyên; điều này được dự đoán trước khi chạy. Selftest PASS 15/15 |
+| `rebase_req.py` | Giữ 261/264 REQ; 3 REQ lỗi thời: design note §4.5, đoạn ADR-006 ở §7, dòng ADR-006 ở §9 |
+| Chunk bổ sung `22_v06_adr006_delta.json` | 7 REQ viết theo text mới; câu trích cắt bằng script như ở §7.4 |
+| `validate_req.py` | 268 REQ · 1 finding · trích dẫn 269/269 · độ phủ 100% ở 15 nhóm · 0 lỗi · 0 cảnh báo |
+| `flow_check.py` | review: 0 xung đột · test âm **7/7 PASS** |
+
+`needs_human_decision` tăng từ 54 lên 56 (ADR-006: 5 → 7). 134 REQ bị đánh lại ID theo thứ tự dòng.
+
+Hạn chế đã biết của `rebase_req.py`: REQ được giữ lại vẫn mang `source_section` cũ khi heading đổi
+(REQ của đoạn đầu ADR-006 còn heading của v0.5). Validator không chấm trường này.

@@ -53,7 +53,7 @@
           "source_line": {"type": "integer", "minimum": 1},
           "source_quote": {"type": "string", "minLength": 8},
           "source_ids": {"type": "array", "items": {"type": "string", "minLength": 1}},
-          "parameters_affected": {"type": "array", "items": {"type": "string", "pattern": "^(PARA_[A-Z0-9_]+|[a-z_]+_cyc)$"}},
+          "parameters_affected": {"type": "array", "items": {"type": "string", "pattern": "^(PARA_[A-Z0-9_]+|[a-z_]+_cyc|[a-z_]+_bytes)$"}},
           "ambiguity_score": {"type": "number", "minimum": 0, "maximum": 1},
           "needs_review": {"type": "boolean"},
           "needs_human_decision": {"type": "boolean"},

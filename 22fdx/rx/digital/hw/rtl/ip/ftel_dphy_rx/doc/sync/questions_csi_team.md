@@ -4,8 +4,8 @@
 |---|---|
 | Gửi | Team CSI-2 Rx controller (HAS-CSI = `FTEL_IP_MIPI_CSI-2_CONTROLLER_HAS_v1.2.docx`) |
 | Từ | Nhóm thiết kế D-PHY Rx (`ftel_dphy_rx`) |
-| Ngày | 2026-09-26 |
-| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.4 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`), HAS-CSI v1.2 |
+| Ngày | 2026-09-26, cập nhật 2026-09-29 (thêm ADR-006; K3 thêm `eot_skip_bytes`) |
+| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.6 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`), HAS-CSI v1.2 |
 
 ## Bối cảnh
 
@@ -16,21 +16,22 @@ PPI. Phụ lục ở cuối file ghi lại cách chúng tôi hiểu HAS-CSI (C1�
 Mỗi câu hỏi kèm **giả định đang dùng**. Thiết kế sẽ đi theo giả định đó cho tới khi có câu trả lời.
 Nếu team đồng ý với giả định, chỉ cần trả lời "Đồng ý".
 
-**Cần trả lời trước HAS v1.0** (chưa có thì chưa sinh RTL được): **K1, K3, K6**.
+**Cần trả lời trước HAS v1.0** (chưa có thì chưa sinh RTL được): **K1, K3, K6, ADR-006**.
 
 ## Tóm tắt
 
 | ID | Chủ đề | Ưu tiên | Yêu cầu đang chờ |
 |---|---|---|---|
 | K1 | Tốc độ lane tối đa; bản phát hành của 4K staggered HDR; `rxskewcalhs_x` khi chưa calibrate | **Cao** | 5 |
-| K2 | Các cổng LPDT | Trung bình | 7 |
+| K2 | Các cổng LPDT | Trung bình | 8 |
 | K3 | Nơi cấu hình timer của D-PHY; lập trình theo tốc độ lane | **Cao** | 6 |
 | K4 | Ngân sách lệch byte giữa các lane | Trung bình | 1 |
 | K5 | Register map v1.4 | Trung bình | 2 |
-| K6 | `phy_core_rst`, `init_done`, `forcerxmode_x` | **Cao** | 2 |
+| K6 | `phy_core_rst`, `init_done`, `forcerxmode_x` | **Cao** | 3 |
 | K7 | Sửa dẫn chiếu trong HAS-CSI (biên tập) | Thấp | — |
 | K8 | Burst HS dài nhất trên một lane | Trung bình | 2 |
 | F-001 | Thời gian giữ `errcontrol_x` khi lỗi do chính LP-11 gây ra | Trung bình | 1 |
+| ADR-006 | EoT: thứ tự `stopstate_x` / `rxactivehs_x`, byte trailer sau packet ở tốc độ thấp, độ trễ PPI | **Cao** | 7 |
 
 ---
 
@@ -105,6 +106,7 @@ Nếu team đồng ý với giả định, chỉ cần trả lời "Đồng ý".
 | `tinit_cyc` | 20 000 (100 µs) |
 | `hs_rx_timeout_cyc` | 2^18 (≈ 1.31 ms) |
 | `esc_timeout_cyc` | 2^18 |
+| `eot_skip_bytes` | 16 (ở 1500 Mb/s); phụ thuộc tốc độ, lập trình cùng `hs_settle_cyc` |
 | Đảo cực P/N, map lane | Không đảo, thẳng |
 | `deskew_bypass` | Chỉ có ở R2 |
 
@@ -209,6 +211,40 @@ Timeout đặt 2^18 chu kỳ `core_clk`, khoảng 1.31 ms.
 
 **Tham chiếu.** HAS-CSI Table 4-3 (#24–#26). HAS D-PHY §4.5 (luật thứ tự ưu tiên của FSM data lane).
 
+## ADR-006 — EoT ở tốc độ thấp
+
+**Câu hỏi.**
+1. HAS-CSI Figure 4-1 cho `stopstate_x` lên trong khoảng từ byte cuối trở đi. Sau EoT, D-PHY có thể bật
+   `stopstate_x` sớm hơn thế, tối đa `PARA_EOT_DELAY_BYTES` chu kỳ `rxbyteclkhs` trước khi byte cuối
+   ra PPI (3.2 µs ở 80 Mb/s), tức là trước khi `rxactivehs_x` hạ. Controller có chấp nhận thứ tự này
+   không? Controller có dùng `stopstate_x` để nhận biết burst đã kết thúc không?
+2. Dưới khoảng 270 Mb/s, D-PHY không bảo đảm cắt trailer đúng tới từng byte. Nếu D-PHY cắt muộn, vài
+   byte trailer sẽ ra sau packet footer với `rxvalidhs_x` = 1. HAS-CSI tìm cuối packet theo Word
+   Count; controller có bỏ qua các byte sau footer không, hay coi đó là lỗi?
+3. Dữ liệu ra PPI trễ `PARA_EOT_DELAY_BYTES` chu kỳ `rxbyteclkhs` so với đường truyền: 32 chu kỳ, tức
+   3.2 µs ở 80 Mb/s và 0.17 µs ở 1500 Mb/s. Controller có ràng buộc nào về độ trễ này không?
+
+**Vì sao cần.**
+- D-PHY phải giữ lại đuôi burst trong một delay line để cắt trailer (D-PHY §6.4.3). Khi LP-11 xuất
+  hiện, yêu cầu EoT phải đi qua `core_clk` rồi sang `rxbyteclkhs`, nên thời điểm LP-11 chỉ biết được
+  với sai số cỡ một chu kỳ byte clock. Ở tốc độ thấp, sai số này lớn hơn khoảng an toàn mà D-PHY để
+  lại giữa trailer và LP-11.
+- Lane đợi D-PHY cắt xong (EoT done) rồi mới về Stop. EoT done được gửi ngay khi cắt xong, trước khi
+  delay line xả hết, nên `stopstate_x` lên trước khi byte cuối ra PPI (câu 1). Nếu controller cần
+  đúng thứ tự của Figure 4-1, D-PHY phải đợi xả hết delay line mới về Stop. Khi đó, dưới khoảng
+  1.2 Gb/s, lane bỏ lỡ burst kế tiếp nếu Tx dùng THS-EXIT và TLPX ở mức tối thiểu.
+- Câu 2 quyết định hướng xử lý ở tốc độ thấp: nghiêng về cắt muộn (thừa byte), hay phải đo thêm
+  thời điểm LP-11 ở mức dưới một byte (phức tạp hơn).
+
+**Giả định hiện tại.**
+- Lane đợi EoT done rồi mới về Stop (đã chốt). Hệ quả phía Tx: dưới khoảng 240 Mb/s, hai burst liền
+  nhau cần THS-EXIT + TLPX lớn hơn khoảng 32·UI + 15 ns (HAS D-PHY §4.5). Phần này đã hỏi phía Tx.
+- `stopstate_x` có thể lên trước byte cuối như ở câu 1, cho tới khi team trả lời.
+- Cắt trailer chính xác trên khoảng 270 Mb/s. Dưới mức đó chưa chốt (ADR-006).
+
+**Tham chiếu.** HAS D-PHY §4.5 và §4.6 (các design note), ADR-006, §9. HAS-CSI Figure 4-1, Table 4-3,
+§4.4 (`err_wc` chỉ báo khi thiếu byte).
+
 ---
 
 ## Phụ lục — Cách chúng tôi hiểu HAS-CSI (nhờ xác nhận hoặc sửa)
@@ -245,4 +281,5 @@ Timeout đặt 2^18 chu kỳ `core_clk`, khoảng 1.31 ms.
 | K7 | | | |
 | K8 | | | |
 | F-001 | | | |
+| ADR-006 | | | |
 | Phụ lục C1–C16 | | | |

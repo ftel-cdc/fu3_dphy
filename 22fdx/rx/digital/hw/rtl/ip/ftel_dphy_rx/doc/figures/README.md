@@ -27,7 +27,9 @@ four additions for this IP. `check_figures.py` enforces the rules marked (checke
 12. **Text first.** Every function drawn in a figure is described in spec.md; a gap found while
     drawing is fixed in the text (marked ⚠️) in the same change.
 13. **Clock domains** by fill colour: `core_clk` blue, `rxbyteclkhs` orange, configuration clock
-    green, analog (AFE) grey, mixed or asynchronous white.
+    green, analog (AFE) grey, mixed or asynchronous white. In leaf-level figures only the clocked
+    elements (registers, counters, FSM states, synchronizers) carry the fill; gates, multiplexers and
+    comparators are white.
 14. **No emoji in figures.** Open items are written as text, for example "(OPEN K3)" or "(R2)".
 
 ## Figure tree
@@ -38,7 +40,19 @@ four additions for this IP. `check_figures.py` enforces the rules marked (checke
 | 2-2 | `ftel_dphy_rx_ulm_clock` | Clock lane module: Universal Lane Module reduced to CIL-SCNN | D-PHY v1.1 Figure 4 |
 | 2-3 | `ftel_dphy_rx_lanes` | Lane configuration: 1 clock lane + N data lanes | D-PHY v1.1 Figure 8 |
 | 2-4 | `ftel_dphy_rx_top` | Top level: blocks No.1 to No.8 | Figures 2-1, 2-2 |
-| 4-1 to 4-11 | planned (batch 2) | Block No.1 to No.8 and the CDC cells | Figure 2-4 |
+| 4-1 | `ftel_dphy_rx_sync_cells` | Level, toggle and reset synchronizers | all blocks |
+| 4-2 | `ftel_dphy_rx_afe_adapter` | Block No.1: LP path, HS path, lane map, AFE controls | Figure 2-4 |
+| 4-3 | `ftel_dphy_rx_lp_filter` | LP glitch filter | Figure 4-2 |
+| 4-4 | `ftel_dphy_rx_cl_fsm` | Block No.2: clock lane FSM and settle counter | Figure 2-4 |
+| 4-5 | `ftel_dphy_rx_dl_ctrl` | Block No.3: structure and output registers | Figure 2-4 |
+| 4-6 | `ftel_dphy_rx_dl_fsm` | Data lane FSM | Figure 4-5 |
+| 4-7 | `ftel_dphy_rx_esc_decoder` | Escape decoder | Figure 4-5 |
+| 4-8 | `ftel_dphy_rx_hs_datapath` | Block No.4: sync search, deskew detection, byte alignment | Figure 2-4 |
+| 4-9 | `ftel_dphy_rx_eot` | EoT delay line and trailer removal | Figure 4-8 |
+| 4-10 | `ftel_dphy_rx_timing_init` | Block No.6: resets, enables, TINIT, watchdogs, `init_done` | Figure 2-4 |
+| 4-11 | `ftel_dphy_rx_deskew` | Block No.5: boundary only (content OPEN ADR-004) | Figure 2-4 |
+| 4-12 | `ftel_dphy_rx_ppi_out` | Block No.7: output gating, `rxclkesc_x`, tie-offs | Figure 2-4 |
+| 4-13 | `ftel_dphy_rx_cfg_status` | Block No.8: configuration and status (bus OPEN K3) | Figure 2-4 |
 
 ## Rendering
 

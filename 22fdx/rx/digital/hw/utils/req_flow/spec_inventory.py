@@ -71,6 +71,10 @@ CAPTION_RE = re.compile(r"^\*\*[^|]*\*\*\s*$")
 #  2026-09-29  v0.5 written before the spec edit (Track Doc, figures): cdc +1 (synchronizer of
 #              afe_cl_clk_active, a gap found while drawing Figure 2-4). The §2.1 table mapping the
 #              D-PHY Universal Lane Module to the blocks is a vocabulary table ("ulm"), not graded.
+#  2026-09-29  v0.6 (Track Doc, block figures 4-1 to 4-13): runtime +1 (eot_skip_bytes), cdc +1 (status
+#              crossing into the configuration clock), fsm_cl +1 (CL_WAIT), open +1 (ADR-006 reopened).
+#              Counted from the change list. Registered after the spec edits, which came out of the
+#              drawing, but before the inventory was run on v0.6.
 _V03 = {
     "param": 10, "runtime": 5, "clock": 3, "cdc": 5, "reset": 3,
     "fsm_cl": 10, "fsm_dl": 16, "ppi": 29, "afe": 8, "open": 10, "timing": 9,
@@ -81,6 +85,7 @@ EXPECTED = {
     "v0.3": _V03,
     "v0.4": dict(_V03, cdc=6, open=12, c_ids=16),
     "v0.5": dict(_V03, cdc=7, open=12, c_ids=16),
+    "v0.6": dict(_V03, runtime=6, cdc=8, fsm_cl=11, open=13, c_ids=16),
 }
 REVISION_RE = re.compile(r"\*\*DRAFT (v[0-9]+\.[0-9]+)\*\*")
 

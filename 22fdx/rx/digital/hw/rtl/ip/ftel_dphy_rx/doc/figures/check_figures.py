@@ -39,7 +39,7 @@ SHAPES = {"cloud", "curlyBracket", "or", "xor", "partialRectangle", "trapezoid",
 # edgeLabel is the text cell the drawio editor creates for a label placed on an edge.
 NAMED_STYLES = {"ellipse", "group", "rhombus", "text", "triangle", "edgeLabel"}
 MIN_FONT = 18
-PORT_LIKE = re.compile(r"^(afe_\w+|PARA_\w+|rx\w+|err\w+|cl_\w+|dl_\w+|\w+_x|\w+_cyc|"
+PORT_LIKE = re.compile(r"^(afe_\w+|PARA_\w+|rx\w+|err\w+|cl_\w+|dl_\w+|\w+_x|\w+_cyc|[a-z_]+_bytes|"
                        r"init_done|phy_core_rst|core_clk|deskew_bypass)$")
 IDENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 FIG_REF = re.compile(r"!\[([^\]]*)\]\((figures/[^)\s]+)\)")

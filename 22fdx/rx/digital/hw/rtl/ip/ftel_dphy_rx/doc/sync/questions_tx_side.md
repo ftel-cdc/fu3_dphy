@@ -4,8 +4,8 @@
 |---|---|
 | Gửi | Đội phát triển phía Tx (CSI-2 transmitter / D-PHY Tx của sensor) |
 | Từ | Nhóm thiết kế D-PHY Rx (`ftel_dphy_rx`) |
-| Ngày | 2026-09-26 |
-| Căn cứ | MIPI CSI-2 v1.3, MIPI D-PHY v1.1 (Table 14); HAS của `ftel_dphy_rx` bản nháp v0.4 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`) |
+| Ngày | 2026-09-26, cập nhật 2026-09-29 (S9: clock lane; S5: THS-EXIT + TLPX ở tốc độ thấp) |
+| Căn cứ | MIPI CSI-2 v1.3, MIPI D-PHY v1.1 (Table 14); HAS của `ftel_dphy_rx` bản nháp v0.6 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`) |
 
 ## Bối cảnh
 
@@ -16,8 +16,8 @@ Tx: CSI-2 protocol ─► D-PHY Tx ══ lane trên PCB ══► AFE ─► ft
 ```
 
 Chúng tôi thiết kế Rx theo CSI-2 v1.3 và D-PHY v1.1. Riêng deskew lấy theo D-PHY v1.2, vì cần khi
-chạy trên 1.5 Gb/s. Rx được thiết kế để chịu được **toàn bộ dải** min/max của spec. Các câu hỏi dưới
-đây giúp chốt những giá trị mà spec chỉ cho một biên, hoặc để ngỏ.
+chạy trên 1.5 Gb/s. Rx được thiết kế để chịu được **toàn bộ dải** min/max của spec, trừ một ngoại lệ
+ghi ở S5. Các câu hỏi dưới đây giúp chốt những giá trị mà spec chỉ cho một biên, hoặc để ngỏ.
 
 Mỗi câu hỏi kèm **giả định đang dùng**. Nếu phía Tx đồng ý với giả định, chỉ cần trả lời "Đồng ý".
 Một số câu đã có câu trả lời một phần từ HAS của team CSI-2 Rx controller (HAS-CSI); với các câu
@@ -34,7 +34,7 @@ S1, S3, S9 và S10 cũng cần sớm, để chuẩn bị môi trường verify.
 | S2 | Số data lane cho từng sensor mode | Trung bình | Đã có từ HAS-CSI, nhờ xác nhận |
 | S3 | Continuous hay non-continuous clock | Cao | Đã có từ HAS-CSI, nhờ xác nhận |
 | S4 | Deskew: có gửi không, pattern, độ dài, thời điểm | **Cao** | Mở |
-| S5 | Bảng timing thực tế của Tx (đặc biệt THS-TRAIL max và THS-ZERO max) | **Cao** | Mở |
+| S5 | Bảng timing thực tế của Tx (đặc biệt THS-TRAIL max, THS-ZERO max, THS-EXIT + TLPX ở tốc độ thấp) | **Cao** | Mở |
 | S6 | ULPS: có dùng không, trình tự, TWAKEUP | Trung bình | Mở |
 | S7 | Thời gian giữ LP-11 sau khi bật nguồn (TINIT phía Tx) | Trung bình | Mở |
 | S8 | Chỉ CSI-2 v1.3, hay có tính năng v2.0 trở lên | Trung bình | Đã có từ HAS-CSI, nhờ xác nhận |
@@ -106,9 +106,14 @@ Rx nhận ra deskew burst khi thấy ≥ 16 bit 1 sau HS-0.
 - **THS-ZERO max** liên quan tới cửa sổ tìm sync. D-PHY chỉ cho giá trị min của THS-PREPARE +
   THS-ZERO (≥ 145 ns + 10·UI), không cho max. Rx đã đếm cửa sổ từ word khác 0 đầu tiên, nên chịu được
   HS-0 dài. Dù vậy, cần giá trị thực để đặt test case.
+- **THS-EXIT + TLPX ở tốc độ thấp.** Sau mỗi burst, Rx đợi cắt trailer xong mới về Stop. Vì vậy dưới
+  khoảng 240 Mb/s, Rx chỉ nhận được burst kế tiếp khi THS-EXIT + TLPX lớn hơn khoảng 32·UI + 15 ns
+  (415 ns ở 80 Mb/s; mức tối thiểu của spec là 100 ns + 50 ns). Nếu Tx gửi hai burst sát nhau ở tốc
+  độ thấp với THS-EXIT và TLPX tối thiểu, nhờ báo lại.
 - Các giá trị còn lại dùng để đặt các góc timing trong môi trường verify.
 
-**Giả định hiện tại.** Đúng min/max của D-PHY v1.1 Table 14.
+**Giả định hiện tại.** Đúng min/max của D-PHY v1.1 Table 14. Ngoại lệ đã biết: ràng buộc THS-EXIT +
+TLPX ở trên, khi chạy dưới khoảng 240 Mb/s (HAS D-PHY §4.5).
 
 ## S6 — ULPS
 
@@ -139,13 +144,17 @@ EPD, scrambling)?
 
 ## S9 — Map lane và cực tính P/N
 
-**Câu hỏi.** Trên board và package, lane logic của Tx nối tới lane vật lý nào của Rx? Có lane nào bị
-đảo P/N không?
+**Câu hỏi.**
+1. Trên board và package, lane logic của Tx nối tới lane vật lý nào của Rx? Có lane nào bị đảo P/N
+   không?
+2. Clock lane có bị đảo P/N không?
 
-**Vì sao cần.** Rx đảo được cực P/N và map lại lane bằng cấu hình, cho cả đường HS lẫn đường LP. Đảo
-P/N còn làm đổi chỗ LP-01 và LP-10, nên phải biết trước để đặt cấu hình đúng.
+**Vì sao cần.** Rx đảo được cực P/N và map lại data lane bằng cấu hình, cho cả đường HS lẫn đường LP.
+Đảo P/N còn làm đổi chỗ LP-01 và LP-10, nên phải biết trước để đặt cấu hình đúng. Bản nháp v0.6 không
+đảo và không map clock lane (HAS D-PHY §4.3). Nếu clock lane bị đảo trên board, Rx sẽ hiểu yêu cầu HS
+(LP-01) thành yêu cầu ULPS (LP-10).
 
-**Giả định hiện tại.** Nối thẳng, không đảo.
+**Giả định hiện tại.** Nối thẳng, không đảo, kể cả clock lane.
 
 ## S10 — Model mô phỏng của Tx
 
