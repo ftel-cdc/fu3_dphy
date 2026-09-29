@@ -1,6 +1,6 @@
 # ftel_dphy_rx — MIPI D-PHY Receiver High-Level Architecture Specification
 
-**DRAFT v0.6** — architecture level. Items that are not yet agreed are marked **OPEN** with the
+**DRAFT v0.7** — architecture level. Items that are not yet agreed are marked **OPEN** with the
 default assumption used by this draft; they are tracked in chapter 9 and in
 [`DPHY_RX_RESEARCH_PLAN.md`](DPHY_RX_RESEARCH_PLAN.md).
 
@@ -14,6 +14,7 @@ default assumption used by this draft; they are tracked in chapter 9 and in
 | v0.4 (draft) | 2026-09-26 | Ho Khanh Linh | Clarifications from the requirement review (`req/spec_review.md`): sync-search window and start, output gating while the byte clock is stopped, run-time deskew bypass field, LP-path polarity and lane map, FSM precedence and aborted requests, escape-watchdog scope, rate-dependent settle values; new open items K8 and ADR-004; S5 and K6 extended; `errsyncesc_x` tie-off linked to K2; C1 traced; marker 🌐 defined |
 | v0.5 (draft) | 2026-09-29 | Ho Khanh Linh | Drawn figures replace the ASCII block sketch: D-PHY lane modules and where each of their functions is implemented (§2.1, Figures 2-1 to 2-3), top level (§2.2, Figure 2-4); synchronization of `afe_cl_clk_active` made explicit (§4.1, §4.3) |
 | v0.6 (draft) | 2026-09-29 | Ho Khanh Linh | Block figures down to standard elements (Figures 4-1 to 4-13). Text made explicit where the drawing needed it: synchronizer cells and reset synchronizers (§4.1, §4.2), LP filter rule, lane-map direction and clock-lane polarity (§4.3), FSM outputs per state and LP-11 exceptions, CL_WAIT for aborted requests (§4.4, §4.5), escape decoding and trigger bit order (§4.5), sync-search and deskew-detection details, delay-line flags and EoT cut (§4.6), TINIT counters, `init_done` and watchdogs (§4.7), output gating (§4.9), status path (§4.10); status crossing added and "settle done" removed (§4.1); new run-time field `eot_skip_bytes`; ADR-006 reopened: the lane keeps waiting for EoT done (not waiting noted as the faster option), the cut below ~270 Mb/s and the order of `stopstate_x` and `rxactivehs_x` at the PPI stay open |
+| v0.7 (draft) | 2026-09-29 | Ho Khanh Linh | HAS document format (docx built by `doc/md2docx.py`): the §1 sketches become Figures 1-1 to 1-3, every table gets a numbered caption, the signal-naming note moves into §1, Appendix C lists the acronyms; no technical change |
 
 ## Conventions
 
@@ -24,8 +25,6 @@ default assumption used by this draft; they are tracked in chapter 9 and in
 | ⚠️ | Assumption or proposal of this draft, not yet agreed |
 | 🌐 | Taken from a secondary (web) source; not verified against a specification in `ref/spec/` |
 | **OPEN Kx / Sx / ADR-nnn** | Open point; see chapter 7 (decisions) and chapter 9 (open items) |
-
-Signal names ending in `_x` exist once per data lane. Unless stated otherwise, signals are active High.
 
 ## Table of Contents
 
@@ -40,6 +39,7 @@ Signal names ending in `_x` exist once per data lane. Unless stated otherwise, s
 - [9. Open Items](#9-open-items)
 - [Appendix A. Requirement Traceability](#appendix-a-requirement-traceability)
 - [Appendix B. Receiver Timing Parameters](#appendix-b-receiver-timing-parameters)
+- [Appendix C. Acronyms](#appendix-c-acronyms)
 
 ---
 
@@ -50,19 +50,13 @@ sits **after** the analog front-end (AFE: HS-RX, LP-RX, termination, deserialize
 the CSI-2 Rx controller, to which it presents the received lanes on the PHY-Protocol Interface
 (PPI). In HAS-CSI terms it is the "D-PHY macro".
 
+Signal names ending in `_x` exist once per data lane. Unless stated otherwise, signals are active High.
+
 ### 1.1 System context — physical signal path
 
-```
-        Sensor chip (transmit side)                         Receiving SoC (FX1, receive side)
- ┌──────────────────────────────────────┐          ┌─────────────────────────────────────────────────────────────┐
- │ CSI-2 Tx      ──PPI──► D-PHY Tx      │ PCB      │ AFE ──► ftel_dphy_rx ──PPI──► CSI-2 Rx ──► ISP / DDR        │
- │ protocol               (digital +    │ lanes    │ (analog)  (D-PHY Rx,           controller                   │
- │ (builds packets)       analog driver)│ ════════►│           digital, this IP)    (HAS-CSI)                    │
- │                                      │ 1 clock +│                                                             │
- │                                      │ 1/2/4    │                                                             │
- │                                      │ data     │                                                             │
- └──────────────────────────────────────┘          └─────────────────────────────────────────────────────────────┘
-```
+![Figure 1-1 — system context: physical signal path from the sensor to the ISP](figures/ftel_dphy_rx_system.svg)
+
+**Table 1-1 — Elements on the physical signal path**
 
 | Element | Location | Function | Owner |
 |---|---|---|---|
@@ -85,19 +79,7 @@ References:
 
 ### 1.2 Layer view — why "CSI-2 Tx talks to CSI-2 Rx"
 
-```
-          Transmit side                                    Receive side
-   ┌─────────────────────┐    logical peers: packets   ┌─────────────────────┐
-   │ CSI-2 protocol (Tx) │ ◄ - - - - - - - - - - - - ► │ CSI-2 protocol (Rx) │  CSI-2 Rx controller (HAS-CSI)
-   └──────────┬──────────┘   (no direct wire)          └──────────▲──────────┘
-              │ PPI                                               │ PPI
-   ┌──────────▼──────────┐                             ┌──────────┴──────────┐
-   │ D-PHY Tx (digital)  │                             │ D-PHY Rx (digital)  │  ftel_dphy_rx (this IP)
-   ├─────────────────────┤                             ├─────────────────────┤
-   │ D-PHY Tx (analog)   │ ═════════ PCB lanes ══════► │ D-PHY Rx (analog)   │  AFE
-   └─────────────────────┘                             └─────────────────────┘
-        data goes DOWN the stack        across the wire        and UP the stack
-```
+![Figure 1-2 — layer view: CSI-2 Tx and CSI-2 Rx are logical peers](figures/ftel_dphy_rx_layers.svg)
 
 - **Logical peers.** The CSI-2 transmitter and receiver are peers: both follow the packet format of
   CSI-2 v1.3 (header, ECC, CRC). This is why they are often described as "connected".
@@ -114,12 +96,9 @@ The CSI-2 Rx controller **controls** this IP, while this IP **delivers data** to
 Because the controller's registers drive the D-PHY enables and reset, a register-level view can
 make the controller look as if it were "in front of" the D-PHY. The data path runs the other way.
 
-```
-                 data ───────────────────────────────────────────►
-  pins ─► AFE ─► ftel_dphy_rx ═════════ PPI ════════ CSI-2 Rx controller ◄── software (AXI4-Lite CSR)
-                 ◄─────────────────────────────────────────── control
-                       cl_enable, dl_enable_x, forcerxmode_x, phy_core_rst
-```
+![Figure 1-3 — data direction versus control direction](figures/ftel_dphy_rx_directions.svg)
+
+**Table 1-2 — Data, control, clock and configuration paths**
 
 | Path | Direction | Signals | Reference |
 |---|---|---|---|
@@ -137,7 +116,7 @@ make the controller look as if it were "in front of" the D-PHY. The data path ru
   calibration, required above 1.5 Gb/s **[CSI]** §7.1. The v1.2 specification is not available;
   the deskew items are therefore design decisions (ADR-004).
 
-**Release plan (proposed, OPEN K1).**
+**Table 1-3 — Release plan (proposed, OPEN K1)**
 
 | Release | Line rate per lane | Deskew | Target use |
 |---|---|---|---|
@@ -197,6 +176,8 @@ v1.3 Annex B, Figure 146 ✅ uses CIL-SFEN for the data lanes.
 
 Where each function of the Universal Lane Module (D-PHY Figure 4) is implemented:
 
+**Table 2-1 — Universal Lane Module functions and where they are implemented**
+
 | ULM function | Data lane (CIL-SFEN) | Clock lane (CIL-SCNN) |
 |---|---|---|
 | HS-RX with termination, LP-RX | AFE | AFE |
@@ -222,6 +203,8 @@ Figure 2-2. Output groups in the figure, by the Source column of §5.1:
 - LP / escape outputs: the outputs from No.3, `rxclkesc_x` and the LPDT outputs tied to 0 (K2).
 - Clock-lane outputs: the outputs from No.2.
 
+**Table 2-2 — Blocks of the top level**
+
 | Block | Name | Instances | Clock domain | Release |
 |---|---|---|---|---|
 | No.1 | AFE Adapter | per lane + clock lane | `core_clk` (LP path), `rxbyteclkhs` (HS path) | R1 |
@@ -239,6 +222,8 @@ Figure 2-2. Output groups in the figure, by the Source column of §5.1:
 
 Synthesis-time parameters. Values that depend on an open item show the default used by this draft.
 
+**Table 3-1 — Synthesis parameters**
+
 | # | Parameter | Value / formula | Type | Description |
 |---|---|---|---|---|
 | 1 | `PARA_NUM_LANES` | 4 | Configurable | Data lane slices instantiated: 1, 2 or 4 **[CSI]** C2. Lanes are enabled at run time by `dl_enable_x` |
@@ -253,6 +238,8 @@ Synthesis-time parameters. Values that depend on an open item show the default u
 | 10 | `PARA_DLY_TAP_WIDTH` | To be determined | Configurable | Width of the AFE delay-tap control (R2, ADR-004) |
 
 Run-time programmable timing values (reset defaults; the configuration path is OPEN K3):
+
+**Table 3-2 — Run-time timing fields**
 
 | Field | Default | Basis |
 |---|---|---|
@@ -269,6 +256,8 @@ Run-time programmable timing values (reset defaults; the configuration path is O
 
 ### 4.1 Clock
 
+**Table 4-1 — Clocks**
+
 | Clock | Source | Frequency | Used by | Notes |
 |---|---|---|---|---|
 | `core_clk` | System, free-running **[CSI]** | 200 MHz | Blocks No. 1 (LP path), 2, 3, 6 | All LP-state, escape and timer logic. Escape reception is by oversampling (ADR-002) |
@@ -276,6 +265,8 @@ Run-time programmable timing values (reset defaults; the configuration path is O
 | configuration clock | System | To be determined | Block No. 8 | Depends on ADR-005 (OPEN K3) |
 
 Clock-domain crossings:
+
+**Table 4-2 — Clock-domain crossings**
 
 | From → To | Signals | Method |
 |---|---|---|
@@ -300,6 +291,8 @@ The crossings use three cells (Figure 4-1):
 ![Figure 4-1 — synchronizer cells: level, toggle and reset](figures/ftel_dphy_rx_sync_cells.svg)
 
 ### 4.2 Reset
+
+**Table 4-3 — Reset controls**
 
 | Control | Type | Scope | Behaviour |
 |---|---|---|---|
@@ -350,7 +343,7 @@ termination switching moves into the AFE (ADR-001).
 **Overview.** Implements CIL-SCNN: clock-lane HS entry/exit (D-PHY §6.7, Table 11–12 ✅) and
 clock-lane ULPS (D-PHY §6.8, Table 13 ✅).
 
-**FSM.**
+**Table 4-4 — Clock lane FSM**
 
 | State | Line state | Exit condition → next state | Outputs |
 |---|---|---|---|
@@ -388,7 +381,7 @@ decided with the AFE boundary (ADR-001).
 **Overview.** Implements CIL-SFEN: the Control-mode FSM of a unidirectional slave data lane, HS
 entry (D-PHY §6.4.2, Table 3 ✅), EoT hand-over (§6.4.3 ✅) and escape mode (§6.6, Table 9 ✅).
 
-**FSM.**
+**Table 4-5 — Data lane FSM**
 
 | State | Line state | Exit condition → next state | Outputs / actions |
 |---|---|---|---|
@@ -617,6 +610,8 @@ Figure 4-13 shows the block, with the bus interface drawn at its boundary.
 
 Direction is seen from this IP. Signal list and semantics follow HAS-CSI Table 4-3 **[CSI]**.
 
+**Table 5-1 — PPI signals**
+
 | Signal | Dir | Width | Domain | Source | Inactive value | R1 |
 |---|---|---|---|---|---|---|
 | `cl_enable` | In | 1 | level | — | — | Yes |
@@ -654,6 +649,8 @@ Direction is seen from this IP. Signal list and semantics follow HAS-CSI Table 4
 Assumes the AFE delivers deserialized, **unaligned** 8-bit words per lane on a common byte clock
 (ADR-001 option B).
 
+**Table 5-2 — AFE interface signals**
+
 | Signal | Dir | Width | Domain | Description |
 |---|---|---|---|---|
 | `afe_lp_dp_x`, `afe_lp_dn_x` | In | 1 each | async | LP-RX outputs of data lane x |
@@ -685,6 +682,8 @@ Scores 1–5; weight in brackets.
 
 ### ADR-001 — AFE boundary (proposed: B, OPEN with the AFE team)
 
+**Table 7-1 — ADR-001: AFE boundary options**
+
 | Criterion (weight) | A: AFE gives serial HS bits + DDR clock | **B: AFE gives unaligned 1:8 words + byte clock** | C: hard PHY up to PPI (vendor macro) |
 |---|---|---|---|
 | Timing feasibility at 1.5–1.8 Gb/s (5) | 1 | 5 | 5 |
@@ -698,6 +697,8 @@ Still to agree with the AFE team: clock-activity detection (TCLK-MISS), terminat
 delay-tap interface.
 
 ### ADR-002 — LP and escape reception (decided in this draft: A)
+
+**Table 7-2 — ADR-002: LP and escape reception options**
 
 | Criterion (weight) | **A: oversample LP lines in `core_clk`** | B: clock escape logic with XOR(Dp, Dn) |
 |---|---|---|
@@ -720,6 +721,8 @@ Deferred: depends on the AFE delay line (ADR-001) and on the Tx deskew behaviour
 fixed now: the R1 datapath already detects deskew bursts, so R2 only adds Block No. 5.
 
 ### ADR-005 — Configuration path (proposed: B, OPEN K3)
+
+**Table 7-3 — ADR-005: configuration path options**
 
 | Criterion (weight) | A: fields added to the CSI-2 controller CSR | **B: own APB subordinate** | C: synthesis parameters only |
 |---|---|---|---|
@@ -772,6 +775,8 @@ Still open: the precision of the cut below ~270 Mb/s and the order of `stopstate
 
 ## 9. Open Items
 
+**Table 9-1 — Open items**
+
 | ID | Item | Default in this draft | Owner / with |
 |---|---|---|---|
 | K1 | Target line rate (1500 or 1792 Mb/s) and the release of 4K staggered HDR | R1 ≤ 1500 Mb/s | CSI team |
@@ -793,6 +798,8 @@ Still open: the precision of the cut below ~270 Mb/s and the order of `stopstate
 ## Appendix A. Requirement Traceability
 
 IDs refer to `DPHY_RX_RESEARCH_PLAN.md` §2.1 (Q) and §2.4 (C).
+
+**Table A-1 — Requirement traceability**
 
 | Requirement | Covered in |
 |---|---|
@@ -820,6 +827,8 @@ IDs refer to `DPHY_RX_RESEARCH_PLAN.md` §2.1 (Q) and §2.4 (C).
 From D-PHY v1.1 Table 14 ✅. `core_clk` period = 5 ns; the LP detection latency is
 (`PARA_LP_SYNC_STAGES` + `PARA_LP_FILTER_CYC`) × 5 ns ≈ 20 ns with the defaults.
 
+**Table B-1 — Receiver timing parameters**
+
 | Parameter | Specification | Implementation |
 |---|---|---|
 | THS-SETTLE | 85 ns + 6·UI … 145 ns + 10·UI, from the start of THS-PREPARE | `hs_settle_cyc` = round((window centre − latency) / 5 ns), window centre = 115 ns + 8·UI; at 1500 Mb/s: (120 − 20) / 5 = 20. Other rates: 80 Mb/s 39, 750 Mb/s 21, 1792 Mb/s 20 |
@@ -831,3 +840,53 @@ From D-PHY v1.1 Table 14 ✅. `core_clk` period = 5 ns; the LP detection latency
 | TINIT (slave) | ≥ 100 µs | `tinit_cyc` = 20 000 |
 | TLPX | ≥ 50 ns | Basis of the LP oversampling (ADR-002) |
 | TWAKEUP | ≥ 1 ms | Tx-side; the Rx leaves ULPS on Mark-1 then Stop, no timer needed |
+
+## Appendix C. Acronyms
+
+| Acronym | Description |
+|---|---|
+| ADR | Architecture decision record (chapter 7) |
+| AFE | Analog front-end: HS-RX, LP-RX, termination and deserializer, outside this IP |
+| APB | AMBA Advanced Peripheral Bus |
+| BFM | Bus functional model (verification stimulus) |
+| CIL | Lane Control and Interface Logic of a D-PHY lane module |
+| CIL-SCNN | Clock lane module of the slave side (D-PHY v1.1 §5.6.3) |
+| CIL-SFEN | Data lane module of the slave side: forward-only high-speed, escape mode with events only, no reverse escape |
+| CRC | Cyclic redundancy check of a CSI-2 packet |
+| CSI-2 | MIPI Camera Serial Interface 2 |
+| [CSI] | Requirement taken from HAS-CSI |
+| CSR | Control and status register |
+| D-PHY | MIPI D-PHY physical layer |
+| DDR | Double data rate (the HS clock); DDR memory in Figure 1-1 |
+| DFT | Design for test |
+| ECC | Error-correcting code of a CSI-2 packet header |
+| EoT | End of transmission (of an HS burst) |
+| FSM | Finite state machine |
+| FX1 | The receiving SoC that integrates this IP |
+| HAS | High-level architecture specification |
+| HAS-CSI | HAS of the CSI-2 Rx controller, FTEL_IP_MIPI_CSI-2_CONTROLLER_HAS_v1.2 |
+| HDR | High dynamic range |
+| HS | High-speed mode of a lane |
+| HS-RX, HS-TX | High-speed receiver, transmitter |
+| IP | Intellectual property block |
+| ISP | Image signal processor |
+| LP | Low-power mode of a lane |
+| LP-RX, LP-TX, LP-CD | Low-power receiver, transmitter, contention detector |
+| LP-xy | Low-power line state, Dp = x and Dn = y (for example LP-11 = Stop) |
+| LPDT | Low-power data transmission |
+| MIPI | MIPI Alliance, owner of the CSI-2 and D-PHY specifications |
+| OPEN | Open point, tracked in chapter 9: Kx with the CSI team, Sx with the Tx side, ADR-nnn a design decision |
+| PCB | Printed circuit board |
+| PHY | Physical layer |
+| PPI | PHY-Protocol Interface between the D-PHY and the CSI-2 Rx controller |
+| R1, R2 | Releases of this IP (§1.4) |
+| RTL | Register-transfer level |
+| SoC | System on chip |
+| SoT | Start of transmission (of an HS burst) |
+| STA | Static timing analysis |
+| TBC | To be confirmed: an assumption or proposal of this draft, not yet agreed (marked with a warning sign in the Markdown source) |
+| THS-x, TCLK-x, TLPX, TINIT, TEOT, TWAKEUP | D-PHY timing parameters (Appendix B, D-PHY v1.1 Table 14) |
+| UI | Unit interval: one bit time on a lane |
+| ULM | Universal Lane Module of D-PHY |
+| ULPS | Ultra-low power state |
+| VOD | Differential voltage of the HS signal |

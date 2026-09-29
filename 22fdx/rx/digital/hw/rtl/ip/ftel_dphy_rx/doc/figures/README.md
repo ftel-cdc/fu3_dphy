@@ -36,6 +36,9 @@ four additions for this IP. `check_figures.py` enforces the rules marked (checke
 
 | Figure | File | Shows | Details |
 |---|---|---|---|
+| 1-1 | `ftel_dphy_rx_system` | System context: physical signal path from the sensor to the ISP | CSI-2 v1.3 Annex B Figure 146 |
+| 1-2 | `ftel_dphy_rx_layers` | Layer view: CSI-2 Tx and Rx are logical peers, the data crosses the D-PHY | Figure 1-1 |
+| 1-3 | `ftel_dphy_rx_directions` | Data direction versus control direction | Figure 1-1 |
 | 2-1 | `ftel_dphy_rx_ulm_data` | Data lane module: Universal Lane Module reduced to CIL-SFEN | D-PHY v1.1 Figure 4 |
 | 2-2 | `ftel_dphy_rx_ulm_clock` | Clock lane module: Universal Lane Module reduced to CIL-SCNN | D-PHY v1.1 Figure 4 |
 | 2-3 | `ftel_dphy_rx_lanes` | Lane configuration: 1 clock lane + N data lanes | D-PHY v1.1 Figure 8 |

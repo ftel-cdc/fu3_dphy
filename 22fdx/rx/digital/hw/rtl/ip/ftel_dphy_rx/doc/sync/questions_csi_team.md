@@ -5,7 +5,7 @@
 | Gửi | Team CSI-2 Rx controller (HAS-CSI = `FTEL_IP_MIPI_CSI-2_CONTROLLER_HAS_v1.2.docx`) |
 | Từ | Nhóm thiết kế D-PHY Rx (`ftel_dphy_rx`) |
 | Ngày | 2026-09-26, cập nhật 2026-09-29 (thêm ADR-006; K3 thêm `eot_skip_bytes`) |
-| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.6 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`), HAS-CSI v1.2 |
+| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.7 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.7.docx`), HAS-CSI v1.2 |
 
 ## Bối cảnh
 

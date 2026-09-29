@@ -5,7 +5,7 @@
 | Gửi | Đội phát triển phía Tx (CSI-2 transmitter / D-PHY Tx của sensor) |
 | Từ | Nhóm thiết kế D-PHY Rx (`ftel_dphy_rx`) |
 | Ngày | 2026-09-26, cập nhật 2026-09-29 (S9: clock lane; S5: THS-EXIT + TLPX ở tốc độ thấp) |
-| Căn cứ | MIPI CSI-2 v1.3, MIPI D-PHY v1.1 (Table 14); HAS của `ftel_dphy_rx` bản nháp v0.6 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`) |
+| Căn cứ | MIPI CSI-2 v1.3, MIPI D-PHY v1.1 (Table 14); HAS của `ftel_dphy_rx` bản nháp v0.7 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.7.docx`) |
 
 ## Bối cảnh
 

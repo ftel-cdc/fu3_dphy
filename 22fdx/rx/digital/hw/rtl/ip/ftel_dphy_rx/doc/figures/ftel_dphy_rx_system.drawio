@@ -1,0 +1,104 @@
+<mxfile host="app.diagrams.net">
+  <diagram name="ftel_dphy_rx_system" id="FtelDphyRxSystem0">
+    <mxGraphModel dx="1600" dy="1000" grid="1" gridSize="10" guides="1" tooltips="1" connect="1" arrows="1" fold="1" page="0" pageScale="1" math="0" shadow="0">
+      <root>
+        <mxCell id="0" />
+        <mxCell id="1" parent="0" />
+        <mxCell id="frame" value="system context  --  physical signal path from the sensor to the ISP" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;fontStyle=1;verticalAlign=top;strokeWidth=2;fillColor=none;arcSize=4;spacingTop=6;" vertex="1" parent="1">
+          <mxGeometry x="0" y="0" width="1320" height="360" as="geometry" />
+        </mxCell>
+        <mxCell id="g_tx" value="&lt;b&gt;Sensor chip&lt;/b&gt; (transmit side)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=none;verticalAlign=top;align=center;spacingLeft=10;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="20" y="60" width="370" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="tx_proto" value="&lt;b&gt;CSI-2 Tx&lt;/b&gt;&lt;br&gt;protocol&lt;br&gt;(builds&lt;br&gt;packets)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="40" y="130" width="140" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="tx_phy" value="&lt;b&gt;D-PHY Tx&lt;/b&gt;&lt;br&gt;digital +&lt;br&gt;analog&lt;br&gt;driver" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="230" y="130" width="140" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="e_tx_ppi" value="PPI" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="tx_proto" target="tx_phy">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-16" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_pcb" value="PCB" style="text;html=1;whiteSpace=wrap;fontSize=18;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;fontStyle=1;" vertex="1" parent="1">
+          <mxGeometry x="400" y="84" width="130" height="30" as="geometry" />
+        </mxCell>
+        <mxCell id="e_lanes" value="lanes" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=4;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="tx_phy" target="afe">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-18" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_lanes" value="1 clock +&lt;br&gt;1/2/4 data" style="text;html=1;whiteSpace=wrap;fontSize=18;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="395" y="222" width="140" height="56" as="geometry" />
+        </mxCell>
+        <mxCell id="g_rx" value="&lt;b&gt;Receiving SoC&lt;/b&gt; (FX1, receive side)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=none;verticalAlign=top;align=center;spacingLeft=10;spacingTop=2;" vertex="1" parent="1">
+          <mxGeometry x="540" y="60" width="760" height="270" as="geometry" />
+        </mxCell>
+        <mxCell id="afe" value="&lt;b&gt;AFE&lt;/b&gt;&lt;br&gt;(analog)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#F5F5F5;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="560" y="130" width="100" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="ip" value="&lt;b&gt;ftel_dphy_rx&lt;/b&gt;&lt;br&gt;D-PHY Rx,&lt;br&gt;digital&lt;br&gt;(this IP)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=4;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="770" y="130" width="160" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="csi_rx" value="&lt;b&gt;CSI-2 Rx&lt;/b&gt;&lt;br&gt;controller&lt;br&gt;(HAS-CSI)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="130" width="140" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="isp" value="ISP /&lt;br&gt;DDR" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="1210" y="130" width="70" height="150" as="geometry" />
+        </mxCell>
+        <mxCell id="e_afe_ip" value="HS words,&lt;br&gt;LP states" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="afe" target="ip">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-30" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_ip_csi" value="PPI" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="ip" target="csi_rx">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-16" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="e_csi_isp" value="pixels" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;exitX=1;exitY=0.5;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="csi_rx" target="isp">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="-16" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=none;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="0" y="380" width="1320" height="80" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_title" value="&lt;b&gt;Legend&lt;/b&gt;" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="10" y="384" width="100" height="32" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_f_afe" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#F5F5F5;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="10" y="426" width="40" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_ft_afe" value="analog" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="58" y="420" width="275" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_f_white" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="335" y="426" width="40" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_ft_white" value="digital" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="383" y="420" width="275" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_k_data" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=4;edgeStyle=none;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="660" y="438" as="sourcePoint" />
+            <mxPoint x="700" y="438" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg_kt_data" value="PCB lanes (differential pairs)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="708" y="420" width="275" height="36" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_k_ctrl" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;edgeStyle=none;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="985" y="438" as="sourcePoint" />
+            <mxPoint x="1025" y="438" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="leg_kt_ctrl" value="on-chip interface" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="1033" y="420" width="275" height="36" as="geometry" />
+        </mxCell>
+      </root>
+    </mxGraphModel>
+  </diagram>
+</mxfile>

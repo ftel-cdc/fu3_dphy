@@ -435,3 +435,20 @@ Nó được ghi là OPEN ADR-006 và hỏi team CSI, không tự quyết. Ràng
 
 Hạn chế đã biết của `rebase_req.py`: REQ được giữ lại vẫn mang `source_section` cũ khi heading đổi
 (REQ của đoạn đầu ADR-006 còn heading của v0.5). Validator không chấm trường này.
+
+### 7.6 Đồng bộ P1 với spec v0.7 (định dạng HAS, 2026-09-29)
+
+Spec v0.7 chỉ đổi cách trình bày, để build được bản Word theo định dạng HAS-CSI (`doc/md2docx.py`):
+- ba sketch ASCII của §1 thành Figure 1-1…1-3;
+- mọi bảng có caption đánh số;
+- câu quy ước tên tín hiệu chuyển vào §1;
+- thêm Appendix C Acronyms.
+
+Không thay đổi kỹ thuật.
+
+| Bước | Kết quả |
+|---|---|
+| `spec_inventory.py` | EXPECTED v0.7 đăng ký **trước** khi sửa spec, bằng số của v0.6 (không đổi số dòng của bảng nào). Selftest PASS 15/15. Số dòng phụ thuộc open item tăng 120 → 127: các caption và dòng trống mới nằm trong vùng OPEN (§5.2, ADR-001, ADR-005) và dòng "OPEN" của bảng Acronyms; không dòng nào là nguồn của REQ |
+| `rebase_req.py` | Giữ 266/268 REQ; 2 REQ đổi chỗ (câu quy ước tên tín hiệu, caption "Release plan") được chuyển sang dòng mới trong chunk `23_v07_delta.json`, nội dung giữ nguyên |
+| `validate_req.py` | 268 REQ · 1 finding · trích dẫn 269/269 · độ phủ 100% ở 15 nhóm · 0 lỗi · 0 cảnh báo |
+| `flow_check.py` | review: 0 xung đột; `needs_human_decision` giữ 56 |

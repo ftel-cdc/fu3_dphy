@@ -4,12 +4,12 @@
   "P1": {
    "status": "pass",
    "mode": "review",
-   "at": "2026-09-29T15:10:38+07:00",
+   "at": "2026-09-29T17:52:31+07:00",
    "inputs": {
-    "spec": "6db9bc9bbdebb72bf9c177c6000939fad1f538691ea1243c7b950b59f08ae236"
+    "spec": "3d04e6157785208773d2fdd7d13638a03878f468bdf3cbbd907c97fb572e80c5"
    },
    "outputs": {
-    "structured_spec": "5063fe744735836be4b2260b86be16f0abde02ba2f102378e34468b4cce8f47a"
+    "structured_spec": "8dedbb789ce6a0743039355569f279fa45f9f087717bf87e6c20e470dad15fd5"
    },
    "conflicts": 0,
    "waived": 0
