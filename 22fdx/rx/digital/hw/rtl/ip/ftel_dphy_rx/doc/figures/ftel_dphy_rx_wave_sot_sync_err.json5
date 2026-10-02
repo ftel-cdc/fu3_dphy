@@ -1,0 +1,19 @@
+// Figure 5-2 - HS receive with a SoT sync error at the PPI (spec.md 5.1; 4.6 sync search).
+// No leader match within PARA_SYNC_SEARCH_BYTES byte clocks: one errsotsynchs_x pulse, no
+// rxsynchs_x and no rxvalidhs_x for the rest of the burst; rxactivehs_x stays High until the EoT cut.
+{ signal: [
+  { name: 'rxbyteclkhs',    wave: 'p.|....|.....|....' },
+  { name: 'rxdatahs_x',     wave: 'x.|....|.....|....' },
+  { name: 'rxactivehs_x',   wave: '0.|1...|.....|..0.' },
+  { name: 'rxvalidhs_x',    wave: '0.|....|.....|....' },
+  { name: 'rxsynchs_x',     wave: '0.|....|.....|....' },
+  { name: 'errsoths_x',     wave: '0.|....|.....|....' },
+  { name: 'errsotsynchs_x', wave: '0.|....|...10|....' },
+  {                                                   node: '....E......F......' },
+  { name: 'stopstate_x',    wave: '10|....|.....|x1..' },
+],
+  edge: ['E<->F PARA_SYNC_SEARCH_BYTES'],
+  head: { text: 'PPI, one data lane: SoT sync error' },
+  foot: { text: 'the search starts at the first non-zero word after the HS entry signal (4.6)' },
+  config: { hscale: 1, arcFontSize: 12 }
+}

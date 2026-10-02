@@ -1,0 +1,17 @@
+// Figure 5-6 - LP error indications at the PPI (spec.md 5.1; 4.5 Table 4-5 and Structure).
+// Left: false control, an escape request (LP-10) followed by Stop: DL_ERR raises errcontrol_x, held
+// until the next line-state change. Right: entry command LPDT 11100001 while PARA_LPDT_EN = 0 (K2):
+// erresc_x from the eighth bit to the next line-state change; the lane waits in DL_ESC_WAIT for Stop.
+{ signal: [
+  { name: 'afe_lp_dp_x',  wave: '1...0|1.0..10|10.|1..' },
+  { name: 'afe_lp_dn_x',  wave: '101..|.0.10..|..1|01.' },
+  {                                                      node: '.R..S..T...U....V..W.' },
+  { name: 'stopstate_x',  wave: '101.0|10.....|...|.1.' },
+  { name: 'errcontrol_x', wave: '0.1.0|.......|...|...' },
+  { name: 'erresc_x',     wave: '0....|.......|.10|...' },
+],
+  edge: ['R<->S false control', 'T<->U escape entry', 'U<->V LPDT command (K2)', 'V<->W wait for Stop'],
+  head: { text: 'PPI, one data lane: false control and unsupported escape command' },
+  foot: { text: 'errcontrol_x and erresc_x stay High until the next line-state change (D-PHY Annex A)' },
+  config: { hscale: 1, arcFontSize: 12 }
+}

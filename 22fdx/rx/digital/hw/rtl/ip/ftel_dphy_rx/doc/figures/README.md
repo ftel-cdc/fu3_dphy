@@ -1,8 +1,9 @@
 # ftel_dphy_rx figures
 
-Figures of the HAS (`../spec.md`). Each figure has a drawio source (`.drawio`) and an SVG render
-(`.svg`). Both are committed, and `spec.md` embeds the SVG. PNG renders are local build products
-(`.gitignore`), used for review and later for the docx build.
+Figures of the HAS (`../spec.md`). Each block diagram has a drawio source (`.drawio`), each timing
+diagram a WaveJSON source (`.json5`, WaveDrom), and both have an SVG render (`.svg`). Sources and
+SVGs are committed, and `spec.md` embeds the SVG. PNG renders are local build products
+(`.gitignore`), used for review and for the docx build.
 
 ## Rules
 
@@ -32,6 +33,19 @@ four additions for this IP. `check_figures.py` enforces the rules marked (checke
     comparators are white.
 14. **No emoji in figures.** Open items are written as text, for example "(OPEN K3)" or "(R2)".
 
+Timing diagrams (`ftel_dphy_rx_wave_*.json5`) follow rules 2, 6, 9, 12 and 14 and these:
+
+15. **Not to scale.** One column is one byte clock for the HS signals of the PPI, and one line state
+    or event elsewhere; a double slash is a time break. Relations that matter (a pulse in the cycle
+    of B1, an order of two edges) are drawn exactly and stated in `spec.md`.
+16. **Hatched** (WaveDrom `x`) means undefined, or a pulse that only some bursts have; each figure's
+    footer says which.
+17. **Annotations.** Arrows sit on their own rows and use uppercase node letters, which WaveDrom does
+    not print; an arrow is longer than its label, so the label background does not hide it. Every
+    `wave` and `node` string of a figure has the same number of columns (checked).
+18. **Size.** `hscale` 1, or 2 where a state name needs it. A figure wider than 950 px goes on a
+    landscape page in the docx, so its 11 pt WaveDrom text prints at about 7 pt or more.
+
 ## Figure tree
 
 | Figure | File | Shows | Details |
@@ -56,6 +70,15 @@ four additions for this IP. `check_figures.py` enforces the rules marked (checke
 | 4-11 | `ftel_dphy_rx_deskew` | Block No.5: boundary only (content OPEN ADR-004) | Figure 2-4 |
 | 4-12 | `ftel_dphy_rx_ppi_out` | Block No.7: output gating, `rxclkesc_x`, tie-offs | Figure 2-4 |
 | 4-13 | `ftel_dphy_rx_cfg_status` | Block No.8: configuration and status (bus OPEN K3) | Figure 2-4 |
+| 5-1 | `ftel_dphy_rx_wave_hs_rx` | PPI: HS receive burst (`stopstate_x` order OPEN ADR-006) | HAS-CSI Figure 4-1, D-PHY Figure 57 |
+| 5-2 | `ftel_dphy_rx_wave_sot_sync_err` | PPI: HS receive with a SoT sync error | HAS-CSI Figure 4-2 |
+| 5-3 | `ftel_dphy_rx_wave_deskew` | PPI: deskew burst | HAS-CSI Figure 4-3 |
+| 5-4 | `ftel_dphy_rx_wave_trigger` | PPI: escape mode, Reset-Trigger | D-PHY Figure 18 |
+| 5-5 | `ftel_dphy_rx_wave_ulps` | PPI: data-lane ULPS entry and exit | Table 4-5 |
+| 5-6 | `ftel_dphy_rx_wave_lp_err` | PPI: false control and unsupported escape command | Table 4-5 |
+| 5-7 | `ftel_dphy_rx_wave_clock_lane` | Clock lane: HS clock start and stop, clock-lane ULPS | D-PHY Figure 21, Figure 4-4 |
+| 5-8 | `ftel_dphy_rx_wave_init` | Initialization: reset, enables, TINIT, `init_done` | Figure 4-10 |
+| 5-9 | `ftel_dphy_rx_wave_afe_sot_eot` | AFE interface: data-lane SoT and EoT (sync-search start OPEN ADR-007) | D-PHY Figure 14, Figure 4-6 |
 
 ## Rendering
 
@@ -76,4 +99,8 @@ python3 check_figures.py                         # rules above; --selftest-negat
   run `render_drawio.py` on it, then `check_figures.py`.
 - `selftest/build_glyph_sheet.py` rebuilds the glyph sheet from the FTEL library
   (`~/Documents/FX1_ips/Common_Info/FTEL_DRAWIO_LIB_V1.drawio`, or `$FTEL_DRAWIO_LIB`).
-- `render_wave.py` renders WaveJSON timing diagrams with `wavedrom-cli@3.2.0`; not used yet (batch 3).
+- `render_wave.py ftel_dphy_rx_wave_*.json5` renders the timing diagrams with `wavedrom-cli@3.2.0`,
+  offline: it takes a wavedrom-cli of that version from `$FTEL_DPHY_RX_WAVEDROM_CLI` or from the npx
+  cache, and falls back to `npx` (network, first install only). The SVG stamp records the sha256 of
+  the `.json5` and the wavedrom-cli and wavedrom versions.
+- `check_figures.py` checks the `.json5` files as well (rules marked checked, and F-COLS for rule 17).

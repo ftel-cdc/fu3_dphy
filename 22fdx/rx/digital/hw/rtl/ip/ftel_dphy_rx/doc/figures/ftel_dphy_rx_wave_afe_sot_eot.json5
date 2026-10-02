@@ -1,0 +1,26 @@
+// Figure 5-9 - data lane at the AFE interface: SoT and EoT (spec.md 5.2; 4.3, 4.5, 4.6).
+// afe_term_en_x from DL_HS_PRPR (TD-TERM-EN), afe_hs_en_x and the HS entry signal from DL_HS_TERM,
+// DL_HS_RX after hs_settle_cyc. The HS entry signal reaches Block No. 4 2-3 byte clocks later
+// (4.1); at low rates this can be after the leader has started (OPEN ADR-007). LP-11 ends the burst:
+// DL_HS_EOT drops the AFE enables and requests the EoT; EoT done returns the lane to DL_STOP.
+{ signal: [
+  { name: 'lane (Dp/Dn)',     wave: '===.=.==|==..=..', data: ['LP-11', 'LP-01', 'LP-00', 'HS-0', 'SYNC', 'B1 ...', 'Bn', 'TRAIL', 'LP-11'] },
+  {                                                    node: '.AB.C.D...E..F.G' },
+  {                                                    node: '..H..I..........' },
+  { name: 'afe_hs_word_x',    wave: 'x...=.==|==..x..', data: ['0x00', 'leader', 'data', 'data', 'trail'] },
+  { name: 'DL FSM (No. 3)',   wave: '====.=..|....=.=', data: ['STOP', 'HS_RQST', 'HS_PRPR', 'HS_TERM', 'HS_RX', 'HS_EOT', 'STOP'] },
+  { name: 'afe_term_en_x',    wave: '0.1.....|....0..' },
+  { name: 'afe_hs_en_x',      wave: '0..1....|....0..' },
+  { name: 'HS entry',         wave: '0..1....|....0..' },
+  { name: 'HS entry, No. 4',  wave: '0..x...1|....x0.' },
+  {                                                    node: '...J...K........' },
+  { name: 'EoT request',      wave: '0.......|....1.0' },
+  { name: 'EoT done',         wave: '0.......|.....10' },
+  { name: 'stopstate_x',      wave: '10......|......1' },
+],
+  edge: ['A<->B TLPX', 'B<->C THS-PREPARE', 'C<->D THS-ZERO', 'E<->F THS-TRAIL', 'F<->G THS-EXIT',
+         'H<->I THS-SETTLE (hs_settle_cyc)', 'J<->K 2-3 byte clocks'],
+  head: { text: 'Data lane at the AFE interface: SoT and EoT' },
+  foot: { text: 'the PPI outputs of the burst follow PARA_EOT_DELAY_BYTES byte clocks later (Figure 5-1); AFE latency not drawn' },
+  config: { hscale: 2, arcFontSize: 12 }
+}

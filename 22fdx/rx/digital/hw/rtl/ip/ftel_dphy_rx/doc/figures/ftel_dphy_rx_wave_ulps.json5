@@ -1,0 +1,19 @@
+// Figure 5-5 - data-lane ULPS entry and exit at the PPI (spec.md 5.1; 4.5 Table 4-5).
+// Entry command 00011110 (first bit first). rxulpsesc_x rises and ulpsactivenot_x falls when the
+// eighth bit is decoded (DL_ULPS); Mark-1 (LP-10) raises ulpsactivenot_x (DL_ULPS_EXIT, [CSI]);
+// Stop (LP-11) after TWAKEUP clears rxulpsesc_x and raises stopstate_x.
+{ signal: [
+  { name: 'afe_lp_dp_x',     wave: '1.0........10101010...|1|...' },
+  { name: 'afe_lp_dn_x',     wave: '10.10101010........10.|.|.1.' },
+  { name: 'command bit',     wave: 'z....=.=.=.=.=.=.=.=.z|.|...', data: ['0', '0', '0', '1', '1', '1', '1', '0'] },
+  {                                                             node: '.M...N..............O..P..Q.' },
+  { name: 'rxclkesc_x',      wave: '010101010101010101010.|1|.0.' },
+  { name: 'stopstate_x',     wave: '10....................|.|.1.' },
+  { name: 'rxulpsesc_x',     wave: '0...................1.|.|.0.' },
+  { name: 'ulpsactivenot_x', wave: '1...................0.|1|...' },
+],
+  edge: ['M<->N escape entry', 'N<->O entry command: ULPS', 'O<->P ULPS', 'P<->Q Mark-1'],
+  head: { text: 'PPI, one data lane: ULPS entry and exit' },
+  foot: { text: 'Mark-1 lasts TWAKEUP >= 1 ms, timed by the transmitter; the receiver needs no timer (Appendix B)' },
+  config: { hscale: 1, arcFontSize: 12 }
+}

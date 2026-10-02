@@ -1,0 +1,20 @@
+// Figure 5-4 - escape mode, Reset-Trigger, at the PPI (spec.md 5.1; 4.5 Table 4-5, escape decoder).
+// D-PHY v1.1 Figure 18: LP-11 > 10 > 00 > 01 > 00, entry command 01100010 (first bit first) in
+// Spaced-One-Hot (Mark-0 = LP-01, Mark-1 = LP-10, each followed by LP-00), then Mark-1 and Stop.
+// rxtriggeresc_x[0] rises when the eighth bit is decoded and falls with the return to Stop.
+{ signal: [
+  { name: 'afe_lp_dp_x',         wave: '1.0....1010......10..1..' },
+  { name: 'afe_lp_dn_x',         wave: '10.1010....101010..10.1.' },
+  { name: 'command bit',         wave: 'z....=.=.=.=.=.=.=.=.z..', data: ['0', '1', '1', '0', '0', '0', '1', '0'] },
+  {                                                                 node: '.I...J...............KL.' },
+  { name: 'rxclkesc_x',          wave: '01010101010101010101010.' },
+  { name: 'stopstate_x',         wave: '10....................1.' },
+  { name: 'rxtriggeresc_x[0]',   wave: '0...................1.0.' },
+  { name: 'rxtriggeresc_x[3:1]', wave: '0.......................' },
+  { name: 'erresc_x',            wave: '0.......................' },
+],
+  edge: ['I<->J escape entry', 'J<->K entry command: Reset-Trigger', 'K<->L Mark-1'],
+  head: { text: 'PPI, one data lane: escape mode, Reset-Trigger' },
+  foot: { text: 'each line state lasts at least TLPX; the outputs follow the line after about 20 ns (Appendix B)' },
+  config: { hscale: 1, arcFontSize: 12 }
+}

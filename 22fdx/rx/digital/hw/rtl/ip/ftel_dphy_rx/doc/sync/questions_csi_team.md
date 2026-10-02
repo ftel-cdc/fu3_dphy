@@ -4,14 +4,15 @@
 |---|---|
 | Gửi | Team CSI-2 Rx controller (HAS-CSI = `FTEL_IP_MIPI_CSI-2_CONTROLLER_HAS_v1.2.docx`) |
 | Từ | Nhóm thiết kế D-PHY Rx (`ftel_dphy_rx`) |
-| Ngày | 2026-09-26, cập nhật 2026-09-29 (thêm ADR-006; K3 thêm `eot_skip_bytes`) |
-| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.7 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.7.docx`), HAS-CSI v1.2 |
+| Ngày | 2026-09-26, cập nhật 2026-09-29 (thêm ADR-006; K3 thêm `eot_skip_bytes`) và 2026-09-30 (ADR-006: điều đã biết từ HAS-CSI; phụ lục C6; waveform PPI) |
+| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.8 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.8.docx`), HAS-CSI v1.2 |
 
 ## Bối cảnh
 
 `ftel_dphy_rx` là khối "D-PHY macro" trong HAS-CSI. Khối này nhận các lane từ AFE (analog) và xuất
 dữ liệu cho CSI-2 Rx controller qua PPI theo HAS-CSI Table 4-3. Chúng tôi dùng HAS-CSI làm hợp đồng
-PPI. Phụ lục ở cuối file ghi lại cách chúng tôi hiểu HAS-CSI (C1–C16); nhờ team kiểm giúp.
+PPI. Phụ lục ở cuối file ghi lại cách chúng tôi hiểu HAS-CSI (C1–C16); nhờ team kiểm giúp. Waveform
+PPI theo cách hiểu đó nằm ở HAS D-PHY §5.1 (Figure 5-1…5-8); nhờ team xem cùng phụ lục.
 
 Mỗi câu hỏi kèm **giả định đang dùng**. Thiết kế sẽ đi theo giả định đó cho tới khi có câu trả lời.
 Nếu team đồng ý với giả định, chỉ cần trả lời "Đồng ý".
@@ -236,14 +237,19 @@ Timeout đặt 2^18 chu kỳ `core_clk`, khoảng 1.31 ms.
 - Câu 2 quyết định hướng xử lý ở tốc độ thấp: nghiêng về cắt muộn (thừa byte), hay phải đo thêm
   thời điểm LP-11 ở mức dưới một byte (phức tạp hơn).
 
+**Đã biết từ HAS-CSI.** `ppi_stopstate` chỉ đi vào IRQ_STATUS bit 11 và LANE_STATUS (Interrupt & Error
+Aggregator, Table 4-25). Burst FSM mở và đóng burst theo `rxactivehs_x` (Table 4-6). Nếu đúng như vậy,
+việc `stopstate_x` lên sớm chỉ làm interrupt Stop state và LANE_STATUS đổi trước khi byte cuối ra PPI.
+Nhờ team xác nhận, hoặc cho biết chỗ khác có dùng `stopstate_x`.
+
 **Giả định hiện tại.**
 - Lane đợi EoT done rồi mới về Stop (đã chốt). Hệ quả phía Tx: dưới khoảng 240 Mb/s, hai burst liền
   nhau cần THS-EXIT + TLPX lớn hơn khoảng 32·UI + 15 ns (HAS D-PHY §4.5). Phần này đã hỏi phía Tx.
 - `stopstate_x` có thể lên trước byte cuối như ở câu 1, cho tới khi team trả lời.
 - Cắt trailer chính xác trên khoảng 270 Mb/s. Dưới mức đó chưa chốt (ADR-006).
 
-**Tham chiếu.** HAS D-PHY §4.5 và §4.6 (các design note), ADR-006, §9. HAS-CSI Figure 4-1, Table 4-3,
-§4.4 (`err_wc` chỉ báo khi thiếu byte).
+**Tham chiếu.** HAS D-PHY §4.5 và §4.6 (các design note), §5.1 Figure 5-1, ADR-006, §9. HAS-CSI
+Figure 4-1, Table 4-3, Table 4-6, Table 4-25, §4.4 (`err_wc` chỉ báo khi thiếu byte).
 
 ---
 
@@ -256,7 +262,7 @@ Timeout đặt 2^18 chu kỳ `core_clk`, khoảng 1.31 ms.
 | C3 | PPI 8 bit/lane (`rxdatahs_x[7:0]`, bit 0 là bit nhận trước); một `rxbyteclkhs` chung = HS DDR clock / 8 | Table 4-3 |
 | C4 | Giới hạn 1792 Mb/s/lane; trên 1.5 Gb/s bắt buộc deskew v1.2 (xem K1) | Table 4-1, §4.3.1, §7.1 |
 | C5 | Chỉ continuous clock; `cl_rxclkactivehs` dùng để chẩn đoán | §4.3.1 |
-| C6 | `rxsynchs_x` là xung 1 chu kỳ, cùng chu kỳ với byte payload đầu tiên | Table 4-4 |
+| C6 | `rxsynchs_x` là xung 1 chu kỳ, cùng chu kỳ với byte payload đầu tiên. Figure 4-1 lại vẽ xung trước byte đầu một chu kỳ; chúng tôi theo Table 4-4, và điều kiện ghi FIFO (`sync_seen_x` hoặc `rxsynchs_x`) nhận được cả hai (HAS D-PHY Figure 5-1) | Table 4-4, Figure 4-1, §4.4 |
 | C7 | `rxvalidhs_x` được phép có khoảng trống trong burst | §4.3.3, §4.4.5 |
 | C8 | Khi có `errsotsynchs_x`: không có `rxsynchs_x`, `rxvalidhs_x` giữ 0 suốt burst, `rxactivehs_x` vẫn giữ tới EoT. `errsoths_x` là xung 1 chu kỳ, burst vẫn dùng được | §4.3.3 |
 | C9 | `rxskewcalhs_x` bật khi nhận ra sync toàn bit 1, giữ tới khi lane về Stop; không có `rxvalidhs_x`/`rxsynchs_x` trong deskew burst; không dùng RxErrorCalHS | §4.3.1, §4.3.3 |

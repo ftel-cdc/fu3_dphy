@@ -1,15 +1,19 @@
 #!/usr/bin/env python3
 """Rule checks for the figures of ftel_dphy_rx (the rules are listed in README.md beside this file).
 
-Every doc/figures/*.drawio is checked against its render and against doc/spec.md:
+Every doc/figures/*.drawio and every WaveJSON timing diagram (*.json5) is checked against its render
+and against doc/spec.md:
   F-XML    the .drawio parses as XML (compressed diagrams are inflated first)
   F-ASCII  only ASCII characters; U+00A0, which the drawio editor writes, is accepted
   F-FONT   every cell that shows text sets fontSize >= 18, and inline HTML font sizes are >= 18
   F-SHAPE  shapes come from FTEL_DRAWIO_LIB_V1 (SHAPES, NAMED_STYLES), plain rectangles or edges
   F-NAME   every port, parameter or run-time field name in a label occurs in doc/spec.md
-  F-STALE  <base>.svg exists and records the sha256 of the current .drawio (render_drawio.py stamp)
+  F-STALE  <base>.svg exists and records the sha256 of the current source (render_drawio.py and
+           render_wave.py stamps)
+  F-COLS   in a .json5, every wave and node string has the same number of columns
   F-REF    every figures/ image embedded in spec.md exists, has a "Figure N-M -- ..." caption
-           (em dash in the spec), and every .drawio is embedded as <base>.svg
+           (em dash in the spec), and every .drawio and .json5 is embedded as <base>.svg
+The .json5 checks are F-ASCII, F-NAME (every identifier of the file), F-STALE, F-COLS and F-REF.
 Usage:
   check_figures.py [--figures DIR] [--spec FILE]
   check_figures.py --selftest-negative   inject one fault per rule into a copy; each must be caught
@@ -44,6 +48,7 @@ PORT_LIKE = re.compile(r"^(afe_\w+|PARA_\w+|rx\w+|err\w+|cl_\w+|dl_\w+|\w+_x|\w+
 IDENT = re.compile(r"[A-Za-z_][A-Za-z0-9_]*")
 FIG_REF = re.compile(r"!\[([^\]]*)\]\((figures/[^)\s]+)\)")
 CAPTION = re.compile(r"^Figure \d+-\d+ — \S")
+WAVE_STR = re.compile(r"\b(?:wave|node)\s*:\s*'([^']*)'")
 
 
 def sha256(path):
@@ -108,6 +113,32 @@ def check_drawio(path, spec_words):
     return out
 
 
+def check_stale(path, name):
+    svg = os.path.splitext(path)[0] + ".svg"
+    if not os.path.isfile(svg):
+        return [("F-STALE", name, "no .svg render")]
+    m = re.search(r"sha256=([0-9a-f]{64})", open(svg, encoding="utf-8").read(4096))
+    if not m or m.group(1) != sha256(path):
+        return [("F-STALE", name, "the .svg was not rendered from the current source")]
+    return []
+
+
+def check_wave(path, spec_words):
+    out = []
+    name = os.path.basename(path)
+    text = open(path, "rb").read().decode("utf-8", errors="replace")
+    bad = sorted({c for c in text if ord(c) > 127})
+    if bad:
+        out.append(("F-ASCII", name, "non-ASCII characters " + " ".join(f"U+{ord(c):04X}" for c in bad)))
+    for tok in sorted(set(IDENT.findall(text))):
+        if PORT_LIKE.match(tok) and tok not in spec_words:
+            out.append(("F-NAME", name, f"'{tok}' does not occur in spec.md"))
+    widths = {len(s) for s in WAVE_STR.findall(text) if s}
+    if len(widths) > 1:
+        out.append(("F-COLS", name, f"wave/node strings of {sorted(widths)} columns"))
+    return out + check_stale(path, name)
+
+
 def check(figures, spec):
     spec_text = open(spec, encoding="utf-8").read()
     spec_words = set(IDENT.findall(spec_text))
@@ -115,6 +146,9 @@ def check(figures, spec):
     drawios = sorted(glob.glob(os.path.join(figures, "*.drawio")))
     for path in drawios:
         out += check_drawio(path, spec_words)
+    waves = sorted(glob.glob(os.path.join(figures, "*.json5")))
+    for path in waves:
+        out += check_wave(path, spec_words)
     doc = os.path.dirname(os.path.abspath(spec))
     embedded = set()
     for caption, ref in FIG_REF.findall(spec_text):
@@ -123,7 +157,7 @@ def check(figures, spec):
             out.append(("F-REF", os.path.basename(spec), f"{ref} does not exist"))
         if not CAPTION.match(caption):
             out.append(("F-REF", os.path.basename(spec), f"caption of {ref} should read 'Figure N-M — ...'"))
-    for path in drawios:
+    for path in drawios + waves:
         svg = os.path.normpath(os.path.splitext(path)[0] + ".svg")
         if svg not in embedded:
             out.append(("F-REF", os.path.basename(path), "not embedded in spec.md as its .svg"))
@@ -139,9 +173,11 @@ def report(out):
 
 def selftest_negative(figures, spec):
     drawios = sorted(glob.glob(os.path.join(figures, "*.drawio")))
-    if not drawios:
-        sys.exit("--selftest-negative needs at least one figure")
+    waves = sorted(glob.glob(os.path.join(figures, "*.json5")))
+    if not drawios or not waves:
+        sys.exit("--selftest-negative needs at least one .drawio and one .json5 figure")
     victim = os.path.basename(drawios[0])
+    wave_victim = os.path.basename(waves[0])
 
     def add_cell(xml, cell):
         return xml.replace("</root>", cell + "</root>", 1)
@@ -159,24 +195,34 @@ def selftest_negative(figures, spec):
         "F-STALE": lambda x, s: (x.replace("</mxfile>", "<!-- edited --></mxfile>", 1), s),
         "F-REF": lambda x, s: (x, re.sub(r"!\[[^\]]*\]\(figures/" + re.escape(victim[:-7]) + r"\.svg\)", "", s)),
     }
+    wave_faults = {
+        "F-ASCII": lambda x, s: (x.replace("signal: [", "signal: [ // \u2265", 1), s),
+        "F-NAME": lambda x, s: (x.replace("signal: [", "signal: [ { name: 'rxvalidsh_x' },", 1), s),
+        "F-STALE": lambda x, s: (x + "\n// edited\n", s),
+        "F-COLS": lambda x, s: (re.sub(r"(wave\s*:\s*')([^']*)'", lambda m: m.group(1) + m.group(2) + ".'", x, count=1), s),
+        "F-REF": lambda x, s: (x, re.sub(r"!\[[^\]]*\]\(figures/" + re.escape(wave_victim[:-6]) + r"\.svg\)", "", s)),
+    }
+    cases = [("clean", None, None)] + [(c, victim, f) for c, f in faults.items()] + \
+            [(c, wave_victim, f) for c, f in wave_faults.items()]
     failures = 0
     with tempfile.TemporaryDirectory() as tmp:
-        for code, inject in [("clean", None)] + list(faults.items()):
-            case = os.path.join(tmp, code)
+        for code, target, inject in cases:
+            case = os.path.join(tmp, f"{code}_{target}")
             fig = os.path.join(case, "figures")
             shutil.copytree(figures, fig, ignore=shutil.ignore_patterns("*.png", "selftest", ".drawio_cache"))
             spec_copy = os.path.join(case, "spec.md")
             shutil.copy(spec, spec_copy)
             if inject:
-                x, s = inject(open(os.path.join(fig, victim), encoding="utf-8").read(),
+                x, s = inject(open(os.path.join(fig, target), encoding="utf-8").read(),
                               open(spec_copy, encoding="utf-8").read())
-                open(os.path.join(fig, victim), "w", encoding="utf-8").write(x)
+                open(os.path.join(fig, target), "w", encoding="utf-8").write(x)
                 open(spec_copy, "w", encoding="utf-8").write(s)
-            codes = {c for c, _, _ in check(fig, spec_copy)}
-            ok = not codes if code == "clean" else code in codes
+            found = check(fig, spec_copy)
+            codes = {c for c, _, _ in found}
+            ok = not codes if code == "clean" else any(c == code and w == target for c, w, _ in found)
             failures += not ok
-            print(f"{'PASS' if ok else 'FAIL'}  {code:8s} -> {sorted(codes) or 'no violation'}")
-    print(f"selftest-negative: {len(faults) + 1 - failures}/{len(faults) + 1} PASS")
+            print(f"{'PASS' if ok else 'FAIL'}  {code:8s} {target or '':44s} -> {sorted(codes) or 'no violation'}")
+    print(f"selftest-negative: {len(cases) - failures}/{len(cases)} PASS")
     return 1 if failures else 0
 
 

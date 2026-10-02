@@ -79,6 +79,10 @@ CAPTION_RE = re.compile(r"^\*\*[^|]*\*\*\s*$")
 #              ASCII sketches become Figures 1-1 to 1-3, every table gets a bold caption line (a caption
 #              that already carried OPEN keeps it), the signal-naming note moves into §1, and Appendix C
 #              lists acronyms in a table that is not graded.
+#  2026-09-30  v0.8 written before the spec edit (Track Doc batch 3, timing diagrams): open +1 (ADR-007,
+#              start of the sync search, found while drawing Figure 5-9). The ADR-007 option matrix
+#              (Table 7-4) is not a graded table; the CL_HS_TERM row of the clock-lane FSM changes its
+#              exit condition only, so fsm_cl keeps 11 rows.
 _V03 = {
     "param": 10, "runtime": 5, "clock": 3, "cdc": 5, "reset": 3,
     "fsm_cl": 10, "fsm_dl": 16, "ppi": 29, "afe": 8, "open": 10, "timing": 9,
@@ -91,6 +95,7 @@ EXPECTED = {
     "v0.5": dict(_V03, cdc=7, open=12, c_ids=16),
     "v0.6": dict(_V03, runtime=6, cdc=8, fsm_cl=11, open=13, c_ids=16),
     "v0.7": dict(_V03, runtime=6, cdc=8, fsm_cl=11, open=13, c_ids=16),
+    "v0.8": dict(_V03, runtime=6, cdc=8, fsm_cl=11, open=14, c_ids=16),
 }
 REVISION_RE = re.compile(r"\*\*DRAFT (v[0-9]+\.[0-9]+)\*\*")
 

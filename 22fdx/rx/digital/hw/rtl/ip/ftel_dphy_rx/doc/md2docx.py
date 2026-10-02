@@ -19,15 +19,16 @@
 #         every page, rows not split;
 #       - appendices (BOS_Appendix) in the last section, Acronyms and First Review
 #         at the end; revision table with a Reviewer column.
-#   * A figure wider than LANDSCAPE_MIN_PX goes on a landscape page when that
-#     makes it at least LANDSCAPE_GAIN larger, so its labels stay readable in print.
+#   * A figure wider than LANDSCAPE_MIN_PX (WAVE_LANDSCAPE_MIN_PX for a timing
+#     diagram, whose text is smaller) goes on a landscape page when that makes it
+#     at least LANDSCAPE_GAIN larger, so its labels stay readable in print.
 #   * Grounding markers of the Markdown: the warning sign becomes "(TBC)", which
 #     Appendix C defines; the check mark and the globe are dropped.
 #   * Contents, Table of Tables and Table of Figures are literal entries with page
 #     numbers measured on a LibreOffice PDF (LibreOffice does not refresh TOC
 #     fields), iterated until the page map stops moving.
 # Deps: pandoc, python-docx, libreoffice, pdftotext. Figures: figures/*.png from
-#   figures/render_drawio.py.
+#   figures/render_drawio.py (block diagrams) and figures/render_wave.py (timing diagrams).
 # Usage: /home/linhhk/anaconda3/bin/python3 md2docx.py   (any python3 with python-docx)
 # Template: $FTEL_DPHY_RX_HAS_TEMPLATE, default
 #   ~/Documents/FX1_ips/Common_Info/FTEL_CDC_IP_Hardware_Design_Specification.docx
@@ -74,7 +75,8 @@ PORTRAIT_W_IN = 6.3            # text width of a portrait page is 6.47 in
 PORTRAIT_H_IN = 8.5
 LANDSCAPE_W_IN = 9.4           # text area of a landscape page: 9.89 x 6.67 in
 LANDSCAPE_H_IN = 5.4           # leaves room for the caption
-LANDSCAPE_MIN_PX = 1500
+LANDSCAPE_MIN_PX = 1500        # drawio figures, text >= 18 px
+WAVE_LANDSCAPE_MIN_PX = 950    # WaveDrom figures, 11 pt text: about 7 pt printed at the portrait width
 LANDSCAPE_GAIN = 1.15
 TEXT_W_DXA = 9304              # portrait text width used by the template's TOC tab stop
 TABLE_FONT_PT = 9              # table text, as HAS-CSI
@@ -180,14 +182,15 @@ def png_size(path):
 
 def sentence_case(title):
     first = title.split(" ", 1)[0]
-    return title[0].upper() + title[1:] if re.fullmatch(r"[a-z]+[:,]?", first) else title
+    return title[0].upper() + title[1:] if re.fullmatch(r"[a-z]+(?:-[a-z]+)*[:,]?", first) else title
 
 
 def figure(num, title, stem):
-    """Figure record: PNG render (figures/render_drawio.py, @2x), page orientation and width."""
+    """Figure record: PNG render (figures/render_drawio.py or render_wave.py, @2x), page orientation
+    and width."""
     svg, png = os.path.join(HERE, stem + ".svg"), os.path.join(HERE, stem + ".png")
     if not os.path.isfile(png):
-        sys.exit(f"[md2docx] ERROR: {png} missing - run figures/render_drawio.py first")
+        sys.exit(f"[md2docx] ERROR: {png} missing - run figures/render_drawio.py or render_wave.py first")
     if os.path.isfile(svg) and os.path.getmtime(png) + 60 < os.path.getmtime(svg):
         sys.exit(f"[md2docx] ERROR: {png} is older than its SVG - re-render it")
     w2, h2 = png_size(png)
@@ -195,7 +198,8 @@ def figure(num, title, stem):
     aspect = w / h
     land_w = min(LANDSCAPE_W_IN, LANDSCAPE_H_IN * aspect)
     port_w = min(PORTRAIT_W_IN, PORTRAIT_H_IN * aspect)
-    landscape = w >= LANDSCAPE_MIN_PX and land_w >= port_w * LANDSCAPE_GAIN
+    min_px = WAVE_LANDSCAPE_MIN_PX if "_wave_" in os.path.basename(stem) else LANDSCAPE_MIN_PX
+    landscape = w >= min_px and land_w >= port_w * LANDSCAPE_GAIN
     width_in = land_w if landscape else port_w
     return {"num": num, "caption": f"Figure {num}. {sentence_case(title)}", "px": (w, h),
             "png": embed_png(png, width_in), "landscape": landscape, "width_in": width_in}
@@ -782,6 +786,9 @@ def assemble(body_docx):
             if text.startswith(FIGCAP):
                 strip_prefix(p, FIGCAP)
                 para.style = base.styles["Heading 4"]
+                # the caption closes its figure; a heading style would chain consecutive figures
+                # into one keep-together block, which then breaks between a picture and its caption
+                para.paragraph_format.keep_with_next = False
                 no_numbering(p)
                 img = p.getprevious()
                 while img is not None and img.find(".//" + qn("w:drawing")) is None:

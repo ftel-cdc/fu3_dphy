@@ -111,8 +111,8 @@
             <mxPoint x="1075" y="390" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="l_en" value="enable: zero seen, not locked" style="text;html=1;whiteSpace=wrap;fontSize=18;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
-          <mxGeometry x="950" y="437" width="260" height="28" as="geometry" />
+        <mxCell id="l_en" value="enable: zero seen, not locked,&lt;br&gt;not expired, no skew cal." style="text;html=1;whiteSpace=wrap;fontSize=18;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="930" y="430" width="300" height="52" as="geometry" />
         </mxCell>
         <mxCell id="off" value="offset" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFE6CC;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="1200" y="270" width="130" height="50" as="geometry" />
@@ -206,8 +206,8 @@
         <mxCell id="sc_ck" value="" style="triangle;whiteSpace=wrap;html=1;rotation=-90;strokeWidth=2;fillColor=none;" vertex="1" parent="1">
           <mxGeometry x="780.0" y="574.0" width="10" height="22" as="geometry" />
         </mxCell>
-        <mxCell id="l_sc" value="from the first non-zero word, stopped when locked" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
-          <mxGeometry x="700" y="494" width="520" height="28" as="geometry" />
+        <mxCell id="l_sc" value="from the first non-zero word, stopped when locked or expired" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="700" y="494" width="640" height="28" as="geometry" />
         </mxCell>
         <mxCell id="scc" value="= PARA_SYNC_SEARCH_BYTES" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="910" y="535" width="310" height="50" as="geometry" />
@@ -367,7 +367,7 @@
         <mxCell id="o_sk_t" value="deskew burst&lt;br&gt;(No.5, R2)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="1770" y="555.0" width="225" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="n_clr" value="zero seen, locked, skew cal. and the&lt;br&gt;search counter are cleared while&lt;br&gt;HS entry is Low." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+        <mxCell id="n_clr" value="zero seen, locked, skew cal. and the&lt;br&gt;search counter are cleared while&lt;br&gt;HS entry is Low; skew cal. also&lt;br&gt;clears locked." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="20" y="590" width="420" height="110" as="geometry" />
         </mxCell>
         <mxCell id="leg_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=none;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">

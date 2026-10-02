@@ -4,8 +4,8 @@
 |---|---|
 | Gửi | Đội phát triển phía Tx (CSI-2 transmitter / D-PHY Tx của sensor) |
 | Từ | Nhóm thiết kế D-PHY Rx (`ftel_dphy_rx`) |
-| Ngày | 2026-09-26, cập nhật 2026-09-29 (S9: clock lane; S5: THS-EXIT + TLPX ở tốc độ thấp) |
-| Căn cứ | MIPI CSI-2 v1.3, MIPI D-PHY v1.1 (Table 14); HAS của `ftel_dphy_rx` bản nháp v0.7 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.7.docx`) |
+| Ngày | 2026-09-26, cập nhật 2026-09-29 (S9: clock lane; S5: THS-EXIT + TLPX ở tốc độ thấp) và 2026-09-30 (S3: vì sao Rx cần continuous clock) |
+| Căn cứ | MIPI CSI-2 v1.3, MIPI D-PHY v1.1 (Table 14); HAS của `ftel_dphy_rx` bản nháp v0.8 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.8.docx`) |
 
 ## Bối cảnh
 
@@ -72,8 +72,10 @@ burst)? Có chuyển giữa hai chế độ khi đang chạy không?
 
 **Đã biết từ HAS-CSI.** Hệ thống chỉ dùng continuous clock trong bản này.
 
-**Giả định hiện tại.** Continuous clock. FSM của clock lane trong Rx vẫn xử lý được việc vào/ra LP
-giữa các burst.
+**Giả định hiện tại.** Continuous clock. FSM của clock lane trong Rx xử lý được việc vào/ra LP giữa
+các burst, nhưng đường dữ liệu thì chưa: delay line EoT chỉ xả khi `rxbyteclkhs` chạy, còn
+non-continuous clock dừng TCLK-POST sau burst, sớm hơn lúc byte cuối ra PPI (HAS D-PHY §1.4, §4.6).
+Nếu Tx cần non-continuous clock, nhờ báo sớm.
 
 ## S4 — Deskew
 

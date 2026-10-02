@@ -452,3 +452,44 @@ Không thay đổi kỹ thuật.
 | `rebase_req.py` | Giữ 266/268 REQ; 2 REQ đổi chỗ (câu quy ước tên tín hiệu, caption "Release plan") được chuyển sang dòng mới trong chunk `23_v07_delta.json`, nội dung giữ nguyên |
 | `validate_req.py` | 268 REQ · 1 finding · trích dẫn 269/269 · độ phủ 100% ở 15 nhóm · 0 lỗi · 0 cảnh báo |
 | `flow_check.py` | review: 0 xung đột; `needs_human_decision` giữ 56 |
+
+### 7.7 Đồng bộ P1 với spec v0.8 (waveform, 2026-09-30)
+
+Spec v0.8 thêm 9 waveform: PPI ở §5.1 (Figure 5-1…5-8) và SoT/EoT ở giao diện AFE ở §5.2 (Figure 5-9).
+Khi dựng timeline, lộ ra 5 chỗ spec chưa đúng hoặc chưa đủ. Bốn chỗ nội bộ được sửa ngay trong text,
+đánh ⚠️:
+- CL_HS_TERM phải đợi thêm clock active. Nếu không, FSM vào CL_HS_CLK trong TCLK-ZERO và thoát ngay vì
+  "clock lost"; `cl_rxclkactivehs` cũng lên trước khi `rxbyteclkhs` chạy, trong khi HAS-CSI coi nó là
+  dấu hiệu duy nhất cho biết byte clock đang chạy.
+- Hết cửa sổ tìm sync thì bộ đếm dừng và comparator bị khóa, để chỉ có một xung `errsotsynchs_x`.
+- Phát hiện deskew thì xóa luôn thanh ghi lock, để không entry nào sau đó mang cờ valid.
+- Mô tả thời điểm `rxskewcalhs_x` ở PPI: rơi sau `rxactivehs_x` khoảng `eot_skip_bytes` byte clock.
+
+Chỗ thứ năm cần quyết định nên thành mục mở mới **ADR-007**, kèm ma trận ba phương án (Table 7-4). Quy
+tắc "leader chỉ được nhận sau một word toàn 0" có hai lỗ hổng:
+- Dưới khoảng 170 Mb/s, nếu Tx dùng THS-PREPARE + THS-ZERO tối thiểu, leader có thể bị từ chối.
+- Ở tốc độ cao, word rác trong THS-PREPARE có thể khởi động cửa sổ tìm sync.
+
+Ngoài ra, spec ghi thêm rằng IP cần continuous clock (delay line EoT chỉ xả khi byte clock chạy). Điều
+này khớp với HAS-CSI C5.
+
+| Bước | Kết quả |
+|---|---|
+| `spec_inventory.py` | EXPECTED v0.8 đăng ký **trước** khi sửa spec: `open` 13 → 14 (ADR-007), các nhóm khác giữ nguyên. Selftest PASS 15/15. Số dòng phụ thuộc open item tăng 127 → 174: mục ADR-007 (heading có OPEN), phần timing mới của §5.2 (nằm dưới heading OPEN ADR-001) và các dòng dẫn ADR-006/ADR-007/K6 |
+| `rebase_req.py` | Giữ 259/268 REQ; 9 REQ lỗi thời vì text đổi (§1.4 clock lane, dòng CL_HS_TERM, settle counter, "clock activity lost", hai REQ ADR-006 ở §4.5, không tìm thấy sync, hủy lock khi gặp deskew, kịch bản SoT ở §8) |
+| Chunk bổ sung `24_v08_delta.json` | 28 REQ, gồm 9 REQ viết lại và 19 REQ mới, cùng 1 finding. Câu trích được kiểm nguyên văn bằng script trước khi assemble; luật `derive_rules` không phải ghi đè trường nào của chunk này |
+| `validate_req.py` | 287 REQ · 2 finding · trích dẫn 289/289 · độ phủ 100% ở 15 nhóm · 0 lỗi · 0 cảnh báo |
+| `flow_check.py` | review: 0 xung đột; `needs_human_decision` 56 → 60 (4 REQ của ADR-007); test âm **7/7 PASS** |
+
+Finding mới (owner: CSI team) là một chỗ HAS-CSI tự mâu thuẫn:
+- Table 4-4 (#8) và phần Lane Management đặt `rxsynchs_x` cùng chu kỳ với byte đầu.
+- Figure 4-1 lại vẽ xung trước byte đầu một chu kỳ.
+- Điều kiện ghi FIFO của HAS-CSI chấp nhận cả hai cách.
+- IP này theo Table 4-4.
+
+Không tạo REQ cho các câu chỉ là lý do hoặc nhắc lại yêu cầu đã có, theo quy tắc của `dphy_spec_parse`:
+- bằng chứng từ HAS-CSI về cách dùng `stopstate_x`;
+- các gạch đầu dòng ở §5.1/§5.2 lặp lại yêu cầu của §4;
+- ma trận Table 7-4.
+
+249 REQ cũ bị đánh lại ID theo thứ tự dòng.

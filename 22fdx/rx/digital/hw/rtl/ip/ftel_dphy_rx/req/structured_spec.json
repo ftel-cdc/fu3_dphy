@@ -2,8 +2,8 @@
  "metadata": {
   "ip_name": "ftel_dphy_rx",
   "spec_path": "hw/rtl/ip/ftel_dphy_rx/doc/spec.md",
-  "spec_sha256": "3d04e6157785208773d2fdd7d13638a03878f468bdf3cbbd907c97fb572e80c5",
-  "spec_revision": "v0.7 (draft)",
+  "spec_sha256": "f8f65d27a641f111276420c5378b55ffc44bba3f7c81d98c21391d371e41ec58",
+  "spec_revision": "v0.8 (draft)",
   "mode": "review",
   "generated_by": "dphy_spec_parse (assembled by assemble_req.py)",
   "gate_1": {
@@ -22,7 +22,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "1. Overview",
-   "source_line": 48,
+   "source_line": 49,
    "source_quote": "`ftel_dphy_rx` is the digital controller of a MIPI D-PHY receiver.",
    "source_ids": [
     "HAS-CSI §4.3.1"
@@ -44,7 +44,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "1. Overview",
-   "source_line": 53,
+   "source_line": 54,
    "source_quote": "Signal names ending in `_x` exist once per data lane. Unless stated otherwise, signals are active High.",
    "source_ids": [],
    "parameters_affected": [],
@@ -64,7 +64,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "1.1 System context — physical signal path",
-   "source_line": 66,
+   "source_line": 67,
    "source_quote": "| AFE | Receiving chip, at the pins | Receives the analog line levels",
    "source_ids": [
     "ADR-001",
@@ -89,7 +89,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "1.3 Data direction versus control direction",
-   "source_line": 105,
+   "source_line": 106,
    "source_quote": "| Received data and lane status | AFE → `ftel_dphy_rx` → CSI-2 Rx controller |",
    "source_ids": [
     "HAS-CSI Table 4-3"
@@ -111,7 +111,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "1.3 Data direction versus control direction",
-   "source_line": 106,
+   "source_line": 107,
    "source_quote": "| Link control | CSI-2 Rx controller → `ftel_dphy_rx` | `cl_enable`, `dl_enable_x`, `forcerxmode_x`, `phy_core_rst` |",
    "source_ids": [
     "HAS-CSI Table 4-3"
@@ -133,7 +133,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "1.3 Data direction versus control direction",
-   "source_line": 107,
+   "source_line": 108,
    "source_quote": "| AFE control | `ftel_dphy_rx` → AFE | HS-RX enable, termination enable, delay taps | §5.2 |",
    "source_ids": [],
    "parameters_affected": [],
@@ -153,7 +153,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "1.3 Data direction versus control direction",
-   "source_line": 108,
+   "source_line": 109,
    "source_quote": "| Reference clock | System → `ftel_dphy_rx` | `core_clk` (200 MHz) | HAS-CSI Table 4-1 **[CSI]** |",
    "source_ids": [
     "HAS-CSI Table 4-1"
@@ -177,7 +177,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "1.3 Data direction versus control direction",
-   "source_line": 109,
+   "source_line": 110,
    "source_quote": "| Timer configuration | Configuration bus → `ftel_dphy_rx` | Timer values, lane map, polarity | §4.10, OPEN K3 |",
    "source_ids": [
     "K3"
@@ -201,7 +201,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "1.4 Baselines, release plan and features",
-   "source_line": 115,
+   "source_line": 116,
    "source_quote": "D-PHY behaviour follows D-PHY v1.1 ✅. The only D-PHY v1.2 feature needed is the deskew calibration, required above 1.5 Gb/s **[CSI]** §7.1.",
    "source_ids": [
     "Q1",
@@ -228,7 +228,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "1.4 Baselines, release plan and features",
-   "source_line": 119,
+   "source_line": 120,
    "source_quote": "Table 1-3 — Release plan (proposed, OPEN K1)",
    "source_ids": [
     "Q1",
@@ -254,7 +254,7 @@
    "release": "R1",
    "spec_status": "open",
    "source_section": "1.4 Baselines, release plan and features",
-   "source_line": 123,
+   "source_line": 124,
    "source_quote": "| R1 | 80–1500 Mb/s | Deskew burst **detected** and flagged on `rxskewcalhs_x`; no calibration |",
    "source_ids": [
     "C4",
@@ -280,7 +280,7 @@
    "release": "R2",
    "spec_status": "open",
    "source_section": "1.4 Baselines, release plan and features",
-   "source_line": 124,
+   "source_line": 125,
    "source_quote": "| R2 | 80–1792 Mb/s | Calibration active (Block No. 5) | 4K staggered HDR RAW12 **[CSI]** §7.3 |",
    "source_ids": [
     "C4",
@@ -307,7 +307,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "1.4 Baselines, release plan and features",
-   "source_line": 127,
+   "source_line": 128,
    "source_quote": "One clock lane and 1, 2 or 4 data lanes (`PARA_NUM_LANES` = 4) **[CSI]** C2.",
    "source_ids": [
     "C2"
@@ -331,7 +331,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "1.4 Baselines, release plan and features",
-   "source_line": 128,
+   "source_line": 129,
    "source_quote": "PPI with an 8-bit data path per lane on one shared `rxbyteclkhs` = HS DDR clock / 8 **[CSI]** C3.",
    "source_ids": [
     "C3"
@@ -348,14 +348,14 @@
   },
   {
    "req_id": "REQ-015",
-   "text": "The clock lane shall support HS entry and exit, continuous-clock operation (mandatory) and clock-lane ULPS; the clock-lane FSM shall also handle LP entry between bursts, while the system uses continuous clock in R1.",
+   "text": "The clock lane shall support HS entry and exit, continuous-clock operation (mandatory) and clock-lane ULPS, and the clock-lane FSM shall also handle LP entry between bursts.",
    "category": "functional",
    "block": "No.2",
    "clock_domain": "core_clk",
    "release": "both",
    "spec_status": "verified",
    "source_section": "1.4 Baselines, release plan and features",
-   "source_line": 129,
+   "source_line": 130,
    "source_quote": "Clock lane: HS entry and exit, continuous-clock operation (mandatory, CSI-2 §7.1 ✅), and",
    "source_ids": [
     "C5",
@@ -372,6 +372,28 @@
   },
   {
    "req_id": "REQ-016",
+   "text": "This IP shall require a continuous clock: the EoT delay line needs rxbyteclkhs after each burst for longer than a non-continuous clock runs, and the system uses continuous clock.",
+   "category": "constraint",
+   "block": "all",
+   "clock_domain": "none",
+   "release": "both",
+   "spec_status": "assumed",
+   "source_section": "1.4 Baselines, release plan and features",
+   "source_line": 133,
+   "source_quote": "so this IP needs a continuous clock ⚠️, as the system uses **[CSI]** C5.",
+   "source_ids": [
+    "C5"
+   ],
+   "parameters_affected": [],
+   "ambiguity_score": 0.35,
+   "needs_review": true,
+   "needs_human_decision": false,
+   "open_item_ref": [],
+   "sva_hint": "none",
+   "verification_method": "review"
+  },
+  {
+   "req_id": "REQ-017",
    "text": "Each data lane shall support SoT/EoT, sync detection tolerant to a single-bit error, trailer removal, and escape mode with ULPS and Triggers.",
    "category": "functional",
    "block": "No.3",
@@ -379,7 +401,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "1.4 Baselines, release plan and features",
-   "source_line": 133,
+   "source_line": 134,
    "source_quote": "Data lanes: SoT/EoT (D-PHY §6.4 ✅), sync detection with single-bit error tolerance, trailer",
    "source_ids": [
     "D-PHY v1.1 §6.4",
@@ -394,7 +416,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-017",
+   "req_id": "REQ-018",
    "text": "Low-Power Data Transmission (LPDT) reception shall not be part of R1; the treatment of the LPDT PPI ports is pending K2.",
    "category": "decision",
    "block": "No.3",
@@ -402,7 +424,7 @@
    "release": "R1",
    "spec_status": "open",
    "source_section": "1.4 Baselines, release plan and features",
-   "source_line": 135,
+   "source_line": 136,
    "source_quote": "(LPDT) is not in R1 (OPEN K2).",
    "source_ids": [
     "K2"
@@ -420,7 +442,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-018",
+   "req_id": "REQ-019",
    "text": "The IP shall indicate SoT error, SoT sync error, escape entry error and false control error, and shall report EoT sync error as a status.",
    "category": "functional",
    "block": "all",
@@ -428,7 +450,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "1.4 Baselines, release plan and features",
-   "source_line": 136,
+   "source_line": 137,
    "source_quote": "Error indications: SoT error, SoT sync error, escape entry error, false control error (D-PHY",
    "source_ids": [
     "D-PHY v1.1 §7.2"
@@ -442,7 +464,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-019",
+   "req_id": "REQ-020",
    "text": "An HS RX timeout shall guarantee that rxactivehs_x always falls, because the CSI-2 controller has no timeout of its own.",
    "category": "functional",
    "block": "No.3",
@@ -450,7 +472,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "1.4 Baselines, release plan and features",
-   "source_line": 137,
+   "source_line": 138,
    "source_quote": "An HS RX timeout guarantees that `rxactivehs_x` always falls, because the CSI-2 controller has no timeout of its own **[CSI]** C11.",
    "source_ids": [
     "C11"
@@ -466,7 +488,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-020",
+   "req_id": "REQ-021",
    "text": "The IP shall provide TINIT detection with init_done, accept the reset request phy_core_rst, per-lane enables and forcerxmode_x.",
    "category": "functional",
    "block": "No.6",
@@ -474,7 +496,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "1.4 Baselines, release plan and features",
-   "source_line": 139,
+   "source_line": 140,
    "source_quote": "Initialization: TINIT detection and `init_done`, reset request `phy_core_rst`, per-lane enables, `forcerxmode_x` **[CSI]** C14, C16.",
    "source_ids": [
     "C14",
@@ -491,7 +513,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-021",
+   "req_id": "REQ-022",
    "text": "Receiver timing (THS-SETTLE, TCLK-SETTLE, TINIT, timeouts) shall be programmable and counted in core_clk (200 MHz) cycles.",
    "category": "constraint",
    "block": "No.6",
@@ -499,7 +521,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "1.4 Baselines, release plan and features",
-   "source_line": 141,
+   "source_line": 142,
    "source_quote": "Programmable receiver timing (THS-SETTLE, TCLK-SETTLE, TINIT, timeouts), counted in `core_clk` (200 MHz) **[CSI]** C15.",
    "source_ids": [
     "C15"
@@ -519,7 +541,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-022",
+   "req_id": "REQ-023",
    "text": "The IP shall never parse byte content; the CSI-2 protocol layer (packet header, ECC, CRC, pixel unpacking) stays in the CSI-2 Rx controller.",
    "category": "constraint",
    "block": "all",
@@ -527,7 +549,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "1.4 Baselines, release plan and features",
-   "source_line": 144,
+   "source_line": 145,
    "source_quote": "The CSI-2 protocol layer (packet header, ECC, CRC, pixel unpacking) is in the CSI-2 Rx controller; this IP never parses byte content.",
    "source_ids": [],
    "parameters_affected": [],
@@ -539,7 +561,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-023",
+   "req_id": "REQ-024",
    "text": "The IP is a unidirectional slave: reverse direction, bus turnaround and 8b9b coding shall not be supported.",
    "category": "constraint",
    "block": "all",
@@ -547,7 +569,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "1.4 Baselines, release plan and features",
-   "source_line": 147,
+   "source_line": 148,
    "source_quote": "are not supported (unidirectional slave per CSI-2 §7.1 ✅).",
    "source_ids": [
     "CSI-2 v1.3 §7.1"
@@ -561,7 +583,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-024",
+   "req_id": "REQ-025",
    "text": "Block No. 1 (AFE Adapter) shall exist per lane and for the clock lane, with its LP path in core_clk and its HS path in rxbyteclkhs.",
    "category": "clocking",
    "block": "No.1",
@@ -569,7 +591,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "2. Block Diagram",
-   "source_line": 210,
+   "source_line": 211,
    "source_quote": "| No.1 | AFE Adapter | per lane + clock lane | `core_clk` (LP path), `rxbyteclkhs` (HS path) | R1 |",
    "source_ids": [],
    "parameters_affected": [],
@@ -581,7 +603,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-025",
+   "req_id": "REQ-026",
    "text": "Block No. 5 (Deskew Controller) shall exist per data lane in the rxbyteclkhs domain and only from release R2.",
    "category": "constraint",
    "block": "No.5",
@@ -589,7 +611,7 @@
    "release": "R2",
    "spec_status": "design",
    "source_section": "2. Block Diagram",
-   "source_line": 214,
+   "source_line": 215,
    "source_quote": "| No.5 | Deskew Controller | per data lane | `rxbyteclkhs` | R2 |",
    "source_ids": [],
    "parameters_affected": [
@@ -603,7 +625,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-026",
+   "req_id": "REQ-027",
    "text": "Block No. 7 (PPI Output Stage) shall drive the HS PPI signals in rxbyteclkhs and the LP PPI signals asynchronously.",
    "category": "clocking",
    "block": "No.7",
@@ -611,7 +633,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "2. Block Diagram",
-   "source_line": 216,
+   "source_line": 217,
    "source_quote": "| No.7 | PPI Output Stage | 1 | `rxbyteclkhs` (HS signals), asynchronous (LP signals) | R1 |",
    "source_ids": [],
    "parameters_affected": [],
@@ -623,7 +645,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-027",
+   "req_id": "REQ-028",
    "text": "Block No. 8 (Configuration & Status) shall run in a configuration clock whose source depends on the open configuration path (K3).",
    "category": "decision",
    "block": "No.8",
@@ -631,7 +653,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "2. Block Diagram",
-   "source_line": 217,
+   "source_line": 218,
    "source_quote": "| No.8 | Configuration & Status | 1 | configuration clock (OPEN K3) | R1 |",
    "source_ids": [
     "K3",
@@ -649,7 +671,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-028",
+   "req_id": "REQ-029",
    "text": "PARA_NUM_LANES (default 4) shall set the number of data lane slices instantiated to 1, 2 or 4; lanes shall be enabled at run time by dl_enable_x.",
    "category": "parameter",
    "block": "all",
@@ -657,7 +679,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "3. Parameters",
-   "source_line": 229,
+   "source_line": 230,
    "source_quote": "| 1 | `PARA_NUM_LANES` | 4 | Configurable | Data lane slices instantiated: 1, 2 or 4 **[CSI]** C2. Lanes are enabled at run time by `dl_enable_x` |",
    "source_ids": [
     "C2",
@@ -674,7 +696,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-029",
+   "req_id": "REQ-030",
    "text": "PARA_DESER_RATIO shall be fixed at 8 and shall set the width of the AFE word per lane and of rxdatahs_x; it stays a parameter so that a 1:16 AFE can be supported later.",
    "category": "parameter",
    "block": "all",
@@ -682,7 +704,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "3. Parameters",
-   "source_line": 230,
+   "source_line": 231,
    "source_quote": "| 2 | `PARA_DESER_RATIO` | 8 | Fixed | Width of the AFE word per lane and of `rxdatahs_x` **[CSI]** C3.",
    "source_ids": [
     "C3"
@@ -698,7 +720,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-030",
+   "req_id": "REQ-031",
    "text": "PARA_CORE_CLK_MHZ shall be fixed at 200; it is the reference of every timer, giving a 5 ns resolution.",
    "category": "parameter",
    "block": "all",
@@ -706,7 +728,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "3. Parameters",
-   "source_line": 231,
+   "source_line": 232,
    "source_quote": "| 3 | `PARA_CORE_CLK_MHZ` | 200 | Fixed | Reference clock of all timers **[CSI]** C15; resolution 5 ns |",
    "source_ids": [
     "C15"
@@ -722,7 +744,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-031",
+   "req_id": "REQ-032",
    "text": "PARA_DESKEW_EN (0 in R1, 1 in R2) shall instantiate Block No. 5; with PARA_DESKEW_EN = 0 deskew bursts shall still be detected by Block No. 4.",
    "category": "parameter",
    "block": "all",
@@ -730,7 +752,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "3. Parameters",
-   "source_line": 232,
+   "source_line": 233,
    "source_quote": "| 4 | `PARA_DESKEW_EN` | 0 (R1), 1 (R2) | Configurable | Instantiates Block No. 5. When 0, deskew bursts are still detected (Block No. 4) |",
    "source_ids": [
     "Q5"
@@ -746,7 +768,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-032",
+   "req_id": "REQ-033",
    "text": "PARA_LPDT_EN (default 0) shall instantiate LPDT reception; when 0 the LPDT PPI outputs shall be tied inactive. The default is pending K2.",
    "category": "parameter",
    "block": "all",
@@ -754,7 +776,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "3. Parameters",
-   "source_line": 233,
+   "source_line": 234,
    "source_quote": "| 5 | `PARA_LPDT_EN` | 0 | Configurable | Instantiates LPDT reception. When 0, LPDT PPI outputs are tied inactive (OPEN K2) |",
    "source_ids": [
     "K2"
@@ -772,7 +794,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-033",
+   "req_id": "REQ-034",
    "text": "PARA_LP_SYNC_STAGES shall be fixed at 2 and shall set the synchronizer depth of the LP-RX inputs into core_clk.",
    "category": "parameter",
    "block": "all",
@@ -780,7 +802,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "3. Parameters",
-   "source_line": 234,
+   "source_line": 235,
    "source_quote": "| 6 | `PARA_LP_SYNC_STAGES` | 2 | Fixed | Synchronizer depth of the LP-RX inputs into `core_clk` |",
    "source_ids": [],
    "parameters_affected": [
@@ -794,7 +816,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-034",
+   "req_id": "REQ-035",
    "text": "PARA_LP_FILTER_CYC (default 2, assumption) shall set the LP-state glitch filter length in core_clk cycles, bounded by the termination-enable budget of Appendix B and by the maximum LP glitch width passed by the AFE (open with ADR-001).",
    "category": "parameter",
    "block": "all",
@@ -802,7 +824,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "3. Parameters",
-   "source_line": 235,
+   "source_line": 236,
    "source_quote": "| 7 | `PARA_LP_FILTER_CYC` | 2 ⚠️ | Configurable | Glitch filter on LP states, in `core_clk` cycles.",
    "source_ids": [],
    "parameters_affected": [
@@ -818,7 +840,7 @@
    "verification_method": "analysis"
   },
   {
-   "req_id": "REQ-035",
+   "req_id": "REQ-036",
    "text": "PARA_EOT_DELAY_BYTES (default 32, assumption) shall size the EoT delay line of Block No. 4 to hold TEOT,max plus the LP-11 detection latency and the crossing at the highest line rate: about 30 bytes at 1500 Mb/s and 35 at 1792 Mb/s; S5 confirms the Tx timing.",
    "category": "parameter",
    "block": "No.4",
@@ -826,7 +848,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "3. Parameters",
-   "source_line": 236,
+   "source_line": 237,
    "source_quote": "| 8 | `PARA_EOT_DELAY_BYTES` | 32 ⚠️ | Configurable | Depth of the EoT delay line (Block No. 4).",
    "source_ids": [
     "S5"
@@ -844,7 +866,7 @@
    "verification_method": "analysis"
   },
   {
-   "req_id": "REQ-036",
+   "req_id": "REQ-037",
    "text": "PARA_SYNC_SEARCH_BYTES (default 16, assumption) shall bound the byte clocks searched for the sync sequence before errsotsynchs_x is raised, counted from the first non-zero word after the HS entry signal.",
    "category": "parameter",
    "block": "all",
@@ -852,7 +874,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "3. Parameters",
-   "source_line": 237,
+   "source_line": 238,
    "source_quote": "| 9 | `PARA_SYNC_SEARCH_BYTES` | 16 ⚠️ | Configurable | Byte clocks searched for the sync sequence before `errsotsynchs_x` is raised, counted from the first non-zero word after the HS entry signal ⚠️ (§4.6) |",
    "source_ids": [],
    "parameters_affected": [
@@ -866,7 +888,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-037",
+   "req_id": "REQ-038",
    "text": "PARA_DLY_TAP_WIDTH shall set the width of the AFE delay-tap control used by deskew calibration; its value is still to be determined with ADR-004.",
    "category": "parameter",
    "block": "all",
@@ -874,7 +896,7 @@
    "release": "R2",
    "spec_status": "open",
    "source_section": "3. Parameters",
-   "source_line": 238,
+   "source_line": 239,
    "source_quote": "| 10 | `PARA_DLY_TAP_WIDTH` | To be determined | Configurable | Width of the AFE delay-tap control (R2, ADR-004) |",
    "source_ids": [
     "ADR-004"
@@ -893,7 +915,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-038",
+   "req_id": "REQ-039",
    "text": "hs_settle_cyc shall default to 20 core_clk cycles (assumption): centre of the THS-SETTLE window at 1500 Mb/s minus the LP detection latency.",
    "category": "parameter",
    "block": "all",
@@ -901,7 +923,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "3. Parameters",
-   "source_line": 246,
+   "source_line": 247,
    "source_quote": "| `hs_settle_cyc` | 20 ⚠️ | Centre of the THS-SETTLE window at 1500 Mb/s (89–151.7 ns → ~120 ns) minus LP detection latency (~20 ns).",
    "source_ids": [
     "D-PHY v1.1 Table 14"
@@ -917,7 +939,7 @@
    "verification_method": "analysis"
   },
   {
-   "req_id": "REQ-039",
+   "req_id": "REQ-040",
    "text": "Software shall program hs_settle_cyc with the Appendix B value for the line rate before enabling the lanes.",
    "category": "parameter",
    "block": "all",
@@ -925,7 +947,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "3. Parameters",
-   "source_line": 246,
+   "source_line": 247,
    "source_quote": "Rate dependent: software programs the value of Appendix B for the line rate before enabling the lanes ⚠️",
    "source_ids": [],
    "parameters_affected": [
@@ -939,7 +961,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-040",
+   "req_id": "REQ-041",
    "text": "clk_settle_cyc shall default to 36 core_clk cycles (assumption): centre of TCLK-SETTLE minus the LP detection latency, counted from entry into CL_HS_TERM.",
    "category": "parameter",
    "block": "all",
@@ -947,7 +969,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "3. Parameters",
-   "source_line": 247,
+   "source_line": 248,
    "source_quote": "| `clk_settle_cyc` | 36 ⚠️ | Centre of TCLK-SETTLE (95–300 ns → ~200 ns) minus the LP detection latency (~20 ns); counted from entry into CL_HS_TERM |",
    "source_ids": [
     "D-PHY v1.1 Table 14"
@@ -963,7 +985,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-041",
+   "req_id": "REQ-042",
    "text": "tinit_cyc shall default to 20 000 core_clk cycles so that TINIT,SLAVE >= 100 us is met.",
    "category": "parameter",
    "block": "all",
@@ -971,7 +993,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "3. Parameters",
-   "source_line": 248,
+   "source_line": 249,
    "source_quote": "| `tinit_cyc` | 20 000 | TINIT,SLAVE ≥ 100 µs (D-PHY §6.11 ✅) |",
    "source_ids": [
     "D-PHY v1.1 §6.11"
@@ -987,7 +1009,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-042",
+   "req_id": "REQ-043",
    "text": "hs_rx_timeout_cyc shall default to 2^18 core_clk cycles (1.31 ms, assumption), longer than the longest burst per lane; the longest burst is open (K8).",
    "category": "parameter",
    "block": "all",
@@ -995,7 +1017,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "3. Parameters",
-   "source_line": 249,
+   "source_line": 250,
    "source_quote": "| `hs_rx_timeout_cyc` | 2^18 (1.31 ms) ⚠️ | Longer than the longest burst: 5802-byte line at 80 Mb/s on one lane ≈ 580 µs; the longest burst per lane is OPEN K8 |",
    "source_ids": [],
    "parameters_affected": [
@@ -1011,7 +1033,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-043",
+   "req_id": "REQ-044",
    "text": "esc_timeout_cyc shall default to 2^18 core_clk cycles (assumption) as the escape-mode watchdog, with the scope and expiry behaviour of §4.7.",
    "category": "parameter",
    "block": "all",
@@ -1019,7 +1041,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "3. Parameters",
-   "source_line": 250,
+   "source_line": 251,
    "source_quote": "| `esc_timeout_cyc` | 2^18 ⚠️ | Escape-mode watchdog (D-PHY §7.3.3 ✅, informative); scope and expiry in §4.7 |",
    "source_ids": [
     "D-PHY v1.1 §7.3.3"
@@ -1035,7 +1057,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-044",
+   "req_id": "REQ-045",
    "text": "The run-time field eot_skip_bytes (default 16, assumption) shall give the number of newest delay-line entries discarded before the last-transition search: (LP-11 detection latency + crossing + centre of the cut window) divided by the byte period, rate dependent and programmed together with hs_settle_cyc.",
    "category": "parameter",
    "block": "all",
@@ -1043,7 +1065,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "3. Parameters",
-   "source_line": 251,
+   "source_line": 252,
    "source_quote": "| `eot_skip_bytes` | 16 ⚠️ | Newest delay-line entries discarded before the last-transition search",
    "source_ids": [],
    "parameters_affected": [
@@ -1058,7 +1080,7 @@
    "verification_method": "analysis"
   },
   {
-   "req_id": "REQ-045",
+   "req_id": "REQ-046",
    "text": "core_clk shall be a free-running 200 MHz system clock that runs all LP-state, escape and timer logic of Blocks No. 1 (LP path), 2, 3 and 6; escape reception shall be done by oversampling.",
    "category": "clocking",
    "block": "all",
@@ -1066,7 +1088,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "4.1 Clock",
-   "source_line": 263,
+   "source_line": 264,
    "source_quote": "| `core_clk` | System, free-running **[CSI]** | 200 MHz | Blocks No. 1 (LP path), 2, 3, 6 | All LP-state, escape and timer logic. Escape reception is by oversampling (ADR-002) |",
    "source_ids": [
     "C15",
@@ -1083,7 +1105,7 @@
    "verification_method": "sta"
   },
   {
-   "req_id": "REQ-046",
+   "req_id": "REQ-047",
    "text": "rxbyteclkhs shall be the clock-lane DDR clock divided by 8 from the AFE (187.5 MHz at 1500 Mb/s, 224 MHz at 1792 Mb/s), clock the HS path of Blocks No. 1, 4, 5 and 7, run only while the clock lane is in HS, and be forwarded to the PPI.",
    "category": "clocking",
    "block": "all",
@@ -1091,7 +1113,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "4.1 Clock",
-   "source_line": 264,
+   "source_line": 265,
    "source_quote": "| `rxbyteclkhs` | AFE: clock-lane DDR clock / 8 | Line rate / 8; 187.5 MHz at 1500 Mb/s, 224 MHz at 1792 Mb/s | Blocks No. 1 (HS path), 4, 5, 7 |",
    "source_ids": [
     "C3",
@@ -1106,7 +1128,7 @@
    "verification_method": "sta"
   },
   {
-   "req_id": "REQ-047",
+   "req_id": "REQ-048",
    "text": "Block No. 8 shall use a configuration clock whose source and frequency depend on the configuration path (ADR-005, K3).",
    "category": "clocking",
    "block": "No.8",
@@ -1114,7 +1136,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "4.1 Clock",
-   "source_line": 265,
+   "source_line": 266,
    "source_quote": "| configuration clock | System | To be determined | Block No. 8 | Depends on ADR-005 (OPEN K3) |",
    "source_ids": [
     "ADR-005",
@@ -1133,7 +1155,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-048",
+   "req_id": "REQ-049",
    "text": "The asynchronous AFE LP-RX outputs afe_lp_dp_x, afe_lp_dn_x, afe_cl_lp_dp and afe_cl_lp_dn shall enter core_clk through PARA_LP_SYNC_STAGES flip-flops followed by a PARA_LP_FILTER_CYC glitch filter.",
    "category": "clocking",
    "block": "all",
@@ -1141,7 +1163,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.1 Clock",
-   "source_line": 273,
+   "source_line": 274,
    "source_quote": "| AFE LP-RX (asynchronous) → `core_clk` | `afe_lp_dp_x`, `afe_lp_dn_x`, `afe_cl_lp_dp`, `afe_cl_lp_dn` | `PARA_LP_SYNC_STAGES` flip-flops + `PARA_LP_FILTER_CYC` glitch filter |",
    "source_ids": [],
    "parameters_affected": [
@@ -1156,7 +1178,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-049",
+   "req_id": "REQ-050",
    "text": "The asynchronous clock-activity input afe_cl_clk_active shall enter core_clk through PARA_LP_SYNC_STAGES flip-flops in Block No. 1; whether a glitch filter is also needed depends on the AFE detector (ADR-001).",
    "category": "clocking",
    "block": "No.1",
@@ -1164,7 +1186,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "4.1 Clock",
-   "source_line": 274,
+   "source_line": 275,
    "source_quote": "| AFE clock-activity detector (asynchronous) → `core_clk` | `afe_cl_clk_active` | `PARA_LP_SYNC_STAGES` flip-flops in Block No. 1 ⚠️; whether a filter is needed depends on the detector (ADR-001) |",
    "source_ids": [
     "ADR-001"
@@ -1182,7 +1204,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-050",
+   "req_id": "REQ-051",
    "text": "HS entry and EoT request (Block No. 3 to No. 4) shall cross from core_clk to rxbyteclkhs as level signals through 2-flop synchronizers, and the receiving logic shall return to idle when the byte clock stops (clock-lane ULPS).",
    "category": "clocking",
    "block": "all",
@@ -1190,7 +1212,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.1 Clock",
-   "source_line": 275,
+   "source_line": 276,
    "source_quote": "| `core_clk` → `rxbyteclkhs` | HS entry, EoT request (Block No. 3 → No. 4) | Level signals through 2-flop synchronizers.",
    "source_ids": [],
    "parameters_affected": [],
@@ -1202,7 +1224,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-051",
+   "req_id": "REQ-052",
    "text": "EoT done (Block No. 4 to No. 3) shall cross from rxbyteclkhs to core_clk through a toggle synchronizer.",
    "category": "clocking",
    "block": "all",
@@ -1210,7 +1232,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.1 Clock",
-   "source_line": 276,
+   "source_line": 277,
    "source_quote": "| `rxbyteclkhs` → `core_clk` | EoT done (Block No. 4 → No. 3) | Toggle synchronizer |",
    "source_ids": [],
    "parameters_affected": [],
@@ -1222,7 +1244,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-052",
+   "req_id": "REQ-053",
    "text": "The status events of Blocks No. 2, 3 and 4 shall cross into the configuration clock through toggle synchronizers that feed the flags and counters of Block No. 8.",
    "category": "clocking",
    "block": "all",
@@ -1230,7 +1252,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.1 Clock",
-   "source_line": 277,
+   "source_line": 278,
    "source_quote": "Events: toggle synchronizers into the flags and counters of Block No. 8 ⚠️.",
    "source_ids": [],
    "parameters_affected": [],
@@ -1242,7 +1264,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-053",
+   "req_id": "REQ-054",
    "text": "The lane FSM states shall cross into the configuration clock through 2-flop synchronizers; a read during a state change may be incoherent and is for debug use only.",
    "category": "clocking",
    "block": "all",
@@ -1250,7 +1272,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.1 Clock",
-   "source_line": 277,
+   "source_line": 278,
    "source_quote": "FSM states: 2-flop synchronizers; a read during a state change may be incoherent (debug use) ⚠️",
    "source_ids": [],
    "parameters_affected": [],
@@ -1262,7 +1284,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-054",
+   "req_id": "REQ-055",
    "text": "cl_enable, dl_enable_x and forcerxmode_x (lite_aclk domain of the controller) shall enter core_clk as level signals through 2-flop synchronizers.",
    "category": "clocking",
    "block": "all",
@@ -1270,7 +1292,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "4.1 Clock",
-   "source_line": 278,
+   "source_line": 279,
    "source_quote": "| Enables (`lite_aclk`) → `core_clk` | `cl_enable`, `dl_enable_x`, `forcerxmode_x` | Level, 2-flop synchronizers; the PPI defines them as level sensitive **[CSI]** C14 |",
    "source_ids": [
     "C14"
@@ -1284,7 +1306,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-055",
+   "req_id": "REQ-056",
    "text": "Timer values, lane map and polarity (configuration clock) shall be treated as quasi-static into core_clk and rxbyteclkhs; software shall change them only while the affected lanes are disabled.",
    "category": "clocking",
    "block": "all",
@@ -1292,7 +1314,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.1 Clock",
-   "source_line": 279,
+   "source_line": 280,
    "source_quote": "| Configuration clock → `core_clk` / `rxbyteclkhs` | Timer values, lane map, polarity | Quasi-static: software changes them only while the affected lanes are disabled |",
    "source_ids": [
     "C14"
@@ -1306,7 +1328,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-056",
+   "req_id": "REQ-057",
    "text": "The synchronized lane enables shall gate the rxbyteclkhs-domain PPI outputs combinationally at the output stage; an enable shall change only while its lane is in Stop state or the byte clock is stopped.",
    "category": "clocking",
    "block": "all",
@@ -1314,7 +1336,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.1 Clock",
-   "source_line": 280,
+   "source_line": 281,
    "source_quote": "| `core_clk` → PPI outputs of the `rxbyteclkhs` domain | Synchronized lane enables | Combinational gating at the output stage (§4.9) ⚠️;",
    "source_ids": [],
    "parameters_affected": [],
@@ -1326,7 +1348,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-057",
+   "req_id": "REQ-058",
    "text": "A level synchronizer shall be a chain of flip-flops in the destination clock: PARA_LP_SYNC_STAGES for the AFE inputs and 2 for the other crossings.",
    "category": "clocking",
    "block": "all",
@@ -1334,7 +1356,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.1 Clock",
-   "source_line": 283,
+   "source_line": 284,
    "source_quote": "- **Level synchronizer.** A chain of flip-flops in the destination clock: `PARA_LP_SYNC_STAGES` for the AFE inputs, 2 elsewhere.",
    "source_ids": [
     "C14"
@@ -1350,7 +1372,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-058",
+   "req_id": "REQ-059",
    "text": "A toggle synchronizer shall invert a flip-flop in the source clock on each one-cycle event, pass the level through two destination flip-flops, and turn each change into a one-cycle destination pulse with a third flip-flop and an XOR gate.",
    "category": "clocking",
    "block": "all",
@@ -1358,7 +1380,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.1 Clock",
-   "source_line": 285,
+   "source_line": 286,
    "source_quote": "- **Toggle synchronizer.** A one-cycle event inverts a flip-flop in the source clock. The level crosses through two flip-flops, and a third flip-flop with an XOR gate turns each change into a one-cycle pulse in the destination clock.",
    "source_ids": [],
    "parameters_affected": [],
@@ -1370,7 +1392,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-059",
+   "req_id": "REQ-060",
    "text": "Two events of one kind crossing a toggle synchronizer shall be at least three destination cycles apart; each event crossing this way occurs at most once per burst or per LP sequence.",
    "category": "clocking",
    "block": "all",
@@ -1378,7 +1400,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.1 Clock",
-   "source_line": 288,
+   "source_line": 289,
    "source_quote": "apart; each event listed above occurs at most once per burst or per LP sequence ⚠️.",
    "source_ids": [],
    "parameters_affected": [],
@@ -1390,7 +1412,7 @@
    "verification_method": "analysis"
   },
   {
-   "req_id": "REQ-060",
+   "req_id": "REQ-061",
    "text": "phy_core_rst shall reset the whole IP (asynchronous assert, synchronous release per domain), be asserted for at least 40 core_clk cycles by the CSI-2 controller, and restart initialization of every lane on release; its polarity and synchronicity are pending K6 (draft: active High, asynchronous).",
    "category": "reset",
    "block": "all",
@@ -1398,7 +1420,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "4.2 Reset",
-   "source_line": 299,
+   "source_line": 300,
    "source_quote": "| `phy_core_rst` | Input, asynchronous assert, synchronous release per domain | Whole IP |",
    "source_ids": [
     "C14",
@@ -1415,7 +1437,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-061",
+   "req_id": "REQ-062",
    "text": "When cl_enable or dl_enable_x is Low the lane shall be shut down: AFE enables off, lane FSM held in reset, and the PPI outputs of the lane at their inactive values.",
    "category": "reset",
    "block": "all",
@@ -1423,7 +1445,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "4.2 Reset",
-   "source_line": 300,
+   "source_line": 301,
    "source_quote": "| `cl_enable`, `dl_enable_x` | Input, level | One lane | Low: the lane is shut down — AFE enables off, lane FSM held in reset, PPI outputs of the lane at their inactive values (D-PHY Annex A \"Enable\" ✅) |",
    "source_ids": [
     "Q6",
@@ -1439,7 +1461,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-062",
+   "req_id": "REQ-063",
    "text": "When forcerxmode_x is High the data-lane FSM shall return immediately to the wait-for-Stop state and re-initialize; the controller uses it only while the lane is in Stop state.",
    "category": "reset",
    "block": "all",
@@ -1447,7 +1469,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "4.2 Reset",
-   "source_line": 301,
+   "source_line": 302,
    "source_quote": "| `forcerxmode_x` | Input, level | One data lane | High: the lane FSM returns to the wait-for-Stop state immediately and re-initializes (D-PHY Annex A ✅).",
    "source_ids": [
     "C14",
@@ -1462,7 +1484,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-063",
+   "req_id": "REQ-064",
    "text": "Each clock domain shall have a reset synchronizer in Block No. 6: phy_core_rst clears its two flip-flops asynchronously, and the second flip-flop is the active-low reset of the domain, released on the second clock edge after phy_core_rst falls.",
    "category": "reset",
    "block": "No.6",
@@ -1470,7 +1492,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.2 Reset",
-   "source_line": 303,
+   "source_line": 304,
    "source_quote": "Each clock domain has a reset synchronizer in Block No. 6 (Figure 4-1): `phy_core_rst` clears its two flip-flops asynchronously. The second flip-flop is the active-low reset of the domain, released on the",
    "source_ids": [
     "C14"
@@ -1484,7 +1506,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-064",
+   "req_id": "REQ-065",
    "text": "The rxbyteclkhs domain shall leave reset only when the byte clock runs; since the clock lane is in HS before any data lane leaves Stop (TCLK-PRE), Block No. 4 is out of reset before its first HS entry.",
    "category": "reset",
    "block": "No.4",
@@ -1492,7 +1514,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.2 Reset",
-   "source_line": 307,
+   "source_line": 308,
    "source_quote": "Table 11 ✅), so Block No. 4 is out of reset before its first HS entry ⚠️.",
    "source_ids": [
     "D-PHY v1.1 Table 11"
@@ -1506,7 +1528,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-065",
+   "req_id": "REQ-066",
    "text": "Block No. 1 shall isolate the rest of the IP from the AFE, so that it is the only block that changes when the AFE changes.",
    "category": "constraint",
    "block": "No.1",
@@ -1514,7 +1536,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.3 AFE Adapter (Block No. 1)",
-   "source_line": 311,
+   "source_line": 312,
    "source_quote": "**Overview.** Isolates the rest of the IP from the AFE (V5 of the research plan). It is the only",
    "source_ids": [],
    "parameters_affected": [],
@@ -1526,7 +1548,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-066",
+   "req_id": "REQ-067",
    "text": "The LP path of Block No. 1 shall synchronize each LP-RX output into core_clk with PARA_LP_SYNC_STAGES flip-flops, swap Dp and Dn when the polarity bit of the physical lane is set, filter the 2-bit line state and present one of LP-11, LP-10, LP-01, LP-00 per lane.",
    "category": "functional",
    "block": "No.1",
@@ -1534,7 +1556,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.3 AFE Adapter (Block No. 1)",
-   "source_line": 315,
+   "source_line": 316,
    "source_quote": "- LP path: synchronizes each LP-RX output into `core_clk` (`PARA_LP_SYNC_STAGES` flip-flops), swaps Dp and Dn when the polarity bit of the physical lane is set, filters the 2-bit line state and presents one of LP-11, LP-10, LP-01, LP-00 per lane.",
    "source_ids": [],
    "parameters_affected": [
@@ -1548,7 +1570,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-067",
+   "req_id": "REQ-068",
    "text": "The LP glitch filter shall accept a new line state once it has been stable for PARA_LP_FILTER_CYC consecutive core_clk cycles.",
    "category": "functional",
    "block": "No.1",
@@ -1556,7 +1578,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.3 AFE Adapter (Block No. 1)",
-   "source_line": 318,
+   "source_line": 319,
    "source_quote": "been stable for `PARA_LP_FILTER_CYC` consecutive cycles (Figure 4-3) ⚠️.",
    "source_ids": [],
    "parameters_affected": [
@@ -1570,7 +1592,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-068",
+   "req_id": "REQ-069",
    "text": "Block No. 1 shall synchronize afe_cl_clk_active into core_clk and provide it to Block No. 2 for clock-activity detection (TCLK-MISS, 4.4 design note).",
    "category": "functional",
    "block": "No.1",
@@ -1578,7 +1600,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.3 AFE Adapter (Block No. 1)",
-   "source_line": 319,
+   "source_line": 320,
    "source_quote": "Clock activity: synchronizes `afe_cl_clk_active` into `core_clk` for Block No. 2 ⚠️ (§4.4",
    "source_ids": [],
    "parameters_affected": [
@@ -1592,7 +1614,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-069",
+   "req_id": "REQ-070",
    "text": "The HS path of Block No. 1 shall register the raw deserialized word of each lane on rxbyteclkhs and invert all its bits when the polarity bit of the physical lane is set.",
    "category": "functional",
    "block": "No.1",
@@ -1600,7 +1622,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.3 AFE Adapter (Block No. 1)",
-   "source_line": 321,
+   "source_line": 322,
    "source_quote": "- HS path: registers the raw deserialized word of each lane on `rxbyteclkhs` and inverts all its bits when the polarity bit of the physical lane is set (P/N polarity inversion, V9).",
    "source_ids": [],
    "parameters_affected": [],
@@ -1612,7 +1634,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-070",
+   "req_id": "REQ-071",
    "text": "One configuration field per logical lane shall select its physical lane, for the LP path and the HS path alike.",
    "category": "functional",
    "block": "No.1",
@@ -1620,7 +1642,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.3 AFE Adapter (Block No. 1)",
-   "source_line": 323,
+   "source_line": 324,
    "source_quote": "- Lane mapping (V9): one configuration field per logical lane selects its physical lane, for the LP path and the HS path alike.",
    "source_ids": [],
    "parameters_affected": [],
@@ -1632,7 +1654,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-071",
+   "req_id": "REQ-072",
    "text": "The AFE controls and the delay taps of a physical lane shall come from the logical lane mapped to it (inverse lane map).",
    "category": "functional",
    "block": "No.1",
@@ -1640,7 +1662,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.3 AFE Adapter (Block No. 1)",
-   "source_line": 324,
+   "source_line": 325,
    "source_quote": "The AFE controls and the delay taps of a physical lane come from the logical lane mapped to it ⚠️.",
    "source_ids": [],
    "parameters_affected": [],
@@ -1652,7 +1674,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-072",
+   "req_id": "REQ-073",
    "text": "The clock lane shall be neither polarity-inverted nor remapped.",
    "category": "functional",
    "block": "No.1",
@@ -1660,7 +1682,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.3 AFE Adapter (Block No. 1)",
-   "source_line": 325,
+   "source_line": 326,
    "source_quote": "The clock lane is neither inverted nor remapped ⚠️ (S9).",
    "source_ids": [],
    "parameters_affected": [],
@@ -1672,7 +1694,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-073",
+   "req_id": "REQ-074",
    "text": "Block No. 1 shall drive the AFE controls requested by Blocks No. 2, 3 and 5: HS-RX enable, termination enable and delay taps (R2).",
    "category": "functional",
    "block": "No.1",
@@ -1680,7 +1702,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.3 AFE Adapter (Block No. 1)",
-   "source_line": 326,
+   "source_line": 327,
    "source_quote": "- Drives the AFE controls requested by Blocks No. 2, 3 and 5: HS-RX enable, termination enable, delay taps (R2).",
    "source_ids": [],
    "parameters_affected": [],
@@ -1692,7 +1714,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-074",
+   "req_id": "REQ-075",
    "text": "The FSM outputs hs_en_x, term_en_x, cl_hs_en and cl_term_en shall be register outputs that Block No. 1 passes to the AFE ports afe_* of §5.2 through the lane mapping without a further register, keeping the enable timing of Appendix B.",
    "category": "interface",
    "block": "No.1",
@@ -1700,7 +1722,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.3 AFE Adapter (Block No. 1)",
-   "source_line": 329,
+   "source_line": 330,
    "source_quote": "lane mapping without a further register, so the enable timing of Appendix B is unchanged ⚠️.",
    "source_ids": [],
    "parameters_affected": [],
@@ -1712,7 +1734,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-075",
+   "req_id": "REQ-076",
    "text": "Block No. 1 shall forward afe_byteclk as rxbyteclkhs.",
    "category": "functional",
    "block": "No.1",
@@ -1720,7 +1742,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.3 AFE Adapter (Block No. 1)",
-   "source_line": 330,
+   "source_line": 331,
    "source_quote": "- Byte clock: `afe_byteclk` is forwarded as `rxbyteclkhs`.",
    "source_ids": [],
    "parameters_affected": [],
@@ -1732,7 +1754,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-076",
+   "req_id": "REQ-077",
    "text": "The termination enable shall be issued on LP-00 detection without an extra timer so that TD-TERM-EN (<= 35 ns + 4 UI) and TCLK-TERM-EN (<= 38 ns) are met with the ~20 ns digital latency; if the AFE cannot meet the remaining budget, termination switching moves into the AFE (ADR-001).",
    "category": "decision",
    "block": "No.1",
@@ -1740,7 +1762,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.3 AFE Adapter (Block No. 1)",
-   "source_line": 336,
+   "source_line": 337,
    "source_quote": "TD-TERM-EN (≤ 35 ns + 4·UI) and TCLK-TERM-EN (≤ 38 ns) are measured from the",
    "source_ids": [
     "ADR-001"
@@ -1759,7 +1781,7 @@
    "verification_method": "analysis"
   },
   {
-   "req_id": "REQ-077",
+   "req_id": "REQ-078",
    "text": "Block No. 2 shall implement the CIL-SCNN function of the clock lane: HS entry and exit (D-PHY v1.1 §6.7, Tables 11-12) and clock-lane ULPS (D-PHY v1.1 §6.8, Table 13).",
    "category": "functional",
    "block": "No.2",
@@ -1767,7 +1789,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 343,
+   "source_line": 344,
    "source_quote": "Implements CIL-SCNN: clock-lane HS entry/exit (D-PHY §6.7, Table 11–12 ✅) and clock-lane ULPS (D-PHY §6.8, Table 13 ✅).",
    "source_ids": [
     "Q2",
@@ -1785,7 +1807,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-078",
+   "req_id": "REQ-079",
    "text": "In CL_INIT the clock-lane FSM shall ignore line states until LP-11 has been held for tinit_cyc core_clk cycles, then enter CL_STOP; no PPI output is asserted in CL_INIT.",
    "category": "functional",
    "block": "No.2",
@@ -1793,7 +1815,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 350,
+   "source_line": 351,
    "source_quote": "| CL_INIT | any | LP-11 held for `tinit_cyc` → CL_STOP | — |",
    "source_ids": [
     "Q2"
@@ -1809,7 +1831,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-079",
+   "req_id": "REQ-080",
    "text": "In CL_STOP (LP-11) the FSM shall assert cl_stopstate = 1 and move to CL_HS_RQST on LP-01 or to CL_ULPS_RQST on LP-10.",
    "category": "functional",
    "block": "No.2",
@@ -1817,7 +1839,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 351,
+   "source_line": 352,
    "source_quote": "| CL_STOP | LP-11 | LP-01 → CL_HS_RQST; LP-10 → CL_ULPS_RQST | `cl_stopstate` = 1 |",
    "source_ids": [
     "Q2"
@@ -1831,7 +1853,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-080",
+   "req_id": "REQ-081",
    "text": "In CL_HS_RQST (LP-01) the clock-lane FSM shall move to CL_HS_PRPR on LP-00, to CL_STOP on LP-11, and to CL_WAIT on LP-10 (aborted request: status flag, no PPI error).",
    "category": "functional",
    "block": "No.2",
@@ -1839,7 +1861,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 352,
+   "source_line": 353,
    "source_quote": "| CL_HS_RQST | LP-01 | LP-00 → CL_HS_PRPR; LP-11 → CL_STOP; LP-10 → CL_WAIT (aborted request: status flag, no PPI error) ⚠️ |",
    "source_ids": [
     "Q2",
@@ -1854,7 +1876,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-081",
+   "req_id": "REQ-082",
    "text": "In CL_HS_PRPR (LP-00) the FSM shall assert cl_term_en = 1 and move to CL_HS_TERM once the termination enable has been issued.",
    "category": "functional",
    "block": "No.2",
@@ -1862,7 +1884,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 353,
+   "source_line": 354,
    "source_quote": "| CL_HS_PRPR | LP-00 | termination enable issued → CL_HS_TERM | `cl_term_en` = 1 |",
    "source_ids": [
     "Q2",
@@ -1878,16 +1900,16 @@
    "notes": "Termination timing budget (TCLK-TERM-EN) is the ⚠️ design note of §4.3."
   },
   {
-   "req_id": "REQ-082",
-   "text": "In CL_HS_TERM the FSM shall assert cl_hs_en = 1 and move to CL_HS_CLK after clk_settle_cyc core_clk cycles.",
+   "req_id": "REQ-083",
+   "text": "In CL_HS_TERM the FSM shall assert cl_hs_en = 1 and move to CL_HS_CLK once clk_settle_cyc core_clk cycles have elapsed and the clock is active.",
    "category": "functional",
    "block": "No.2",
    "clock_domain": "core_clk",
    "release": "both",
-   "spec_status": "design",
+   "spec_status": "assumed",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 354,
-   "source_quote": "| CL_HS_TERM | LP-00 → HS | `clk_settle_cyc` elapsed → CL_HS_CLK | `cl_hs_en` = 1 |",
+   "source_line": 355,
+   "source_quote": "| CL_HS_TERM | LP-00 → HS | `clk_settle_cyc` elapsed and clock active → CL_HS_CLK ⚠️ | `cl_hs_en` = 1 |",
    "source_ids": [
     "Q2",
     "D-PHY v1.1 §6.7"
@@ -1895,15 +1917,15 @@
    "parameters_affected": [
     "clk_settle_cyc"
    ],
-   "ambiguity_score": 0.1,
-   "needs_review": false,
+   "ambiguity_score": 0.35,
+   "needs_review": true,
    "needs_human_decision": false,
    "open_item_ref": [],
    "sva_hint": "property",
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-083",
+   "req_id": "REQ-084",
    "text": "In CL_HS_CLK the FSM shall assert cl_rxclkactivehs = 1 while the HS clock is received, and move to CL_HS_END when clock activity is lost (TCLK-MISS).",
    "category": "functional",
    "block": "No.2",
@@ -1911,7 +1933,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 355,
+   "source_line": 356,
    "source_quote": "| CL_HS_CLK | HS clock | clock activity lost (TCLK-MISS) → CL_HS_END | `cl_rxclkactivehs` = 1 |",
    "source_ids": [
     "Q2",
@@ -1930,7 +1952,7 @@
    "notes": "How clock loss is detected depends on the design note below (AFE detector, ADR-001)."
   },
   {
-   "req_id": "REQ-084",
+   "req_id": "REQ-085",
    "text": "In CL_HS_END the FSM shall keep HS-RX disabled and return to CL_STOP on LP-11.",
    "category": "functional",
    "block": "No.2",
@@ -1938,7 +1960,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 356,
+   "source_line": 357,
    "source_quote": "| CL_HS_END | HS-0 / trail | LP-11 → CL_STOP | HS-RX disabled |",
    "source_ids": [
     "Q2",
@@ -1953,7 +1975,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-085",
+   "req_id": "REQ-086",
    "text": "In CL_ULPS_RQST (LP-10) the clock-lane FSM shall move to CL_ULPS on LP-00, to CL_STOP on LP-11, and to CL_WAIT on LP-01 (aborted entry).",
    "category": "functional",
    "block": "No.2",
@@ -1961,7 +1983,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 357,
+   "source_line": 358,
    "source_quote": "| CL_ULPS_RQST | LP-10 | LP-00 → CL_ULPS; LP-11 → CL_STOP; LP-01 → CL_WAIT (aborted entry, D-PHY §6.8 ✅) |",
    "source_ids": [
     "Q2",
@@ -1976,7 +1998,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-086",
+   "req_id": "REQ-087",
    "text": "In CL_ULPS (LP-00) the FSM shall drive cl_ulpsclknot = 0 and cl_ulpsactivenot = 0, and move to CL_ULPS_EXIT on LP-10 (Mark-1).",
    "category": "functional",
    "block": "No.2",
@@ -1984,7 +2006,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 358,
+   "source_line": 359,
    "source_quote": "| CL_ULPS | LP-00 | LP-10 (Mark-1) → CL_ULPS_EXIT | `cl_ulpsclknot` = 0, `cl_ulpsactivenot` = 0 |",
    "source_ids": [
     "Q2",
@@ -1999,7 +2021,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-087",
+   "req_id": "REQ-088",
    "text": "In CL_ULPS_EXIT (LP-10) the FSM shall drive cl_ulpsclknot = 0 and cl_ulpsactivenot = 1, and return to CL_STOP on LP-11.",
    "category": "functional",
    "block": "No.2",
@@ -2007,7 +2029,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 359,
+   "source_line": 360,
    "source_quote": "| CL_ULPS_EXIT | LP-10 | LP-11 → CL_STOP | `cl_ulpsclknot` = 0, `cl_ulpsactivenot` = 1 **[CSI]** |",
    "source_ids": [
     "Q2",
@@ -2023,7 +2045,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-088",
+   "req_id": "REQ-089",
    "text": "In CL_WAIT the clock-lane FSM shall wait for LP-11 and then enter CL_STOP.",
    "category": "functional",
    "block": "No.2",
@@ -2031,7 +2053,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 360,
+   "source_line": 361,
    "source_quote": "| CL_WAIT | any | LP-11 → CL_STOP | — |",
    "source_ids": [
     "Q2",
@@ -2046,7 +2068,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-089",
+   "req_id": "REQ-090",
    "text": "Every clock-lane state except CL_INIT shall go to CL_STOP on LP-11.",
    "category": "functional",
    "block": "No.2",
@@ -2054,7 +2076,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 363,
+   "source_line": 364,
    "source_quote": "- Every state except CL_INIT goes to CL_STOP on LP-11 ⚠️.",
    "source_ids": [
     "Q2"
@@ -2068,7 +2090,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-090",
+   "req_id": "REQ-091",
    "text": "Clock-lane FSM outputs not listed in the table shall keep their inactive value, except cl_term_en, which stays 1 from CL_HS_PRPR to CL_HS_END, and cl_hs_en, which stays 1 in CL_HS_TERM and CL_HS_CLK.",
    "category": "functional",
    "block": "No.2",
@@ -2076,7 +2098,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 365,
+   "source_line": 366,
    "source_quote": "CL_HS_PRPR to CL_HS_END and `cl_hs_en` stays 1 in CL_HS_TERM and CL_HS_CLK ⚠️.",
    "source_ids": [
     "Q2"
@@ -2090,7 +2112,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-091",
+   "req_id": "REQ-092",
    "text": "The clock-lane FSM outputs shall be registers, so the AFE controls are glitch-free.",
    "category": "functional",
    "block": "No.2",
@@ -2098,7 +2120,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 366,
+   "source_line": 367,
    "source_quote": "registers, so the AFE controls are glitch-free.",
    "source_ids": [
     "Q2"
@@ -2112,7 +2134,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-092",
+   "req_id": "REQ-093",
    "text": "CL_INIT shall end when Block No. 6 reports that the clock lane has seen LP-11 for tinit_cyc.",
    "category": "functional",
    "block": "No.2",
@@ -2120,7 +2142,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 367,
+   "source_line": 368,
    "source_quote": "- CL_INIT ends when Block No. 6 reports that the lane has seen LP-11 for `tinit_cyc` (§4.7).",
    "source_ids": [
     "Q2"
@@ -2136,8 +2158,8 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-093",
-   "text": "The settle counter of Block No. 2 shall count core_clk cycles in CL_HS_TERM and restart outside it; CL_HS_TERM shall end when the counter reaches clk_settle_cyc.",
+   "req_id": "REQ-094",
+   "text": "The settle counter of Block No. 2 shall count core_clk cycles in CL_HS_TERM and restart outside it; CL_HS_TERM shall end once the counter has reached clk_settle_cyc and the clock is active.",
    "category": "functional",
    "block": "No.2",
    "clock_domain": "core_clk",
@@ -2145,7 +2167,7 @@
    "spec_status": "assumed",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
    "source_line": 369,
-   "source_quote": "when it reaches `clk_settle_cyc` ⚠️.",
+   "source_quote": "The settle counter counts `core_clk` cycles in CL_HS_TERM and restarts outside it. CL_HS_TERM ends once the counter has reached `clk_settle_cyc` and the clock is active ⚠️",
    "source_ids": [
     "Q2"
    ],
@@ -2160,16 +2182,38 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-094",
-   "text": "The clock-lane FSM shall take 'clock activity lost' as the synchronized afe_cl_clk_active Low from Block No. 1.",
+   "req_id": "REQ-095",
+   "text": "cl_rxclkactivehs shall be asserted only while rxbyteclkhs runs, because TCLK-ZERO (HS-0 without clock transitions) can outlast TCLK-SETTLE and HAS-CSI takes cl_rxclkactivehs as the only indication that rxbyteclkhs is running.",
+   "category": "interface",
+   "block": "No.2",
+   "clock_domain": "multi",
+   "release": "both",
+   "spec_status": "contract",
+   "source_section": "4.4 Clock Lane Control (Block No. 2)",
+   "source_line": 371,
+   "source_quote": "HAS-CSI takes `cl_rxclkactivehs` as the only indication that `rxbyteclkhs` is running **[CSI]**.",
+   "source_ids": [
+    "C5"
+   ],
+   "parameters_affected": [],
+   "ambiguity_score": 0.1,
+   "needs_review": false,
+   "needs_human_decision": false,
+   "open_item_ref": [],
+   "sva_hint": "property",
+   "verification_method": "sva+sim"
+  },
+  {
+   "req_id": "REQ-096",
+   "text": "The clock-lane FSM shall take 'clock active' and 'clock activity lost' as the synchronized afe_cl_clk_active High and Low from Block No. 1.",
    "category": "functional",
    "block": "No.2",
    "clock_domain": "core_clk",
    "release": "both",
    "spec_status": "design",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 370,
-   "source_quote": "- \"Clock activity lost\" is the synchronized `afe_cl_clk_active` Low (Block No. 1).",
+   "source_line": 373,
+   "source_quote": "- \"Clock active\" and \"clock activity lost\" are the synchronized `afe_cl_clk_active` High and Low",
    "source_ids": [
     "Q2"
    ],
@@ -2182,7 +2226,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-095",
+   "req_id": "REQ-097",
    "text": "Loss of the HS clock shall be detected within TCLK-MISS (<= 60 ns) at every supported rate; because rxbyteclkhs alone cannot do this at 80 Mb/s, clock-activity detection is expected from the AFE (afe_cl_clk_active) or the requirement is relaxed for low rates, to be decided with ADR-001.",
    "category": "decision",
    "block": "No.2",
@@ -2190,7 +2234,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
-   "source_line": 374,
+   "source_line": 378,
    "source_quote": "At 80 Mb/s the byte clock period is 100 ns, so the loss of the clock cannot be detected within 60 ns from `rxbyteclkhs` alone.",
    "source_ids": [
     "ADR-001"
@@ -2206,7 +2250,7 @@
    "verification_method": "analysis"
   },
   {
-   "req_id": "REQ-096",
+   "req_id": "REQ-098",
    "text": "Block No. 3 shall implement CIL-SFEN: the Control-mode FSM of a unidirectional slave data lane, HS entry, EoT hand-over and escape mode.",
    "category": "functional",
    "block": "No.3",
@@ -2214,7 +2258,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 381,
+   "source_line": 385,
    "source_quote": "**Overview.** Implements CIL-SFEN: the Control-mode FSM of a unidirectional slave data lane, HS",
    "source_ids": [
     "Q2",
@@ -2234,7 +2278,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-097",
+   "req_id": "REQ-099",
    "text": "In DL_INIT the data-lane FSM shall ignore line states until LP-11 has been held for tinit_cyc core_clk cycles, then enter DL_STOP.",
    "category": "functional",
    "block": "No.3",
@@ -2242,7 +2286,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 388,
+   "source_line": 392,
    "source_quote": "| DL_INIT | any | LP-11 held for `tinit_cyc` → DL_STOP | — |",
    "source_ids": [
     "Q2"
@@ -2258,7 +2302,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-098",
+   "req_id": "REQ-100",
    "text": "In DL_STOP (LP-11) the FSM shall assert stopstate_x = 1 and move to DL_HS_RQST on LP-01 or to DL_LP_RQST on LP-10.",
    "category": "functional",
    "block": "No.3",
@@ -2266,7 +2310,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 389,
+   "source_line": 393,
    "source_quote": "| DL_STOP | LP-11 | LP-01 → DL_HS_RQST; LP-10 → DL_LP_RQST | `stopstate_x` = 1 |",
    "source_ids": [
     "Q2",
@@ -2281,7 +2325,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-099",
+   "req_id": "REQ-101",
    "text": "In DL_HS_RQST (LP-01) the FSM shall move to DL_HS_PRPR on LP-00 and to DL_ERR on any other line state.",
    "category": "functional",
    "block": "No.3",
@@ -2289,7 +2333,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 390,
+   "source_line": 394,
    "source_quote": "| DL_HS_RQST | LP-01 | LP-00 → DL_HS_PRPR; other → DL_ERR | — |",
    "source_ids": [
     "Q2",
@@ -2305,7 +2349,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-100",
+   "req_id": "REQ-102",
    "text": "In DL_HS_PRPR (LP-00) the FSM shall assert term_en_x = 1 and move to DL_HS_TERM once the termination enable has been issued.",
    "category": "functional",
    "block": "No.3",
@@ -2313,7 +2357,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 391,
+   "source_line": 395,
    "source_quote": "| DL_HS_PRPR | LP-00 | termination enable issued → DL_HS_TERM | `term_en_x` = 1 |",
    "source_ids": [
     "Q2",
@@ -2328,7 +2372,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-101",
+   "req_id": "REQ-103",
    "text": "In DL_HS_TERM the FSM shall assert hs_en_x = 1 and move to DL_HS_RX after hs_settle_cyc core_clk cycles.",
    "category": "functional",
    "block": "No.3",
@@ -2336,7 +2380,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 392,
+   "source_line": 396,
    "source_quote": "| DL_HS_TERM | LP-00 → HS | `hs_settle_cyc` elapsed → DL_HS_RX | `hs_en_x` = 1 |",
    "source_ids": [
     "Q2",
@@ -2353,7 +2397,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-102",
+   "req_id": "REQ-104",
    "text": "In DL_HS_RX Block No. 4 shall be active; the FSM shall move to DL_HS_EOT on LP-11, or after hs_rx_timeout_cyc with a timeout status.",
    "category": "functional",
    "block": "No.3",
@@ -2361,7 +2405,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 393,
+   "source_line": 397,
    "source_quote": "| DL_HS_RX | HS | LP-11 → DL_HS_EOT; `hs_rx_timeout_cyc` elapsed → DL_HS_EOT (timeout status) | Block No. 4 active |",
    "source_ids": [
     "Q7",
@@ -2378,7 +2422,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-103",
+   "req_id": "REQ-105",
    "text": "In DL_HS_EOT the FSM shall send the EoT request to Block No. 4 and move to DL_STOP when Block No. 4 reports EoT done.",
    "category": "functional",
    "block": "No.3",
@@ -2386,7 +2430,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 394,
+   "source_line": 398,
    "source_quote": "| DL_HS_EOT | LP-11 | Block No. 4 reports EoT done → DL_STOP | EoT request to Block No. 4 |",
    "source_ids": [
     "Q7",
@@ -2401,7 +2445,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-104",
+   "req_id": "REQ-106",
    "text": "In DL_LP_RQST (LP-10) the FSM shall move to DL_LP_YIELD on LP-00 and to DL_ERR on LP-11.",
    "category": "functional",
    "block": "No.3",
@@ -2409,7 +2453,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 395,
+   "source_line": 399,
    "source_quote": "| DL_LP_RQST | LP-10 | LP-00 → DL_LP_YIELD; LP-11 → DL_ERR | — |",
    "source_ids": [
     "Q4",
@@ -2425,7 +2469,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-105",
+   "req_id": "REQ-107",
    "text": "In DL_LP_YIELD (LP-00) the FSM shall move to DL_ESC_RQST on LP-01; a turnaround request (LP-10) is not supported and shall lead to DL_ERR.",
    "category": "functional",
    "block": "No.3",
@@ -2433,7 +2477,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 396,
+   "source_line": 400,
    "source_quote": "| DL_LP_YIELD | LP-00 | LP-01 → DL_ESC_RQST; LP-10 → turnaround request, not supported → DL_ERR | — |",
    "source_ids": [
     "Q2",
@@ -2449,7 +2493,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-106",
+   "req_id": "REQ-108",
    "text": "In DL_ESC_RQST (LP-01) the FSM shall move to DL_ESC_GO on LP-00 and to DL_ERR on any other line state.",
    "category": "functional",
    "block": "No.3",
@@ -2457,7 +2501,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 397,
+   "source_line": 401,
    "source_quote": "| DL_ESC_RQST | LP-01 | LP-00 → DL_ESC_GO; other → DL_ERR | — |",
    "source_ids": [
     "Q4",
@@ -2473,7 +2517,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-107",
+   "req_id": "REQ-109",
    "text": "In DL_ESC_GO (LP-00) the FSM shall move to DL_ESC_CMD on the first Mark.",
    "category": "functional",
    "block": "No.3",
@@ -2481,7 +2525,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 398,
+   "source_line": 402,
    "source_quote": "| DL_ESC_GO | LP-00 | first Mark → DL_ESC_CMD | — |",
    "source_ids": [
     "Q4",
@@ -2496,7 +2540,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-108",
+   "req_id": "REQ-110",
    "text": "In DL_ESC_CMD the FSM shall decode 8 Spaced-One-Hot bits: ULPS 00011110 leads to DL_ULPS, a Trigger to DL_ESC_WAIT, LPDT 11100001 to DL_ESC_WAIT with erresc_x in R1, and an unknown command to DL_ESC_WAIT with erresc_x.",
    "category": "functional",
    "block": "No.3",
@@ -2504,7 +2548,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 399,
+   "source_line": 403,
    "source_quote": "| DL_ESC_CMD | Spaced-One-Hot | 8 bits decoded (Table 8 ✅): ULPS `00011110` → DL_ULPS; Trigger → DL_ESC_WAIT;",
    "source_ids": [
     "Q4",
@@ -2525,7 +2569,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-109",
+   "req_id": "REQ-111",
    "text": "In DL_ULPS (LP-00) the FSM shall drive rxulpsesc_x = 1 and ulpsactivenot_x = 0, and move to DL_ULPS_EXIT on LP-10 (Mark-1).",
    "category": "functional",
    "block": "No.3",
@@ -2533,7 +2577,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 400,
+   "source_line": 404,
    "source_quote": "| DL_ULPS | LP-00 | LP-10 (Mark-1) → DL_ULPS_EXIT | `rxulpsesc_x` = 1, `ulpsactivenot_x` = 0 |",
    "source_ids": [
     "Q4",
@@ -2548,7 +2592,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-110",
+   "req_id": "REQ-112",
    "text": "In DL_ULPS_EXIT (LP-10) the FSM shall drive rxulpsesc_x = 1 and ulpsactivenot_x = 1, and return to DL_STOP on LP-11.",
    "category": "functional",
    "block": "No.3",
@@ -2556,7 +2600,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 401,
+   "source_line": 405,
    "source_quote": "| DL_ULPS_EXIT | LP-10 | LP-11 → DL_STOP | `rxulpsesc_x` = 1, `ulpsactivenot_x` = 1 **[CSI]** |",
    "source_ids": [
     "Q4",
@@ -2572,7 +2616,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-111",
+   "req_id": "REQ-113",
    "text": "In DL_ESC_WAIT the FSM shall hold the received trigger bit on rxtriggeresc_x until the lane returns to Stop, and move to DL_STOP on LP-11.",
    "category": "functional",
    "block": "No.3",
@@ -2580,7 +2624,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 402,
+   "source_line": 406,
    "source_quote": "| DL_ESC_WAIT | any | LP-11 → DL_STOP | Trigger bit held on `rxtriggeresc_x` until Stop (Annex A ✅) |",
    "source_ids": [
     "Q9",
@@ -2596,7 +2640,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-112",
+   "req_id": "REQ-114",
    "text": "In DL_ERR the FSM shall hold errcontrol_x until the next line-state change and return to DL_STOP on LP-11.",
    "category": "functional",
    "block": "No.3",
@@ -2604,7 +2648,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 403,
+   "source_line": 407,
    "source_quote": "| DL_ERR | any | LP-11 → DL_STOP | `errcontrol_x` held until the next line-state change **[CSI]** C13 |",
    "source_ids": [
     "Q8",
@@ -2619,7 +2663,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-113",
+   "req_id": "REQ-115",
    "text": "Every data-lane state except DL_INIT, DL_HS_RX (where LP-11 ends the burst: DL_HS_EOT) and DL_HS_EOT (which waits for EoT done) shall return to DL_STOP on LP-11.",
    "category": "functional",
    "block": "No.3",
@@ -2627,7 +2671,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 406,
+   "source_line": 410,
    "source_quote": "(LP-11 ends the burst: DL_HS_EOT) and DL_HS_EOT (waits for EoT done) ⚠️.",
    "source_ids": [
     "Q2",
@@ -2642,7 +2686,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-114",
+   "req_id": "REQ-116",
    "text": "Where a data-lane FSM row names LP-11 or 'other' as a path to DL_ERR (DL_HS_RQST, DL_LP_RQST, DL_ESC_RQST), that row shall take precedence: the lane passes through DL_ERR, raising errcontrol_x, and then returns to DL_STOP.",
    "category": "functional",
    "block": "No.3",
@@ -2650,7 +2694,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 408,
+   "source_line": 412,
    "source_quote": "lane passes through DL_ERR, raising `errcontrol_x`, and then returns to DL_STOP ⚠️.",
    "source_ids": [
     "Q2",
@@ -2666,7 +2710,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-115",
+   "req_id": "REQ-117",
    "text": "The four trigger entry commands of D-PHY Table 8 shall map in table order: Reset-Trigger to rxtriggeresc_x[0], Unknown-3 to [1], Unknown-4 to [2], Unknown-5 to [3] (T1).",
    "category": "functional",
    "block": "No.3",
@@ -2674,7 +2718,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 410,
+   "source_line": 414,
    "source_quote": "`[1]`, Unknown-4 to `[2]`, Unknown-5 to `[3]` ⚠️ (T1).",
    "source_ids": [
     "Q9",
@@ -2691,7 +2735,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-116",
+   "req_id": "REQ-118",
    "text": "Block No. 3 shall consist of the lane FSM, a settle counter, the escape decoder, a line-state change detector and the output registers.",
    "category": "functional",
    "block": "No.3",
@@ -2699,7 +2743,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 412,
+   "source_line": 416,
    "source_quote": "**Structure** (Figure 4-5). The lane FSM (Figure 4-6), a settle counter, the escape decoder",
    "source_ids": [
     "Q2"
@@ -2713,7 +2757,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-117",
+   "req_id": "REQ-119",
    "text": "term_en_x shall be 1 in DL_HS_PRPR, DL_HS_TERM and DL_HS_RX, and hs_en_x shall be 1 in DL_HS_TERM and DL_HS_RX.",
    "category": "functional",
    "block": "No.3",
@@ -2721,7 +2765,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 414,
+   "source_line": 418,
    "source_quote": "- `term_en_x` = 1 in DL_HS_PRPR, DL_HS_TERM and DL_HS_RX; `hs_en_x` = 1 in DL_HS_TERM and DL_HS_RX.",
    "source_ids": [
     "Q2",
@@ -2736,7 +2780,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-118",
+   "req_id": "REQ-120",
    "text": "The HS entry signal to Block No. 4 shall be High in DL_HS_TERM and DL_HS_RX, and the EoT request shall be High in DL_HS_EOT.",
    "category": "interface",
    "block": "No.3",
@@ -2744,7 +2788,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 415,
+   "source_line": 419,
    "source_quote": "The HS entry signal to Block No. 4 is High in DL_HS_TERM and DL_HS_RX, the EoT request in DL_HS_EOT",
    "source_ids": [
     "Q7"
@@ -2758,7 +2802,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-119",
+   "req_id": "REQ-121",
    "text": "The data-lane FSM outputs shall be registers, so the AFE controls are glitch-free.",
    "category": "functional",
    "block": "No.3",
@@ -2766,7 +2810,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 416,
+   "source_line": 420,
    "source_quote": "The outputs are registers, so the AFE controls are glitch-free.",
    "source_ids": [
     "Q2"
@@ -2780,7 +2824,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-120",
+   "req_id": "REQ-122",
    "text": "The settle counter of Block No. 3 shall count core_clk cycles in DL_HS_TERM and restart outside it; DL_HS_TERM shall end when the counter reaches hs_settle_cyc.",
    "category": "functional",
    "block": "No.3",
@@ -2788,7 +2832,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 418,
+   "source_line": 422,
    "source_quote": "when it reaches `hs_settle_cyc` ⚠️.",
    "source_ids": [
     "Q2",
@@ -2805,7 +2849,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-121",
+   "req_id": "REQ-123",
    "text": "DL_INIT shall end when Block No. 6 reports that the data lane has seen LP-11 for tinit_cyc.",
    "category": "functional",
    "block": "No.3",
@@ -2813,7 +2857,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 419,
+   "source_line": 423,
    "source_quote": "- DL_INIT ends when Block No. 6 reports that the lane has seen LP-11 for `tinit_cyc`;",
    "source_ids": [
     "Q2"
@@ -2829,7 +2873,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-122",
+   "req_id": "REQ-124",
    "text": "dl_enable_x Low or forcerxmode_x High shall return the data lane to DL_INIT.",
    "category": "functional",
    "block": "No.3",
@@ -2837,7 +2881,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 420,
+   "source_line": 424,
    "source_quote": "Low or `forcerxmode_x` High returns the lane to DL_INIT (§4.2).",
    "source_ids": [
     "Q2"
@@ -2851,7 +2895,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-123",
+   "req_id": "REQ-125",
    "text": "errcontrol_x (set on entry into DL_ERR) and erresc_x (set by the escape decoder) shall stay High until the next line-state change.",
    "category": "interface",
    "block": "No.3",
@@ -2859,7 +2903,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 422,
+   "source_line": 426,
    "source_quote": "- `errcontrol_x` (set on entry into DL_ERR) and `erresc_x` (set by the escape decoder) stay High until",
    "source_ids": [
     "Q8",
@@ -2876,7 +2920,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-124",
+   "req_id": "REQ-126",
    "text": "rxtriggeresc_x and rxulpsesc_x shall stay High until the lane reaches DL_STOP.",
    "category": "interface",
    "block": "No.3",
@@ -2884,7 +2928,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 423,
+   "source_line": 427,
    "source_quote": "`rxtriggeresc_x` and `rxulpsesc_x` stay High until",
    "source_ids": [
     "Q4",
@@ -2900,7 +2944,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-125",
+   "req_id": "REQ-127",
    "text": "In DL_ESC_GO or DL_ESC_CMD each change of the line state to LP-00 shall yield one bit, whose value is given by the previous line state: Mark-0 (LP-01) gives 0 and Mark-1 (LP-10) gives 1.",
    "category": "functional",
    "block": "No.3",
@@ -2908,7 +2952,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 427,
+   "source_line": 431,
    "source_quote": "on each change to LP-00 in DL_ESC_GO or DL_ESC_CMD, the previous line",
    "source_ids": [
     "Q9",
@@ -2923,7 +2967,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-126",
+   "req_id": "REQ-128",
    "text": "The received bits shall shift into an 8-bit register, the first bit ending in the most significant position, and a bit counter, cleared outside DL_ESC_GO and DL_ESC_CMD, shall mark the eighth bit.",
    "category": "functional",
    "block": "No.3",
@@ -2931,7 +2975,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 428,
+   "source_line": 432,
    "source_quote": "Bits shift into an 8-bit register, the first bit ending in the most significant",
    "source_ids": [
     "Q9"
@@ -2945,7 +2989,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-127",
+   "req_id": "REQ-129",
    "text": "After the eighth bit the register shall be compared with the entry codes of D-PHY Table 8 (ULPS and the four triggers); any other value, LPDT included while PARA_LPDT_EN = 0, shall be treated as unknown.",
    "category": "functional",
    "block": "No.3",
@@ -2953,7 +2997,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 431,
+   "source_line": 435,
    "source_quote": "included while `PARA_LPDT_EN` = 0, is unknown ⚠️.",
    "source_ids": [
     "Q9",
@@ -2970,7 +3014,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-128",
+   "req_id": "REQ-130",
    "text": "DL_HS_EOT shall keep waiting for EoT done from Block No. 4 (ADR-006 decision); below roughly 240 Mb/s the next burst is received only when THS-EXIT + TLPX exceeds the round trip, about 32 UI + 15 ns (415 ns at 80 Mb/s); the Tx side is asked in S5.",
    "category": "timing",
    "block": "No.3",
@@ -2978,7 +3022,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 444,
+   "source_line": 448,
    "source_quote": "- Decided (ADR-006): the lane keeps this wait. Below roughly 240 Mb/s the next burst is received only when THS-EXIT + TLPX exceeds the round trip, about 32·UI + 15 ns (415 ns at 80 Mb/s) ⚠️",
    "source_ids": [
     "ADR-006",
@@ -2996,7 +3040,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-129",
+   "req_id": "REQ-131",
    "text": "The order of stopstate_x and rxactivehs_x at the end of a burst is open (ADR-006): HAS-CSI Figure 4-1 leaves the rise of stopstate_x undefined from the last byte on.",
    "category": "interface",
    "block": "No.3",
@@ -3004,7 +3048,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 447,
+   "source_line": 451,
    "source_quote": "- Order at the PPI, OPEN ADR-006: HAS-CSI Figure 4-1 leaves the rise of `stopstate_x` undefined from the last byte on **[CSI]**.",
    "source_ids": [
     "ADR-006"
@@ -3020,7 +3064,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-130",
+   "req_id": "REQ-132",
    "text": "Because EoT done leaves Block No. 4 once the cut is decided, before the delay line drains, stopstate_x may rise up to PARA_EOT_DELAY_BYTES byte clocks (3.2 us at 80 Mb/s) before the last byte reaches the PPI, until the CSI team answers.",
    "category": "interface",
    "block": "No.3",
@@ -3028,7 +3072,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 448,
+   "source_line": 452,
    "source_quote": "EoT done leaves Block No. 4 once the cut is decided, before the delay line drains (§4.6), so `stopstate_x` can rise up to `PARA_EOT_DELAY_BYTES` byte clocks (3.2 µs at 80 Mb/s) before the last byte reaches the PPI ⚠️",
    "source_ids": [
     "ADR-006"
@@ -3044,7 +3088,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-131",
+   "req_id": "REQ-133",
    "text": "The option in which DL_HS_EOT does not wait for EoT done (Block No. 4 completes the EoT on its own, EoT done only feeds the status) shall stay documented as the faster alternative: it receives bursts at the minimum THS-EXIT + TLPX at every rate, raises stopstate_x one round trip earlier, and needs Block No. 4 to accept the next HS entry while the previous EoT is pending.",
    "category": "decision",
    "block": "No.3",
@@ -3052,7 +3096,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
-   "source_line": 453,
+   "source_line": 459,
    "source_quote": "- Faster option, kept for later: DL_HS_EOT does not wait; Block No. 4 completes the EoT on its own and EoT done only feeds the status.",
    "source_ids": [
     "ADR-006"
@@ -3066,7 +3110,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-132",
+   "req_id": "REQ-134",
    "text": "Block No. 4 shall exist per data lane in the rxbyteclkhs domain and turn the raw AFE words into aligned PPI bytes.",
    "category": "functional",
    "block": "No.4",
@@ -3074,7 +3118,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 461,
+   "source_line": 467,
    "source_quote": "**Overview.** Per data lane, in `rxbyteclkhs`. Turns the raw AFE words into aligned PPI bytes.",
    "source_ids": [
     "Q7"
@@ -3090,7 +3134,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-133",
+   "req_id": "REQ-135",
    "text": "After the HS entry signal from Block No. 3, Block No. 4 shall compare, every byte clock, a 2-word window of two consecutive AFE words with the leader ...00011101 (first bit received first), accepting any single-bit error.",
    "category": "functional",
    "block": "No.4",
@@ -3098,7 +3142,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 464,
+   "source_line": 470,
    "source_quote": "After the HS entry signal from Block No. 3, compares a 2-word window (two consecutive AFE words, every byte clock) with the leader `…00011101` (first bit received first), accepting any single-bit error (D-PHY §6.4.4 ✅).",
    "source_ids": [
     "Q7",
@@ -3116,7 +3160,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-134",
+   "req_id": "REQ-136",
    "text": "The sync search shall last at most PARA_SYNC_SEARCH_BYTES byte clocks counted from the first non-zero word after the HS entry signal, because D-PHY bounds THS-PREPARE + THS-ZERO only from below.",
    "category": "functional",
    "block": "No.4",
@@ -3124,7 +3168,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 466,
+   "source_line": 472,
    "source_quote": "The search lasts at most `PARA_SYNC_SEARCH_BYTES` byte clocks, counted from the first non-zero word after the HS entry signal ⚠️",
    "source_ids": [
     "D-PHY v1.1 Table 14"
@@ -3140,7 +3184,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-135",
+   "req_id": "REQ-137",
    "text": "On an exact sync match the byte offset shall be locked and rxsynchs_x shall pulse in the same rxbyteclkhs cycle as the first payload byte.",
    "category": "interface",
    "block": "No.4",
@@ -3148,7 +3192,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 470,
+   "source_line": 476,
    "source_quote": "Exact match: the byte offset is locked; `rxsynchs_x` pulses in the **same cycle** as the first",
    "source_ids": [
     "C6"
@@ -3162,7 +3206,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-136",
+   "req_id": "REQ-138",
    "text": "On a sync match with a single-bit error the burst shall be received as for an exact match and errsoths_x shall pulse for one cycle.",
    "category": "interface",
    "block": "No.4",
@@ -3170,7 +3214,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 472,
+   "source_line": 478,
    "source_quote": "Single-bit error: as above, plus a one-cycle `errsoths_x` (D-PHY §7.2.1 ✅).",
    "source_ids": [
     "Q8",
@@ -3186,7 +3230,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-137",
+   "req_id": "REQ-139",
    "text": "If no sync is found within PARA_SYNC_SEARCH_BYTES, errsotsynchs_x shall pulse for one cycle, rxsynchs_x and rxvalidhs_x shall stay 0 for the rest of the burst, and rxactivehs_x shall stay asserted until EoT.",
    "category": "interface",
    "block": "No.4",
@@ -3194,7 +3238,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 473,
+   "source_line": 479,
    "source_quote": "No match within `PARA_SYNC_SEARCH_BYTES`: one-cycle `errsotsynchs_x`; no `rxsynchs_x` and no",
    "source_ids": [
     "Q8",
@@ -3211,7 +3255,31 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-138",
+   "req_id": "REQ-140",
+   "text": "The sync-search counter shall stop at PARA_SYNC_SEARCH_BYTES, and the leader comparators shall stay disabled until the HS entry signal falls, so that no lock follows a SoT sync error.",
+   "category": "functional",
+   "block": "No.4",
+   "clock_domain": "rxbyteclkhs",
+   "release": "both",
+   "spec_status": "assumed",
+   "source_section": "4.6 HS Receive Datapath (Block No. 4)",
+   "source_line": 481,
+   "source_quote": "The search counter stops at `PARA_SYNC_SEARCH_BYTES`, and the comparators stay disabled until the HS entry signal falls ⚠️.",
+   "source_ids": [
+    "C8"
+   ],
+   "parameters_affected": [
+    "PARA_SYNC_SEARCH_BYTES"
+   ],
+   "ambiguity_score": 0.35,
+   "needs_review": true,
+   "needs_human_decision": false,
+   "open_item_ref": [],
+   "sva_hint": "property",
+   "verification_method": "sva+sim"
+  },
+  {
+   "req_id": "REQ-141",
    "text": "Eight comparators, one per bit offset of the 2-word window, shall each accept at most one differing bit, and the lowest matching offset shall be locked.",
    "category": "functional",
    "block": "No.4",
@@ -3219,7 +3287,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 478,
+   "source_line": 485,
    "source_quote": "least three bits, so a single-bit error cannot move the lock to a wrong offset ⚠️.",
    "source_ids": [
     "Q7",
@@ -3234,7 +3302,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-139",
+   "req_id": "REQ-142",
    "text": "In R1 and R2 a run of at least 16 ones after HS-0 (v1.2 skew-calibration sync) shall assert rxskewcalhs_x until the lane returns to Stop, with no rxvalidhs_x or rxsynchs_x during that burst; in R2 the burst is forwarded to Block No. 5. The exact pattern depends on the Tx deskew behaviour (S4).",
    "category": "interface",
    "block": "No.4",
@@ -3242,7 +3310,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 479,
+   "source_line": 486,
    "source_quote": "**Deskew-burst detection (R1 and R2).** A run of ≥ 16 ones after HS-0 (v1.2 skew-calibration sync,",
    "source_ids": [
     "Q5",
@@ -3262,7 +3330,53 @@
    "notes": "The v1.2 deskew pattern comes from a secondary public source (research plan 2.3); S4 must confirm it."
   },
   {
-   "req_id": "REQ-140",
+   "req_id": "REQ-143",
+   "text": "The skew-calibration flag shall be set on every delay-line entry written from the deskew detection until the HS entry signal falls.",
+   "category": "functional",
+   "block": "No.4",
+   "clock_domain": "rxbyteclkhs",
+   "release": "both",
+   "spec_status": "design",
+   "source_section": "4.6 HS Receive Datapath (Block No. 4)",
+   "source_line": 489,
+   "source_quote": "The skew-calibration flag is set on every delay-line entry written from the detection until the HS entry signal falls.",
+   "source_ids": [
+    "C9"
+   ],
+   "parameters_affected": [],
+   "ambiguity_score": 0.15,
+   "needs_review": false,
+   "needs_human_decision": false,
+   "open_item_ref": [],
+   "sva_hint": "property",
+   "verification_method": "sva+sim"
+  },
+  {
+   "req_id": "REQ-144",
+   "text": "At the PPI, rxskewcalhs_x shall fall after rxactivehs_x, by about eot_skip_bytes byte clocks, and after stopstate_x rises; HAS-CSI expects rxskewcalhs_x to stay asserted after rxactivehs_x has fallen.",
+   "category": "interface",
+   "block": "No.4",
+   "clock_domain": "multi",
+   "release": "both",
+   "spec_status": "assumed",
+   "source_section": "4.6 HS Receive Datapath (Block No. 4)",
+   "source_line": 490,
+   "source_quote": "At the PPI `rxskewcalhs_x` therefore falls after `rxactivehs_x`, by about `eot_skip_bytes` byte clocks, and after `stopstate_x` rises (Figure 5-3) ⚠️",
+   "source_ids": [
+    "C9"
+   ],
+   "parameters_affected": [
+    "eot_skip_bytes"
+   ],
+   "ambiguity_score": 0.35,
+   "needs_review": true,
+   "needs_human_decision": false,
+   "open_item_ref": [],
+   "sva_hint": "property",
+   "verification_method": "sim"
+  },
+  {
+   "req_id": "REQ-145",
    "text": "The first 1 after HS-0 shall be located in the first non-zero word, and the burst shall be a deskew burst when the 16 bits from that position, taken from three consecutive words, are all ones.",
    "category": "functional",
    "block": "No.4",
@@ -3270,7 +3384,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 483,
+   "source_line": 494,
    "source_quote": "the 16 bits from that position, taken from three consecutive words, are all ones ⚠️.",
    "source_ids": [
     "Q5",
@@ -3285,7 +3399,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-141",
+   "req_id": "REQ-146",
    "text": "A deskew-burst detection shall cancel a lock taken on the same burst (the deskew sync matches the leader with one bit in error) by clearing the sync, SoT-error and valid flags in the three newest delay-line entries.",
    "category": "functional",
    "block": "No.4",
@@ -3293,7 +3407,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 486,
+   "source_line": 497,
    "source_quote": "and valid flags already written into the delay line, which are in its three newest entries ⚠️.",
    "source_ids": [
     "Q5",
@@ -3308,7 +3422,29 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-142",
+   "req_id": "REQ-147",
+   "text": "After a deskew detection, Block No. 4 shall clear the lock register and keep the leader comparators disabled until the HS entry signal falls, so that no later delay-line entry is marked valid.",
+   "category": "functional",
+   "block": "No.4",
+   "clock_domain": "rxbyteclkhs",
+   "release": "both",
+   "spec_status": "assumed",
+   "source_section": "4.6 HS Receive Datapath (Block No. 4)",
+   "source_line": 498,
+   "source_quote": "It also clears the lock register and keeps the comparators disabled until the HS entry signal falls, so no later entry is marked valid ⚠️.",
+   "source_ids": [
+    "C9"
+   ],
+   "parameters_affected": [],
+   "ambiguity_score": 0.35,
+   "needs_review": true,
+   "needs_human_decision": false,
+   "open_item_ref": [],
+   "sva_hint": "property",
+   "verification_method": "sva+sim"
+  },
+  {
+   "req_id": "REQ-148",
    "text": "A barrel shifter (an 8-to-1 multiplexer of 8-bit slices selected by the locked offset) over two consecutive words shall produce rxdatahs_x with bit 0 received first, and rxvalidhs_x shall be asserted for every aligned byte.",
    "category": "functional",
    "block": "No.4",
@@ -3316,7 +3452,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 487,
+   "source_line": 500,
    "source_quote": "- **Byte alignment.** A barrel shifter (an 8-to-1 multiplexer of 8-bit slices, selected by the",
    "source_ids": [
     "Q7",
@@ -3331,7 +3467,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-143",
+   "req_id": "REQ-149",
    "text": "Each entry of the PARA_EOT_DELAY_BYTES delay line shall hold a byte and its valid, sync, SoT error, SoT sync error, skew calibration and active flags.",
    "category": "functional",
    "block": "No.4",
@@ -3339,7 +3475,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 490,
+   "source_line": 503,
    "source_quote": "- **Delay line and outputs.** Each entry of the `PARA_EOT_DELAY_BYTES` delay line holds a byte and its",
    "source_ids": [],
    "parameters_affected": [
@@ -3353,7 +3489,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-144",
+   "req_id": "REQ-150",
    "text": "Every PPI output of the lane shall be taken from the oldest delay-line entry, so the outputs follow the line by PARA_EOT_DELAY_BYTES byte clocks and consecutive bursts leave in order.",
    "category": "interface",
    "block": "No.4",
@@ -3361,7 +3497,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 493,
+   "source_line": 506,
    "source_quote": "clocks (3.2 µs at 80 Mb/s) and consecutive bursts leave in order ⚠️.",
    "source_ids": [
     "C6",
@@ -3379,7 +3515,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-145",
+   "req_id": "REQ-151",
    "text": "rxactivehs_x shall be the active flag at the delay-line output, set for every entry written while the HS entry signal is High.",
    "category": "interface",
    "block": "No.4",
@@ -3387,7 +3523,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 494,
+   "source_line": 507,
    "source_quote": "flag at the output: it is set for every entry written while the HS entry signal is High.",
    "source_ids": [
     "C8",
@@ -3402,7 +3538,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-146",
+   "req_id": "REQ-152",
    "text": "On the EoT request (LP-11 seen by Block No. 3) the stored tail of the burst shall be scanned backwards.",
    "category": "functional",
    "block": "No.4",
@@ -3410,7 +3546,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 496,
+   "source_line": 509,
    "source_quote": "tail is scanned backwards (D-PHY §6.4.3, Table 4 ✅):",
    "source_ids": [
     "Q7",
@@ -3425,7 +3561,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-147",
+   "req_id": "REQ-153",
    "text": "On the EoT request the eot_skip_bytes newest delay-line entries shall be discarded: the THS-SKIP interval and the detection latency.",
    "category": "functional",
    "block": "No.4",
@@ -3433,7 +3569,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 498,
+   "source_line": 511,
    "source_quote": "latency (Appendix B) ⚠️;",
    "source_ids": [],
    "parameters_affected": [
@@ -3447,7 +3583,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-148",
+   "req_id": "REQ-154",
    "text": "The newest remaining bit shall give the trailer value, and the newest entry that is not uniformly equal to it shall hold the last payload bit, which is its highest bit that differs.",
    "category": "functional",
    "block": "No.4",
@@ -3455,7 +3591,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 499,
+   "source_line": 512,
    "source_quote": "- the newest remaining bit gives the trailer value; the newest entry that is not uniformly equal to",
    "source_ids": [
     "D-PHY v1.1 §6.4.3"
@@ -3469,7 +3605,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-149",
+   "req_id": "REQ-155",
    "text": "If the last payload bit is bit 7 its entry shall be the last byte; otherwise that entry shall be dropped as well and the EoT sync error status raised.",
    "category": "functional",
    "block": "No.4",
@@ -3477,7 +3613,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 503,
+   "source_line": 516,
    "source_quote": "HAS-CSI has no PPI pin for it) ⚠️;",
    "source_ids": [
     "Q8",
@@ -3492,7 +3628,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-150",
+   "req_id": "REQ-156",
    "text": "Delay-line entries after the last byte shall lose their valid and active flags, so rxactivehs_x falls after the last delivered byte.",
    "category": "interface",
    "block": "No.4",
@@ -3500,7 +3636,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 504,
+   "source_line": 517,
    "source_quote": "- entries after the last byte lose their valid and active flags, so `rxactivehs_x` falls after the",
    "source_ids": [
     "C11"
@@ -3514,7 +3650,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-151",
+   "req_id": "REQ-157",
    "text": "EoT done shall go to Block No. 3 once the cut is decided, before the delay line drains.",
    "category": "functional",
    "block": "No.4",
@@ -3522,7 +3658,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 505,
+   "source_line": 518,
    "source_quote": "EoT done goes to Block No. 3 once the cut is decided, before the delay line drains ⚠️.",
    "source_ids": [
     "Q7"
@@ -3536,7 +3672,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-152",
+   "req_id": "REQ-158",
    "text": "The HS RX timeout of Block No. 3 shall force the same EoT sequence, so that rxactivehs_x always falls.",
    "category": "functional",
    "block": "No.4",
@@ -3544,7 +3680,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 506,
+   "source_line": 519,
    "source_quote": "**Timeout.** The HS RX timeout of Block No. 3 forces the same EoT sequence, so `rxactivehs_x` always falls **[CSI]** C11.",
    "source_ids": [
     "C11"
@@ -3560,7 +3696,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-153",
+   "req_id": "REQ-159",
    "text": "Because the core_clk to byte-clock crossing of the HS entry signal adds 2-3 byte cycles at 80 Mb/s, Block No. 4 shall accept the leader only after at least one all-zero word has been received after the HS entry signal.",
    "category": "timing",
    "block": "No.4",
@@ -3568,7 +3704,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 515,
+   "source_line": 528,
    "source_quote": "The search therefore qualifies the sync on a preceding run of zeros rather than relying only on the settle timer: the leader is accepted only after at least one all-zero word has been received after the HS entry signal ⚠️",
    "source_ids": [],
    "parameters_affected": [
@@ -3582,7 +3718,32 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-154",
+   "req_id": "REQ-160",
+   "text": "The start of the sync search is open (ADR-007): with the current rule a leader sent at the minimum THS-PREPARE + THS-ZERO can be rejected below about 170 Mb/s, and AFE words received during THS-PREPARE at high rates can start the search window or match the leader.",
+   "category": "decision",
+   "block": "No.4",
+   "clock_domain": "rxbyteclkhs",
+   "release": "both",
+   "spec_status": "open",
+   "source_section": "4.6 HS Receive Datapath (Block No. 4)",
+   "source_line": 532,
+   "source_quote": "**Design note ⚠️ (start of the sync search, OPEN ADR-007).** Drawing Figure 5-9 shows two cases that",
+   "source_ids": [
+    "ADR-007",
+    "ADR-001"
+   ],
+   "parameters_affected": [],
+   "ambiguity_score": 0.5,
+   "needs_review": true,
+   "needs_human_decision": true,
+   "open_item_ref": [
+    "ADR-007"
+   ],
+   "sva_hint": "none",
+   "verification_method": "review"
+  },
+  {
+   "req_id": "REQ-161",
    "text": "A fixed eot_skip_bytes shall place the EoT cut inside the trailer only above roughly 270 Mb/s; below that rate the choice between a late cut, time-stamping the LP-11 detection, or leaving the trailer to the CSI-2 controller is open (ADR-006).",
    "category": "decision",
    "block": "No.4",
@@ -3590,7 +3751,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 519,
+   "source_line": 546,
    "source_quote": "**Design note ⚠️ (EoT cut at low rates, OPEN ADR-006).**",
    "source_ids": [
     "ADR-006",
@@ -3609,7 +3770,7 @@
    "verification_method": "analysis"
   },
   {
-   "req_id": "REQ-155",
+   "req_id": "REQ-162",
    "text": "The delay line shall hold TEOT,max plus the LP-11 detection latency and the crossing into rxbyteclkhs: about 30 bytes at 1500 Mb/s and 35 at 1792 Mb/s, so the default PARA_EOT_DELAY_BYTES of 32 covers R1 only.",
    "category": "constraint",
    "block": "No.4",
@@ -3617,7 +3778,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.6 HS Receive Datapath (Block No. 4)",
-   "source_line": 531,
+   "source_line": 558,
    "source_quote": "**Design note ⚠️ (delay line depth).** The tail to hold is TEOT,max",
    "source_ids": [
     "D-PHY v1.1 Table 14"
@@ -3633,7 +3794,7 @@
    "verification_method": "analysis"
   },
   {
-   "req_id": "REQ-156",
+   "req_id": "REQ-163",
    "text": "Block No. 6 shall hold the programmable timer values and distribute them to Blocks No. 2 and 3.",
    "category": "functional",
    "block": "No.6",
@@ -3641,7 +3802,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.7 Timing & Init Control (Block No. 6)",
-   "source_line": 537,
+   "source_line": 571,
    "source_quote": "Holds the programmable timer values and distributes them to Blocks No. 2 and 3.",
    "source_ids": [
     "C15"
@@ -3661,7 +3822,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-157",
+   "req_id": "REQ-164",
    "text": "Block No. 6 shall host the reset synchronizers of the three clock domains and the level synchronizers of cl_enable, dl_enable_x and forcerxmode_x.",
    "category": "functional",
    "block": "No.6",
@@ -3669,7 +3830,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.7 Timing & Init Control (Block No. 6)",
-   "source_line": 538,
+   "source_line": 572,
    "source_quote": "- Hosts the reset synchronizers of the three clock domains (§4.2) and the level synchronizers of",
    "source_ids": [
     "C14"
@@ -3683,7 +3844,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-158",
+   "req_id": "REQ-165",
    "text": "The synchronized enables shall go to Block No. 7, and a lane whose enable is Low, or a data lane whose forcerxmode_x is High, shall be held in its INIT state.",
    "category": "functional",
    "block": "No.6",
@@ -3691,7 +3852,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.7 Timing & Init Control (Block No. 6)",
-   "source_line": 540,
+   "source_line": 574,
    "source_quote": "a lane whose enable is Low, or a data lane whose `forcerxmode_x` is High, is held in its INIT state.",
    "source_ids": [
     "C14"
@@ -3705,7 +3866,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-159",
+   "req_id": "REQ-166",
    "text": "After phy_core_rst release, enable, or forcerxmode_x, a lane shall ignore all line states until it has observed LP-11 for tinit_cyc.",
    "category": "functional",
    "block": "No.6",
@@ -3713,7 +3874,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "4.7 Timing & Init Control (Block No. 6)",
-   "source_line": 541,
+   "source_line": 575,
    "source_quote": "Initialization (D-PHY §6.11 ✅): after `phy_core_rst` release, enable, or `forcerxmode_x`, a lane ignores all line states until it has observed LP-11 for `tinit_cyc`.",
    "source_ids": [
     "C14",
@@ -3731,7 +3892,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-160",
+   "req_id": "REQ-167",
    "text": "init_done shall rise when the clock lane and every enabled data lane have completed initialization.",
    "category": "interface",
    "block": "No.6",
@@ -3739,7 +3900,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "4.7 Timing & Init Control (Block No. 6)",
-   "source_line": 542,
+   "source_line": 576,
    "source_quote": "`init_done` rises when the clock lane and every enabled data lane have completed initialization **[CSI]** C14, C16.",
    "source_ids": [
     "C14",
@@ -3757,7 +3918,7 @@
    "notes": "Exact init_done semantics are part of K6."
   },
   {
-   "req_id": "REQ-161",
+   "req_id": "REQ-168",
    "text": "One counter per lane shall count consecutive LP-11 cycles and restart on any other state or on a lane reset; the lane is initialized when the counter reaches tinit_cyc.",
    "category": "functional",
    "block": "No.6",
@@ -3765,7 +3926,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.7 Timing & Init Control (Block No. 6)",
-   "source_line": 545,
+   "source_line": 579,
    "source_quote": "lane reset; the lane is initialized when the counter reaches `tinit_cyc` ⚠️.",
    "source_ids": [
     "D-PHY v1.1 §6.11"
@@ -3781,7 +3942,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-162",
+   "req_id": "REQ-169",
    "text": "init_done shall be the registered AND of the clock lane and, for each data lane, 'initialized or not enabled' (exact semantics OPEN K6).",
    "category": "functional",
    "block": "No.6",
@@ -3789,7 +3950,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "4.7 Timing & Init Control (Block No. 6)",
-   "source_line": 547,
+   "source_line": 581,
    "source_quote": "enabled\" ⚠️ (exact semantics OPEN K6).",
    "source_ids": [
     "C14",
@@ -3807,7 +3968,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-163",
+   "req_id": "REQ-170",
    "text": "Block No. 6 shall host one HS RX timeout counter and one escape watchdog counter per data lane, each counting core_clk cycles in its watched states (DL_HS_RX for the HS RX timeout) and restarting outside them, and expiring when it reaches hs_rx_timeout_cyc or esc_timeout_cyc.",
    "category": "functional",
    "block": "No.6",
@@ -3815,7 +3976,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.7 Timing & Init Control (Block No. 6)",
-   "source_line": 550,
+   "source_line": 584,
    "source_quote": "reaches `hs_rx_timeout_cyc` or `esc_timeout_cyc` ⚠️. The HS RX timeout watches DL_HS_RX.",
    "source_ids": [
     "C11",
@@ -3833,7 +3994,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-164",
+   "req_id": "REQ-171",
    "text": "The escape watchdog shall run only in DL_LP_RQST, DL_LP_YIELD, DL_ESC_RQST, DL_ESC_GO and DL_ESC_CMD, not in DL_ULPS, DL_ULPS_EXIT or DL_ESC_WAIT.",
    "category": "functional",
    "block": "No.6",
@@ -3841,7 +4002,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.7 Timing & Init Control (Block No. 6)",
-   "source_line": 551,
+   "source_line": 585,
    "source_quote": "Escape watchdog ⚠️: runs only in DL_LP_RQST, DL_LP_YIELD, DL_ESC_RQST, DL_ESC_GO and DL_ESC_CMD,",
    "source_ids": [
     "D-PHY v1.1 §7.3"
@@ -3857,7 +4018,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-165",
+   "req_id": "REQ-172",
    "text": "On escape-watchdog expiry the data lane shall go to DL_ESC_WAIT, wait for LP-11 without raising a PPI error, and set the escape-timeout sticky flag of Block No. 8.",
    "category": "functional",
    "block": "all",
@@ -3865,7 +4026,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.7 Timing & Init Control (Block No. 6)",
-   "source_line": 553,
+   "source_line": 587,
    "source_quote": "On expiry the lane goes to DL_ESC_WAIT, which waits for LP-11 without a PPI error, and the escape-timeout sticky flag of Block No. 8 is set.",
    "source_ids": [],
    "parameters_affected": [
@@ -3879,7 +4040,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-166",
+   "req_id": "REQ-173",
    "text": "Block No. 5 shall receive the deskew bursts identified by Block No. 4, drive the AFE delay taps of its lane and select the tap in the centre of the passing window.",
    "category": "functional",
    "block": "No.5",
@@ -3887,7 +4048,7 @@
    "release": "R2",
    "spec_status": "design",
    "source_section": "4.8 Deskew Controller (Block No. 5, R2)",
-   "source_line": 560,
+   "source_line": 594,
    "source_quote": "Receives deskew bursts identified by Block No. 4, drives the AFE delay taps of its lane, and",
    "source_ids": [
     "Q5"
@@ -3907,7 +4068,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-167",
+   "req_id": "REQ-174",
    "text": "The deskew algorithm, tap resolution and use of periodic calibration shall be decided for R2 (ADR-004), once the AFE delay-line capability is known.",
    "category": "decision",
    "block": "No.5",
@@ -3915,7 +4076,7 @@
    "release": "R2",
    "spec_status": "design",
    "source_section": "4.8 Deskew Controller (Block No. 5, R2)",
-   "source_line": 562,
+   "source_line": 596,
    "source_quote": "The algorithm, the tap resolution and the use of periodic calibration are decided in R2 (ADR-004), once the AFE delay-line capability is known.",
    "source_ids": [
     "Q5",
@@ -3934,7 +4095,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-168",
+   "req_id": "REQ-175",
    "text": "RxErrorCalHS shall not be required on the PPI.",
    "category": "interface",
    "block": "No.5",
@@ -3942,7 +4103,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "4.8 Deskew Controller (Block No. 5, R2)",
-   "source_line": 564,
+   "source_line": 598,
    "source_quote": "RxErrorCalHS is not required **[CSI]** C9.",
    "source_ids": [
     "C9"
@@ -3956,7 +4117,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-169",
+   "req_id": "REQ-176",
    "text": "With PARA_DESKEW_EN = 0, Block No. 5 shall be absent and the AFE delay taps held at their reset value.",
    "category": "functional",
    "block": "No.5",
@@ -3964,7 +4125,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.8 Deskew Controller (Block No. 5, R2)",
-   "source_line": 565,
+   "source_line": 599,
    "source_quote": "With `PARA_DESKEW_EN` = 0 the block is absent and the taps are held at their reset value.",
    "source_ids": [
     "Q5"
@@ -3980,7 +4141,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-170",
+   "req_id": "REQ-177",
    "text": "Block No. 7 shall map the internal signals to the PPI names of HAS-CSI Table 4-3, so that a change of the PPI contract stays inside this block.",
    "category": "constraint",
    "block": "No.7",
@@ -3988,7 +4149,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "4.9 PPI Output Stage (Block No. 7)",
-   "source_line": 572,
+   "source_line": 606,
    "source_quote": "Maps internal signals to the PPI names of HAS-CSI Table 4-3 (§5.1), so a change of the PPI",
    "source_ids": [
     "HAS-CSI Table 4-3"
@@ -4002,7 +4163,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-171",
+   "req_id": "REQ-178",
    "text": "Block No. 7 shall force the inactive value of every PPI output of a lane whose enable is Low.",
    "category": "interface",
    "block": "No.7",
@@ -4010,7 +4171,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "4.9 PPI Output Stage (Block No. 7)",
-   "source_line": 574,
+   "source_line": 608,
    "source_quote": "Forces the inactive value of every output of a lane whose enable is Low (D-PHY Annex A ✅).",
    "source_ids": [
     "D-PHY v1.1 Annex A"
@@ -4024,7 +4185,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-172",
+   "req_id": "REQ-179",
    "text": "The rxbyteclkhs-domain PPI outputs shall be gated combinationally with the synchronized lane enable, so their inactive values hold while the byte clock is stopped.",
    "category": "interface",
    "block": "No.7",
@@ -4032,7 +4193,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.9 PPI Output Stage (Block No. 7)",
-   "source_line": 575,
+   "source_line": 609,
    "source_quote": "The outputs of the `rxbyteclkhs` domain are gated combinationally with the synchronized enable, so their inactive values hold while the byte clock is stopped ⚠️",
    "source_ids": [],
    "parameters_affected": [],
@@ -4044,7 +4205,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-173",
+   "req_id": "REQ-180",
    "text": "Block No. 7 shall generate rxclkesc_x as the XOR of the synchronized LP lines for PPI completeness, and no logic inside the IP shall be clocked by it.",
    "category": "interface",
    "block": "No.7",
@@ -4052,7 +4213,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.9 PPI Output Stage (Block No. 7)",
-   "source_line": 577,
+   "source_line": 611,
    "source_quote": "Generates `rxclkesc_x` as the XOR of the synchronized LP lines for PPI completeness; no logic inside this IP is clocked by it (ADR-002).",
    "source_ids": [
     "ADR-002"
@@ -4066,7 +4227,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-174",
+   "req_id": "REQ-181",
    "text": "An output whose inactive value is 0 shall be ANDed with the synchronized enable of its lane, and ulpsactivenot_x, cl_ulpsactivenot and cl_ulpsclknot (inactive value 1) shall be ORed with its inverse.",
    "category": "interface",
    "block": "No.7",
@@ -4074,7 +4235,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.9 PPI Output Stage (Block No. 7)",
-   "source_line": 579,
+   "source_line": 613,
    "source_quote": "- Gating (Figure 4-12): an output whose inactive value is 0 is ANDed with the synchronized enable of",
    "source_ids": [
     "D-PHY v1.1 Annex A"
@@ -4088,7 +4249,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-175",
+   "req_id": "REQ-182",
    "text": "Block No. 7 shall tie the LPDT outputs to 0 (K2) and pass rxbyteclkhs and init_done through.",
    "category": "interface",
    "block": "No.7",
@@ -4096,7 +4257,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "4.9 PPI Output Stage (Block No. 7)",
-   "source_line": 581,
+   "source_line": 615,
    "source_quote": "The LPDT outputs are tied to 0 (K2); `rxbyteclkhs` and `init_done` pass through.",
    "source_ids": [
     "K2"
@@ -4112,7 +4273,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-176",
+   "req_id": "REQ-183",
    "text": "Block No. 8 shall provide configuration fields for the timer values of §3, lane polarity inversion and lane mapping.",
    "category": "functional",
    "block": "No.8",
@@ -4120,7 +4281,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.10 Configuration & Status (Block No. 8)",
-   "source_line": 587,
+   "source_line": 621,
    "source_quote": "Configuration fields: the timer values of §3, lane polarity inversion and lane mapping (V9), and a",
    "source_ids": [],
    "parameters_affected": [
@@ -4138,7 +4299,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-177",
+   "req_id": "REQ-184",
    "text": "Block No. 8 shall provide a run-time deskew bypass field deskew_bypass (R2), present only when PARA_DESKEW_EN = 1, that holds the delay taps at their reset value.",
    "category": "functional",
    "block": "No.8",
@@ -4146,7 +4307,7 @@
    "release": "R2",
    "spec_status": "assumed",
    "source_section": "4.10 Configuration & Status (Block No. 8)",
-   "source_line": 588,
+   "source_line": 622,
    "source_quote": "run-time deskew bypass `deskew_bypass` (R2, present only when `PARA_DESKEW_EN` = 1; holds the taps at their reset value) ⚠️.",
    "source_ids": [],
    "parameters_affected": [
@@ -4160,7 +4321,7 @@
    "verification_method": "sva+sim"
   },
   {
-   "req_id": "REQ-178",
+   "req_id": "REQ-185",
    "text": "Block No. 8 shall report the lane FSM states and sticky flags with counters for EoT sync errors, HS RX timeouts, SoT errors, escape errors, escape timeouts and aborted clock-lane requests.",
    "category": "functional",
    "block": "No.8",
@@ -4168,7 +4329,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.10 Configuration & Status (Block No. 8)",
-   "source_line": 591,
+   "source_line": 625,
    "source_quote": "Status: the lane FSM states, and sticky flags with counters for EoT sync errors, HS RX timeouts, SoT errors, escape errors, escape timeouts and aborted clock-lane requests.",
    "source_ids": [],
    "parameters_affected": [],
@@ -4180,7 +4341,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-179",
+   "req_id": "REQ-186",
    "text": "The bus and register map of Block No. 8 are open (K3, ADR-005).",
    "category": "decision",
    "block": "No.8",
@@ -4188,7 +4349,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "4.10 Configuration & Status (Block No. 8)",
-   "source_line": 594,
+   "source_line": 628,
    "source_quote": "The bus and register map are OPEN (K3, ADR-005); chapter 6.",
    "source_ids": [
     "K3",
@@ -4206,7 +4367,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-180",
+   "req_id": "REQ-187",
    "text": "The configuration fields shall be registers of the configuration clock, used quasi-statically by the other blocks.",
    "category": "functional",
    "block": "No.8",
@@ -4214,7 +4375,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.10 Configuration & Status (Block No. 8)",
-   "source_line": 597,
+   "source_line": 631,
    "source_quote": "- The configuration fields are registers of the configuration clock, used quasi-statically by the",
    "source_ids": [],
    "parameters_affected": [],
@@ -4226,7 +4387,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-181",
+   "req_id": "REQ-188",
    "text": "Each status event shall arrive through a toggle synchronizer, set its sticky flag and increment its counter; software clears both.",
    "category": "functional",
    "block": "No.8",
@@ -4234,7 +4395,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "4.10 Configuration & Status (Block No. 8)",
-   "source_line": 600,
+   "source_line": 634,
    "source_quote": "its counter; software clears both ⚠️ (access method with the register map, chapter 6).",
    "source_ids": [],
    "parameters_affected": [],
@@ -4246,7 +4407,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-182",
+   "req_id": "REQ-189",
    "text": "The lane FSM states shall reach Block No. 8 through 2-flop synchronizers.",
    "category": "functional",
    "block": "No.8",
@@ -4254,7 +4415,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "4.10 Configuration & Status (Block No. 8)",
-   "source_line": 601,
+   "source_line": 635,
    "source_quote": "- The lane FSM states arrive through 2-flop synchronizers (§4.1).",
    "source_ids": [],
    "parameters_affected": [],
@@ -4266,7 +4427,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-183",
+   "req_id": "REQ-190",
    "text": "The PPI signal list and semantics shall follow HAS-CSI Table 4-3, with directions seen from this IP.",
    "category": "interface",
    "block": "No.7",
@@ -4274,7 +4435,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 611,
+   "source_line": 645,
    "source_quote": "Direction is seen from this IP. Signal list and semantics follow HAS-CSI Table 4-3 **[CSI]**.",
    "source_ids": [
     "C2",
@@ -4290,7 +4451,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-184",
+   "req_id": "REQ-191",
    "text": "cl_enable shall be a 1-bit level input.",
    "category": "interface",
    "block": "top",
@@ -4298,7 +4459,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 617,
+   "source_line": 651,
    "source_quote": "| `cl_enable` | In | 1 | level | — | — | Yes |",
    "source_ids": [],
    "parameters_affected": [],
@@ -4310,7 +4471,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-185",
+   "req_id": "REQ-192",
    "text": "dl_enable_x shall be a 1-bit level input per data lane.",
    "category": "interface",
    "block": "top",
@@ -4318,7 +4479,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 618,
+   "source_line": 652,
    "source_quote": "| `dl_enable_x` | In | 1 | level | — | — | Yes |",
    "source_ids": [
     "C2"
@@ -4334,7 +4495,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-186",
+   "req_id": "REQ-193",
    "text": "forcerxmode_x shall be a 1-bit level input per data lane.",
    "category": "interface",
    "block": "top",
@@ -4342,7 +4503,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 619,
+   "source_line": 653,
    "source_quote": "| `forcerxmode_x` | In | 1 | level | — | — | Yes |",
    "source_ids": [],
    "parameters_affected": [],
@@ -4354,7 +4515,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-187",
+   "req_id": "REQ-194",
    "text": "phy_core_rst shall be a 1-bit asynchronous input.",
    "category": "interface",
    "block": "top",
@@ -4362,7 +4523,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 620,
+   "source_line": 654,
    "source_quote": "| `phy_core_rst` | In | 1 | async | — | — | Yes |",
    "source_ids": [],
    "parameters_affected": [],
@@ -4376,7 +4537,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-188",
+   "req_id": "REQ-195",
    "text": "core_clk shall be a 1-bit clock input from the system.",
    "category": "interface",
    "block": "top",
@@ -4384,7 +4545,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 621,
+   "source_line": 655,
    "source_quote": "| `core_clk` | In | 1 | — | system | — | Yes |",
    "source_ids": [],
    "parameters_affected": [
@@ -4398,7 +4559,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-189",
+   "req_id": "REQ-196",
    "text": "init_done shall be a 1-bit output in core_clk driven by Block No. 6, inactive value 0.",
    "category": "interface",
    "block": "No.6",
@@ -4406,7 +4567,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 622,
+   "source_line": 656,
    "source_quote": "| `init_done` | Out | 1 | `core_clk` | No.6 | 0 | Yes |",
    "source_ids": [],
    "parameters_affected": [],
@@ -4418,7 +4579,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-190",
+   "req_id": "REQ-197",
    "text": "cl_stopstate shall be a 1-bit asynchronous output driven by Block No. 2, inactive value 0.",
    "category": "interface",
    "block": "No.2",
@@ -4426,7 +4587,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 623,
+   "source_line": 657,
    "source_quote": "| `cl_stopstate` | Out | 1 | async | No.2 | 0 | Yes |",
    "source_ids": [],
    "parameters_affected": [],
@@ -4438,7 +4599,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-191",
+   "req_id": "REQ-198",
    "text": "stopstate_x shall be a 1-bit asynchronous output per data lane driven by Block No. 3, inactive value 0.",
    "category": "interface",
    "block": "No.3",
@@ -4446,7 +4607,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 624,
+   "source_line": 658,
    "source_quote": "| `stopstate_x` | Out | 1 | async | No.3 | 0 | Yes |",
    "source_ids": [
     "C2"
@@ -4460,7 +4621,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-192",
+   "req_id": "REQ-199",
    "text": "cl_ulpsactivenot shall be a 1-bit asynchronous output driven by Block No. 2, inactive value 1.",
    "category": "interface",
    "block": "No.2",
@@ -4468,7 +4629,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 625,
+   "source_line": 659,
    "source_quote": "| `cl_ulpsactivenot` | Out | 1 | async | No.2 | 1 | Yes |",
    "source_ids": [
     "C12"
@@ -4482,7 +4643,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-193",
+   "req_id": "REQ-200",
    "text": "ulpsactivenot_x shall be a 1-bit asynchronous output per data lane driven by Block No. 3, inactive value 1.",
    "category": "interface",
    "block": "No.3",
@@ -4490,7 +4651,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 626,
+   "source_line": 660,
    "source_quote": "| `ulpsactivenot_x` | Out | 1 | async | No.3 | 1 | Yes |",
    "source_ids": [
     "C12",
@@ -4505,7 +4666,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-194",
+   "req_id": "REQ-201",
    "text": "rxbyteclkhs shall be a 1-bit clock output taken from the AFE through Block No. 1.",
    "category": "interface",
    "block": "No.1",
@@ -4513,7 +4674,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 627,
+   "source_line": 661,
    "source_quote": "| `rxbyteclkhs` | Out | 1 | clock | AFE via No.1 | — | Yes |",
    "source_ids": [
     "C3"
@@ -4527,7 +4688,7 @@
    "verification_method": "sta"
   },
   {
-   "req_id": "REQ-195",
+   "req_id": "REQ-202",
    "text": "cl_rxclkactivehs shall be a 1-bit asynchronous output driven by Block No. 2, inactive value 0.",
    "category": "interface",
    "block": "No.2",
@@ -4535,7 +4696,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 628,
+   "source_line": 662,
    "source_quote": "| `cl_rxclkactivehs` | Out | 1 | async | No.2 | 0 | Yes |",
    "source_ids": [],
    "parameters_affected": [],
@@ -4547,7 +4708,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-196",
+   "req_id": "REQ-203",
    "text": "cl_ulpsclknot shall be a 1-bit asynchronous output driven by Block No. 2, inactive value 1.",
    "category": "interface",
    "block": "No.2",
@@ -4555,7 +4716,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 629,
+   "source_line": 663,
    "source_quote": "| `cl_ulpsclknot` | Out | 1 | async | No.2 | 1 | Yes |",
    "source_ids": [
     "C12"
@@ -4569,7 +4730,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-197",
+   "req_id": "REQ-204",
    "text": "rxdatahs_x shall be an 8-bit output per data lane in rxbyteclkhs driven by Block No. 4, inactive value 0.",
    "category": "interface",
    "block": "No.4",
@@ -4577,7 +4738,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 630,
+   "source_line": 664,
    "source_quote": "| `rxdatahs_x` | Out | 8 | `rxbyteclkhs` | No.4 | 0 | Yes |",
    "source_ids": [
     "C3",
@@ -4594,7 +4755,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-198",
+   "req_id": "REQ-205",
    "text": "rxvalidhs_x shall be a 1-bit output per data lane in rxbyteclkhs driven by Block No. 4, inactive value 0.",
    "category": "interface",
    "block": "No.4",
@@ -4602,7 +4763,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 631,
+   "source_line": 665,
    "source_quote": "| `rxvalidhs_x` | Out | 1 | `rxbyteclkhs` | No.4 | 0 | Yes |",
    "source_ids": [
     "C2"
@@ -4616,7 +4777,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-199",
+   "req_id": "REQ-206",
    "text": "rxactivehs_x shall be a 1-bit output per data lane in rxbyteclkhs driven by Block No. 4, inactive value 0.",
    "category": "interface",
    "block": "No.4",
@@ -4624,7 +4785,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 632,
+   "source_line": 666,
    "source_quote": "| `rxactivehs_x` | Out | 1 | `rxbyteclkhs` | No.4 | 0 | Yes |",
    "source_ids": [
     "C2"
@@ -4638,7 +4799,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-200",
+   "req_id": "REQ-207",
    "text": "rxsynchs_x shall be a 1-bit output per data lane in rxbyteclkhs driven by Block No. 4, inactive value 0.",
    "category": "interface",
    "block": "No.4",
@@ -4646,7 +4807,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 633,
+   "source_line": 667,
    "source_quote": "| `rxsynchs_x` | Out | 1 | `rxbyteclkhs` | No.4 | 0 | Yes |",
    "source_ids": [
     "C2"
@@ -4660,7 +4821,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-201",
+   "req_id": "REQ-208",
    "text": "rxskewcalhs_x shall be a 1-bit output per data lane in rxbyteclkhs driven by Block No. 4, inactive value 0; in R1 it reports deskew-burst detection only.",
    "category": "interface",
    "block": "No.4",
@@ -4668,7 +4829,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 634,
+   "source_line": 668,
    "source_quote": "| `rxskewcalhs_x` | Out | 1 | `rxbyteclkhs` | No.4 | 0 | Yes (detection) |",
    "source_ids": [
     "C2"
@@ -4682,7 +4843,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-202",
+   "req_id": "REQ-209",
    "text": "rxclkesc_x shall be a 1-bit clock-like output per data lane driven by Block No. 7, inactive value 0.",
    "category": "interface",
    "block": "No.7",
@@ -4690,7 +4851,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 635,
+   "source_line": 669,
    "source_quote": "| `rxclkesc_x` | Out | 1 | clock | No.7 | 0 | Yes |",
    "source_ids": [
     "C2"
@@ -4704,7 +4865,7 @@
    "verification_method": "cdc"
   },
   {
-   "req_id": "REQ-203",
+   "req_id": "REQ-210",
    "text": "rxlpdtesc_x shall be a 1-bit output in core_clk tied to 0 while LPDT is not implemented (pending K2).",
    "category": "interface",
    "block": "top",
@@ -4712,7 +4873,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 636,
+   "source_line": 670,
    "source_quote": "| `rxlpdtesc_x` | Out | 1 | `core_clk` | — | 0 | Tied 0 (K2) |",
    "source_ids": [
     "K2"
@@ -4730,7 +4891,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-204",
+   "req_id": "REQ-211",
    "text": "rxulpsesc_x shall be a 1-bit asynchronous output per data lane driven by Block No. 3, inactive value 0.",
    "category": "interface",
    "block": "No.3",
@@ -4738,7 +4899,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 637,
+   "source_line": 671,
    "source_quote": "| `rxulpsesc_x` | Out | 1 | async | No.3 | 0 | Yes |",
    "source_ids": [
     "C12"
@@ -4752,7 +4913,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-205",
+   "req_id": "REQ-212",
    "text": "rxtriggeresc_x shall be a 4-bit asynchronous output per data lane driven by Block No. 3, inactive value 0.",
    "category": "interface",
    "block": "No.3",
@@ -4760,7 +4921,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 638,
+   "source_line": 672,
    "source_quote": "| `rxtriggeresc_x` | Out | 4 | async | No.3 | 0 | Yes |",
    "source_ids": [
     "C12"
@@ -4776,7 +4937,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-206",
+   "req_id": "REQ-213",
    "text": "rxdataesc_x shall be an 8-bit output in core_clk tied to 0 while LPDT is not implemented (pending K2).",
    "category": "interface",
    "block": "top",
@@ -4784,7 +4945,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 639,
+   "source_line": 673,
    "source_quote": "| `rxdataesc_x` | Out | 8 | `core_clk` | — | 0 | Tied 0 (K2) |",
    "source_ids": [
     "K2"
@@ -4802,7 +4963,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-207",
+   "req_id": "REQ-214",
    "text": "rxvalidesc_x shall be a 1-bit output in core_clk tied to 0 while LPDT is not implemented (pending K2).",
    "category": "interface",
    "block": "top",
@@ -4810,7 +4971,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 640,
+   "source_line": 674,
    "source_quote": "| `rxvalidesc_x` | Out | 1 | `core_clk` | — | 0 | Tied 0 (K2) |",
    "source_ids": [
     "K2"
@@ -4828,7 +4989,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-208",
+   "req_id": "REQ-215",
    "text": "errsoths_x shall be a 1-bit output per data lane in rxbyteclkhs driven by Block No. 4, inactive value 0.",
    "category": "interface",
    "block": "No.4",
@@ -4836,7 +4997,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 641,
+   "source_line": 675,
    "source_quote": "| `errsoths_x` | Out | 1 | `rxbyteclkhs` | No.4 | 0 | Yes |",
    "source_ids": [
     "Q8"
@@ -4850,7 +5011,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-209",
+   "req_id": "REQ-216",
    "text": "errsotsynchs_x shall be a 1-bit output per data lane in rxbyteclkhs driven by Block No. 4, inactive value 0.",
    "category": "interface",
    "block": "No.4",
@@ -4858,7 +5019,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 642,
+   "source_line": 676,
    "source_quote": "| `errsotsynchs_x` | Out | 1 | `rxbyteclkhs` | No.4 | 0 | Yes |",
    "source_ids": [
     "Q8"
@@ -4872,7 +5033,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-210",
+   "req_id": "REQ-217",
    "text": "erresc_x shall be a 1-bit asynchronous output per data lane driven by Block No. 3, inactive value 0.",
    "category": "interface",
    "block": "No.3",
@@ -4880,7 +5041,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 643,
+   "source_line": 677,
    "source_quote": "| `erresc_x` | Out | 1 | async | No.3 | 0 | Yes |",
    "source_ids": [
     "Q8",
@@ -4895,7 +5056,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-211",
+   "req_id": "REQ-218",
    "text": "errsyncesc_x shall be a 1-bit asynchronous output tied to 0 because LPDT is not implemented (pending K2).",
    "category": "interface",
    "block": "top",
@@ -4903,7 +5064,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 644,
+   "source_line": 678,
    "source_quote": "| `errsyncesc_x` | Out | 1 | async | — | 0 | Tied 0 (no LPDT, K2) |",
    "source_ids": [
     "Q8",
@@ -4922,7 +5083,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-212",
+   "req_id": "REQ-219",
    "text": "errcontrol_x shall be a 1-bit asynchronous output per data lane driven by Block No. 3, inactive value 0.",
    "category": "interface",
    "block": "No.3",
@@ -4930,7 +5091,7 @@
    "release": "both",
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
-   "source_line": 645,
+   "source_line": 679,
    "source_quote": "| `errcontrol_x` | Out | 1 | async | No.3 | 0 | Yes |",
    "source_ids": [
     "Q8",
@@ -4945,7 +5106,131 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-213",
+   "req_id": "REQ-220",
+   "text": "rxactivehs_x shall rise at or before rxsynchs_x.",
+   "category": "interface",
+   "block": "No.4",
+   "clock_domain": "rxbyteclkhs",
+   "release": "both",
+   "spec_status": "design",
+   "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
+   "source_line": 686,
+   "source_quote": "- `rxactivehs_x` rises at or before `rxsynchs_x`.",
+   "source_ids": [],
+   "parameters_affected": [],
+   "ambiguity_score": 0.1,
+   "needs_review": false,
+   "needs_human_decision": false,
+   "open_item_ref": [],
+   "sva_hint": "property",
+   "verification_method": "sva+sim"
+  },
+  {
+   "req_id": "REQ-221",
+   "text": "rxsynchs_x, and errsoths_x after a leader with a single-bit error, shall pulse in the cycle of the first payload byte B1 (HAS-CSI Table 4-4).",
+   "category": "interface",
+   "block": "No.4",
+   "clock_domain": "rxbyteclkhs",
+   "release": "both",
+   "spec_status": "contract",
+   "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
+   "source_line": 687,
+   "source_quote": "- `rxsynchs_x`, and `errsoths_x` after a leader with a single-bit error, pulse in the cycle of the first payload byte B1 **[CSI]** C6.",
+   "source_ids": [
+    "C6"
+   ],
+   "parameters_affected": [],
+   "ambiguity_score": 0.05,
+   "needs_review": false,
+   "needs_human_decision": false,
+   "open_item_ref": [],
+   "sva_hint": "property",
+   "verification_method": "sva+sim"
+  },
+  {
+   "req_id": "REQ-222",
+   "text": "rxvalidhs_x shall be High for every byte from B1 to Bn and fall with rxactivehs_x after Bn.",
+   "category": "interface",
+   "block": "No.4",
+   "clock_domain": "rxbyteclkhs",
+   "release": "both",
+   "spec_status": "design",
+   "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
+   "source_line": 692,
+   "source_quote": "- `rxvalidhs_x` is High for every byte from B1 to Bn and falls with `rxactivehs_x` after Bn.",
+   "source_ids": [],
+   "parameters_affected": [],
+   "ambiguity_score": 0.1,
+   "needs_review": false,
+   "needs_human_decision": false,
+   "open_item_ref": [],
+   "sva_hint": "property",
+   "verification_method": "sva+sim"
+  },
+  {
+   "req_id": "REQ-223",
+   "text": "stopstate_x shall fall when LP-01 is seen, before rxactivehs_x rises.",
+   "category": "interface",
+   "block": "No.3",
+   "clock_domain": "multi",
+   "release": "both",
+   "spec_status": "design",
+   "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
+   "source_line": 693,
+   "source_quote": "`stopstate_x` falls when LP-01 is seen, before `rxactivehs_x` rises",
+   "source_ids": [],
+   "parameters_affected": [],
+   "ambiguity_score": 0.1,
+   "needs_review": false,
+   "needs_human_decision": false,
+   "open_item_ref": [],
+   "sva_hint": "property",
+   "verification_method": "sim"
+  },
+  {
+   "req_id": "REQ-224",
+   "text": "stopstate_x, the escape outputs and the clock-lane outputs shall be core_clk registers that follow the line state after the LP-RX synchronizer and glitch filter, about 20 ns with the defaults.",
+   "category": "timing",
+   "block": "all",
+   "clock_domain": "core_clk",
+   "release": "both",
+   "spec_status": "design",
+   "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
+   "source_line": 699,
+   "source_quote": "`stopstate_x`, the escape outputs and the clock-lane outputs are registers in `core_clk`. They follow the line state after the LP-RX synchronizer and glitch filter, about 20 ns",
+   "source_ids": [],
+   "parameters_affected": [],
+   "ambiguity_score": 0.15,
+   "needs_review": false,
+   "needs_human_decision": false,
+   "open_item_ref": [],
+   "sva_hint": "property",
+   "verification_method": "sva+sim"
+  },
+  {
+   "req_id": "REQ-225",
+   "text": "The trigger bit, or rxulpsesc_x with ulpsactivenot_x Low, shall be set when the eighth bit of the escape entry command is decoded.",
+   "category": "functional",
+   "block": "No.3",
+   "clock_domain": "core_clk",
+   "release": "both",
+   "spec_status": "design",
+   "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
+   "source_line": 702,
+   "source_quote": "the trigger bit, or `rxulpsesc_x` with `ulpsactivenot_x` Low, is set when the eighth bit of the entry command is decoded.",
+   "source_ids": [
+    "C12"
+   ],
+   "parameters_affected": [],
+   "ambiguity_score": 0.1,
+   "needs_review": false,
+   "needs_human_decision": false,
+   "open_item_ref": [],
+   "sva_hint": "property",
+   "verification_method": "sva+sim"
+  },
+  {
+   "req_id": "REQ-226",
    "text": "The AFE interface shall assume that the AFE delivers deserialized, unaligned 8-bit words per lane on a common byte clock (ADR-001 option B); the boundary is open with the AFE team.",
    "category": "decision",
    "block": "No.1",
@@ -4953,7 +5238,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "5.2 AFE interface (proposed, OPEN ADR-001)",
-   "source_line": 649,
+   "source_line": 730,
    "source_quote": "Assumes the AFE delivers deserialized, **unaligned** 8-bit words per lane on a common byte clock (ADR-001 option B).",
    "source_ids": [
     "ADR-001"
@@ -4971,7 +5256,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-214",
+   "req_id": "REQ-227",
    "text": "afe_lp_dp_x and afe_lp_dn_x shall be 1-bit asynchronous inputs carrying the LP-RX outputs of data lane x.",
    "category": "interface",
    "block": "No.1",
@@ -4979,7 +5264,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "5.2 AFE interface (proposed, OPEN ADR-001)",
-   "source_line": 656,
+   "source_line": 737,
    "source_quote": "| `afe_lp_dp_x`, `afe_lp_dn_x` | In | 1 each | async | LP-RX outputs of data lane x |",
    "source_ids": [
     "ADR-001"
@@ -4995,7 +5280,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-215",
+   "req_id": "REQ-228",
    "text": "afe_cl_lp_dp and afe_cl_lp_dn shall be 1-bit asynchronous inputs carrying the LP-RX outputs of the clock lane.",
    "category": "interface",
    "block": "No.1",
@@ -5003,7 +5288,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "5.2 AFE interface (proposed, OPEN ADR-001)",
-   "source_line": 657,
+   "source_line": 738,
    "source_quote": "| `afe_cl_lp_dp`, `afe_cl_lp_dn` | In | 1 each | async | LP-RX outputs of the clock lane |",
    "source_ids": [
     "ADR-001"
@@ -5019,7 +5304,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-216",
+   "req_id": "REQ-229",
    "text": "afe_byteclk shall be a clock input equal to the clock-lane DDR clock divided by 8; it becomes rxbyteclkhs.",
    "category": "interface",
    "block": "No.1",
@@ -5027,7 +5312,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "5.2 AFE interface (proposed, OPEN ADR-001)",
-   "source_line": 658,
+   "source_line": 739,
    "source_quote": "| `afe_byteclk` | In | 1 | clock | Clock-lane DDR clock divided by 8; becomes `rxbyteclkhs` |",
    "source_ids": [
     "ADR-001"
@@ -5043,7 +5328,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-217",
+   "req_id": "REQ-230",
    "text": "afe_hs_word_x shall be an 8-bit input per lane in the afe_byteclk domain carrying raw deserialized bits, bit 0 received first, with arbitrary byte phase.",
    "category": "interface",
    "block": "No.1",
@@ -5051,7 +5336,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "5.2 AFE interface (proposed, OPEN ADR-001)",
-   "source_line": 659,
+   "source_line": 740,
    "source_quote": "| `afe_hs_word_x` | In | 8 | `afe_byteclk` | Raw deserialized bits, bit 0 received first, arbitrary byte phase |",
    "source_ids": [
     "ADR-001"
@@ -5069,7 +5354,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-218",
+   "req_id": "REQ-231",
    "text": "afe_cl_clk_active shall be a 1-bit asynchronous input from an AFE clock-activity detector used for TCLK-MISS (assumption).",
    "category": "interface",
    "block": "No.1",
@@ -5077,7 +5362,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "5.2 AFE interface (proposed, OPEN ADR-001)",
-   "source_line": 660,
+   "source_line": 741,
    "source_quote": "| `afe_cl_clk_active` | In | 1 | async | Clock-activity detector for TCLK-MISS (§4.4 note) ⚠️ |",
    "source_ids": [
     "ADR-001"
@@ -5093,7 +5378,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-219",
+   "req_id": "REQ-232",
    "text": "afe_hs_en_x and afe_cl_hs_en shall be 1-bit outputs in core_clk enabling the HS-RX and deserializer.",
    "category": "interface",
    "block": "No.1",
@@ -5101,7 +5386,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "5.2 AFE interface (proposed, OPEN ADR-001)",
-   "source_line": 661,
+   "source_line": 742,
    "source_quote": "| `afe_hs_en_x`, `afe_cl_hs_en` | Out | 1 each | `core_clk` | HS-RX (and deserializer) enable |",
    "source_ids": [
     "ADR-001"
@@ -5117,7 +5402,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-220",
+   "req_id": "REQ-233",
    "text": "afe_term_en_x and afe_cl_term_en shall be 1-bit outputs in core_clk enabling the HS termination.",
    "category": "interface",
    "block": "No.1",
@@ -5125,7 +5410,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "5.2 AFE interface (proposed, OPEN ADR-001)",
-   "source_line": 662,
+   "source_line": 743,
    "source_quote": "| `afe_term_en_x`, `afe_cl_term_en` | Out | 1 each | `core_clk` | HS termination enable |",
    "source_ids": [
     "ADR-001"
@@ -5141,7 +5426,7 @@
    "verification_method": "sva"
   },
   {
-   "req_id": "REQ-221",
+   "req_id": "REQ-234",
    "text": "afe_dly_tap_x shall be a PARA_DLY_TAP_WIDTH-bit output per lane in rxbyteclkhs carrying the delay-line setting (R2).",
    "category": "interface",
    "block": "No.1",
@@ -5149,7 +5434,7 @@
    "release": "R2",
    "spec_status": "open",
    "source_section": "5.2 AFE interface (proposed, OPEN ADR-001)",
-   "source_line": 663,
+   "source_line": 744,
    "source_quote": "| `afe_dly_tap_x` | Out | `PARA_DLY_TAP_WIDTH` | `rxbyteclkhs` | Delay-line setting (R2) |",
    "source_ids": [
     "ADR-001"
@@ -5168,7 +5453,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-222",
+   "req_id": "REQ-235",
    "text": "The configuration and status interface is open (K3, ADR-005); the draft assumes a dedicated APB subordinate in Block No. 8.",
    "category": "decision",
    "block": "No.8",
@@ -5176,7 +5461,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "5.3 Configuration and status interface",
-   "source_line": 667,
+   "source_line": 760,
    "source_quote": "OPEN K3 / ADR-005. Draft assumption: a dedicated APB subordinate in Block No. 8.",
    "source_ids": [
     "K3",
@@ -5194,7 +5479,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-223",
+   "req_id": "REQ-236",
    "text": "The register map is deferred until ADR-005 is agreed and the CSI-2 controller register map (FTEL_MEMORY_MAP_REGISTERS_v1_4.xlsx, K5) is available.",
    "category": "decision",
    "block": "No.8",
@@ -5202,7 +5487,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "6. Registers",
-   "source_line": 674,
+   "source_line": 767,
    "source_quote": "(`FTEL_MEMORY_MAP_REGISTERS_v1_4.xlsx`, OPEN K5) is available.",
    "source_ids": [
     "K5",
@@ -5220,7 +5505,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-224",
+   "req_id": "REQ-237",
    "text": "The AFE boundary (proposed option B) shall still be agreed with the AFE team, including clock-activity detection (TCLK-MISS), termination timing and the delay-tap interface.",
    "category": "decision",
    "block": "No.1",
@@ -5228,7 +5513,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "ADR-001 — AFE boundary (proposed: B, OPEN with the AFE team)",
-   "source_line": 696,
+   "source_line": 789,
    "source_quote": "Still to agree with the AFE team: clock-activity detection (TCLK-MISS), termination timing and the delay-tap interface.",
    "source_ids": [
     "ADR-001"
@@ -5244,7 +5529,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-225",
+   "req_id": "REQ-238",
    "text": "LP and escape reception shall oversample the LP lines in core_clk (ADR-002 option A, decided).",
    "category": "constraint",
    "block": "No.1",
@@ -5252,7 +5537,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "ADR-002 — LP and escape reception (decided in this draft: A)",
-   "source_line": 703,
+   "source_line": 796,
    "source_quote": "oversample LP lines in `core_clk`",
    "source_ids": [
     "ADR-002"
@@ -5269,7 +5554,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-226",
+   "req_id": "REQ-239",
    "text": "Every LP state lasts at least TLPX = 50 ns, so oversampling at 200 MHz shall provide at least 10 samples per LP state.",
    "category": "timing",
    "block": "No.1",
@@ -5277,7 +5562,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "ADR-002 — LP and escape reception (decided in this draft: A)",
-   "source_line": 712,
+   "source_line": 805,
    "source_quote": "Basis: every LP state lasts at least TLPX = 50 ns (D-PHY Table 14 ✅), i.e. ≥ 10 samples at 200 MHz.",
    "source_ids": [
     "ADR-002",
@@ -5295,7 +5580,7 @@
    "verification_method": "analysis"
   },
   {
-   "req_id": "REQ-227",
+   "req_id": "REQ-240",
    "text": "Release staging shall be R1 without deskew calibration and R2 with it; this is pending K1.",
    "category": "decision",
    "block": "all",
@@ -5303,7 +5588,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "ADR-003 — Release staging",
-   "source_line": 716,
+   "source_line": 809,
    "source_quote": "R1 without deskew calibration, R2 with it (research plan §3.1). OPEN K1.",
    "source_ids": [
     "ADR-003",
@@ -5322,7 +5607,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-228",
+   "req_id": "REQ-241",
    "text": "The R1 datapath shall already detect deskew bursts, so that R2 only adds Block No. 5.",
    "category": "constraint",
    "block": "No.4",
@@ -5330,7 +5615,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "ADR-004 — Deskew algorithm (R2)",
-   "source_line": 721,
+   "source_line": 814,
    "source_quote": "fixed now: the R1 datapath already detects deskew bursts, so R2 only adds Block No. 5.",
    "source_ids": [
     "ADR-004"
@@ -5346,7 +5631,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-229",
+   "req_id": "REQ-242",
    "text": "Trailer removal shall buffer the tail of the burst and cut it at the last transition before the THS-SKIP interval; discarding a fixed number of bytes is not allowed because the Tx trail length may change.",
    "category": "constraint",
    "block": "No.4",
@@ -5354,7 +5639,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "ADR-006 — Trailer removal (decided: delay line + last transition)",
-   "source_line": 738,
+   "source_line": 831,
    "source_quote": "D-PHY §6.4.3 ✅ is to buffer the tail of the burst and cut it at the last transition before the",
    "source_ids": [
     "ADR-006",
@@ -5373,7 +5658,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-230",
+   "req_id": "REQ-243",
    "text": "ADR-006 decision: DL_HS_EOT shall keep waiting for EoT done; the resulting rate limit and the faster alternative (not waiting) are stated in §4.5.",
    "category": "decision",
    "block": "No.3",
@@ -5381,7 +5666,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "ADR-006 — Trailer removal (decided: delay line + last transition, wait for EoT done; OPEN: cut below ~270 Mb/s, order at the PPI)",
-   "source_line": 741,
+   "source_line": 834,
    "source_quote": "Decided: DL_HS_EOT keeps waiting for EoT done; §4.5 states the resulting rate limit and keeps not waiting as the faster option.",
    "source_ids": [
     "ADR-006"
@@ -5397,7 +5682,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-231",
+   "req_id": "REQ-244",
    "text": "ADR-006 shall stay open for the precision of the EoT cut below roughly 270 Mb/s and for the order of stopstate_x and rxactivehs_x at the PPI (with the CSI team).",
    "category": "decision",
    "block": "No.4",
@@ -5405,7 +5690,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "ADR-006 — Trailer removal (decided: delay line + last transition, wait for EoT done; OPEN: cut below ~270 Mb/s, order at the PPI)",
-   "source_line": 743,
+   "source_line": 836,
    "source_quote": "Still open: the precision of the cut below ~270 Mb/s and the order of `stopstate_x` and `rxactivehs_x` at the PPI (CSI team).",
    "source_ids": [
     "ADR-006"
@@ -5421,7 +5706,31 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-232",
+   "req_id": "REQ-245",
+   "text": "ADR-007 option C (proposed): a run-time field hs_skip_bytes makes Block No. 4 ignore the first words after the HS entry signal arrives, as THS-SETTLE,min does at the line, so that no all-zero word is required and the search counter starts at the first non-zero word after the skipped ones.",
+   "category": "decision",
+   "block": "No.4",
+   "clock_domain": "rxbyteclkhs",
+   "release": "both",
+   "spec_status": "open",
+   "source_section": "ADR-007 — Start of the sync search (proposed: C, OPEN)",
+   "source_line": 845,
+   "source_quote": "- C: a run-time field `hs_skip_bytes` makes Block No. 4 ignore the first words after the HS entry",
+   "source_ids": [
+    "ADR-007"
+   ],
+   "parameters_affected": [],
+   "ambiguity_score": 0.5,
+   "needs_review": true,
+   "needs_human_decision": true,
+   "open_item_ref": [
+    "ADR-007"
+   ],
+   "sva_hint": "none",
+   "verification_method": "review"
+  },
+  {
+   "req_id": "REQ-246",
    "text": "Verification shall use a specification-compliant Tx BFM; the example model may be reused only after its deviations are corrected (flipped last bit as trail, THS-EXIT >= 100 ns, clock in quadrature with data).",
    "category": "verification",
    "block": "all",
@@ -5429,7 +5738,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "8. Verification Requirement",
-   "source_line": 750,
+   "source_line": 870,
    "source_quote": "**Stimulus.** A specification-compliant Tx BFM is required.",
    "source_ids": [],
    "parameters_affected": [],
@@ -5441,7 +5750,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-233",
+   "req_id": "REQ-247",
    "text": "A behavioural AFE model shall convert the line-level stimulus to the §5.2 interface with a random byte phase per lane and programmable lane-to-lane skew.",
    "category": "verification",
    "block": "all",
@@ -5449,7 +5758,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "8. Verification Requirement",
-   "source_line": 754,
+   "source_line": 874,
    "source_quote": "**AFE model.** A behavioural AFE model converts the line-level stimulus to the §5.2 interface, with",
    "source_ids": [],
    "parameters_affected": [],
@@ -5463,7 +5772,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-234",
+   "req_id": "REQ-248",
    "text": "Scenarios shall cover 1, 2 and 4 lanes, including bursts whose length is not a multiple of the lane count.",
    "category": "verification",
    "block": "all",
@@ -5471,7 +5780,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "8. Verification Requirement",
-   "source_line": 757,
+   "source_line": 877,
    "source_quote": "1/2/4 lanes, including bursts whose length is not a multiple of the lane count.",
    "source_ids": [],
    "parameters_affected": [
@@ -5485,7 +5794,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-235",
+   "req_id": "REQ-249",
    "text": "Scenarios shall sweep the line rate over 80-1500 Mb/s for R1.",
    "category": "verification",
    "block": "all",
@@ -5493,7 +5802,7 @@
    "release": "R1",
    "spec_status": "design",
    "source_section": "8. Verification Requirement",
-   "source_line": 758,
+   "source_line": 878,
    "source_quote": "Rate sweep 80–1500 Mb/s (R1).",
    "source_ids": [],
    "parameters_affected": [],
@@ -5507,7 +5816,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-236",
+   "req_id": "REQ-250",
    "text": "Scenarios shall cover the timing corners of THS-SETTLE, TCLK-SETTLE and the trail length, and at 80 Mb/s both the minimum THS-PREPARE + THS-ZERO and an HS-0 much longer than the minimum.",
    "category": "verification",
    "block": "all",
@@ -5515,7 +5824,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "8. Verification Requirement",
-   "source_line": 759,
+   "source_line": 879,
    "source_quote": "Timing corners of THS-SETTLE, TCLK-SETTLE and the trail length; at 80 Mb/s the minimum THS-PREPARE + THS-ZERO, and an HS-0 much longer than the minimum (§4.6).",
    "source_ids": [],
    "parameters_affected": [
@@ -5531,16 +5840,40 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-237",
-   "text": "Scenarios shall include SoT with a single-bit error (errsoths_x) and with a corrupted leader (errsotsynchs_x).",
+   "req_id": "REQ-251",
+   "text": "Scenarios shall include the minimum THS-PREPARE + THS-ZERO at 80 Mb/s for every byte-clock phase, and AFE words other than zero during THS-PREPARE at 1500 Mb/s.",
+   "category": "verification",
+   "block": "No.4",
+   "clock_domain": "none",
+   "release": "both",
+   "spec_status": "open",
+   "source_section": "8. Verification Requirement",
+   "source_line": 882,
+   "source_quote": "than zero during THS-PREPARE at 1500 Mb/s (ADR-007).",
+   "source_ids": [
+    "ADR-007"
+   ],
+   "parameters_affected": [],
+   "ambiguity_score": 0.35,
+   "needs_review": true,
+   "needs_human_decision": true,
+   "open_item_ref": [
+    "ADR-007"
+   ],
+   "sva_hint": "cover",
+   "verification_method": "sim"
+  },
+  {
+   "req_id": "REQ-252",
+   "text": "Scenarios shall include SoT with a single-bit error (errsoths_x) and with a corrupted leader (errsotsynchs_x), checking exactly one errsotsynchs_x and no later rxsynchs_x.",
    "category": "verification",
    "block": "No.4",
    "clock_domain": "none",
    "release": "both",
    "spec_status": "design",
    "source_section": "8. Verification Requirement",
-   "source_line": 761,
-   "source_quote": "SoT with a single-bit error (`errsoths_x`) and with a corrupted leader (`errsotsynchs_x`).",
+   "source_line": 883,
+   "source_quote": "SoT with a single-bit error (`errsoths_x`) and with a corrupted leader (`errsotsynchs_x`): exactly one `errsotsynchs_x` and no later `rxsynchs_x` (Figure 5-2).",
    "source_ids": [],
    "parameters_affected": [],
    "ambiguity_score": 0.05,
@@ -5551,7 +5884,47 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-238",
+   "req_id": "REQ-253",
+   "text": "Scenarios shall include a deskew burst, checking no rxvalidhs_x after the cancelled lock and rxskewcalhs_x after rxactivehs_x falls.",
+   "category": "verification",
+   "block": "No.4",
+   "clock_domain": "none",
+   "release": "both",
+   "spec_status": "design",
+   "source_section": "8. Verification Requirement",
+   "source_line": 885,
+   "source_quote": "- Deskew burst: no `rxvalidhs_x` after the cancelled lock, and `rxskewcalhs_x` after `rxactivehs_x` falls (Figure 5-3).",
+   "source_ids": [],
+   "parameters_affected": [],
+   "ambiguity_score": 0.05,
+   "needs_review": false,
+   "needs_human_decision": false,
+   "open_item_ref": [],
+   "sva_hint": "cover",
+   "verification_method": "sim"
+  },
+  {
+   "req_id": "REQ-254",
+   "text": "Scenarios shall include a clock lane whose TCLK-ZERO is longer than TCLK-SETTLE + TCLK-MISS.",
+   "category": "verification",
+   "block": "No.2",
+   "clock_domain": "none",
+   "release": "both",
+   "spec_status": "design",
+   "source_section": "8. Verification Requirement",
+   "source_line": 887,
+   "source_quote": "- Clock lane: TCLK-ZERO longer than TCLK-SETTLE + TCLK-MISS (Figure 5-7).",
+   "source_ids": [],
+   "parameters_affected": [],
+   "ambiguity_score": 0.05,
+   "needs_review": false,
+   "needs_human_decision": false,
+   "open_item_ref": [],
+   "sva_hint": "cover",
+   "verification_method": "sim"
+  },
+  {
+   "req_id": "REQ-255",
    "text": "Scenarios shall include EoT on and off a byte boundary.",
    "category": "verification",
    "block": "No.4",
@@ -5559,7 +5932,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "8. Verification Requirement",
-   "source_line": 762,
+   "source_line": 888,
    "source_quote": "EoT on and off a byte boundary.",
    "source_ids": [],
    "parameters_affected": [],
@@ -5571,7 +5944,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-239",
+   "req_id": "REQ-256",
    "text": "Scenarios shall include clock-lane and data-lane ULPS entry/exit, the four triggers, an unknown escape command (erresc_x) and false control (errcontrol_x).",
    "category": "verification",
    "block": "No.3",
@@ -5579,7 +5952,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "8. Verification Requirement",
-   "source_line": 763,
+   "source_line": 889,
    "source_quote": "Clock-lane and data-lane ULPS entry/exit; the four triggers; unknown escape command",
    "source_ids": [],
    "parameters_affected": [],
@@ -5591,7 +5964,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-240",
+   "req_id": "REQ-257",
    "text": "Scenarios shall include an HS RX timeout and an escape watchdog expiry.",
    "category": "verification",
    "block": "all",
@@ -5599,7 +5972,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "8. Verification Requirement",
-   "source_line": 765,
+   "source_line": 891,
    "source_quote": "HS RX timeout and escape watchdog expiry.",
    "source_ids": [],
    "parameters_affected": [
@@ -5614,7 +5987,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-241",
+   "req_id": "REQ-258",
    "text": "Scenarios shall include P/N-swapped and remapped lanes, in both HS and LP.",
    "category": "verification",
    "block": "all",
@@ -5622,7 +5995,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "8. Verification Requirement",
-   "source_line": 766,
+   "source_line": 892,
    "source_quote": "P/N-swapped and remapped lanes, in both HS and LP.",
    "source_ids": [],
    "parameters_affected": [],
@@ -5634,7 +6007,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-242",
+   "req_id": "REQ-259",
    "text": "Scenarios shall exercise the enables, forcerxmode_x, phy_core_rst, TINIT and init_done.",
    "category": "verification",
    "block": "No.6",
@@ -5642,7 +6015,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "8. Verification Requirement",
-   "source_line": 767,
+   "source_line": 893,
    "source_quote": "Enables, `forcerxmode_x`, `phy_core_rst`, TINIT and `init_done`.",
    "source_ids": [],
    "parameters_affected": [
@@ -5656,7 +6029,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-243",
+   "req_id": "REQ-260",
    "text": "Scenarios shall include deskew burst detection (R1) and calibration (R2).",
    "category": "verification",
    "block": "No.4",
@@ -5664,7 +6037,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "8. Verification Requirement",
-   "source_line": 768,
+   "source_line": 894,
    "source_quote": "Deskew burst detection (R1) and calibration (R2).",
    "source_ids": [],
    "parameters_affected": [
@@ -5680,7 +6053,27 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-244",
+   "req_id": "REQ-261",
+   "text": "A PPI monitor shall check the relations of Figures 5-1 to 5-8 on every burst and LP sequence.",
+   "category": "verification",
+   "block": "all",
+   "clock_domain": "none",
+   "release": "both",
+   "spec_status": "design",
+   "source_section": "8. Verification Requirement",
+   "source_line": 895,
+   "source_quote": "- **PPI monitor.** Checks the relations of Figures 5-1 to 5-8 on every burst and LP sequence.",
+   "source_ids": [],
+   "parameters_affected": [],
+   "ambiguity_score": 0.1,
+   "needs_review": false,
+   "needs_human_decision": false,
+   "open_item_ref": [],
+   "sva_hint": "none",
+   "verification_method": "sim"
+  },
+  {
+   "req_id": "REQ-262",
    "text": "Integration shall co-simulate with the CSI-2 Rx controller RTL and check inter-lane divergence <= 6 byte cycles and no stuck rxactivehs_x.",
    "category": "verification",
    "block": "all",
@@ -5688,7 +6081,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "8. Verification Requirement",
-   "source_line": 769,
+   "source_line": 896,
    "source_quote": "**Integration.** Co-simulation with the CSI-2 Rx controller RTL, checking HAS-CSI Lane Management expectations: inter-lane divergence ≤ 6 byte cycles (C10) and no stuck `rxactivehs_x` (C11).",
    "source_ids": [
     "C10",
@@ -5705,7 +6098,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-245",
+   "req_id": "REQ-263",
    "text": "Coverage shall include every FSM state and transition of Blocks No. 2 and 3, every PPI error output and every lane count.",
    "category": "verification",
    "block": "all",
@@ -5713,7 +6106,7 @@
    "release": "both",
    "spec_status": "design",
    "source_section": "8. Verification Requirement",
-   "source_line": 771,
+   "source_line": 898,
    "source_quote": "**Coverage.** Every FSM state and transition of Blocks No. 2 and 3, every PPI error output, every lane count.",
    "source_ids": [],
    "parameters_affected": [],
@@ -5725,7 +6118,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-246",
+   "req_id": "REQ-264",
    "text": "The target line rate (1500 or 1792 Mb/s) and the release of 4K staggered HDR shall be decided with the CSI team; default R1 <= 1500 Mb/s.",
    "category": "decision",
    "block": "all",
@@ -5733,7 +6126,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "9. Open Items",
-   "source_line": 782,
+   "source_line": 909,
    "source_quote": "| K1 | Target line rate (1500 or 1792 Mb/s) and the release of 4K staggered HDR | R1 ≤ 1500 Mb/s | CSI team |",
    "source_ids": [
     "K1"
@@ -5751,7 +6144,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-247",
+   "req_id": "REQ-265",
    "text": "The tie-off and clock domain of the LPDT PPI ports shall be agreed with the CSI team; default tied 0.",
    "category": "decision",
    "block": "all",
@@ -5759,7 +6152,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "9. Open Items",
-   "source_line": 783,
+   "source_line": 910,
    "source_quote": "| K2 | LPDT ports: tie-off and clock domain | Tied 0 | CSI team |",
    "source_ids": [
     "K2"
@@ -5777,7 +6170,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-248",
+   "req_id": "REQ-266",
    "text": "The configuration path of the timers shall be agreed with the CSI team; default own APB subordinate (ADR-005).",
    "category": "decision",
    "block": "all",
@@ -5785,7 +6178,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "9. Open Items",
-   "source_line": 784,
+   "source_line": 911,
    "source_quote": "| K3 / ADR-005 | Configuration path of the timers | Own APB subordinate | CSI team |",
    "source_ids": [
     "K3",
@@ -5803,7 +6196,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-249",
+   "req_id": "REQ-267",
    "text": "The inter-lane byte divergence budget at the PPI shall be confirmed with the CSI team; default <= 6 byte cycles.",
    "category": "decision",
    "block": "all",
@@ -5811,7 +6204,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "9. Open Items",
-   "source_line": 785,
+   "source_line": 912,
    "source_quote": "| K4 | Inter-lane byte divergence budget at the PPI | ≤ 6 byte cycles | CSI team |",
    "source_ids": [
     "K4",
@@ -5828,7 +6221,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-250",
+   "req_id": "REQ-268",
    "text": "Register map v1.4 (PHY_CONFIG, PHY_STATUS, LANE_STATUS) shall be obtained from the CSI team.",
    "category": "decision",
    "block": "all",
@@ -5836,7 +6229,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "9. Open Items",
-   "source_line": 786,
+   "source_line": 913,
    "source_quote": "| K5 | Register map v1.4 (PHY_CONFIG, PHY_STATUS, LANE_STATUS) | — | CSI team |",
    "source_ids": [
     "K5"
@@ -5852,7 +6245,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-251",
+   "req_id": "REQ-269",
    "text": "The polarity and synchronicity of phy_core_rst, whether it is a reset-type port under the FX1 IP Wrapper Guideline, and the exact semantics of init_done and forcerxmode_x shall be agreed with the CSI team; default active High, asynchronous, with an active-low wrapper port and the inverter inside m_ftel_dphy_rx_wrap.",
    "category": "decision",
    "block": "all",
@@ -5860,7 +6253,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "9. Open Items",
-   "source_line": 787,
+   "source_line": 914,
    "source_quote": "| K6 | `phy_core_rst` polarity and synchronicity; whether it is a reset-type port under the FX1 IP Wrapper Guideline (active-low `_n` at the wrapper);",
    "source_ids": [
     "K6"
@@ -5876,7 +6269,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-252",
+   "req_id": "REQ-270",
    "text": "The longest HS burst per lane over all sensor modes and lane/rate combinations, which sizes hs_rx_timeout_cyc, shall be obtained from the CSI team; default a 5802-byte line at 80 Mb/s on one lane.",
    "category": "decision",
    "block": "all",
@@ -5884,7 +6277,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "9. Open Items",
-   "source_line": 788,
+   "source_line": 915,
    "source_quote": "| K8 | Longest HS burst per lane over all sensor modes and lane/rate combinations (sizes `hs_rx_timeout_cyc`) |",
    "source_ids": [
     "K8"
@@ -5902,7 +6295,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-253",
+   "req_id": "REQ-271",
    "text": "The AFE boundary, clock-activity detection, termination timing, delay taps and maximum LP glitch width shall be agreed with the AFE team; default option B.",
    "category": "decision",
    "block": "all",
@@ -5910,7 +6303,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "9. Open Items",
-   "source_line": 789,
+   "source_line": 916,
    "source_quote": "| ADR-001 | AFE boundary, clock-activity detection, termination timing, delay taps, maximum LP glitch width | Option B | AFE team |",
    "source_ids": [
     "ADR-001"
@@ -5929,7 +6322,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-254",
+   "req_id": "REQ-272",
    "text": "The deskew algorithm, tap resolution and use of periodic calibration (R2) shall be decided by this IP after ADR-001 and S4; default centre of the passing window with initial calibration only.",
    "category": "decision",
    "block": "all",
@@ -5937,7 +6330,7 @@
    "release": "R2",
    "spec_status": "open",
    "source_section": "9. Open Items",
-   "source_line": 790,
+   "source_line": 917,
    "source_quote": "| ADR-004 | Deskew algorithm, tap resolution and periodic calibration (R2) | Centre of the passing window; initial calibration only |",
    "source_ids": [
     "ADR-004"
@@ -5957,7 +6350,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-255",
+   "req_id": "REQ-273",
    "text": "The Tx deskew behaviour (initial or periodic, exact pattern) shall be confirmed by the Tx side; default D-PHY v1.2 pattern from a secondary source.",
    "category": "decision",
    "block": "all",
@@ -5965,7 +6358,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "9. Open Items",
-   "source_line": 791,
+   "source_line": 918,
    "source_quote": "| S4 | Tx deskew behaviour (initial / periodic, exact pattern) | D-PHY v1.2 pattern (🌐) | Tx side |",
    "source_ids": [
     "S4"
@@ -5983,7 +6376,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-256",
+   "req_id": "REQ-274",
    "text": "The Tx timing table, in particular the maximum THS-TRAIL (sizes PARA_EOT_DELAY_BYTES) and the maximum THS-ZERO (sync search), shall be obtained from the Tx side; default specification minimums.",
    "category": "decision",
    "block": "all",
@@ -5991,7 +6384,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "9. Open Items",
-   "source_line": 792,
+   "source_line": 919,
    "source_quote": "| S5 | Tx timing table, in particular the maximum THS-TRAIL (sizes `PARA_EOT_DELAY_BYTES`) and the maximum THS-ZERO (sync search, §4.6) |",
    "source_ids": [
     "S5"
@@ -6010,7 +6403,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-257",
+   "req_id": "REQ-275",
    "text": "The mapping of the four trigger commands to rxtriggeresc_x[3:0] shall be checked against the specification; default order of D-PHY Table 8.",
    "category": "decision",
    "block": "all",
@@ -6018,7 +6411,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "9. Open Items",
-   "source_line": 793,
+   "source_line": 920,
    "source_quote": "| T1 | Mapping of the four trigger commands to `rxtriggeresc_x[3:0]` | Order of D-PHY Table 8 | Specification check |",
    "source_ids": [
     "T1"
@@ -6034,7 +6427,7 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-258",
+   "req_id": "REQ-276",
    "text": "ADR-006 (open): EoT - cut precision below roughly 270 Mb/s, order of stopstate_x and rxactivehs_x at the PPI (HAS-CSI Figure 4-1) and the gap between bursts below roughly 240 Mb/s; this draft waits for EoT done (decided) and lets stopstate_x rise before the last byte until the CSI team confirms (owner: this IP with the CSI team and the Tx side).",
    "category": "decision",
    "block": "all",
@@ -6042,7 +6435,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "9. Open Items",
-   "source_line": 794,
+   "source_line": 921,
    "source_quote": "| ADR-006 | EoT: cut precision below ~270 Mb/s; order of `stopstate_x` and `rxactivehs_x` at the PPI",
    "source_ids": [
     "ADR-006"
@@ -6058,7 +6451,31 @@
    "verification_method": "review"
   },
   {
-   "req_id": "REQ-259",
+   "req_id": "REQ-277",
+   "text": "ADR-007 is open: the start of the sync search (a leader at the minimum THS-PREPARE + THS-ZERO below ~170 Mb/s; AFE words during THS-PREPARE); the draft keeps the current rule and proposes option C.",
+   "category": "decision",
+   "block": "all",
+   "clock_domain": "none",
+   "release": "both",
+   "spec_status": "open",
+   "source_section": "9. Open Items",
+   "source_line": 922,
+   "source_quote": "| ADR-007 | Start of the sync search: a leader at the minimum THS-PREPARE + THS-ZERO below ~170 Mb/s; AFE words during THS-PREPARE |",
+   "source_ids": [
+    "ADR-007"
+   ],
+   "parameters_affected": [],
+   "ambiguity_score": 0.5,
+   "needs_review": true,
+   "needs_human_decision": true,
+   "open_item_ref": [
+    "ADR-007"
+   ],
+   "sva_hint": "none",
+   "verification_method": "review"
+  },
+  {
+   "req_id": "REQ-278",
    "text": "The LP detection latency shall be (PARA_LP_SYNC_STAGES + PARA_LP_FILTER_CYC) x 5 ns, about 20 ns with the defaults.",
    "category": "timing",
    "block": "No.1",
@@ -6066,7 +6483,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "Appendix B. Receiver Timing Parameters",
-   "source_line": 827,
+   "source_line": 955,
    "source_quote": "`core_clk` period = 5 ns; the LP detection latency is (`PARA_LP_SYNC_STAGES` + `PARA_LP_FILTER_CYC`) × 5 ns ≈ 20 ns with the defaults.",
    "source_ids": [
     "D-PHY v1.1 Table 14"
@@ -6084,7 +6501,7 @@
    "verification_method": "analysis"
   },
   {
-   "req_id": "REQ-260",
+   "req_id": "REQ-279",
    "text": "THS-SETTLE (85 ns + 6 UI to 145 ns + 10 UI from the start of THS-PREPARE) shall be implemented as hs_settle_cyc = round((115 ns + 8 UI - latency) / 5 ns): 39 at 80 Mb/s, 21 at 750 Mb/s, 20 at 1500 and 1792 Mb/s.",
    "category": "timing",
    "block": "all",
@@ -6092,7 +6509,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "Appendix B. Receiver Timing Parameters",
-   "source_line": 834,
+   "source_line": 962,
    "source_quote": "| THS-SETTLE | 85 ns + 6·UI … 145 ns + 10·UI, from the start of THS-PREPARE |",
    "source_ids": [
     "D-PHY v1.1 Table 14"
@@ -6108,7 +6525,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-261",
+   "req_id": "REQ-280",
    "text": "TCLK-SETTLE (95 to 300 ns) shall be implemented as clk_settle_cyc = (~200 - 20) / 5 = 36, counted from entry into CL_HS_TERM.",
    "category": "timing",
    "block": "all",
@@ -6116,7 +6533,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "Appendix B. Receiver Timing Parameters",
-   "source_line": 835,
+   "source_line": 963,
    "source_quote": "| TCLK-SETTLE | 95 … 300 ns | `clk_settle_cyc` = (~200 − 20) / 5 = 36, counted from entry into CL_HS_TERM |",
    "source_ids": [
     "D-PHY v1.1 Table 14"
@@ -6132,7 +6549,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-262",
+   "req_id": "REQ-281",
    "text": "TD-TERM-EN (<= 35 ns + 4 UI) shall be met by issuing the data-lane termination enable on LP-00 detection (~20 ns).",
    "category": "timing",
    "block": "all",
@@ -6140,7 +6557,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "Appendix B. Receiver Timing Parameters",
-   "source_line": 836,
+   "source_line": 964,
    "source_quote": "| TD-TERM-EN | ≤ 35 ns + 4·UI | Issued on LP-00 detection (~20 ns) |",
    "source_ids": [
     "D-PHY v1.1 Table 14"
@@ -6158,7 +6575,7 @@
    "verification_method": "analysis"
   },
   {
-   "req_id": "REQ-263",
+   "req_id": "REQ-282",
    "text": "TCLK-TERM-EN (<= 38 ns) shall be met by issuing the clock-lane termination enable on LP-00 detection (~20 ns).",
    "category": "timing",
    "block": "all",
@@ -6166,7 +6583,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "Appendix B. Receiver Timing Parameters",
-   "source_line": 837,
+   "source_line": 965,
    "source_quote": "| TCLK-TERM-EN | ≤ 38 ns | Issued on LP-00 detection (~20 ns) |",
    "source_ids": [
     "D-PHY v1.1 Table 14"
@@ -6184,7 +6601,7 @@
    "verification_method": "analysis"
   },
   {
-   "req_id": "REQ-264",
+   "req_id": "REQ-283",
    "text": "For THS-SKIP (40 to 55 ns + 4 UI), eot_skip_bytes shall place the EoT cut between 40 ns and THS-TRAIL,min before LP-11; the placement is exact only above roughly 270 Mb/s.",
    "category": "timing",
    "block": "No.4",
@@ -6192,7 +6609,7 @@
    "release": "both",
    "spec_status": "assumed",
    "source_section": "Appendix B. Receiver Timing Parameters",
-   "source_line": 838,
+   "source_line": 966,
    "source_quote": "| THS-SKIP | 40 … 55 ns + 4·UI | Bits discarded before the last-transition search (Block No. 4):",
    "source_ids": [
     "D-PHY v1.1 Table 14"
@@ -6208,7 +6625,7 @@
    "verification_method": "analysis"
   },
   {
-   "req_id": "REQ-265",
+   "req_id": "REQ-284",
    "text": "TCLK-MISS (<= 60 ns) shall be met by an AFE clock-activity detector (ADR-001).",
    "category": "timing",
    "block": "all",
@@ -6216,7 +6633,7 @@
    "release": "both",
    "spec_status": "open",
    "source_section": "Appendix B. Receiver Timing Parameters",
-   "source_line": 839,
+   "source_line": 967,
    "source_quote": "| TCLK-MISS | ≤ 60 ns | AFE clock-activity detector (ADR-001) |",
    "source_ids": [
     "D-PHY v1.1 Table 14",
@@ -6233,7 +6650,7 @@
    "verification_method": "analysis"
   },
   {
-   "req_id": "REQ-266",
+   "req_id": "REQ-285",
    "text": "TINIT (slave, >= 100 us) shall be met with tinit_cyc = 20 000.",
    "category": "timing",
    "block": "all",
@@ -6241,7 +6658,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "Appendix B. Receiver Timing Parameters",
-   "source_line": 840,
+   "source_line": 968,
    "source_quote": "| TINIT (slave) | ≥ 100 µs | `tinit_cyc` = 20 000 |",
    "source_ids": [
     "D-PHY v1.1 Table 14"
@@ -6257,7 +6674,7 @@
    "verification_method": "sim"
   },
   {
-   "req_id": "REQ-267",
+   "req_id": "REQ-286",
    "text": "TLPX (>= 50 ns) shall be the basis of the LP oversampling (ADR-002).",
    "category": "timing",
    "block": "all",
@@ -6265,7 +6682,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "Appendix B. Receiver Timing Parameters",
-   "source_line": 841,
+   "source_line": 969,
    "source_quote": "| TLPX | ≥ 50 ns | Basis of the LP oversampling (ADR-002) |",
    "source_ids": [
     "D-PHY v1.1 Table 14",
@@ -6282,7 +6699,7 @@
    "verification_method": "analysis"
   },
   {
-   "req_id": "REQ-268",
+   "req_id": "REQ-287",
    "text": "TWAKEUP (>= 1 ms) is a Tx-side requirement; the Rx shall leave ULPS on Mark-1 then Stop without a wake-up timer.",
    "category": "timing",
    "block": "all",
@@ -6290,7 +6707,7 @@
    "release": "both",
    "spec_status": "verified",
    "source_section": "Appendix B. Receiver Timing Parameters",
-   "source_line": 842,
+   "source_line": 970,
    "source_quote": "| TWAKEUP | ≥ 1 ms | Tx-side; the Rx leaves ULPS on Mark-1 then Stop, no timer needed |",
    "source_ids": [
     "D-PHY v1.1 Table 14"
@@ -6309,9 +6726,18 @@
    "finding_id": "F-001",
    "type": "new_ambiguity",
    "text": "The v0.4 precedence rule sends a lane that sees LP-11 in DL_HS_RQST, DL_LP_RQST or DL_ESC_RQST through DL_ERR and back to DL_STOP on the same LP-11, while DL_ERR holds errcontrol_x 'until the next line-state change' [CSI] C13. The line stays LP-11, so it is not stated whether errcontrol_x stays high while the lane already reports Stop, or for how long.",
-   "source_line": 407,
+   "source_line": 411,
    "source_quote": "that row takes precedence: the lane passes through DL_ERR, raising `errcontrol_x`, and then returns to DL_STOP ⚠️.",
    "proposed_default": "errcontrol_x stays high until the next line-state change after that LP-11 (the next LP-01 or LP-10), per C13, while the lane is already in DL_STOP; confirm with the CSI team that a Stop state with errcontrol_x high is acceptable.",
+   "owner": "CSI team"
+  },
+  {
+   "finding_id": "F-002",
+   "type": "inconsistency",
+   "text": "HAS-CSI places rxsynchs_x in the cycle of the first payload byte in Table 4-4 (#8) and in its Lane Management text, but its Figure 4-1 draws the pulse one cycle before B1. The HAS-CSI write condition (rxvalidhs_x with sync_seen_x or rxsynchs_x) accepts both; this IP follows the table.",
+   "source_line": 688,
+   "source_quote": "HAS-CSI Figure 4-1 draws the pulse one cycle before B1 and its",
+   "proposed_default": "Follow HAS-CSI Table 4-4 (pulse in the cycle of B1); ask the CSI team to align Figure 4-1.",
    "owner": "CSI team"
   }
  ]
