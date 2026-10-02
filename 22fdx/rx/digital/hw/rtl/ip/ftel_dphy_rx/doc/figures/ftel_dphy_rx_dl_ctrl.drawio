@@ -321,8 +321,8 @@
             <mxPoint x="1705" y="410" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="o3_t" value="HS entry, EoT request (No.4)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
-          <mxGeometry x="1710" y="385" width="270" height="50" as="geometry" />
+        <mxCell id="o3_t" value="HS entry, sync-search start,&lt;br&gt;EoT request (No.4)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="1710" y="398" width="285" height="50" as="geometry" />
         </mxCell>
         <mxCell id="o4" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;edgeStyle=none;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">

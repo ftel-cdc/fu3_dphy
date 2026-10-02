@@ -46,11 +46,12 @@ ftel_dphy_rx/
 ├── ip_config.yaml        ← tool_flow design overrides (all commented = default convention)
 ├── .gitignore            ← tool_flow output patterns
 ├── doc/
-│   ├── spec.md           ← architecture specification (HAS), draft v0.8 (source of the docx)
+│   ├── spec.md           ← architecture specification (HAS), draft v0.9 (source of the docx)
 │   ├── md2docx.py        ← spec.md → FTEL_IP_MIPI_D-PHY_RX_HAS_v<x.y>.docx in the FTEL HAS format
-│   ├── FTEL_IP_MIPI_D-PHY_RX_HAS_v0.8.docx ← HAS as a Word document (built, do not edit by hand)
+│   ├── FTEL_IP_MIPI_D-PHY_RX_HAS_v0.9.docx ← HAS as a Word document (built, do not edit by hand)
 │   ├── DPHY_RX_RESEARCH_PLAN.md ← research, change analysis, sync-up lists, plan
 │   ├── RTL_FLOW_PLAN.md  ← requirement-to-RTL flow (adapted [reference rule set] flow), stages and gates
+│   ├── analysis/         ← models behind design decisions (adr007: start of the sync search)
 │   ├── sync/             ← question lists for the CSI team, the Tx side and the AFE team
 │   └── figures/          ← diagrams referenced by spec.md (drawio / WaveJSON sources + SVG/PNG)
 ├── req/                  ← requirement artifacts of the flow (structured_spec.json, reviews, RTM)

@@ -4,8 +4,8 @@
 |---|---|
 | Gửi | Team AFE (analog front-end của D-PHY Rx: HS-RX, LP-RX, termination, deserializer) |
 | Từ | Nhóm thiết kế D-PHY Rx digital (`ftel_dphy_rx`) |
-| Ngày | 2026-09-29 |
-| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.5 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`) §2.1 (Figure 2-1, 2-2), §4.1, §4.3, §5.2, ADR-001, ADR-004, Appendix B; MIPI D-PHY v1.1 Table 14 |
+| Ngày | 2026-10-02 |
+| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.9 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`) §2.1 (Figure 2-1, 2-2), §4.1, §4.3, §4.4, §4.6, §5.2 (Figure 5-9), ADR-001, ADR-004, ADR-007, Appendix B; MIPI D-PHY v1.1 Table 14 |
 
 ## Bối cảnh
 
@@ -32,7 +32,7 @@ Mỗi câu hỏi kèm **giả định đang dùng**. Thiết kế sẽ đi theo 
 Nếu team đồng ý với giả định, chỉ cần trả lời "Đồng ý".
 
 **Cần trả lời trước HAS v1.0** (chưa có thì chưa sinh RTL được): **A1, A2, A3**. A4 chỉ cần cho bản
-R2 (deskew calibration).
+R2 (deskew calibration). A6 không chặn RTL: câu trả lời chỉ đổi giá trị lập trình của `hs_settle_cyc`.
 
 ## Tóm tắt
 
@@ -43,8 +43,10 @@ R2 (deskew calibration).
 | A3 | Ngân sách thời gian bật termination | **Cao** | ADR-001 |
 | A4 | Delay line cho deskew (R2) | Trung bình | ADR-001, ADR-004 |
 | A5 | Độ rộng glitch tối đa ở đầu ra LP-RX | Trung bình | ADR-001 |
+| A6 | Độ trễ word và dữ liệu trong THS-PREPARE | Trung bình | ADR-001, ADR-007 |
 
-Có 20 yêu cầu trong HAS đang chờ các quyết định này: ADR-001 chặn 17 yêu cầu, ADR-004 chặn 3.
+Có 22 yêu cầu trong HAS v0.9 đang chờ team AFE: 19 yêu cầu chờ ADR-001 (3 trong số đó chờ cả ADR-004),
+và 3 yêu cầu khác chờ độ trễ word Λ của ADR-007 (A6).
 Ranh giới AFE / digital theo phương án B được vẽ ở HAS Figure 2-1 (data lane) và Figure 2-2 (clock lane).
 
 ## Giao diện đề xuất (HAS D-PHY §5.2)
@@ -56,7 +58,7 @@ Chiều tín hiệu nhìn từ `ftel_dphy_rx`. Hậu tố `_x` nghĩa là mỗi 
 | `afe_lp_dp_x`, `afe_lp_dn_x` | In | 1 mỗi tín hiệu | async | Đầu ra LP-RX của data lane x |
 | `afe_cl_lp_dp`, `afe_cl_lp_dn` | In | 1 mỗi tín hiệu | async | Đầu ra LP-RX của clock lane |
 | `afe_byteclk` | In | 1 | clock | DDR clock của clock lane chia 8; trở thành `rxbyteclkhs` |
-| `afe_hs_word_x` | In | 8 | `afe_byteclk` | Bit đã deserialize, bit 0 nhận trước, pha byte tùy ý |
+| `afe_hs_word_x` | In | 8 | `afe_byteclk` | Bit đã deserialize, bit 0 nhận trước, pha byte tùy ý, độ trễ cố định (A6) |
 | `afe_cl_clk_active` | In | 1 | async | Bộ phát hiện clock activity cho TCLK-MISS (A2) |
 | `afe_hs_en_x`, `afe_cl_hs_en` | Out | 1 mỗi tín hiệu | `core_clk` | Bật HS-RX (và deserializer) |
 | `afe_term_en_x`, `afe_cl_term_en` | Out | 1 mỗi tín hiệu | `core_clk` | Bật HS termination |
@@ -75,7 +77,7 @@ Chiều tín hiệu nhìn từ `ftel_dphy_rx`. Hậu tố `_x` nghĩa là mỗi 
 2. Bit 0 của word có phải là bit nhận trước không? Word của các lane có quan hệ timing thế nào với
    `afe_byteclk` (setup/hold tại đầu vào digital)?
 3. Từ lúc `afe_hs_en_x` lên tới khi word ổn định mất bao lâu? Word trong khoảng này có thể là dữ liệu
-   rác; phần digital bỏ qua mọi thứ trong thời gian THS-SETTLE.
+   rác; phần digital bỏ qua mọi word tới khi hết THS-SETTLE (HAS §4.6; chi tiết ở A6).
 4. `afe_byteclk` có dừng khi clock lane rời HS (vào LP hoặc ULPS) không? Khi dừng và chạy lại, clock
    có sạch (không glitch, không có xung ngắn) không?
 5. Phần digital tự làm đảo cực P/N và map lane logic ↔ vật lý, cho cả đường HS lẫn đường LP. AFE có
@@ -93,8 +95,11 @@ lane ở HS, và dừng/chạy lại không glitch. AFE không đảo cực và 
 3. Tín hiệu này có glitch khi clock bắt đầu chạy hoặc dừng không? Phần digital đồng bộ nó vào
    `core_clk` bằng 2 flip-flop (HAS §4.1); nếu có glitch thì phải thêm bộ lọc.
 
-**Vì sao cần.** D-PHY yêu cầu phát hiện mất HS clock trong TCLK-MISS ≤ 60 ns (Table 14). Ở 80 Mb/s,
-một chu kỳ byte clock đã là 100 ns, nên phần digital chỉ nhìn `rxbyteclkhs` thì không phát hiện kịp.
+**Vì sao cần.**
+- D-PHY yêu cầu phát hiện mất HS clock trong TCLK-MISS ≤ 60 ns (Table 14). Ở 80 Mb/s, một chu kỳ byte
+  clock đã là 100 ns, nên phần digital chỉ nhìn `rxbyteclkhs` thì không phát hiện kịp.
+- Từ HAS v0.8, FSM của clock lane chỉ vào CL_HS_CLK khi hết `clk_settle_cyc` **và** tín hiệu này báo
+  clock đang chạy (§4.4). Nhờ đó `cl_rxclkactivehs` ở PPI chỉ lên khi `rxbyteclkhs` thật sự chạy.
 
 **Giả định hiện tại.** AFE có bộ phát hiện này, và đầu ra không có glitch nên phần digital chỉ
 cần đồng bộ, không cần lọc.
@@ -145,6 +150,29 @@ dài thì càng chống glitch tốt, nhưng càng ăn vào ngân sách terminat
 **Giả định hiện tại.** Bộ lọc 2 chu kỳ `core_clk` (10 ns), tức glitch dài hơn 10 ns không lọt qua
 LP-RX.
 
+## A6 — Độ trễ word và dữ liệu trong THS-PREPARE
+
+**Câu hỏi.**
+1. Từ lúc bit cuối của một word tới chân AFE cho tới khi word đó có trên `afe_hs_word_x`, mất bao
+   nhiêu chu kỳ `afe_byteclk`? Độ trễ này có cố định không: giữa các burst, giữa các lane, và sau mỗi
+   lần bật lại `afe_hs_en_x`?
+2. Trong THS-PREPARE (đường truyền chuyển từ LP-00 sang HS-0, termination vừa bật), `afe_hs_word_x`
+   mang gì: toàn 0, toàn 1, hay giá trị bất kỳ? Tính từ đầu LP-00, sau bao lâu thì word phản ánh đúng
+   HS-0?
+
+**Vì sao cần.**
+- Từ HAS v0.9, phần digital bắt đầu tìm sync khi hết THS-SETTLE và bỏ qua mọi word đến trước đó (§4.6,
+  ADR-007). Điểm bắt đầu này do `hs_settle_cyc` đặt, và phụ thuộc độ trễ word Λ = độ trễ của AFE + 1
+  (thanh ghi của Block No. 1).
+- Từ khoảng 300 Mb/s trở lên, Λ lệch 1 byte clock vẫn chạy đúng. Dưới mức đó phải biết đúng Λ để lập
+  bảng `hs_settle_cyc` (HAS Appendix B).
+- Theo D-PHY Table 14, phần digital chấp nhận rác tới THS-SETTLE,min (85 ns + 6·UI tính từ đầu
+  THS-PREPARE). Nếu rác kéo dài hơn mốc này, `hs_settle_cyc` vẫn chỉnh được trong một khoảng, nhưng
+  cần biết trước.
+
+**Giả định hiện tại.** Độ trễ của AFE là 1 byte clock và cố định (Λ = 2). Word có thể là rác, kể cả
+toàn bit 1, cho tới THS-SETTLE,min.
+
 ---
 
 ## Trả lời
@@ -156,3 +184,4 @@ LP-RX.
 | A3 | | | |
 | A4 | | | |
 | A5 | | | |
+| A6 | | | |

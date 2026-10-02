@@ -111,7 +111,7 @@
             <mxPoint x="1075" y="390" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="l_en" value="enable: zero seen, not locked,&lt;br&gt;not expired, no skew cal." style="text;html=1;whiteSpace=wrap;fontSize=18;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+        <mxCell id="l_en" value="enable: started, not locked,&lt;br&gt;not expired, no skew cal." style="text;html=1;whiteSpace=wrap;fontSize=18;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="930" y="430" width="300" height="52" as="geometry" />
         </mxCell>
         <mxCell id="off" value="offset" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFE6CC;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
@@ -175,30 +175,6 @@
         </mxCell>
         <mxCell id="f_sync_t" value="sync, SoT error (at lock)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=right;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="1190" y="402" width="305" height="28" as="geometry" />
-        </mxCell>
-        <mxCell id="z" value="= 0" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
-          <mxGeometry x="300" y="470" width="80" height="40" as="geometry" />
-        </mxCell>
-        <mxCell id="w_z" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" parent="1">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="265" y="140" as="sourcePoint" />
-            <mxPoint x="300" y="490" as="targetPoint" />
-            <Array as="points">
-              <mxPoint x="265" y="490" />
-            </Array>
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="zs" value="zero seen" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFE6CC;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
-          <mxGeometry x="440" y="465" width="150" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="zs_ck" value="" style="triangle;whiteSpace=wrap;html=1;rotation=-90;strokeWidth=2;fillColor=none;" vertex="1" parent="1">
-          <mxGeometry x="509.0" y="496.0" width="12" height="26" as="geometry" />
-        </mxCell>
-        <mxCell id="w_zs" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;edgeStyle=none;" edge="1" parent="1">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="380" y="490" as="sourcePoint" />
-            <mxPoint x="440" y="490" as="targetPoint" />
-          </mxGeometry>
         </mxCell>
         <mxCell id="sc" value="search&lt;br&gt;counter" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFE6CC;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="700" y="530" width="170" height="60" as="geometry" />
@@ -367,8 +343,32 @@
         <mxCell id="o_sk_t" value="deskew burst&lt;br&gt;(No.5, R2)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="1770" y="555.0" width="225" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="n_clr" value="zero seen, locked, skew cal. and the&lt;br&gt;search counter are cleared while&lt;br&gt;HS entry is Low; skew cal. also&lt;br&gt;clears locked." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+        <mxCell id="n_clr" value="words n-1 and n-2, locked, skew cal.&lt;br&gt;and the search counter are held clear&lt;br&gt;until the search has started; skew&lt;br&gt;cal. also clears locked." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="20" y="590" width="420" height="110" as="geometry" />
+        </mxCell>
+        <mxCell id="i_sss" value="sync-search&lt;br&gt;start (No.3)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=right;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="5" y="515" width="220" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="w_sss" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;edgeStyle=none;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="225" y="540" as="sourcePoint" />
+            <mxPoint x="300" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="ls0" value="level sync" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFE6CC;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="300" y="515" width="140" height="50" as="geometry" />
+        </mxCell>
+        <mxCell id="ls0_ck" value="" style="triangle;whiteSpace=wrap;html=1;rotation=-90;strokeWidth=2;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="364.0" y="546.0" width="12" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="w_started" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;edgeStyle=none;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="440" y="540" as="sourcePoint" />
+            <mxPoint x="700" y="540" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="l_started" value="search started" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="450" y="508" width="180" height="28" as="geometry" />
         </mxCell>
         <mxCell id="leg_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=none;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="0" y="890" width="2000" height="80" as="geometry" />

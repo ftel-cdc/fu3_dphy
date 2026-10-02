@@ -4,8 +4,8 @@
 |---|---|
 | Gửi | Đội phát triển phía Tx (CSI-2 transmitter / D-PHY Tx của sensor) |
 | Từ | Nhóm thiết kế D-PHY Rx (`ftel_dphy_rx`) |
-| Ngày | 2026-09-26, cập nhật 2026-09-29 (S9: clock lane; S5: THS-EXIT + TLPX ở tốc độ thấp) và 2026-09-30 (S3: vì sao Rx cần continuous clock) |
-| Căn cứ | MIPI CSI-2 v1.3, MIPI D-PHY v1.1 (Table 14); HAS của `ftel_dphy_rx` bản nháp v0.8 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.8.docx`) |
+| Ngày | 2026-09-26, cập nhật 2026-09-29 (S9: clock lane; S5: THS-EXIT + TLPX ở tốc độ thấp), 2026-09-30 (S3: vì sao Rx cần continuous clock) và 2026-10-02 (S5: THS-ZERO không còn ảnh hưởng việc tìm sync) |
+| Căn cứ | MIPI CSI-2 v1.3, MIPI D-PHY v1.1 (Table 14); HAS của `ftel_dphy_rx` bản nháp v0.9 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.9.docx`) |
 
 ## Bối cảnh
 
@@ -34,7 +34,7 @@ S1, S3, S9 và S10 cũng cần sớm, để chuẩn bị môi trường verify.
 | S2 | Số data lane cho từng sensor mode | Trung bình | Đã có từ HAS-CSI, nhờ xác nhận |
 | S3 | Continuous hay non-continuous clock | Cao | Đã có từ HAS-CSI, nhờ xác nhận |
 | S4 | Deskew: có gửi không, pattern, độ dài, thời điểm | **Cao** | Mở |
-| S5 | Bảng timing thực tế của Tx (đặc biệt THS-TRAIL max, THS-ZERO max, THS-EXIT + TLPX ở tốc độ thấp) | **Cao** | Mở |
+| S5 | Bảng timing thực tế của Tx (đặc biệt THS-TRAIL max, THS-EXIT + TLPX ở tốc độ thấp) | **Cao** | Mở |
 | S6 | ULPS: có dùng không, trình tự, TWAKEUP | Trung bình | Mở |
 | S7 | Thời gian giữ LP-11 sau khi bật nguồn (TINIT phía Tx) | Trung bình | Mở |
 | S8 | Chỉ CSI-2 v1.3, hay có tính năng v2.0 trở lên | Trung bình | Đã có từ HAS-CSI, nhờ xác nhận |
@@ -105,9 +105,9 @@ Rx nhận ra deskew burst khi thấy ≥ 16 bit 1 sau HS-0.
 **Vì sao cần.**
 - **THS-TRAIL max** quyết định độ sâu delay line EoT của Rx (`PARA_EOT_DELAY_BYTES`, mặc định
   32 byte). Delay line này dùng để cắt phần trailer ở cuối burst.
-- **THS-ZERO max** liên quan tới cửa sổ tìm sync. D-PHY chỉ cho giá trị min của THS-PREPARE +
-  THS-ZERO (≥ 145 ns + 10·UI), không cho max. Rx đã đếm cửa sổ từ word khác 0 đầu tiên, nên chịu được
-  HS-0 dài. Dù vậy, cần giá trị thực để đặt test case.
+- **THS-ZERO** không còn ảnh hưởng việc tìm sync. Từ HAS v0.9, Rx bắt đầu tìm sync khi hết THS-SETTLE
+  và đếm cửa sổ từ word khác 0 đầu tiên, nên nhận đúng ở mọi tốc độ, cả với THS-PREPARE + THS-ZERO tối
+  thiểu (145 ns + 10·UI) lẫn HS-0 rất dài. Giá trị thực chỉ dùng để đặt test case.
 - **THS-EXIT + TLPX ở tốc độ thấp.** Sau mỗi burst, Rx đợi cắt trailer xong mới về Stop. Vì vậy dưới
   khoảng 240 Mb/s, Rx chỉ nhận được burst kế tiếp khi THS-EXIT + TLPX lớn hơn khoảng 32·UI + 15 ns
   (415 ns ở 80 Mb/s; mức tối thiểu của spec là 100 ns + 50 ns). Nếu Tx gửi hai burst sát nhau ở tốc

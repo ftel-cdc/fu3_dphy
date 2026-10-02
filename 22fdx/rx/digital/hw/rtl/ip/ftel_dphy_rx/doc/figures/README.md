@@ -78,7 +78,7 @@ Timing diagrams (`ftel_dphy_rx_wave_*.json5`) follow rules 2, 6, 9, 12 and 14 an
 | 5-6 | `ftel_dphy_rx_wave_lp_err` | PPI: false control and unsupported escape command | Table 4-5 |
 | 5-7 | `ftel_dphy_rx_wave_clock_lane` | Clock lane: HS clock start and stop, clock-lane ULPS | D-PHY Figure 21, Figure 4-4 |
 | 5-8 | `ftel_dphy_rx_wave_init` | Initialization: reset, enables, TINIT, `init_done` | Figure 4-10 |
-| 5-9 | `ftel_dphy_rx_wave_afe_sot_eot` | AFE interface: data-lane SoT and EoT (sync-search start OPEN ADR-007) | D-PHY Figure 14, Figure 4-6 |
+| 5-9 | `ftel_dphy_rx_wave_afe_sot_eot` | AFE interface: data-lane SoT and EoT, start of the sync search (ADR-007) | D-PHY Figure 14, Figure 4-6 |
 
 ## Rendering
 

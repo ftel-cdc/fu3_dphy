@@ -83,6 +83,10 @@ CAPTION_RE = re.compile(r"^\*\*[^|]*\*\*\s*$")
 #              start of the sync search, found while drawing Figure 5-9). The ADR-007 option matrix
 #              (Table 7-4) is not a graded table; the CL_HS_TERM row of the clock-lane FSM changes its
 #              exit condition only, so fsm_cl keeps 11 rows.
+#  2026-10-02  v0.9 written before the spec edit (ADR-007 decided: the sync search starts at DL_HS_RX):
+#              no graded count changes. Table 7-4 is rewritten (options A to E) and Table 7-5 (events
+#              and fallbacks) is added, neither graded; the core_clk -> rxbyteclkhs CDC row lists one
+#              more signal, so cdc keeps 8 rows; the ADR-007 open-item row stays (AFE word latency).
 _V03 = {
     "param": 10, "runtime": 5, "clock": 3, "cdc": 5, "reset": 3,
     "fsm_cl": 10, "fsm_dl": 16, "ppi": 29, "afe": 8, "open": 10, "timing": 9,
@@ -96,6 +100,7 @@ EXPECTED = {
     "v0.6": dict(_V03, runtime=6, cdc=8, fsm_cl=11, open=13, c_ids=16),
     "v0.7": dict(_V03, runtime=6, cdc=8, fsm_cl=11, open=13, c_ids=16),
     "v0.8": dict(_V03, runtime=6, cdc=8, fsm_cl=11, open=14, c_ids=16),
+    "v0.9": dict(_V03, runtime=6, cdc=8, fsm_cl=11, open=14, c_ids=16),
 }
 REVISION_RE = re.compile(r"\*\*DRAFT (v[0-9]+\.[0-9]+)\*\*")
 

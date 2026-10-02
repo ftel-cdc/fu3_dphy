@@ -1,14 +1,14 @@
 {
  "phase": "P1",
  "mode": "review",
- "at": "2026-10-02T09:14:36+07:00",
- "spec_sha256": "f8f65d27a641f111276420c5378b55ffc44bba3f7c81d98c21391d371e41ec58",
- "structured_spec_sha256": "f6f52c43925cd4445e1f9c7267f9e2bf21e83665bcb4c3fb0d28ce914807e71f",
+ "at": "2026-10-02T10:18:44+07:00",
+ "spec_sha256": "0c020abcd175757d41985bac2c38137ab3b73ee682ce06ed7246b4817e3f5197",
+ "structured_spec_sha256": "0bf8b1e633227d1824125e632ae3026041507e1c59411d9ab4d1e72c7df0d54f",
  "conflicts": [],
  "waived": [],
  "rejected_waivers": [],
  "info": {
   "warnings": 0,
-  "needs_human_decision": 60
+  "needs_human_decision": 62
  }
 }

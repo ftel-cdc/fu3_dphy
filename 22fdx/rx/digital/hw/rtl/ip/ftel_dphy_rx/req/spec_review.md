@@ -493,3 +493,41 @@ Không tạo REQ cho các câu chỉ là lý do hoặc nhắc lại yêu cầu �
 - ma trận Table 7-4.
 
 249 REQ cũ bị đánh lại ID theo thứ tự dòng.
+
+### 7.8 Đồng bộ P1 với spec v0.9 (ADR-007 chốt phương án D, 2026-10-02)
+
+Spec v0.9 chốt ADR-007 theo phương án D. Việc tìm sync bắt đầu ở DL_HS_RX, tức khi hết THS-SETTLE, và
+mọi word đến trước đó bị bỏ qua. `hs_settle_cyc` được đặt theo độ trễ word Λ của AFE. Quyết định dựa
+trên mô hình mức bit trong `doc/analysis/adr007/` (kết quả ở `results.md`). Mô hình cũng chỉ ra ba chỗ
+sai của v0.8:
+- **Không có lỗ hổng tốc độ thấp.** Với AFE "sạch" (xuất 0 trước HS-0), quy tắc cũ không mất leader ở
+  tốc độ thấp, vì đường dữ liệu cũng trễ gần bằng tín hiệu HS entry. Câu "dưới ~170 Mb/s" của v0.8 sai.
+- **Chưa bỏ qua word trước THS-SETTLE,min.** D-PHY Table 14 yêu cầu bỏ qua (*shall ignore*), nhưng v0.8
+  chưa làm, nên `hs_settle_cyc` không có tác dụng gì lên việc tìm sync.
+- **Công thức `hs_skip_bytes` của phương án C sai** ở mọi tốc độ.
+
+Các thay đổi khác của spec:
+- §4.6 ghi rõ hành vi sau một leader hỏng: thường khóa sai trong payload, khoảng 99 % với giới hạn mặc
+  định.
+- S5 bỏ câu hỏi về THS-ZERO tối đa.
+- Vẽ lại Figure 2-4, 4-1, 4-5, 4-8, 5-2 và 5-9.
+
+| Bước | Kết quả |
+|---|---|
+| `spec_inventory.py` | EXPECTED v0.9 đăng ký **trước** khi sửa spec; không nhóm nào đổi số dòng. Selftest PASS. Số dòng phụ thuộc open item giảm 174 → 163, vì heading ADR-007 không còn chữ OPEN |
+| `rebase_req.py` | Giữ 265/287 REQ. 22 REQ lỗi thời: các REQ quanh việc tìm sync (§3, §4.1, §4.5, §4.6, §5.2), dòng S5 và ADR-007 ở §9, dòng THS-SETTLE ở Appendix B, và ba kịch bản ở §8 |
+| Chunk bổ sung `25_v09_delta.json` | 30 REQ, gồm 19 REQ viết lại và 11 REQ mới. Các REQ mới nói về: điểm bắt đầu tìm sync, việc xóa cửa sổ so sánh, độ trễ Λ, vị trí của `hs_settle_cyc`, leader hỏng, `errsoths_x` bị che ở 80 Mb/s, rác toàn 1 không gây deskew giả, quyết định D, và thời điểm `errsotsynchs_x` ở PPI. Bỏ 3 REQ lỗi thời: quy tắc word toàn 0, ghi chú OPEN của v0.8, đề xuất C. Thêm 1 finding. Câu trích được kiểm nguyên văn bằng script; luật `derive_rules` không phải ghi đè trường nào của chunk này |
+| `validate_req.py` | 295 REQ · 3 finding · trích dẫn 298/298 · độ phủ 100% ở 15 nhóm · 0 lỗi · 0 cảnh báo |
+| `flow_check.py` | review: 0 xung đột; `needs_human_decision` 60 → 62; test âm **7/7 PASS** |
+
+**Finding mới F-003** (owner: internal):
+- Công thức `eot_skip_bytes` có vẻ thiếu độ trễ của đường dữ liệu, khoảng Λ + 1 byte clock, nên điểm
+  cắt EoT có thể sớm hơn chừng ấy.
+- Chưa kiểm bằng mô hình EoT; theo dõi cùng ADR-006.
+- Finding được neo ở dòng THS-SKIP của Appendix B, để F-001 và F-002 giữ nguyên số (file câu hỏi cho
+  team CSI đang dẫn F-001).
+
+Không tạo REQ cho ma trận Table 7-4, bảng biến cố Table 7-5, danh sách phương án dự phòng (là lý do và
+kế hoạch) và dòng revision.
+
+140 REQ cũ bị đánh lại ID theo thứ tự dòng.
