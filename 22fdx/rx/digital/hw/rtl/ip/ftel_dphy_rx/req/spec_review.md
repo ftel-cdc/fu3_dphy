@@ -531,3 +531,68 @@ Không tạo REQ cho ma trận Table 7-4, bảng biến cố Table 7-5, danh sá
 kế hoạch) và dòng revision.
 
 140 REQ cũ bị đánh lại ID theo thứ tự dòng.
+
+### 7.9 Đồng bộ P1 với spec v0.10 (HAS thành tài liệu độc lập, 2026-10-02)
+
+Spec v0.10 làm HAS thành một tài liệu tự đứng được:
+- Không còn dẫn tới file hay tài liệu khác: research plan, HAS-CSI, thư mục `ref/`, mô hình trong
+  `doc/analysis/`, file register map.
+- Hai chuẩn MIPI chỉ được nêu tên ở §1.5 References, không ghi số điều khoản. Nguồn công khai duy nhất
+  là [3], tài liệu Lattice FPGA-IPUG-02081-2.1, dùng cho pattern deskew.
+- Nội dung trước đây phải tra ở nơi khác nay viết thẳng vào HAS: bảng mã escape (Table 4-6), định
+  nghĩa Q1–Q9 và C1–C16 (Appendix A), mô tả mô hình của ADR-007 (chương 7).
+- Không đổi kỹ thuật. S9 vốn đã được dẫn ở §4.3 nhưng chưa có trong bảng Open Items, nay được thêm vào.
+
+| Bước | Kết quả |
+|---|---|
+| `spec_inventory.py` | EXPECTED v0.10 đăng ký **trước** khi sửa spec: open 14 → 15 (S9), các nhóm khác giữ nguyên. Selftest PASS. Số dòng phụ thuộc open item 163 → 169 (S9; T1 ở Table 4-6) |
+| `rebase_req.py` | Giữ 212/295 REQ và 1/3 finding. 83 REQ và 2 finding lỗi thời, vì câu trích nằm trên dòng đã đổi chữ |
+| Chunk bổ sung `26_v10_delta.json` | 92 REQ. 83 REQ giữ nguyên nội dung, chỉ đổi câu trích và `source_line`: 69 REQ tự động, bằng chính các phép thay đã áp lên spec; 14 REQ viết tay. 9 REQ mới: 8 dòng của Table 4-6 và dòng S9. 13 REQ sửa câu chữ để bỏ tên tài liệu khác. `source_ids` được chuẩn hóa ở mọi chunk (bỏ HAS-CSI; điều khoản MIPI gom về `D-PHY [1]` / `CSI-2 [2]`), kể cả 34 REQ giữ nguyên. F-001 và F-002 giữ số |
+| `validate_req.py` | 304 REQ · 3 finding · trích dẫn 307/307 · độ phủ 100% ở 15 nhóm · 0 lỗi · 0 cảnh báo |
+| `flow_check.py` | review: 0 xung đột; `needs_human_decision` 62 → 68 (4 lệnh trigger của Table 4-6 phụ thuộc T1; dòng S9 và câu "clock lane không đảo, không map" ở §4.3 phụ thuộc S9); test âm **7/7 PASS** |
+
+Truy vết của v0.9 tới từng điều khoản MIPI và tới HAS-CSI vẫn còn trong lịch sử git
+(`structured_spec.json` ở commit `07cae3e`).
+
+Không tạo REQ cho §1.5 References, phần mô tả mô hình ở chương 7, hai bảng của Appendix A (truy vết)
+và dòng revision.
+
+158 REQ bị đánh lại ID theo thứ tự dòng, do §1.5, Table 4-6 và phần mô tả mô hình được chèn vào.
+
+### 7.10 Đồng bộ P1 với spec v0.11 (hiệu đính các điểm mơ hồ, 2026-10-02)
+
+Spec v0.11 sửa 13 điểm mơ hồ còn lại của lượt rà v0.9 (S9 đã xong ở v0.10). Các lựa chọn là của người
+dùng ngày 2026-10-02:
+- Điểm 1: `forcerxmode_x` khởi động lại lane khi lên (cách A), không còn giữ lane ở DL_INIT, nên
+  controller thấy được Stop trong lúc giữ tín hiệu. K6 vẫn OPEN để team CSI xác nhận.
+- Điểm 2: byte clock = DDR clock / 4 = line rate / 8.
+- Điểm 3 (hỏi Tx và CSI): mục mở mới S12 và dòng TCLK-POST ở Appendix B. IP không đổi hành vi; spec
+  ghi rõ đuôi burst cuối nằm lại trong delay line tới khi clock chạy lại.
+- Điểm 4: state mới DL_HS_WAIT. Sửa luôn một lỗi tìm thấy khi kiểm lại: ở tốc độ thấp, EoT done có thể
+  về khi Tx đã sang chuỗi tiếp theo, và lane có thể bật termination giữa một escape entry.
+- Điểm 5: quy tắc khi EoT không tìm thấy chuyển mức.
+- Điểm 6, 7: từ Block No. 3 sang No. 4 chỉ còn một tín hiệu, sync-search start. Cạnh xuống của nó là
+  EoT request, và cờ active lấy từ nó.
+- Điểm 8 (phát khi EoT): burst kết thúc trước khi lock có một xung `errsotsynchs_x` ở byte active cuối.
+  Team CSI xác nhận dưới ADR-007.
+- Điểm 9 (xử lý nội bộ): tắt lane thì xóa Block No. 4 của lane; enable đổi lúc nào cũng được.
+- Điểm 10–14:
+  - lane map: giá trị reset, và quy tắc OR khi map không phải hoán vị;
+  - độ trễ LP và ngân sách termination ghi theo tham số;
+  - `clk_settle_cyc` 33;
+  - `PARA_EOT_DELAY_BYTES` 36 ở R2;
+  - câu chữ của `rxskewcalhs_x`, `cl_rxclkactivehs`, cờ status và `afe_byteclk`.
+
+| Bước | Kết quả |
+|---|---|
+| `spec_inventory.py` | EXPECTED v0.11 đăng ký **trước** khi sửa spec: fsm_dl 16 → 17 (DL_HS_WAIT), open 15 → 16 (S12), timing 9 → 10 (TCLK-POST), các nhóm khác giữ nguyên. Selftest PASS. Số dòng phụ thuộc open item 169 → 178 |
+| `rebase_req.py` | Giữ 232/304 REQ và 2/3 finding. 72 REQ và 1 finding lỗi thời |
+| Chunk bổ sung `27_v11_delta.json` | 91 REQ: 72 REQ lỗi thời được neo lại, trong đó 48 REQ có câu trích hoặc nội dung mới vì hành vi đổi, 24 REQ giữ nguyên nội dung. 19 REQ mới: DL_HS_WAIT, EoT không có chuyển mức, `errsotsynchs_x` khi EoT, lane map, xóa Block No. 4, độ trễ LP, S12, TCLK-POST, kịch bản kiểm thử. 2 REQ cũ còn ghi "D-PHY Table 8" (sót từ v0.10) được sửa thành Table 4-6 |
+| `validate_req.py` | 323 REQ · 3 finding · trích dẫn 326/326 · độ phủ 100% ở 15 nhóm · 0 lỗi · 0 cảnh báo |
+| `flow_check.py` | review: 0 xung đột; `needs_human_decision` 68 → 75: `forcerxmode_x` với K6; sync-search start và burst chưa lock với ADR-007; 3 REQ của S12; §5.2 SoT nằm dưới heading OPEN ADR-001. Test âm **7/7 PASS** |
+| Hình | Vẽ lại 9 hình drawio và 2 hình WaveJSON: Figure 2-2, 2-4, 4-1, 4-2, 4-5, 4-6, 4-8, 4-9, 4-10, 5-7, 5-9. `check_figures`: 0 vi phạm, test âm 13/13 |
+| Docx v0.11 | 75 trang, XSD PASS, 29/29 caption cùng trang với hình, không còn "()" rỗng |
+
+241 REQ bị đánh lại ID theo thứ tự dòng. F-001, F-002 và F-003 giữ số.
+
+Còn mở sau v0.11: F-003. Công thức `eot_skip_bytes` có thể thiếu Λ + 1 byte clock; chưa mô hình hóa.

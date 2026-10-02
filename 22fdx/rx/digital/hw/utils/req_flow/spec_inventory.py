@@ -87,6 +87,16 @@ CAPTION_RE = re.compile(r"^\*\*[^|]*\*\*\s*$")
 #              no graded count changes. Table 7-4 is rewritten (options A to E) and Table 7-5 (events
 #              and fallbacks) is added, neither graded; the core_clk -> rxbyteclkhs CDC row lists one
 #              more signal, so cdc keeps 8 rows; the ADR-007 open-item row stays (AFE word latency).
+#  2026-10-02  v0.10 written before the spec edit (standalone document: no reference to other files or
+#              documents; the MIPI standards are cited by name only): open +1 (S9, cited in §4.3 but
+#              missing from the Open Items table). Appendix A states Q1-Q9 and C1-C16 in two new tables
+#              and §4.5 lists the escape entry commands; none of them is graded, and the same Q and C
+#              ids are cited, so q_ids and c_ids keep 9 and 16.
+#  2026-10-02  v0.11 written before the spec edit (ambiguities of the v0.9 review resolved, user decisions
+#              of 2026-10-02): fsm_dl +1 (DL_HS_WAIT: after an EoT during which the line showed LP-00 the
+#              lane waits for LP-11), open +1 (S12, HS clock after the last burst), timing +1 (TCLK-POST
+#              row in Appendix B). The core_clk -> rxbyteclkhs crossing carries one signal instead of three
+#              and the enable-gating row adds the clear of Block No. 4, so cdc keeps 8 rows.
 _V03 = {
     "param": 10, "runtime": 5, "clock": 3, "cdc": 5, "reset": 3,
     "fsm_cl": 10, "fsm_dl": 16, "ppi": 29, "afe": 8, "open": 10, "timing": 9,
@@ -101,6 +111,8 @@ EXPECTED = {
     "v0.7": dict(_V03, runtime=6, cdc=8, fsm_cl=11, open=13, c_ids=16),
     "v0.8": dict(_V03, runtime=6, cdc=8, fsm_cl=11, open=14, c_ids=16),
     "v0.9": dict(_V03, runtime=6, cdc=8, fsm_cl=11, open=14, c_ids=16),
+    "v0.10": dict(_V03, runtime=6, cdc=8, fsm_cl=11, open=15, c_ids=16),
+    "v0.11": dict(_V03, runtime=6, cdc=8, fsm_cl=11, fsm_dl=17, open=16, timing=10, c_ids=16),
 }
 REVISION_RE = re.compile(r"\*\*DRAFT (v[0-9]+\.[0-9]+)\*\*")
 

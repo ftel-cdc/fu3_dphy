@@ -1,4 +1,4 @@
-// Figure 5-8 - initialization (spec.md 5.1; 4.2, 4.7; HAS-CSI bring-up sequence).
+// Figure 5-8 - initialization (spec.md 5.1; 4.2, 4.7; bring-up sequence of the CSI-2 Rx controller).
 // phy_core_rst is asserted for at least 40 core_clk cycles; after its release and the enables, each
 // lane counts consecutive LP-11 cycles and leaves its INIT state at tinit_cyc; init_done is the
 // registered AND of the clock lane and every enabled data lane (exact semantics OPEN K6).

@@ -225,8 +225,8 @@
             <mxPoint x="1338" y="470" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="mux_en" value="" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;rotation=-90;strokeWidth=2;size=12;" vertex="1" parent="1">
-          <mxGeometry x="990.0" y="630.0" width="100" height="40" as="geometry" />
+        <mxCell id="mux_en" value="" style="verticalLabelPosition=bottom;shadow=0;dashed=0;align=center;html=1;verticalAlign=top;shape=mxgraph.electrical.logic_gates.logic_gate;operation=or;strokeWidth=2;fontSize=18;rotation=180;" vertex="1" parent="1">
+          <mxGeometry x="1010" y="620" width="70" height="60" as="geometry" />
         </mxCell>
         <mxCell id="i_en_t" value="hs_en_x, term_en_x,&lt;br&gt;all logical lanes&lt;br&gt;(from No.3)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="1342" y="616" width="300" height="68" as="geometry" />
@@ -234,7 +234,7 @@
         <mxCell id="i_en" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="1338" y="650" as="sourcePoint" />
-            <mxPoint x="1060" y="650" as="targetPoint" />
+            <mxPoint x="1080" y="650" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="o_en_t" value="afe_hs_en_x,&lt;br&gt;afe_term_en_x" style="text;html=1;whiteSpace=wrap;fontSize=18;align=right;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
@@ -242,17 +242,17 @@
         </mxCell>
         <mxCell id="o_en" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1020" y="650" as="sourcePoint" />
+            <mxPoint x="1010" y="650" as="sourcePoint" />
             <mxPoint x="240" y="650" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c_inv1_t" value="inverse map" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;fontColor=#2D7600;" vertex="1" parent="1">
-          <mxGeometry x="1048" y="716" width="170" height="28" as="geometry" />
+        <mxCell id="c_inv1_t" value="OR of x with&lt;br&gt;map = p" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;fontColor=#2D7600;" vertex="1" parent="1">
+          <mxGeometry x="1062" y="712" width="113" height="50" as="geometry" />
         </mxCell>
         <mxCell id="c_inv1" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;dashed=1;dashPattern=2 4;strokeColor=#2D7600;fontColor=#2D7600;edgeStyle=none;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1040" y="730" as="sourcePoint" />
-            <mxPoint x="1040" y="696" as="targetPoint" />
+            <mxPoint x="1045" y="730" as="sourcePoint" />
+            <mxPoint x="1045" y="680" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="mux_tap" value="" style="shape=trapezoid;perimeter=trapezoidPerimeter;whiteSpace=wrap;html=1;fixedSize=1;rotation=-90;strokeWidth=2;size=12;" vertex="1" parent="1">
@@ -276,8 +276,8 @@
             <mxPoint x="240" y="790" as="targetPoint" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="c_inv2_t" value="inverse map" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;fontColor=#2D7600;" vertex="1" parent="1">
-          <mxGeometry x="1048" y="844" width="170" height="28" as="geometry" />
+        <mxCell id="c_inv2_t" value="lowest x with&lt;br&gt;map = p" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;fontColor=#2D7600;" vertex="1" parent="1">
+          <mxGeometry x="1052" y="834" width="126" height="50" as="geometry" />
         </mxCell>
         <mxCell id="c_inv2" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;dashed=1;dashPattern=2 4;strokeColor=#2D7600;fontColor=#2D7600;edgeStyle=none;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">

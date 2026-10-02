@@ -59,8 +59,8 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="a_use" value="N = PARA_LP_SYNC_STAGES: afe_lp_dp_x, afe_lp_dn_x,&lt;br&gt;afe_cl_lp_dp, afe_cl_lp_dn, afe_cl_clk_active.&lt;br&gt;N = 2: HS entry, sync-search start, EoT request,&lt;br&gt;enables, FSM states." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
-          <mxGeometry x="1000" y="205" width="540" height="130" as="geometry" />
+        <mxCell id="a_use" value="N = PARA_LP_SYNC_STAGES: afe_lp_dp_x, afe_lp_dn_x,&lt;br&gt;afe_cl_lp_dp, afe_cl_lp_dn, afe_cl_clk_active.&lt;br&gt;N = 2: sync-search start, enables, FSM states.&lt;br&gt;forcerxmode_x: a third flip-flop and an AND&lt;br&gt;gate add a one-cycle pulse when it rises." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="205" width="540" height="140" as="geometry" />
         </mxCell>
         <mxCell id="fb" value="toggle synchronizer  --  one-cycle event to one-cycle pulse" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;fontStyle=1;verticalAlign=top;strokeWidth=2;fillColor=none;arcSize=4;spacingTop=6;" vertex="1" parent="1">
           <mxGeometry x="0" y="390" width="1560" height="390" as="geometry" />
@@ -184,7 +184,7 @@
         <mxCell id="b_use" value="Events of one kind at least&lt;br&gt;3 destination cycles apart." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="960" y="442" width="590" height="56" as="geometry" />
         </mxCell>
-        <mxCell id="fc" value="reset synchronizer  --  one per clock domain, in Block No.6" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;fontStyle=1;verticalAlign=top;strokeWidth=2;fillColor=none;arcSize=4;spacingTop=6;" vertex="1" parent="1">
+        <mxCell id="fc" value="reset synchronizer  --  one per clock domain and one per data lane for No.4, in Block No.6" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;fontStyle=1;verticalAlign=top;strokeWidth=2;fillColor=none;arcSize=4;spacingTop=6;" vertex="1" parent="1">
           <mxGeometry x="0" y="820" width="1560" height="360" as="geometry" />
         </mxCell>
         <mxCell id="c_rst" value="phy_core_rst" style="text;html=1;whiteSpace=wrap;fontSize=18;align=right;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
@@ -261,8 +261,8 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="c_use" value="Domains: core_clk, rxbyteclkhs,&lt;br&gt;configuration clock." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
-          <mxGeometry x="1000" y="1070" width="550" height="70" as="geometry" />
+        <mxCell id="c_use" value="Domains: core_clk, rxbyteclkhs, configuration&lt;br&gt;clock; per data lane one more in rxbyteclkhs&lt;br&gt;for No.4, cleared also while the lane is&lt;br&gt;disabled (Figure 4-10)." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="1000" y="1070" width="550" height="104" as="geometry" />
         </mxCell>
         <mxCell id="ca" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;dashed=1;dashPattern=10 6;strokeColor=#B85450;fontColor=#B85450;endArrow=none;endArrow=none;edgeStyle=none;jumpStyle=none;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">

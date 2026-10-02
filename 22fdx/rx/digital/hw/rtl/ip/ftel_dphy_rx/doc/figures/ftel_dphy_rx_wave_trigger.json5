@@ -1,5 +1,5 @@
 // Figure 5-4 - escape mode, Reset-Trigger, at the PPI (spec.md 5.1; 4.5 Table 4-5, escape decoder).
-// D-PHY v1.1 Figure 18: LP-11 > 10 > 00 > 01 > 00, entry command 01100010 (first bit first) in
+// D-PHY [1]: LP-11 > 10 > 00 > 01 > 00, entry command 01100010 (first bit first) in
 // Spaced-One-Hot (Mark-0 = LP-01, Mark-1 = LP-10, each followed by LP-00), then Mark-1 and Stop.
 // rxtriggeresc_x[0] rises when the eighth bit is decoded and falls with the return to Stop.
 { signal: [

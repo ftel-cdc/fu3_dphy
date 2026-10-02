@@ -31,7 +31,7 @@
         <mxCell id="ip" value="&lt;b&gt;ftel_dphy_rx&lt;/b&gt;&lt;br&gt;(this IP)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=4;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="380" y="200" width="220" height="120" as="geometry" />
         </mxCell>
-        <mxCell id="csi" value="&lt;b&gt;CSI-2 Rx&lt;/b&gt;&lt;br&gt;controller&lt;br&gt;(HAS-CSI)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+        <mxCell id="csi" value="&lt;b&gt;CSI-2 Rx&lt;/b&gt;&lt;br&gt;controller" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="800" y="200" width="220" height="120" as="geometry" />
         </mxCell>
         <mxCell id="sw" value="software&lt;br&gt;(AXI4-Lite&lt;br&gt;CSR)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">

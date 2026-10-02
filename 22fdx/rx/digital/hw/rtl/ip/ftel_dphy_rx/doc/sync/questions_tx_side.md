@@ -4,8 +4,8 @@
 |---|---|
 | Gửi | Đội phát triển phía Tx (CSI-2 transmitter / D-PHY Tx của sensor) |
 | Từ | Nhóm thiết kế D-PHY Rx (`ftel_dphy_rx`) |
-| Ngày | 2026-09-26, cập nhật 2026-09-29 (S9: clock lane; S5: THS-EXIT + TLPX ở tốc độ thấp), 2026-09-30 (S3: vì sao Rx cần continuous clock) và 2026-10-02 (S5: THS-ZERO không còn ảnh hưởng việc tìm sync) |
-| Căn cứ | MIPI CSI-2 v1.3, MIPI D-PHY v1.1 (Table 14); HAS của `ftel_dphy_rx` bản nháp v0.9 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.9.docx`) |
+| Ngày | 2026-09-26, cập nhật 2026-09-29 (S9: clock lane; S5: THS-EXIT + TLPX ở tốc độ thấp), 2026-09-30 (S3: vì sao Rx cần continuous clock) và 2026-10-02 (S5: THS-ZERO không còn ảnh hưởng việc tìm sync; S12 mới: HS clock sau burst cuối) |
+| Căn cứ | MIPI CSI-2 v1.3, MIPI D-PHY v1.1 (Table 14); HAS của `ftel_dphy_rx` bản nháp v0.11 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.11.docx`) |
 
 ## Bối cảnh
 
@@ -16,14 +16,15 @@ Tx: CSI-2 protocol ─► D-PHY Tx ══ lane trên PCB ══► AFE ─► ft
 ```
 
 Chúng tôi thiết kế Rx theo CSI-2 v1.3 và D-PHY v1.1. Riêng deskew lấy theo D-PHY v1.2, vì cần khi
-chạy trên 1.5 Gb/s. Rx được thiết kế để chịu được **toàn bộ dải** min/max của spec, trừ một ngoại lệ
-ghi ở S5. Các câu hỏi dưới đây giúp chốt những giá trị mà spec chỉ cho một biên, hoặc để ngỏ.
+chạy trên 1.5 Gb/s. Rx được thiết kế để chịu được **toàn bộ dải** min/max của spec, trừ hai ngoại
+lệ: THS-EXIT + TLPX ở tốc độ thấp (S5) và TCLK-POST trước khi clock lane rời HS (S12). Các câu hỏi dưới đây giúp chốt những giá trị mà spec chỉ cho một biên, hoặc để ngỏ.
 
 Mỗi câu hỏi kèm **giả định đang dùng**. Nếu phía Tx đồng ý với giả định, chỉ cần trả lời "Đồng ý".
 Một số câu đã có câu trả lời một phần từ HAS của team CSI-2 Rx controller (HAS-CSI); với các câu
 đó, chúng tôi chỉ nhờ xác nhận.
 
 **Cần trả lời trước HAS v1.0:** **S4, S5**. Đây là hai mục mở trong HAS, đang chặn 4 yêu cầu.
+S12 không chặn RTL (Rx không đổi theo câu trả lời) nhưng cần trước khi chạy hệ thống thật.
 S1, S3, S9 và S10 cũng cần sớm, để chuẩn bị môi trường verify.
 
 ## Tóm tắt
@@ -41,6 +42,7 @@ S1, S3, S9 và S10 cũng cần sớm, để chuẩn bị môi trường verify.
 | S9 | Map lane và cực tính P/N trên board/package | Cao | Mở |
 | S10 | Model mô phỏng của Tx | Cao | Mở |
 | S11 | Chế độ test cho bring-up | Thấp | Mở |
+| S12 | HS clock sau burst cuối, trước khi clock lane rời HS (TCLK-POST) | **Cao** | Mở |
 
 ---
 
@@ -75,7 +77,8 @@ burst)? Có chuyển giữa hai chế độ khi đang chạy không?
 **Giả định hiện tại.** Continuous clock. FSM của clock lane trong Rx xử lý được việc vào/ra LP giữa
 các burst, nhưng đường dữ liệu thì chưa: delay line EoT chỉ xả khi `rxbyteclkhs` chạy, còn
 non-continuous clock dừng TCLK-POST sau burst, sớm hơn lúc byte cuối ra PPI (HAS D-PHY §1.4, §4.6).
-Nếu Tx cần non-continuous clock, nhờ báo sớm.
+Nếu Tx cần non-continuous clock, nhờ báo sớm. Với continuous clock, việc này vẫn xảy ra một lần, ở burst
+cuối trước khi clock lane rời HS: xem S12.
 
 ## S4 — Deskew
 
@@ -181,6 +184,30 @@ tôi sẽ chạy thêm model đó để bắt các khác biệt ngoài đời th
 
 **Giả định hiện tại.** Không giả định có.
 
+## S12 — HS clock sau burst cuối (TCLK-POST)
+
+**Câu hỏi.**
+1. Trước khi clock lane rời HS (vào ULPS hoặc khi dừng stream), Tx giữ HS clock bao lâu sau khi data
+   lane cuối cùng về LP-11 (TCLK-POST)? Giá trị này có cấu hình được không, và dải cấu hình là bao nhiêu?
+2. Tx có giữ được TCLK-POST ≥ 288·UI ở bản R1 (320·UI ở bản R2) không? Ví dụ: 3.6 µs ở 80 Mb/s,
+   192 ns ở 1500 Mb/s.
+
+**Vì sao cần.**
+- Rx giữ phần đuôi của mỗi burst trong một delay line `PARA_EOT_DELAY_BYTES` byte (32 ở R1, 36 ở R2)
+  để cắt trailer (HAS D-PHY §4.6). Delay line chỉ xả khi `rxbyteclkhs` chạy.
+- Ở mức tối thiểu của spec (TCLK-POST ≥ 60 ns + 52·UI), byte clock chỉ chạy thêm khoảng 7 byte clock
+  ở 80 Mb/s và 18 ở 1500 Mb/s sau LP-11. Trong khi đó byte cuối của burst ra PPI sau khoảng
+  `PARA_EOT_DELAY_BYTES` + 3 byte clock. Phần đuôi, ví dụ packet Frame End, sẽ nằm lại trong Rx tới khi
+  clock chạy lại.
+- D-PHY v1.1 §6.14.2 tính tới trường hợp này: nếu receiver cần nhiều clock hơn TCLK-POST,min để nhận
+  xong, transmitter phải cấp đủ clock.
+- 288·UI = (`PARA_EOT_DELAY_BYTES` + Λ + 2) byte clock × 8 UI, với độ trễ word của AFE Λ = 2. Pipeline
+  của CSI-2 Rx controller có thể cần thêm vài byte clock; team CSI được hỏi riêng, và con số đó sẽ cộng
+  thêm vào.
+
+**Giả định hiện tại.** Tx dùng TCLK-POST tối thiểu của spec. Khi đó đuôi của burst cuối tới controller
+trễ, vào lúc clock lane chạy lại (HAS mục mở S12).
+
 ---
 
 ## Trả lời
@@ -198,3 +225,4 @@ tôi sẽ chạy thêm model đó để bắt các khác biệt ngoài đời th
 | S9 | | | |
 | S10 | | | |
 | S11 | | | |
+| S12 | | | |

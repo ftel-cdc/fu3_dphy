@@ -1,22 +1,23 @@
 // Figure 5-7 - clock lane: HS clock start and stop, clock-lane ULPS (spec.md 5.1; 4.4 Table 4-4).
 // CL_HS_TERM ends when clk_settle_cyc has elapsed and the clock is active, so cl_rxclkactivehs rises
-// only with a running rxbyteclkhs (HAS-CSI: the only indication that it is running). The TCLK-MISS
-// detector (afe_cl_clk_active) ends CL_HS_CLK. ULPS: LP-10 then LP-00; exit Mark-1 then Stop.
+// only with a running rxbyteclkhs (the CSI-2 Rx controller: the only indication that it is running). The TCLK-MISS
+// detector (afe_cl_clk_active) ends CL_HS_CLK one column after the clock stops, so cl_rxclkactivehs falls up
+// to about 75 ns after the last clock edge (5.1). ULPS: LP-10 then LP-00; exit Mark-1 then Stop.
 { signal: [
-  { name: 'clock lane (Cp/Cn)', wave: '=.=.=..=..=.|=.=.=..=.|=..|=.', data: ['LP-11', 'LP-01', 'LP-00', 'HS-0', 'HS clock', 'HS-0', 'LP-11', 'LP-10', 'LP-00', 'LP-10', 'LP-11'] },
-  {                                                              node: '....J....K.............H...I.' },
-  { name: 'CL FSM (No. 2)',     wave: '=.=.=.....=.|=.=.=..=.|=..|=.', data: ['STOP', 'HS_RQST', 'HS_PRPR > HS_TERM', 'HS_CLK', 'HS_END', 'STOP', 'ULPS_RQST', 'ULPS', 'ULPS_EXIT', 'STOP'] },
-  { name: 'afe_cl_term_en',     wave: '0...1.......|..0......|...|..' },
-  { name: 'afe_cl_hs_en',       wave: '0...1.......|0........|...|..' },
-  { name: 'afe_cl_clk_active',  wave: '0.........1.|0........|...|..' },
-  { name: 'rxbyteclkhs',        wave: 'l.........p.|l........|...|..' },
-  { name: 'cl_rxclkactivehs',   wave: '0.........1.|0........|...|..' },
-  { name: 'cl_stopstate',       wave: '1.0.........|..1.0....|...|1.' },
-  { name: 'cl_ulpsactivenot',   wave: '1...........|.......0.|1..|..' },
-  { name: 'cl_ulpsclknot',      wave: '1...........|.......0.|...|1.' },
+  { name: 'clock lane (Cp/Cn)', wave: '=.=.=..=..=|...=..=.=..=.|=..|=.', data: ['LP-11', 'LP-01', 'LP-00', 'HS-0', 'HS clock', 'HS-0', 'LP-11', 'LP-10', 'LP-00', 'LP-10', 'LP-11'] },
+  {                                                              node: '....J....K................H...I.' },
+  { name: 'CL FSM (No. 2)',     wave: '=.=.=.....=|....=.=.=..=.|=..|=.', data: ['STOP', 'HS_RQST', 'HS_PRPR > HS_TERM', 'HS_CLK', 'HS_END', 'STOP', 'ULPS_RQST', 'ULPS', 'ULPS_EXIT', 'STOP'] },
+  { name: 'afe_cl_term_en',     wave: '0...1......|......0......|...|..' },
+  { name: 'afe_cl_hs_en',       wave: '0...1......|....0........|...|..' },
+  { name: 'afe_cl_clk_active',  wave: '0.........1|....0........|...|..' },
+  { name: 'rxbyteclkhs',        wave: 'l.........p|...l.........|...|..' },
+  { name: 'cl_rxclkactivehs',   wave: '0.........1|....0........|...|..' },
+  { name: 'cl_stopstate',       wave: '1.0........|......1.0....|...|1.' },
+  { name: 'cl_ulpsactivenot',   wave: '1..........|...........0.|1..|..' },
+  { name: 'cl_ulpsclknot',      wave: '1..........|...........0.|...|1.' },
 ],
   edge: ['J<->K TCLK-SETTLE', 'H<->I TWAKEUP'],
   head: { text: 'Clock lane: HS clock start and stop, clock-lane ULPS' },
-  foot: { text: 'CL_HS_TERM ends when clk_settle_cyc has elapsed and the clock is active (4.4); CL_HS_PRPR lasts one core_clk cycle' },
+  foot: { text: 'CL_HS_PRPR lasts one cycle; CL_HS_TERM ends once clk_settle_cyc has elapsed and the clock is active (4.4); cl_rxclkactivehs falls up to about 75 ns after the clock stops (5.1)' },
   config: { hscale: 1, arcFontSize: 12 }
 }

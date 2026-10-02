@@ -3,7 +3,7 @@
 MIPI D-PHY receiver controller: receives one clock lane and up to four data lanes and
 presents the received data on the PHY-Protocol Interface (PPI) toward a CSI-2 receiver.
 
-> Status (2026-09-26): architecture draft — [`doc/spec.md`](doc/spec.md) is HAS **draft v0.4**
+> Status (2026-10-02): architecture draft — [`doc/spec.md`](doc/spec.md) is HAS **draft v0.11**
 > (open items in its chapter 9). Research, change analysis and sync-up lists are in
 > [`doc/DPHY_RX_RESEARCH_PLAN.md`](doc/DPHY_RX_RESEARCH_PLAN.md); the requirement-to-RTL flow is
 > planned in [`doc/RTL_FLOW_PLAN.md`](doc/RTL_FLOW_PLAN.md). No RTL has been written yet.
@@ -46,9 +46,10 @@ ftel_dphy_rx/
 ├── ip_config.yaml        ← tool_flow design overrides (all commented = default convention)
 ├── .gitignore            ← tool_flow output patterns
 ├── doc/
-│   ├── spec.md           ← architecture specification (HAS), draft v0.9 (source of the docx)
+│   ├── spec.md           ← architecture specification (HAS), draft v0.11 (source of the docx); standalone:
+│   │                       cites no other file or document, the MIPI standards by name only (§1.5)
 │   ├── md2docx.py        ← spec.md → FTEL_IP_MIPI_D-PHY_RX_HAS_v<x.y>.docx in the FTEL HAS format
-│   ├── FTEL_IP_MIPI_D-PHY_RX_HAS_v0.9.docx ← HAS as a Word document (built, do not edit by hand)
+│   ├── FTEL_IP_MIPI_D-PHY_RX_HAS_v0.11.docx ← HAS as a Word document (built, do not edit by hand)
 │   ├── DPHY_RX_RESEARCH_PLAN.md ← research, change analysis, sync-up lists, plan
 │   ├── RTL_FLOW_PLAN.md  ← requirement-to-RTL flow (adapted [reference rule set] flow), stages and gates
 │   ├── analysis/         ← models behind design decisions (adr007: start of the sync search)

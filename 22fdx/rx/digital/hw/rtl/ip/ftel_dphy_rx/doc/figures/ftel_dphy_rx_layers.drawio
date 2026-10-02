@@ -41,7 +41,7 @@
             <mxPoint x="30" y="0" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="t_rx_proto" value="CSI-2 Rx controller (HAS-CSI)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+        <mxCell id="t_rx_proto" value="CSI-2 Rx controller" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="920" y="130" width="300" height="40" as="geometry" />
         </mxCell>
         <mxCell id="t_rx_dig" value="ftel_dphy_rx (this IP)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;fontStyle=1;" vertex="1" parent="1">

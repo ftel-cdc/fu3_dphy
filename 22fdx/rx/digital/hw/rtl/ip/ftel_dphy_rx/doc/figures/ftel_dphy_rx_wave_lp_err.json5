@@ -12,6 +12,6 @@
 ],
   edge: ['R<->S false control', 'T<->U escape entry', 'U<->V LPDT command (K2)', 'V<->W wait for Stop'],
   head: { text: 'PPI, one data lane: false control and unsupported escape command' },
-  foot: { text: 'errcontrol_x and erresc_x stay High until the next line-state change (D-PHY Annex A)' },
+  foot: { text: 'errcontrol_x and erresc_x stay High until the next line-state change (D-PHY [1])' },
   config: { hscale: 1, arcFontSize: 12 }
 }

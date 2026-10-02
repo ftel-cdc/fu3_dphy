@@ -28,6 +28,9 @@
         <mxCell id="heot" value="DL_HS_EOT" style="ellipse;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#DAE8FC;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="1610.0" y="325.0" width="180" height="70" as="geometry" />
         </mxCell>
+        <mxCell id="hwait" value="DL_HS_WAIT" style="ellipse;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#DAE8FC;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="1250.0" y="325.0" width="200" height="70" as="geometry" />
+        </mxCell>
         <mxCell id="err" value="DL_ERR" style="ellipse;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#DAE8FC;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="830.0" y="315.0" width="170" height="70" as="geometry" />
         </mxCell>
@@ -85,14 +88,28 @@
             <mxPoint x="95" y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="t_heend" value="EoT done (No.4)" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;exitX=0;exitY=0.5;exitDx=0;exitDy=0;entryX=0.674;entryY=0.969;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="heot" target="stop">
+        <mxCell id="t_heend" value="EoT done (No.4)" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;exitX=0;exitY=0.3;exitDx=0;exitDy=0;entryX=0.674;entryY=0.969;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="heot" target="stop">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
-              <mxPoint x="1570" y="360" />
+              <mxPoint x="1570" y="346" />
               <mxPoint x="1570" y="245" />
               <mxPoint x="470" y="245" />
             </Array>
-            <mxPoint x="260" y="-14" as="offset" />
+            <mxPoint x="412" y="-14" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_hwait" value="EoT done,&lt;br&gt;LP-00 seen" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="1" source="heot" target="hwait">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="0" y="30" as="offset" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="t_hwend" value="LP-11" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;exitX=0.5;exitY=0;exitDx=0;exitDy=0;entryX=0.674;entryY=0.969;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="hwait" target="stop">
+          <mxGeometry x="-0.93" relative="1" as="geometry">
+            <Array as="points">
+              <mxPoint x="1350" y="245" />
+              <mxPoint x="470" y="245" />
+            </Array>
+            <mxPoint x="30" y="0" as="offset" />
           </mxGeometry>
         </mxCell>
         <mxCell id="t_e1" value="other" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;exitX=0.5;exitY=1;exitDx=0;exitDy=0;entryX=0.3;entryY=0;entryDx=0;entryDy=0;" edge="1" parent="1" source="hrq" target="err">
@@ -215,11 +232,8 @@
         <mxCell id="o_hte" value="term_en_x = 1,&lt;br&gt;hs_en_x = 1" style="text;html=1;whiteSpace=wrap;fontSize=18;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="1250" y="45" width="260" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="o_hrx" value="term_en_x = 1,&lt;br&gt;hs_en_x = 1" style="text;html=1;whiteSpace=wrap;fontSize=18;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
-          <mxGeometry x="1590" y="45" width="230" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="o_heot" value="EoT request" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
-          <mxGeometry x="1795" y="345" width="180" height="30" as="geometry" />
+        <mxCell id="o_hrx" value="term_en_x = 1,&lt;br&gt;hs_en_x = 1,&lt;br&gt;sync-search start = 1" style="text;html=1;whiteSpace=wrap;fontSize=18;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="1580" y="18" width="260" height="76" as="geometry" />
         </mxCell>
         <mxCell id="o_err" value="errcontrol_x = 1" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="1005" y="335" width="190" height="30" as="geometry" />
@@ -236,7 +250,7 @@
         <mxCell id="o_ewait" value="rxtriggeresc_x&lt;br&gt;held" style="text;html=1;whiteSpace=wrap;fontSize=18;align=right;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="790" y="795" width="170" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="n_any" value="Every state except DL_INIT, DL_HS_RX and DL_HS_EOT goes to DL_STOP on LP-11; only the regular LP-11 exits are drawn. Escape watchdog expiry (No.6) in DL_LP_RQST to DL_ESC_CMD: DL_ESC_WAIT, no PPI error. dl_enable_x Low or forcerxmode_x High: DL_INIT. Outputs not written beside a state keep their inactive value." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+        <mxCell id="n_any" value="Every state except DL_INIT, DL_HS_RX and DL_HS_EOT goes to DL_STOP on LP-11; only the regular LP-11 exits are drawn. Escape watchdog expiry (No.6) in DL_LP_RQST to DL_ESC_CMD: DL_ESC_WAIT, no PPI error. dl_enable_x Low holds the lane in DL_INIT; a rising forcerxmode_x returns it there. The fall of the sync-search start, on leaving DL_HS_RX, is the EoT request to No.4. Outputs not written beside a state keep their inactive value." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="20" y="955" width="1950" height="90" as="geometry" />
         </mxCell>
         <mxCell id="leg_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=none;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">

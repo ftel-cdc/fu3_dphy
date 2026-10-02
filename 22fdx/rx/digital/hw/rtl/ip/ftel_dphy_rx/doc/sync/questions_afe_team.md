@@ -5,7 +5,7 @@
 | Gửi | Team AFE (analog front-end của D-PHY Rx: HS-RX, LP-RX, termination, deserializer) |
 | Từ | Nhóm thiết kế D-PHY Rx digital (`ftel_dphy_rx`) |
 | Ngày | 2026-10-02 |
-| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.9 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`) §2.1 (Figure 2-1, 2-2), §4.1, §4.3, §4.4, §4.6, §5.2 (Figure 5-9), ADR-001, ADR-004, ADR-007, Appendix B; MIPI D-PHY v1.1 Table 14 |
+| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.11 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`) §2.1 (Figure 2-1, 2-2), §4.1, §4.3, §4.4, §4.6, §5.2 (Figure 5-9), ADR-001, ADR-004, ADR-007, Appendix B; MIPI D-PHY v1.1 Table 14 |
 
 ## Bối cảnh
 
@@ -45,8 +45,8 @@ R2 (deskew calibration). A6 không chặn RTL: câu trả lời chỉ đổi gi�
 | A5 | Độ rộng glitch tối đa ở đầu ra LP-RX | Trung bình | ADR-001 |
 | A6 | Độ trễ word và dữ liệu trong THS-PREPARE | Trung bình | ADR-001, ADR-007 |
 
-Có 22 yêu cầu trong HAS v0.9 đang chờ team AFE: 19 yêu cầu chờ ADR-001 (3 trong số đó chờ cả ADR-004),
-và 3 yêu cầu khác chờ độ trễ word Λ của ADR-007 (A6).
+Có 24 yêu cầu trong HAS v0.11 đang chờ team AFE: 20 yêu cầu chờ ADR-001 (3 trong số đó chờ cả
+ADR-004), và 4 yêu cầu khác chờ độ trễ word Λ của ADR-007 (A6).
 Ranh giới AFE / digital theo phương án B được vẽ ở HAS Figure 2-1 (data lane) và Figure 2-2 (clock lane).
 
 ## Giao diện đề xuất (HAS D-PHY §5.2)
@@ -57,7 +57,7 @@ Chiều tín hiệu nhìn từ `ftel_dphy_rx`. Hậu tố `_x` nghĩa là mỗi 
 |---|---|---|---|---|
 | `afe_lp_dp_x`, `afe_lp_dn_x` | In | 1 mỗi tín hiệu | async | Đầu ra LP-RX của data lane x |
 | `afe_cl_lp_dp`, `afe_cl_lp_dn` | In | 1 mỗi tín hiệu | async | Đầu ra LP-RX của clock lane |
-| `afe_byteclk` | In | 1 | clock | DDR clock của clock lane chia 8; trở thành `rxbyteclkhs` |
+| `afe_byteclk` | In | 1 | clock | DDR clock của clock lane chia 4 (line rate / 8); trở thành `rxbyteclkhs` |
 | `afe_hs_word_x` | In | 8 | `afe_byteclk` | Bit đã deserialize, bit 0 nhận trước, pha byte tùy ý, độ trễ cố định (A6) |
 | `afe_cl_clk_active` | In | 1 | async | Bộ phát hiện clock activity cho TCLK-MISS (A2) |
 | `afe_hs_en_x`, `afe_cl_hs_en` | Out | 1 mỗi tín hiệu | `core_clk` | Bật HS-RX (và deserializer) |
@@ -72,19 +72,21 @@ Chiều tín hiệu nhìn từ `ftel_dphy_rx`. Hậu tố `_x` nghĩa là mỗi 
 
 **Câu hỏi.**
 1. AFE có giao được, cho mỗi data lane, một word 8 bit đã deserialize nhưng **chưa align byte**, trên
-   **một byte clock chung** (DDR clock của clock lane chia 8) không? Việc tìm sync và align byte do
+   **một byte clock chung** (DDR clock của clock lane chia 4, tức line rate / 8) không? Việc tìm sync và align byte do
    phần digital làm.
 2. Bit 0 của word có phải là bit nhận trước không? Word của các lane có quan hệ timing thế nào với
    `afe_byteclk` (setup/hold tại đầu vào digital)?
 3. Từ lúc `afe_hs_en_x` lên tới khi word ổn định mất bao lâu? Word trong khoảng này có thể là dữ liệu
    rác; phần digital bỏ qua mọi word tới khi hết THS-SETTLE (HAS §4.6; chi tiết ở A6).
-4. `afe_byteclk` có dừng khi clock lane rời HS (vào LP hoặc ULPS) không? Khi dừng và chạy lại, clock
-   có sạch (không glitch, không có xung ngắn) không?
+4. `afe_byteclk` có dừng khi clock lane rời HS (vào LP hoặc ULPS) không? Khi dừng và chạy lại, và khi
+   `afe_cl_hs_en` bật hoặc tắt (ví dụ phần mềm tắt clock lane), clock có sạch (không glitch, không có
+   xung ngắn) không?
 5. Phần digital tự làm đảo cực P/N và map lane logic ↔ vật lý, cho cả đường HS lẫn đường LP. AFE có
    tự đảo hay map lại tín hiệu nào không? Nếu cả hai bên cùng đảo thì cực tính sẽ bị đảo hai lần.
 
 **Giả định hiện tại.** Phương án B, với giao diện như bảng ở trên. `afe_byteclk` chỉ chạy khi clock
-lane ở HS, và dừng/chạy lại không glitch. AFE không đảo cực và không map lane.
+lane ở HS, và dừng/chạy lại không glitch, kể cả khi `afe_cl_hs_en` đổi (HAS Table 5-2). AFE không đảo
+cực và không map lane.
 
 ## A2 — Bộ phát hiện clock activity cho TCLK-MISS
 
@@ -107,17 +109,25 @@ cần đồng bộ, không cần lọc.
 ## A3 — Ngân sách thời gian bật termination
 
 **Câu hỏi.**
-1. Phần digital phát `afe_term_en_x` / `afe_cl_term_en` ngay khi phát hiện LP-00. Việc phát hiện mất
-   khoảng 20 ns: 2 chu kỳ đồng bộ và 2 chu kỳ lọc glitch ở 200 MHz. AFE bật được termination trong
-   phần thời gian còn lại không?
-   - Data lane: TD-TERM-EN ≤ 35 ns + 4·UI, tính từ lúc đường truyền vào LP-00, nên AFE còn khoảng
-     15 ns + 4·UI.
-   - Clock lane: TCLK-TERM-EN ≤ 38 ns, nên AFE còn khoảng 18 ns.
+1. Phần digital phát `afe_term_en_x` / `afe_cl_term_en` ngay khi phát hiện LP-00, không thêm timer.
+   Từ lúc đầu ra LP-RX đổi tới lúc tín hiệu này lên mất 25–30 ns:
+   - phát hiện LP-00 mất 20–25 ns tùy pha lấy mẫu: 2 chu kỳ đồng bộ và bộ lọc glitch 2 chu kỳ ở 200 MHz;
+   - thanh ghi của FSM thêm 1 chu kỳ;
+   - thêm 5 ns nữa nếu flip-flop đồng bộ đầu tiên resolve trễ một chu kỳ.
+
+   AFE bật được termination trong phần thời gian còn lại không?
+   - Data lane: TD-TERM-EN ≤ 35 ns + 4·UI, tính từ lúc Dn qua VIL,MAX, nên AFE còn 5–10 ns + 4·UI cho
+     độ trễ của LP-RX và việc bật termination.
+   - Clock lane: TCLK-TERM-EN ≤ 38 ns, nên AFE còn 8–13 ns.
 2. Nếu không kịp, AFE có tự phát hiện LP-00 và tự bật termination được không? Khi đó việc chuyển
    termination nằm trong AFE, và phần digital chỉ cho phép (enable) chức năng này.
 
-**Giả định hiện tại.** Kịp. Phần digital phát termination enable ngay khi phát hiện LP-00, không
-thêm timer.
+**Giả định hiện tại.** AFE kịp trong phần thời gian còn lại. Phần digital phát termination enable
+ngay khi phát hiện LP-00, không thêm timer.
+
+**Sửa so với bản trước (HAS v0.11).** Bản trước ghi phần digital mất khoảng 20 ns, và AFE còn khoảng
+15 ns + 4·UI (data lane) và 18 ns (clock lane). Con số đó bỏ sót độ trễ lấy mẫu và chu kỳ thanh ghi
+của FSM, nên ngân sách thật của AFE nhỏ hơn 10 ns. Nếu ngân sách này không đủ, câu 2 là hướng xử lý.
 
 **Tham chiếu.** D-PHY v1.1 Table 14. HAS D-PHY §4.3 (design note), Appendix B.
 

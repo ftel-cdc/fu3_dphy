@@ -4,7 +4,7 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="frame" value="lane configuration  --  1 clock lane + N data lanes, forward only, no LPDT (after D-PHY v1.1 Figure 8)" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;fontStyle=1;verticalAlign=top;strokeWidth=2;fillColor=none;arcSize=4;spacingTop=6;" vertex="1" parent="1">
+        <mxCell id="frame" value="lane configuration  --  1 clock lane + N data lanes, forward only, no LPDT (after D-PHY [1])" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;fontStyle=1;verticalAlign=top;strokeWidth=2;fillColor=none;arcSize=4;spacingTop=6;" vertex="1" parent="1">
           <mxGeometry x="0" y="0" width="1290" height="690" as="geometry" />
         </mxCell>
         <mxCell id="csi_tx" value="&lt;b&gt;CSI-2 Tx&lt;/b&gt;&lt;br&gt;protocol&lt;br&gt;(sensor)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
@@ -25,7 +25,7 @@
         <mxCell id="t_pcb" value="PCB interconnect" style="text;html=1;whiteSpace=wrap;fontSize=18;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;fontStyle=1;" vertex="1" parent="1">
           <mxGeometry x="470" y="60" width="240" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="csi_rx" value="&lt;b&gt;CSI-2 Rx&lt;/b&gt;&lt;br&gt;controller&lt;br&gt;(HAS-CSI)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+        <mxCell id="csi_rx" value="&lt;b&gt;CSI-2 Rx&lt;/b&gt;&lt;br&gt;controller" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="1150" y="90" width="125" height="470" as="geometry" />
         </mxCell>
         <mxCell id="m_cl" value="&lt;b&gt;clock lane&lt;/b&gt;&lt;br&gt;HS-TX, LP-TX,&lt;br&gt;CIL-MCNN" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">

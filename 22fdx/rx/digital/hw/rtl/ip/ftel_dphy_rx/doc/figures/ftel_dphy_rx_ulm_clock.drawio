@@ -4,7 +4,7 @@
       <root>
         <mxCell id="0" />
         <mxCell id="1" parent="0" />
-        <mxCell id="frame" value="clock lane module  --  Universal Lane Module (D-PHY v1.1 Figure 4) reduced to CIL-SCNN" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;fontStyle=1;verticalAlign=top;strokeWidth=2;fillColor=none;arcSize=4;spacingTop=6;" vertex="1" parent="1">
+        <mxCell id="frame" value="clock lane module  --  Universal Lane Module of D-PHY [1] reduced to CIL-SCNN" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;fontStyle=1;verticalAlign=top;strokeWidth=2;fillColor=none;arcSize=4;spacingTop=6;" vertex="1" parent="1">
           <mxGeometry x="75" y="0" width="1060" height="775" as="geometry" />
         </mxCell>
         <mxCell id="pad_p" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#FFFFFF;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
@@ -112,7 +112,7 @@
         <mxCell id="t_unused" value="grey: not used (unidirectional slave)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;fontColor=#A0A0A0;" vertex="1" parent="1">
           <mxGeometry x="105" y="715" width="300" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="div8" value="&lt;b&gt;DDR clock / 8&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#F5F5F5;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+        <mxCell id="div8" value="&lt;b&gt;DDR clock / 4&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#F5F5F5;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="255" y="230" width="145" height="50" as="geometry" />
         </mxCell>
         <mxCell id="e_ddr" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;dashed=1;dashPattern=8 4;strokeColor=#666666;fontColor=#666666;exitX=1;exitY=0.33;exitDx=0;exitDy=0;entryX=0;entryY=0.5;entryDx=0;entryDy=0;" edge="1" parent="1" source="hsrx" target="div8">
