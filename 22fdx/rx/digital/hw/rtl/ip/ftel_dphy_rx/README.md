@@ -3,10 +3,13 @@
 MIPI D-PHY receiver controller: receives one clock lane and up to four data lanes and
 presents the received data on the PHY-Protocol Interface (PPI) toward a CSI-2 receiver.
 
-> Status (2026-10-02): architecture draft — [`doc/spec.md`](doc/spec.md) is HAS **draft v0.11**
+> Status (2026-10-03): architecture draft — [`doc/spec.md`](doc/spec.md) is HAS **draft v0.11**
 > (open items in its chapter 9). Research, change analysis and sync-up lists are in
 > [`doc/DPHY_RX_RESEARCH_PLAN.md`](doc/DPHY_RX_RESEARCH_PLAN.md); the requirement-to-RTL flow is
-> planned in [`doc/RTL_FLOW_PLAN.md`](doc/RTL_FLOW_PLAN.md). No RTL has been written yet.
+> planned in [`doc/RTL_FLOW_PLAN.md`](doc/RTL_FLOW_PLAN.md).
+> **Draft RTL** of release R1 in `logical/` (2026-10-03): open items at the defaults of the HAS, each
+> tagged `// OPEN`; lint-clean (VCS, SpyGlass, `check_rtl_rules.py`), **not simulated yet**. Decisions
+> and status in [`doc/rtl_notes.md`](doc/rtl_notes.md).
 
 ---
 
@@ -45,6 +48,9 @@ ftel_dphy_rx/
 ├── README.md             ← this file
 ├── ip_config.yaml        ← tool_flow design overrides (all commented = default convention)
 ├── .gitignore            ← tool_flow output patterns
+├── config/
+│   ├── ftel_dphy_rx.yaml ← configuration: Table 3-1 parameters, Table 3-2 field widths and reset values
+│   └── validate_config.py ← checks the YAML against the HAS formulas, emits logical/ftel_dphy_rx_config_pkg.sv
 ├── doc/
 │   ├── spec.md           ← architecture specification (HAS), draft v0.11 (source of the docx); standalone:
 │   │                       cites no other file or document, the MIPI standards by name only (§1.5)
@@ -52,12 +58,16 @@ ftel_dphy_rx/
 │   ├── FTEL_IP_MIPI_D-PHY_RX_HAS_v0.11.docx ← HAS as a Word document (built, do not edit by hand)
 │   ├── DPHY_RX_RESEARCH_PLAN.md ← research, change analysis, sync-up lists, plan
 │   ├── RTL_FLOW_PLAN.md  ← requirement-to-RTL flow (adapted [reference rule set] flow), stages and gates
+│   ├── rtl_rule.md       ← RTL coding rule (naming, CDC, tags); [M] rules checked by check_rtl_rules.py
+│   ├── rtl_notes.md      ← HAS ↔ RTL mapping, RTL decisions D-n, lint log
 │   ├── analysis/         ← models behind design decisions (adr007: start of the sync search)
 │   ├── sync/             ← question lists for the CSI team, the Tx side and the AFE team
 │   └── figures/          ← diagrams referenced by spec.md (drawio / WaveJSON sources + SVG/PNG)
-├── req/                  ← requirement artifacts of the flow (structured_spec.json, reviews, RTM)
-├── logical/              ← RTL (flat) + filelist.f / filelist_sim.f / filelist_netlist.f
-├── sim/                  ← testbenches, BFM, models
+├── req/                  ← requirement artifacts of the flow (structured_spec.json, rtl_scope.json, rtm.json,
+│                           conflicts_<phase>.json, flow_state.json)
+├── logical/              ← RTL (flat, 17 files: 2 packages, 15 modules) + filelist.f (compile order) /
+│                           filelist_sim.f / filelist_netlist.f
+├── sim/                  ← vcs_lint.sh (VCS +lint=all, 1/2/4 lanes); later testbenches, BFM, models
 ├── lint/                 ← lint_constraint.tcl, lint_waiver.tcl (SpyGlass lint_rtl)
 ├── cdc/                  ← cdc.sgdc, cdc_waiver.sgdc (SpyGlass cdc_verify)
 ├── rdc/                  ← rdc.sgdc, rdc_waiver.sgdc (SpyGlass rdc_verify_struct)
@@ -73,7 +83,13 @@ REPO_ROOT=/home/linhhk/Documents/DPHY \
   python3 -B /home/linhhk/Documents/ip-dev/hw/utils/tool_flow/bin/run_ip_tool.py --ip dphy_rx --tool <init|lint|cdc|rdc|vcs|vcs-run>
 ```
 
-Only `init` has been exercised so far (2026-09-26); the other tools are verified once RTL exists.
+`init` (2026-09-26) and `lint` (SpyGlass `lint_rtl`, 2026-10-03: 0 Fatal / 0 Error / 0 Warning, no
+waiver) have been exercised; `cdc`, `rdc` and `vcs-run` come with M4 and M3. VCS lint of the RTL:
+
+```bash
+hw/rtl/ip/ftel_dphy_rx/sim/vcs_lint.sh                    # wrapper, PARA_NUM_LANES = 1, 2, 4
+hw/rtl/ip/ftel_dphy_rx/sim/vcs_lint.sh --module <name>    # one module with the files before it
+```
 
 ---
 
@@ -81,19 +97,20 @@ Only `init` has been exercised so far (2026-09-26); the other tools are verified
 
 FX1 conventions: the IP Wrapper Guideline
 (`~/Documents/FX1_ips/Common_Info/IP_Wrapper_Guideline.pdf`, Tables 1-1 and 1-2) and the ip-dev
-project settings (`ip-dev/hw/utils/tool_flow/config/project.yaml`). The complete rule set will be
-written in `doc/rtl_rule.md` before any RTL (RTL_FLOW_PLAN Stage B).
+project settings (`ip-dev/hw/utils/tool_flow/config/project.yaml`). The complete rule set is
+[`doc/rtl_rule.md`](doc/rtl_rule.md) (v1.1, approved 2026-10-03); the table below summarizes it.
 
 | Item | Convention |
 |---|---|
 | Language | SystemVerilog (`.sv`), synthesizable subset; `always_ff` / `always_comb` only |
 | IP folder | `hw/rtl/ip/ftel_dphy_rx` |
-| Module names | Wrapper `m_ftel_dphy_rx_wrap` (IP top for tool_flow), core `ftel_dphy_rx`, sub-blocks `ftel_dphy_rx_<block>` |
+| Module names | Every module starts with `m_` (Guideline Table 1-1): wrapper `m_ftel_dphy_rx_wrap` (IP top for tool_flow), core `m_ftel_dphy_rx`, sub-blocks `m_ftel_dphy_rx_<block>`; packages `ftel_dphy_rx[_<name>]_pkg` |
 | Parameters / defines | `PARA_<NAME>` / `DEF_<NAME>` |
 | Flip-flops / instances | `reg_<name>` / `u_<name>_<n>` |
-| Ports | `i_` / `o_` / `io_`; wrapper ports `<dir>_<ip>_<type>_<name>` (Guideline Table 1-2) |
+| Ports | `i_` / `o_` (no `io_` in this IP); wrapper ports `<dir>_dphy_rx_<type>_<name>` (Guideline Table 1-2, IP token `dphy_rx`) |
 | Resets | Active-low `_n` at the wrapper; an active-high reset gets its inverter inside the wrapper |
-| Clock-domain crossing | Only through `ftel_dphy_rx_sync`, port-compatible with `m_vlsi_synch` (as `ftel_intctl`) |
+| Clock-domain crossing | Only through the cells `m_ftel_dphy_rx_sync` (level, port-compatible with `m_vlsi_synch`), `m_ftel_dphy_rx_tsync` (toggle) and `m_ftel_dphy_rx_rst_sync` (reset, port-compatible with `m_fpt_lib_reset_sync_rising_edge_async_reset_n`), each instance tagged `// CDC_CROSSING` |
+| Traceability | `// REQ-xxx` on every always block, assign group and instance; `// OPEN <id> REQ-xxx: <default>` at the single place of a provisional REQ (`req/rtl_scope.json`, `req/rtm.json`) |
 | Files | One module per file; file name = module name |
 | File header | FTEL copyright + Evolution History block, in the form used by `ftel_intctl` |
 | Generated output | Never committed — see the repository `.gitignore` |

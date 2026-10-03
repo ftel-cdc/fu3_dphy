@@ -1,0 +1,43 @@
+# ============================================================================
+# ftel_dphy_rx — configuration (git-trackable), source of logical/ftel_dphy_rx_config_pkg.sv
+# Values from the HAS (doc/spec.md): Table 3-1 synthesis parameters, Table 3-2 run-time timing
+# fields (reset values), Appendix B formulas. A value that depends on an open item names it.
+#
+# Validate : python3 config/validate_config.py config/ftel_dphy_rx.yaml
+# Emit pkg : python3 config/validate_config.py config/ftel_dphy_rx.yaml --emit logical/ftel_dphy_rx_config_pkg.sv
+# The package is generated: edit this file, never the package.
+# ============================================================================
+
+meta:                             # header of the generated package
+  author:          Ho Khanh Linh
+  email:           linhhk26@fpt.com
+  created:         2026-10-03
+
+release:           R1             # Table 1-3 (OPEN K1): R1 80-1500 Mb/s; R2 (1792 Mb/s, Block No. 5) not in this RTL
+
+synthesis:                        # Table 3-1, defaults of the PARA_* parameters
+  NUM_LANES:         4            # data lane slices: 1, 2 or 4
+  DESER_RATIO:       8            # fixed
+  CORE_CLK_MHZ:      200          # fixed, timer reference (5 ns)
+  DESKEW_EN:         0            # 0 in R1: Block No. 5 absent (ADR-004)
+  LPDT_EN:           0            # fixed 0 in this draft (OPEN K2)
+  LP_SYNC_STAGES:    2            # fixed
+  LP_FILTER_CYC:     2            # bounded by the termination-enable budget (Appendix B); OPEN ADR-001
+  EOT_DELAY_BYTES:   32           # R1 32, R2 36; OPEN S5, S12
+  SYNC_SEARCH_BYTES: 16           # OPEN ADR-007
+  DLY_TAP_WIDTH:     1            # placeholder: "to be determined" in the HAS (OPEN ADR-004); unused while DESKEW_EN = 0
+
+runtime:                          # Table 3-2: reset value and field width (width: rtl_notes.md D-1)
+  hs_settle_cyc:     {reset: 19,     width: 8}    # Appendix B value at rate_ref; OPEN ADR-007
+  clk_settle_cyc:    {reset: 33,     width: 8}
+  tinit_cyc:         {reset: 20000,  width: 16}
+  hs_rx_timeout_cyc: {reset: 262144, width: 20}   # 2^18; OPEN K8
+  esc_timeout_cyc:   {reset: 262144, width: 20}   # 2^18
+  eot_skip_bytes:    {reset: 16,     width: 6}    # value of Table 3-2 at rate_ref
+
+assumptions:
+  afe_word_latency:        2      # word latency Λ of the AFE (§5.2); OPEN ADR-007
+  rate_ref_mbps:           1500   # line rate of the reset values of Table 3-2
+  rate_points_mbps:        [80, 750, 1500, 1792]   # rates of Appendix B
+  longest_burst_bytes:     5802   # K8 default: one 5802-byte line ...
+  longest_burst_rate_mbps: 80     # ... at 80 Mb/s on one lane

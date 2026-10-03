@@ -20,3 +20,6 @@ req/_work
 doc/figures/.drawio_cache
 doc/figures/*.png
 doc/_docx_build
+sim/vcs_lint
+lint/work
+lint/reports

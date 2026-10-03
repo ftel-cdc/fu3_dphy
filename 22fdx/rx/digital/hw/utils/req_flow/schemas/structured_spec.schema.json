@@ -25,7 +25,9 @@
             "by": {"type": ["string", "null"]},
             "at": {"type": ["string", "null"]}
           }
-        }
+        },
+        "req_id_next": {"type": "integer", "minimum": 1, "maximum": 1000},
+        "finding_id_next": {"type": "integer", "minimum": 1, "maximum": 1000}
       }
     },
     "requirements": {

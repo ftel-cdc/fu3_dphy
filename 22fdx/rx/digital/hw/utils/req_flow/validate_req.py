@@ -3,7 +3,8 @@
 
 Checks (each issue carries a code consumed by flow_check.py):
   SPEC     metadata.spec_sha256 differs from the spec file on disk (stale baseline)
-  SCHEMA   schema errors, duplicate / non-sequential ids, unknown enum-like references
+  SCHEMA   schema errors, duplicate ids or ids at/above the recorded next free number, items not
+           ordered by source line, unknown enum-like references
   QUOTE    source_quote not found verbatim (whitespace-collapsed) at source_line..source_line+2
   COVER    a graded inventory row is the source of no REQ, or a Q/C id is cited by no REQ
   OPEN     a REQ sourced from a line that depends on an open item (spec_inventory.open_scope) is
@@ -66,12 +67,20 @@ def check(doc, spec_path, mode):
             f"artifact built on {md['spec_sha256'][:12]}…, spec on disk is {hashlib.sha256(raw).hexdigest()[:12]}…")
 
     reqs = doc["requirements"]
-    ids = [r["req_id"] for r in reqs]
-    if ids != [f"REQ-{i:03d}" for i in range(1, len(ids) + 1)]:
-        add("SCHEMA", "requirements", "req_id sequence is not REQ-001..REQ-NNN in order")
-    fids = [f["finding_id"] for f in doc["findings"]]
-    if fids != [f"F-{i:03d}" for i in range(1, len(fids) + 1)]:
-        add("SCHEMA", "findings", "finding_id sequence is not F-001..F-NNN in order")
+    # ids are stable across spec revisions (assemble_req.py): unique, below the recorded next free
+    # number, never reused; the items stay ordered by source line, so the ids may have gaps
+    for key, items, nxt_key in (("req_id", reqs, "req_id_next"), ("finding_id", doc["findings"], "finding_id_next")):
+        ids = [x[key] for x in items]
+        dup = sorted({i for i in ids if ids.count(i) > 1})
+        if dup:
+            add("SCHEMA", key, f"duplicate ids {dup[:5]}")
+        nxt = md.get(nxt_key)
+        over = [i for i in ids if nxt is not None and int(i.split("-")[1]) >= nxt]
+        if over:
+            add("SCHEMA", key, f"ids {over[:5]} not below metadata.{nxt_key} = {nxt}")
+        lines_seq = [x["source_line"] for x in items]
+        if lines_seq != sorted(lines_seq):
+            add("SCHEMA", key, "items are not ordered by source_line")
 
     # lines depending on an open item: OPEN word, Open Items rows, OPEN heading/caption scope,
     # citation of an open id, 'To be determined' (spec_inventory.open_scope)
