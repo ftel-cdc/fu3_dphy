@@ -35,3 +35,6 @@ hw/rtl/ip/*/lint/lint_results/
 .~lock.*#
 ~$*
 __pycache__/
+
+# ---- Local secrets (kept on disk, never committed) ---------------------------
+/ref/spec/password.txt
