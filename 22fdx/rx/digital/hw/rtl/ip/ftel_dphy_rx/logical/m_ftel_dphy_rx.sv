@@ -15,7 +15,7 @@
 //                   (configuration path, K3) are absent: the configuration fields are inputs
 //                   and the status is exported (rtl_notes D-2).
 // Parent          : m_ftel_dphy_rx_wrap
-// HAS             : draft v0.11, §1.4, §2.2, §3, §5, Tables 2-2, 3-1, 5-1 and 5-2
+// HAS             : draft v0.12, §1.4, §2.2, §3, §5, Tables 2-2, 3-1, 5-1 and 5-2
 // Clock domains   : core, byte
 // REQ-IDs         : REQ-001, REQ-002, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008, REQ-009,
 //                   REQ-011, REQ-013, REQ-014, REQ-030, REQ-031, REQ-032, REQ-033, REQ-034,

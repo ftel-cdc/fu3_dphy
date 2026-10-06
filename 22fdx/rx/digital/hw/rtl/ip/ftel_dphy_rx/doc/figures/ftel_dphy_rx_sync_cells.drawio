@@ -59,7 +59,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="a_use" value="N = PARA_LP_SYNC_STAGES: afe_lp_dp_x, afe_lp_dn_x,&lt;br&gt;afe_cl_lp_dp, afe_cl_lp_dn, afe_cl_clk_active.&lt;br&gt;N = 2: sync-search start, enables, FSM states.&lt;br&gt;forcerxmode_x: a third flip-flop and an AND&lt;br&gt;gate add a one-cycle pulse when it rises." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+        <mxCell id="a_use" value="N = PARA_LP_SYNC_STAGES: afe_lp_dp_x, afe_lp_dn_x,&lt;br&gt;afe_cl_lp_dp, afe_cl_lp_dn.&lt;br&gt;N = 2: clock-activity toggles, sync-search start,&lt;br&gt;enables, FSM states.&lt;br&gt;forcerxmode_x: a third flip-flop and an AND&lt;br&gt;gate add a one-cycle pulse when it rises." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="1000" y="205" width="540" height="140" as="geometry" />
         </mxCell>
         <mxCell id="fb" value="toggle synchronizer  --  one-cycle event to one-cycle pulse" style="rounded=1;whiteSpace=wrap;html=1;fontSize=20;fontStyle=1;verticalAlign=top;strokeWidth=2;fillColor=none;arcSize=4;spacingTop=6;" vertex="1" parent="1">
@@ -261,7 +261,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="c_use" value="Domains: core_clk, rxbyteclkhs, configuration&lt;br&gt;clock; per data lane one more in rxbyteclkhs&lt;br&gt;for No.4, cleared also while the lane is&lt;br&gt;disabled (Figure 4-10)." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+        <mxCell id="c_use" value="Domains: core_clk, DDR clock, rxbyteclkhs,&lt;br&gt;configuration clock; one more per data lane&lt;br&gt;for No.4 (Figure 4-10), and one in the DDR&lt;br&gt;clock for the byte-clock gate (Figure 4-2)." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="1000" y="1070" width="550" height="104" as="geometry" />
         </mxCell>
         <mxCell id="ca" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;dashed=1;dashPattern=10 6;strokeColor=#B85450;fontColor=#B85450;endArrow=none;endArrow=none;edgeStyle=none;jumpStyle=none;" edge="1" parent="1">

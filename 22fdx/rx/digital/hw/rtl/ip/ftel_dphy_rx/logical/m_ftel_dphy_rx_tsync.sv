@@ -13,7 +13,7 @@
 //                   clock; the level crosses through two flip-flops and a third
 //                   flip-flop with an XOR turns each change into a one-cycle pulse.
 // Parent          : m_ftel_dphy_rx_hs_datapath
-// HAS             : draft v0.11, §4.1, Figure 4-1
+// HAS             : draft v0.12, §4.1, Figure 4-1
 // Clock domains   : source and destination clocks of the instance
 // REQ-IDs         : REQ-060, REQ-061
 // OPEN            : none

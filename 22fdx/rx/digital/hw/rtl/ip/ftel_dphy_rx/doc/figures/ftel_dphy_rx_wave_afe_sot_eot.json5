@@ -1,4 +1,5 @@
-// Figure 5-9 - data lane at the AFE interface: SoT and EoT (spec.md 5.2; 4.3, 4.5, 4.6).
+// Figure 5-9 - data lane at the AFE interface: SoT and EoT (spec.md 5.2; 4.3, 4.5, 4.6). afe_hs_bit_x is the
+// unsampled HS-RX output; the words are those of the deserializer of Block No. 1 (4.3).
 // afe_term_en_x from DL_HS_PRPR (TD-TERM-EN), afe_hs_en_x from DL_HS_TERM, DL_HS_RX and the
 // sync-search start after hs_settle_cyc (ADR-007). The sync-search start reaches Block No. 4 2-3 byte
 // clocks later (4.1); the words received before it are ignored (4.6). LP-11 ends the burst: DL_HS_EOT
@@ -8,7 +9,8 @@
   { name: 'lane (Dp/Dn)',             wave: '===.=.==|==..=..', data: ['LP-11', 'LP-01', 'LP-00', 'HS-0', 'SYNC', 'B1 ...', 'Bn', 'TRAIL', 'LP-11'] },
   {                                                            node: '.AB.C.D...E..F.G' },
   {                                                            node: '..H..I..........' },
-  { name: 'afe_hs_word_x',            wave: 'x...=.==|==..x..', data: ['0x00', 'leader', 'data', 'data', 'trail'] },
+  { name: 'afe_hs_bit_x',             wave: 'x...=.==|==..x..', data: ['HS-0', 'SYNC', 'B1 ...', 'Bn', 'TRAIL'] },
+  { name: 'words (No. 1)',            wave: 'x...=.==|==..x..', data: ['0x00', 'leader', 'data', 'data', 'trail'] },
   {                                                            node: 'L....M..........' },
   { name: 'DL FSM (No. 3)',           wave: '====.=..|....=.=', data: ['STOP', 'HS_RQST', 'HS_PRPR', 'HS_TERM', 'HS_RX', 'HS_EOT', 'STOP'] },
   { name: 'afe_term_en_x',            wave: '0.1.....|....0..' },
@@ -22,6 +24,6 @@
   edge: ['A<->B TLPX', 'B<->C THS-PREPARE', 'C<->D THS-ZERO', 'E<->F THS-TRAIL', 'F<->G THS-EXIT',
          'H<->I THS-SETTLE (hs_settle_cyc)', 'L<->M ignored by the sync search', 'J<->K 2-3 byte clocks'],
   head: { text: 'Data lane at the AFE interface: SoT and EoT' },
-  foot: { text: 'the sync-search start falling at No. 4 is the EoT request; the PPI outputs follow PARA_EOT_DELAY_BYTES byte clocks later (Figure 5-1); AFE latency not drawn: words and start reach No. 4 alike (4.6)' },
+  foot: { text: 'the sync-search start falling at No. 4 is the EoT request; PPI outputs follow PARA_EOT_DELAY_BYTES byte clocks later (Figure 5-1); latency not drawn: words and start reach No. 4 alike (4.6)' },
   config: { hscale: 2, arcFontSize: 12 }
 }

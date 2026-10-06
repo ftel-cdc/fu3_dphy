@@ -13,7 +13,7 @@
 //                   Table 4-5, settle counter, escape decoder, line-state change detector
 //                   and output registers; drives the sync-search start of Block No. 4.
 // Parent          : m_ftel_dphy_rx
-// HAS             : draft v0.11, §4.5, Table 4-5, Figures 4-5 and 4-6, Appendix B
+// HAS             : draft v0.12, §4.5, Table 4-5, Figures 4-5 and 4-6, Appendix B
 // Clock domains   : core
 // REQ-IDs         : REQ-018, REQ-021, REQ-025, REQ-063, REQ-104, REQ-105, REQ-106, REQ-107,
 //                   REQ-108, REQ-109, REQ-110, REQ-111, REQ-112, REQ-113, REQ-114, REQ-115,

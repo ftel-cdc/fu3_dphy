@@ -13,7 +13,7 @@
 //                   state, the clock-lane and data-lane FSM states, escape entry codes,
 //                   SoT leader, run-time timing fields and the delay-line entry.
 // Parent          : none
-// HAS             : draft v0.11, §4.3, §4.4, §4.5, §4.6, Table 4-6
+// HAS             : draft v0.12, §4.3, §4.4, §4.5, §4.6, Table 4-6
 // Clock domains   : none
 // REQ-IDs         : REQ-023, REQ-057, REQ-076, REQ-084, REQ-104, REQ-137, REQ-139, REQ-142,
 //                   REQ-143, REQ-144, REQ-145, REQ-153, REQ-165, REQ-169

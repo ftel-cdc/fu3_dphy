@@ -15,7 +15,7 @@
 //                   counters, init_done, HS RX and escape watchdogs, distribution of the
 //                   timer values.
 // Parent          : m_ftel_dphy_rx
-// HAS             : draft v0.11, §4.1, §4.2, §4.7, Table 4-3, Figure 4-10
+// HAS             : draft v0.12, §4.1, §4.2, §4.7, Table 4-3, Figure 4-10
 // Clock domains   : core, byte (reset synchronizers only)
 // REQ-IDs         : REQ-022, REQ-023, REQ-056, REQ-058, REQ-059, REQ-062, REQ-063, REQ-064,
 //                   REQ-065, REQ-066, REQ-067, REQ-068, REQ-189, REQ-190, REQ-191, REQ-192,

@@ -13,7 +13,7 @@
 //                   PARA_EOT_DELAY_BYTES entries of a byte and its flags; on the EoT request
 //                   the stored tail is scanned backwards and cut at the last payload byte.
 // Parent          : m_ftel_dphy_rx_hs_datapath
-// HAS             : draft v0.11, §4.6, Figure 4-9, ADR-006, Appendix B
+// HAS             : draft v0.12, §4.6, Figure 4-9, ADR-006, Appendix B
 // Clock domains   : byte
 // REQ-IDs         : REQ-016, REQ-017, REQ-024, REQ-159, REQ-164, REQ-166, REQ-169, REQ-170,
 //                   REQ-171, REQ-172, REQ-173, REQ-174, REQ-175, REQ-176, REQ-177, REQ-178,

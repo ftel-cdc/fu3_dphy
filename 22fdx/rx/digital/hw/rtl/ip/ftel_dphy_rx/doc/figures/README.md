@@ -27,8 +27,9 @@ four additions for this IP. `check_figures.py` enforces the rules marked (checke
     The figure title names the figure it details.
 12. **Text first.** Every function drawn in a figure is described in spec.md; a gap found while
     drawing is fixed in the text (marked ⚠️) in the same change.
-13. **Clock domains** by fill colour: `core_clk` blue, `rxbyteclkhs` orange, configuration clock
-    green, analog (AFE) grey, mixed or asynchronous white. In leaf-level figures only the clocked
+13. **Clock domains** by fill colour: `core_clk` blue, `rxbyteclkhs` orange, the DDR clock
+    `afe_cl_hs_clk` purple, configuration clock green, analog (AFE) grey, mixed or asynchronous
+    white. In leaf-level figures only the clocked
     elements (registers, counters, FSM states, synchronizers) carry the fill; gates, multiplexers and
     comparators are white.
 14. **No emoji in figures.** Open items are written as text, for example "(OPEN K3)" or "(R2)".

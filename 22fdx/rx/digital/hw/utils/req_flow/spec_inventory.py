@@ -97,6 +97,16 @@ CAPTION_RE = re.compile(r"^\*\*[^|]*\*\*\s*$")
 #              lane waits for LP-11), open +1 (S12, HS clock after the last burst), timing +1 (TCLK-POST
 #              row in Appendix B). The core_clk -> rxbyteclkhs crossing carries one signal instead of three
 #              and the enable-gating row adds the clear of Block No. 4, so cdc keeps 8 rows.
+#   v0.12 — registered before the spec edit of 2026-10-03 (AFE boundary stated explicitly: the AFE
+#              cuts words at an arbitrary boundary, this IP aligns them). Wording only, no table gains or
+#              loses a row, so the counts equal v0.11.
+#   v0.13 — registered before the spec edit of 2026-10-06 (AFE boundary corrected to option A, as
+#              announced by the AFE team: the AFE has the line receivers and the termination only; this
+#              IP samples, deserializes and generates the byte clock in Block No. 1). clock +1 (DDR
+#              clock), cdc +3 (sampling of the HS bits, DDR clock -> rxbyteclkhs word transfer, clock
+#              gate enable; the clock-activity row is replaced by the toggles of Block No. 1), afe -1
+#              (afe_byteclk, afe_hs_word_x and afe_cl_clk_active replaced by afe_hs_bit_x and
+#              afe_cl_hs_clk), timing +1 (TSETUP[RX] / THOLD[RX] row in Appendix B).
 _V03 = {
     "param": 10, "runtime": 5, "clock": 3, "cdc": 5, "reset": 3,
     "fsm_cl": 10, "fsm_dl": 16, "ppi": 29, "afe": 8, "open": 10, "timing": 9,
@@ -113,6 +123,9 @@ EXPECTED = {
     "v0.9": dict(_V03, runtime=6, cdc=8, fsm_cl=11, open=14, c_ids=16),
     "v0.10": dict(_V03, runtime=6, cdc=8, fsm_cl=11, open=15, c_ids=16),
     "v0.11": dict(_V03, runtime=6, cdc=8, fsm_cl=11, fsm_dl=17, open=16, timing=10, c_ids=16),
+    "v0.12": dict(_V03, runtime=6, cdc=8, fsm_cl=11, fsm_dl=17, open=16, timing=10, c_ids=16),
+    "v0.13": dict(_V03, runtime=6, clock=4, cdc=11, fsm_cl=11, fsm_dl=17, afe=7, open=16, timing=11,
+                  c_ids=16),
 }
 REVISION_RE = re.compile(r"\*\*DRAFT (v[0-9]+\.[0-9]+)\*\*")
 

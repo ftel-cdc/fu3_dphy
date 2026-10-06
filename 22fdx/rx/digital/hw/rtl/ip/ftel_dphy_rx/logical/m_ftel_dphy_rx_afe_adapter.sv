@@ -14,7 +14,7 @@
 //                   AFE enables, clock-activity synchronizer and byte-clock forwarding. The
 //                   only block that changes when the AFE changes.
 // Parent          : m_ftel_dphy_rx
-// HAS             : draft v0.11, §4.3, Table 4-2, §5.2, Table 5-2
+// HAS             : draft v0.12, §4.3, Table 4-2, §5.2, Table 5-2
 // Clock domains   : core (LP path, AFE enables), byte (HS word register)
 // REQ-IDs         : REQ-026, REQ-047, REQ-048, REQ-050, REQ-051, REQ-059, REQ-069, REQ-070,
 //                   REQ-072, REQ-073, REQ-074, REQ-075, REQ-077, REQ-079, REQ-080, REQ-081,

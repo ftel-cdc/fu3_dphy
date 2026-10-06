@@ -596,3 +596,83 @@ dùng ngày 2026-10-02:
 241 REQ bị đánh lại ID theo thứ tự dòng. F-001, F-002 và F-003 giữ số.
 
 Còn mở sau v0.11: F-003. Công thức `eot_skip_bytes` có thể thiếu Λ + 1 byte clock; chưa mô hình hóa.
+
+### 7.11 Đồng bộ P1 với spec v0.12 (ranh giới AFE ghi rõ, 2026-10-03)
+
+Ngày 2026-10-03 team AFE thông báo rằng AFE chỉ cắt chuỗi bit HS thành byte (1:8) tại một biên tùy ý,
+không tìm biên byte. Đây là phương án B của ADR-001. Spec v0.12 chỉ sửa câu chữ cho rõ, không đổi hành
+vi:
+- §1 có thêm đoạn "Who deserializes". AFE lấy mẫu bit rồi cắt thành word chưa align. IP này tìm biên
+  byte từ SoT leader (Block No. 4), nhờ đó hoàn tất việc deserialize.
+- Table 1-1, §1.4, §2.1, Table 2-1, §4.3, §4.6, §5.2 và Appendix C nay dùng cùng một cách diễn đạt.
+- ADR-001:
+  - tiêu đề bỏ chữ OPEN;
+  - thêm đoạn "Boundary" (B, do team AFE thông báo);
+  - thêm đoạn căn cứ cho điểm timing của phương án A: cửa sổ setup/hold của receiver là 0.4 UI, tức
+    ±133 ps ở 1.5 Gb/s;
+  - phần chưa chốt ghi là "Still OPEN": byte clock chung, timing và độ trễ của word, clock activity,
+    termination, delay tap, glitch LP. Dòng ADR-001 của Table 9-1 ghi giống vậy.
+
+| Bước | Kết quả |
+|---|---|
+| `spec_inventory.py` | EXPECTED v0.12 đăng ký **trước** khi sửa spec, dùng lại số của v0.11 vì không bảng nào đổi số dòng. Selftest PASS. Số dòng phụ thuộc open item giảm 178 → 164, vì dưới heading ADR-001 chỉ còn đoạn "Still OPEN" là mở |
+| `rebase_req.py` | Giữ 313/323 REQ và 3/3 finding. 10 REQ lỗi thời |
+| Chunk bổ sung `28_v12_delta.json` | 13 REQ. 10 REQ lỗi thời được neo lại bằng `prev_req_id`, nên giữ được ID mà RTL đang dẫn. 3 REQ mới: REQ-324 (IP này hoàn tất việc deserialize, No.4), REQ-325 (ranh giới B), REQ-326 (căn cứ cho điểm timing của A) |
+| `validate_req.py` | 326 REQ · 3 finding · trích dẫn 329/329 · độ phủ 100% ở 15 nhóm · 0 lỗi · 0 cảnh báo |
+| `flow_check.py` | P1 review: 0 xung đột. `needs_human_decision` 75 → 74, vì REQ-003 (vai trò của AFE) không còn phụ thuộc ADR-001. P2: sinh lại config package (header HAS v0.12), Gate 2 tự ký lại. P3a: 0 xung đột, REQ có tag 253/253 (REQ-324 gắn ở `m_ftel_dphy_rx_sync_search`). VCS 1/2/4 lane 0/0/0, SpyGlass 0/0/0 |
+| Hình | Không đổi. Figure 2-1 đã ghi "1:8, unaligned" ở phía AFE và "sync search, byte align" ở No.4 |
+| Docx v0.12 | 78 trang, XSD PASS. Script build tự kiểm: 29 hình, 24 caption bảng, 12 dòng lịch sử. Đã xem bằng mắt các trang có nội dung mới (11, 19, 65) |
+
+Không ID nào bị retire. Số REQ chờ team AFE là 23: 19 REQ chờ ADR-001 (3 trong số đó chờ cả ADR-004)
+và 4 REQ chờ Λ (ADR-007).
+
+### 7.12 Đồng bộ P1 với spec v0.13 (ranh giới AFE sửa thành phương án A, 2026-10-06)
+
+Ngày 2026-10-06 team AFE cho biết AFE chỉ có HS-RX, LP-RX và termination có công tắc, cùng một mạch
+đơn giản phát hiện lane ở LP hay HS để bật termination. Đây là phương án A của ADR-001. Cách đọc
+thông báo ngày 2026-10-03 thành phương án B ở v0.12 là sai. Spec v0.13 đổi thiết kế:
+- Block No. 1 nay có:
+  - sampler trên cả hai cạnh của DDR clock `afe_cl_hs_clk`;
+  - deserializer 1:8;
+  - byte clock: chia 4, qua clock gate chỉ mở trong CL_HS_CLK;
+  - bộ phát hiện clock activity: hai toggle, `cl_rxclkactivehs` hạ 50–60 ns sau cạnh cuối.
+- Giao diện AFE (Table 5-2) bỏ `afe_byteclk`, `afe_hs_word_x`, `afe_cl_clk_active` và thêm
+  `afe_cl_hs_clk`, `afe_hs_bit_x`. Độ trễ word Λ nay do Block No. 1 đặt.
+- Hai design note mới ở §4.3:
+  - vì sao termination vẫn do IP này bật: escape entry cũng đi qua LP-01 → LP-00, và ULPS giữ LP-00;
+  - timing của sampler: cửa sổ 0.3/0.4 UI, sampler đặt tay; đạt ở 1.35 V/125 °C, không đạt ở
+    1.2 V/175 °C.
+
+  Corner sign-off là OPEN với physical design. Các số thư viện là ước lượng của nhóm digital; physical
+  design chưa làm gì.
+- ADR-001 chọn A dù điểm thấp nhất (43): B cần sampler và deserializer trong AFE, còn C thay IP này
+  bằng macro của vendor. Phần "Still OPEN" ghi các câu cho team AFE và cho physical design.
+- §1, §2, Table 4-1, Table 4-2, §4.2, §4.8 (delay line cho R2), §5, §8, chương 9, Appendix B (dòng
+  TCLK-MISS, dòng mới TSETUP[RX]/THOLD[RX]) và Appendix C sửa theo.
+
+| Bước | Kết quả |
+|---|---|
+| `spec_inventory.py` | EXPECTED v0.13 đăng ký **trước** khi sửa spec: clock 3 → 4 (DDR clock), cdc 8 → 11 (4 dòng thay cho dòng `afe_cl_clk_active`), afe 8 → 7, timing 10 → 11 (TSETUP[RX]/THOLD[RX]); các nhóm khác giữ nguyên. Selftest PASS. Số dòng phụ thuộc open item 164 → 169 |
+| `rebase_req.py` | Giữ 268/326 REQ và 3/3 finding. 58 REQ lỗi thời |
+| Chunk bổ sung `29_v13_delta.json` | 86 REQ. 49 REQ lỗi thời được neo lại bằng `prev_req_id`, nên giữ ID. 37 REQ mới (REQ-327 đến REQ-363): sampler, deserializer, byte clock và clock gate, clock activity, hai design note, các tín hiệu AFE mới, delay line, kịch bản kiểm thử, static timing, TSETUP[RX]/THOLD[RX] |
+| `validate_req.py` | 354 REQ · 3 finding · trích dẫn 357/357 · độ phủ 100% ở 15 nhóm · 0 lỗi · 0 cảnh báo |
+| `flow_check.py` | P1 review: 0 xung đột. `needs_human_decision` 74 → 76. Test âm 26/28: hai FAIL là phép kiểm "baseline sạch" của P2 (`PKG-STALE`, vì package sinh từ YAML có ghi phiên bản HAS) và P3a (`CF-DRIFT/P2-INPUT`, `CF-TAG/T6`), do config package và RTL còn ở v0.12. P2 và P3a cố ý chưa chạy lại; hai FAIL này hết ở bước RTL |
+| Hình | Sửa 10 hình: Figure 1-1, 1-3, 2-1, 2-2, 2-4, 4-1, 4-2, 4-10 (drawio) và 5-7, 5-9 (WaveJSON). Thêm màu tím `#E1D5E7` cho domain DDR clock (quy tắc 13 trong `figures/README.md`). `check_figures`: 0 vi phạm, test âm 13/13 |
+| Docx v0.13 | 81 trang, XSD PASS. Script build tự kiểm: 29 hình, 24 caption bảng, 13 dòng lịch sử. Đã xem bằng mắt các trang 11, 14, 27, 29, 30, 31, 67 |
+
+9 ID bị retire, không dùng lại:
+
+| ID | Nội dung ở v0.12 | Lý do |
+|---|---|---|
+| REQ-003 | AFE lấy mẫu bit HS và cắt word | AFE không lấy mẫu |
+| REQ-051, REQ-073 | Đồng bộ `afe_cl_clk_active` vào `core_clk` | Clock activity nay phát hiện trong Block No. 1 |
+| REQ-082 | Block No. 1 chuyển `afe_byteclk` thành `rxbyteclkhs` | Byte clock nay chia từ DDR clock, qua clock gate |
+| REQ-256, REQ-259, REQ-260, REQ-261 | Giao diện word, `afe_byteclk`, `afe_hs_word_x`, `afe_cl_clk_active` | Bỏ khỏi Table 5-2 |
+| REQ-325 | Ranh giới B | Thay bằng ranh giới A |
+
+Tag của các ID đã retire chỉ còn trong `logical/m_ftel_dphy_rx_afe_adapter.sv`. RTL chưa sửa: bước RTL
+cần người duyệt, gồm cả ngoại lệ của rtl_rule cho clock đảo, clock chia, ICG và reset synchronizer
+dùng làm enable của gate.
+
+Số REQ chờ ADR-001 là 22, trong đó 4 REQ chờ cả ADR-004. Hai REQ trong số đó chỉ chờ physical design
+(corner sign-off, đặt tay sampler), nên 20 REQ chờ team AFE. Λ (ADR-007) không còn chờ team AFE.

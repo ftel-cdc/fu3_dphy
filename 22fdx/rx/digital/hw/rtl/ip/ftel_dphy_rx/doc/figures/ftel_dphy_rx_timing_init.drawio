@@ -19,7 +19,7 @@
         <mxCell id="w_rst_bus" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;endArrow=none;edgeStyle=none;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="255" y="97" as="sourcePoint" />
-            <mxPoint x="255" y="207" as="targetPoint" />
+            <mxPoint x="255" y="247" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="rs_core" value="reset sync, core_clk" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#DAE8FC;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
@@ -76,8 +76,26 @@
             <mxPoint x="565" y="197" as="targetPoint" />
           </mxGeometry>
         </mxCell>
+        <mxCell id="rs_ddr" value="reset sync, DDR clock" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#E1D5E7;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="280" y="225" width="250" height="45" as="geometry" />
+        </mxCell>
+        <mxCell id="rs_ddr_ck" value="" style="triangle;whiteSpace=wrap;html=1;rotation=-90;strokeWidth=2;fillColor=none;" vertex="1" parent="1">
+          <mxGeometry x="399" y="251" width="12" height="26" as="geometry" />
+        </mxCell>
+        <mxCell id="rs_ddr_i" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;edgeStyle=none;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="255" y="247" as="sourcePoint" />
+            <mxPoint x="280" y="247" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
+        <mxCell id="rs_ddr_o" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;edgeStyle=none;" edge="1" parent="1">
+          <mxGeometry relative="1" as="geometry">
+            <mxPoint x="530" y="247" as="sourcePoint" />
+            <mxPoint x="565" y="247" as="targetPoint" />
+          </mxGeometry>
+        </mxCell>
         <mxCell id="l_rst" value="domain resets&lt;br&gt;(all blocks)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
-          <mxGeometry x="570" y="115" width="145" height="50" as="geometry" />
+          <mxGeometry x="570" y="147" width="145" height="50" as="geometry" />
         </mxCell>
         <mxCell id="i_cle" value="cl_enable" style="text;html=1;whiteSpace=wrap;fontSize=18;align=right;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="5" y="285.0" width="225" height="30" as="geometry" />
@@ -493,7 +511,13 @@
           <mxGeometry x="1565" y="851" width="420" height="28" as="geometry" />
         </mxCell>
         <mxCell id="leg_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=none;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
-          <mxGeometry x="0" y="970" width="1990" height="120" as="geometry" />
+          <mxGeometry x="0" y="970" width="1990" height="160" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_f_ddr" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#E1D5E7;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+          <mxGeometry x="10" y="1096" width="40" height="24" as="geometry" />
+        </mxCell>
+        <mxCell id="leg_ft_ddr" value="DDR clock domain (afe_cl_hs_clk)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="58" y="1090" width="600" height="36" as="geometry" />
         </mxCell>
         <mxCell id="leg_title" value="&lt;b&gt;Legend&lt;/b&gt;" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="10" y="974" width="100" height="32" as="geometry" />

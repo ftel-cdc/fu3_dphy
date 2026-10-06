@@ -14,7 +14,7 @@
 //                   the module name only (rtl_rule K10).
 // Parent          : m_ftel_dphy_rx_afe_adapter, m_ftel_dphy_rx_timing_init, m_ftel_dphy_rx_tsync,
 //                   m_ftel_dphy_rx_hs_datapath
-// HAS             : draft v0.11, §4.1, Figure 4-1
+// HAS             : draft v0.12, §4.1, Figure 4-1
 // Clock domains   : destination clock of the instance
 // REQ-IDs         : REQ-059
 // OPEN            : none

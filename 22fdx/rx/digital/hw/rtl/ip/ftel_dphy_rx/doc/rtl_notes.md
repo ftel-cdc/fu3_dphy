@@ -1,8 +1,9 @@
 # ftel_dphy_rx — RTL Design Notes (HAS ↔ RTL bridge and decisions)
 
-> Companion to `spec.md` (HAS draft v0.11) and `rtl_rule.md` (v1.1). It records which HAS section each
-> RTL block implements and why each RTL-level decision was made, so a reviewer can trace the RTL back
-> to the HAS and a later change stays in one place. Same role as `ftel_intctl/doc/rtl_notes.md`.
+> Companion to `spec.md` (the RTL follows HAS draft v0.12; v0.13 is pending, §1) and `rtl_rule.md`
+> (v1.1). It records which HAS section each RTL block implements and why each RTL-level decision was
+> made, so a reviewer can trace the RTL back to the HAS and a later change stays in one place. Same
+> role as `ftel_intctl/doc/rtl_notes.md`.
 > Markers: ✅ checked by a tool · ⚠️ assumption · 🔍 to confirm. Each decision states its confidence.
 
 ## 1. Status
@@ -10,6 +11,23 @@
 - **Draft RTL, 2026-10-03.** Written against HAS v0.11 before HAS v1.0, by decision of 2026-10-03:
   every open item takes the default of the HAS and carries `// OPEN <id> REQ-xxx: <default>` at the
   single place that implements it. Such REQs are provisional and cannot be signed off.
+- **HAS v0.12, same day.** It only states the AFE boundary explicitly, as announced by the AFE team:
+  the AFE cuts the HS bit stream into 8-bit words at an arbitrary boundary, and Block No. 4 finds the
+  byte boundary, which completes the deserialization. The RTL already worked this way. Only the
+  `HAS` header field (v0.12) and the tag of the new REQ-324 at the barrel shifter of
+  `m_ftel_dphy_rx_sync_search` changed.
+- **HAS v0.13, 2026-10-06: the RTL lags it.** v0.13 corrects the AFE boundary to option A, as
+  announced by the AFE team: the AFE has the HS-RX, the LP-RX and the switched termination only.
+  - Block No. 1 gains the samplers on both edges of the DDR clock `afe_cl_hs_clk`, the 1:8
+    deserializer, the byte clock (divider by 4 and clock gate) and the clock-activity detection.
+  - The AFE ports `afe_byteclk`, `afe_hs_word_x` and `afe_cl_clk_active` give way to `afe_cl_hs_clk`
+    and `afe_hs_bit_x`.
+
+  The RTL still implements v0.12. `m_ftel_dphy_rx_afe_adapter` carries tags of six retired REQs
+  (REQ-051, REQ-073, REQ-082, REQ-259, REQ-260, REQ-261), and the config package header names v0.12.
+  So `flow_check --selftest-negative` fails its P2 and P3a baseline checks (PKG-STALE; CF-DRIFT, CF-TAG)
+  until the RTL step. That step needs review first, including new rtl_rule exceptions: falling-edge
+  samplers, a divided clock, a clock gate, and a reset synchronizer used as the gate enable.
 - **Checked:** compile and lint only (VCS `+lint=all`, SpyGlass `lint_rtl`, `check_rtl_rules.py`,
   `flow_check.py --phase P3a`). **Not simulated:** lint-clean does not mean functionally correct.
   The unit testbenches (M3) and the CDC/RDC runs (M4) are the next steps.
@@ -171,7 +189,9 @@ One line per correction round (rule 1 of `/dphy_rtl_gen`: at most 3 rounds per m
 | `m_ftel_dphy_rx_dl_ctrl` | 1 | checker T1: REQ-135 tagged but not in the header | header completed |
 | whole IP (SpyGlass) | 1 | 29 W415a (multiple assignments in one always block), 3 W528 (timer fields distributed but unused) | encoders rewritten (D-15); Block No. 6 distributes only the fields Blocks No. 2–4 use |
 | whole IP (`flow_check` P3a) | 1 | CF-COVER REQ-164, REQ-182 untagged | tags added in `_eot` and `_dl_ctrl` |
+| whole IP (HAS v0.12) | 1 | P2 CF-CONFIG: config package header behind the spec; P3a CF-COVER REQ-324 (this IP completes the deserialization) untagged | package regenerated; tag added at the barrel shifter of `_sync_search` |
 
-Final state: `check_rtl_rules` 0 violations on 17 files; VCS 0 Error / 0 Warning / 0 Lint for
-`PARA_NUM_LANES` = 1, 2, 4; SpyGlass `lint_rtl` 0 Fatal / 0 Error / 0 Warning, no waiver.
+Final state (rerun after HAS v0.12): `check_rtl_rules` 0 violations on 17 files; VCS 0 Error /
+0 Warning / 0 Lint for `PARA_NUM_LANES` = 1, 2, 4; SpyGlass `lint_rtl` 0 Fatal / 0 Error / 0 Warning,
+no waiver.
 VCS `+lint=all` does not report latches or unused nets (probe of 2026-10-03); SpyGlass covers them.

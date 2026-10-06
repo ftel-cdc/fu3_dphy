@@ -13,7 +13,7 @@
 //                   into an 8-bit register, first bit in the MSB, and comparison of the
 //                   entry command with the codes of Table 4-6.
 // Parent          : m_ftel_dphy_rx_dl_ctrl
-// HAS             : draft v0.11, §4.5, Table 4-6, Figure 4-7
+// HAS             : draft v0.12, §4.5, Table 4-6, Figure 4-7
 // Clock domains   : core
 // REQ-IDs         : REQ-117, REQ-125, REQ-135, REQ-136, REQ-137, REQ-138, REQ-139, REQ-140,
 //                   REQ-141, REQ-142, REQ-143, REQ-144, REQ-145, REQ-254

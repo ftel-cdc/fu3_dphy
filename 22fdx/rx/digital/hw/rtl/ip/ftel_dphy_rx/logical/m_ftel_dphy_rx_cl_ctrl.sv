@@ -12,7 +12,7 @@
 // Description     : Clock Lane Control, CIL-SCNN (HAS Block No. 2): clock-lane FSM of
 //                   Table 4-4 with its settle counter; outputs are registers.
 // Parent          : m_ftel_dphy_rx
-// HAS             : draft v0.11, §4.4, Table 4-4, Figure 4-4, Appendix B
+// HAS             : draft v0.12, §4.4, Table 4-4, Figure 4-4, Appendix B
 // Clock domains   : core
 // REQ-IDs         : REQ-015, REQ-063, REQ-084, REQ-085, REQ-086, REQ-087, REQ-088, REQ-089,
 //                   REQ-090, REQ-091, REQ-092, REQ-093, REQ-094, REQ-095, REQ-096, REQ-097,

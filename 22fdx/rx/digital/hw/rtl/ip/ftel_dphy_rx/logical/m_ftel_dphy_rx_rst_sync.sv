@@ -13,7 +13,7 @@
 //                   edge. Port-compatible with m_fpt_lib_reset_sync_rising_edge_async_reset_n
 //                   (rtl_rule K10).
 // Parent          : m_ftel_dphy_rx_timing_init
-// HAS             : draft v0.11, §4.2, Figure 4-1
+// HAS             : draft v0.12, §4.2, Figure 4-1
 // Clock domains   : clock of the instance
 // REQ-IDs         : REQ-066
 // OPEN            : none

@@ -14,7 +14,7 @@
 //                   other than the inverter. The configuration and status ports stand in for
 //                   Block No. 8 until the configuration path is defined (K3).
 // Parent          : SoC
-// HAS             : draft v0.11, §1.3, §4.2, §5, Table 9-1 (K3, K6)
+// HAS             : draft v0.12, §1.3, §4.2, §5, Table 9-1 (K3, K6)
 // Clock domains   : core, byte
 // REQ-IDs         : REQ-001, REQ-004, REQ-005, REQ-006, REQ-007, REQ-221, REQ-302
 // OPEN            : K3, K6
