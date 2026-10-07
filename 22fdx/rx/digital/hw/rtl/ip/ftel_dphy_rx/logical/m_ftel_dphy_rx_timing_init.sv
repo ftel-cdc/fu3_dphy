@@ -10,17 +10,17 @@
 // Created Date    : 2026-10-03
 // Module          : m_ftel_dphy_rx_timing_init
 // Description     : Timing & Init Control (HAS Block No. 6): reset synchronizers of the
-//                   core and byte domains and of Block No. 4 of each lane, level
+//                   core, DDR and byte domains and of Block No. 4 of each lane, level
 //                   synchronizers of the PPI enables, rising edge of forcerxmode_x, TINIT
 //                   counters, init_done, HS RX and escape watchdogs, distribution of the
 //                   timer values.
 // Parent          : m_ftel_dphy_rx
-// HAS             : draft v0.12, §4.1, §4.2, §4.7, Table 4-3, Figure 4-10
-// Clock domains   : core, byte (reset synchronizers only)
+// HAS             : draft v0.14, §4.1, §4.2, §4.7, Table 4-3, Figure 4-10
+// Clock domains   : core, ddr and byte (reset synchronizers only)
 // REQ-IDs         : REQ-022, REQ-023, REQ-056, REQ-058, REQ-059, REQ-062, REQ-063, REQ-064,
 //                   REQ-065, REQ-066, REQ-067, REQ-068, REQ-189, REQ-190, REQ-191, REQ-192,
 //                   REQ-193, REQ-194, REQ-195, REQ-196, REQ-197, REQ-198, REQ-221, REQ-223,
-//                   REQ-321
+//                   REQ-321, REQ-338
 // OPEN            : K6
 //
 // Evolution History:
@@ -42,6 +42,7 @@ module m_ftel_dphy_rx_timing_init
 ) (
   // ---- clock / reset ----
   input  logic                              i_core_clk,
+  input  logic                              i_ddr_clk,
   input  logic                              i_byte_clk,
   // REQ-221
   input  logic                              i_phy_core_rst,
@@ -55,6 +56,7 @@ module m_ftel_dphy_rx_timing_init
   input  dl_state_t [PARA_NUM_LANES-1:0]    i_dl_state,
   // ---- data out: resets, enables, initialization, watchdogs, timer values ----
   output logic                              o_core_rst_n,
+  output logic                              o_ddr_rst_n,
   output logic [PARA_NUM_LANES-1:0]         o_hs_rst_n,
   output logic                              o_cl_en,
   output logic [PARA_NUM_LANES-1:0]         o_dl_en,
@@ -121,6 +123,16 @@ module m_ftel_dphy_rx_timing_init
     .i_clk           (i_byte_clk),
     .i_async_reset_n (w_arst_n),
     .o_sync_reset_n  (w_byte_rst_n)
+  );
+
+  // The DDR-clock domain (clock-activity toggles of Block No. 1) leaves reset on the second DDR
+  // clock edge; the divider of Block No. 1 has its own reset, the byte-clock enable.
+  // CDC_CROSSING: phy_core_rst -> ddr: reset release (HAS §4.2, Figure 4-1)
+  // REQ-066, REQ-190, REQ-338
+  m_ftel_dphy_rx_rst_sync u_rst_sync_2 (
+    .i_clk           (i_ddr_clk),
+    .i_async_reset_n (w_arst_n),
+    .o_sync_reset_n  (o_ddr_rst_n)
   );
 
   // REQ-066

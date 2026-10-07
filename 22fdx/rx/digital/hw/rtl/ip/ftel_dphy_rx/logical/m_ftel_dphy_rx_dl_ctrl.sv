@@ -13,15 +13,15 @@
 //                   Table 4-5, settle counter, escape decoder, line-state change detector
 //                   and output registers; drives the sync-search start of Block No. 4.
 // Parent          : m_ftel_dphy_rx
-// HAS             : draft v0.12, §4.5, Table 4-5, Figures 4-5 and 4-6, Appendix B
+// HAS             : draft v0.14, §4.5, Table 4-5, Figures 4-5 and 4-6, Appendix B
 // Clock domains   : core
-// REQ-IDs         : REQ-018, REQ-021, REQ-025, REQ-063, REQ-104, REQ-105, REQ-106, REQ-107,
-//                   REQ-108, REQ-109, REQ-110, REQ-111, REQ-112, REQ-113, REQ-114, REQ-115,
-//                   REQ-116, REQ-117, REQ-118, REQ-119, REQ-120, REQ-121, REQ-122, REQ-123,
-//                   REQ-124, REQ-126, REQ-127, REQ-128, REQ-129, REQ-130, REQ-131, REQ-132,
-//                   REQ-133, REQ-134, REQ-135, REQ-146, REQ-147, REQ-148, REQ-180, REQ-182,
-//                   REQ-198, REQ-225, REQ-227, REQ-238, REQ-239, REQ-244, REQ-246, REQ-250,
-//                   REQ-253, REQ-254, REQ-265, REQ-314, REQ-316, REQ-323
+// REQ-IDs         : REQ-018, REQ-021, REQ-025, REQ-063, REQ-083, REQ-104, REQ-105, REQ-106,
+//                   REQ-107, REQ-108, REQ-109, REQ-110, REQ-111, REQ-112, REQ-113, REQ-114,
+//                   REQ-115, REQ-116, REQ-117, REQ-118, REQ-119, REQ-120, REQ-121, REQ-122,
+//                   REQ-123, REQ-124, REQ-126, REQ-127, REQ-128, REQ-129, REQ-130, REQ-131,
+//                   REQ-132, REQ-133, REQ-134, REQ-135, REQ-146, REQ-147, REQ-148, REQ-180,
+//                   REQ-182, REQ-198, REQ-225, REQ-227, REQ-238, REQ-239, REQ-244, REQ-246,
+//                   REQ-250, REQ-253, REQ-254, REQ-265, REQ-314, REQ-316, REQ-323
 // OPEN            : ADR-001, ADR-006, ADR-007
 //
 // Evolution History:
@@ -217,8 +217,8 @@ module m_ftel_dphy_rx_dl_ctrl
   // The sync-search start is High in DL_HS_RX; its fall on any exit is the EoT request.
   // OPEN ADR-007 REQ-128: the sync-search start, High in DL_HS_RX, is the only signal to Block No. 4
   // OPEN ADR-001 REQ-265: afe_term_en_x rises with the register of DL_HS_PRPR, one cycle after the LP state
-  // REQ-106, REQ-108, REQ-109, REQ-110, REQ-111, REQ-118, REQ-119, REQ-120, REQ-127, REQ-129,
-  // REQ-133, REQ-134, REQ-148, REQ-253, REQ-254, REQ-316
+  // REQ-083, REQ-106, REQ-108, REQ-109, REQ-110, REQ-111, REQ-118, REQ-119, REQ-120, REQ-127,
+  // REQ-129, REQ-133, REQ-134, REQ-148, REQ-253, REQ-254, REQ-316
   always_ff @(posedge i_core_clk or negedge i_core_rst_n) begin : p_state_reg
     if (!i_core_rst_n) begin
       reg_state             <= DL_INIT;

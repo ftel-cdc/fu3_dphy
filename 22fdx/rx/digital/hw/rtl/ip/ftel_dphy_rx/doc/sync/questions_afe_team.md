@@ -5,7 +5,7 @@
 | Gửi | Team AFE (analog front-end của D-PHY Rx: HS-RX, LP-RX, termination) |
 | Từ | Nhóm thiết kế D-PHY Rx digital (`ftel_dphy_rx`) |
 | Ngày | 2026-10-02; cập nhật 2026-10-03 và 2026-10-06 theo các thông báo của team AFE về ranh giới (A1) |
-| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.13 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`) §1, §2.1 (Figure 2-1, 2-2), §4.1, §4.3, §4.4, §4.6, §4.8, §5.2 (Figure 5-9), ADR-001, ADR-004, ADR-007, Appendix B; MIPI D-PHY v1.1 Table 14 (timing) và Table 27 (setup/hold của receiver) |
+| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.14 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`) §1, §2.1 (Figure 2-1, 2-2), §4.1, §4.3, §4.4, §4.6, §4.8, §5.2 (Figure 5-9), ADR-001, ADR-004, ADR-007, Appendix B; MIPI D-PHY v1.1 Table 14 (timing) và Table 27 (setup/hold của receiver) |
 
 ## Bối cảnh
 
@@ -127,10 +127,10 @@ Các ý còn mở của A1 bản trước:
 
 AFE không cần cung cấp `afe_cl_clk_active` nữa. Phần digital tự phát hiện trong Block No. 1 (HAS
 §4.3):
-- Hai toggle flip-flop, một chạy theo DDR clock (line rate / 4) và một theo DDR clock đã chia
-  (line rate / 16), mỗi cái qua bộ đồng bộ 2 flip-flop vào `core_clk`.
-- Clock bị coi là mất khi không toggle nào đổi trong 8 chu kỳ `core_clk` (40 ns). Clock mất được
-  thấy sau 45–55 ns, nên `cl_rxclkactivehs` hạ 50–60 ns sau cạnh cuối, trong TCLK-MISS ≤ 60 ns ⚠️.
+- Hai toggle flip-flop chạy ở cạnh lên của DDR clock: một cái đổi ở mỗi cạnh (line rate / 4), một
+  cái đổi ở mỗi cạnh thứ tư (line rate / 16). Mỗi cái qua bộ đồng bộ 2 flip-flop vào `core_clk`.
+- Clock bị coi là mất khi không toggle nào đổi trong 8 chu kỳ `core_clk` (40 ns). `cl_rxclkactivehs`
+  hạ chậm nhất 60 ns sau cạnh cuối của DDR clock, tức trong TCLK-MISS ≤ 60 ns (HAS v0.14) ⚠️.
 
 Điều kiện còn lại từ phía AFE nằm ở A9: DDR clock ở mức Low khi HS-RX tắt.
 

@@ -36,7 +36,7 @@ runtime:                          # Table 3-2: reset value and field width (widt
   eot_skip_bytes:    {reset: 16,     width: 6}    # value of Table 3-2 at rate_ref
 
 assumptions:
-  afe_word_latency:        2      # word latency Λ of the AFE (§5.2); OPEN ADR-007
+  afe_word_latency:        2      # word latency Λ of Block No. 1 (§5.2), set by its two-stage HS path; OPEN ADR-007
   rate_ref_mbps:           1500   # line rate of the reset values of Table 3-2
   rate_points_mbps:        [80, 750, 1500, 1792]   # rates of Appendix B
   longest_burst_bytes:     5802   # K8 default: one 5802-byte line ...

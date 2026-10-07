@@ -13,7 +13,7 @@
 //                   accepted once it has been sampled PARA_LP_FILTER_CYC + 1 times in a
 //                   row; the output is a register.
 // Parent          : m_ftel_dphy_rx_afe_adapter
-// HAS             : draft v0.12, §4.3, Figure 4-3, Appendix B
+// HAS             : draft v0.14, §4.3, Figure 4-3, Appendix B
 // Clock domains   : core
 // REQ-IDs         : REQ-071, REQ-072, REQ-313
 // OPEN            : none

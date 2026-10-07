@@ -107,6 +107,10 @@ CAPTION_RE = re.compile(r"^\*\*[^|]*\*\*\s*$")
 #              gate enable; the clock-activity row is replaced by the toggles of Block No. 1), afe -1
 #              (afe_byteclk, afe_hs_word_x and afe_cl_clk_active replaced by afe_hs_bit_x and
 #              afe_cl_hs_clk), timing +1 (TSETUP[RX] / THOLD[RX] row in Appendix B).
+#   v0.14 — registered before the spec edit of 2026-10-07 (erratum found while planning the RTL: the
+#              falling-edge parallel register takes its load phase through one falling-edge flip-flop,
+#              the only half-period path of the deserializer; the second clock-activity toggle runs in
+#              the DDR clock). Wording only, no table gains or loses a row, so the counts equal v0.13.
 _V03 = {
     "param": 10, "runtime": 5, "clock": 3, "cdc": 5, "reset": 3,
     "fsm_cl": 10, "fsm_dl": 16, "ppi": 29, "afe": 8, "open": 10, "timing": 9,
@@ -125,6 +129,8 @@ EXPECTED = {
     "v0.11": dict(_V03, runtime=6, cdc=8, fsm_cl=11, fsm_dl=17, open=16, timing=10, c_ids=16),
     "v0.12": dict(_V03, runtime=6, cdc=8, fsm_cl=11, fsm_dl=17, open=16, timing=10, c_ids=16),
     "v0.13": dict(_V03, runtime=6, clock=4, cdc=11, fsm_cl=11, fsm_dl=17, afe=7, open=16, timing=11,
+                  c_ids=16),
+    "v0.14": dict(_V03, runtime=6, clock=4, cdc=11, fsm_cl=11, fsm_dl=17, afe=7, open=16, timing=11,
                   c_ids=16),
 }
 REVISION_RE = re.compile(r"\*\*DRAFT (v[0-9]+\.[0-9]+)\*\*")

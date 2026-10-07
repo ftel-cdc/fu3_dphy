@@ -11,12 +11,13 @@
 // Module          : ftel_dphy_rx_pkg
 // Description     : Types and constants shared by the blocks of ftel_dphy_rx: LP line
 //                   state, the clock-lane and data-lane FSM states, escape entry codes,
-//                   SoT leader, run-time timing fields and the delay-line entry.
+//                   SoT leader, clock-activity window, run-time timing fields and the
+//                   delay-line entry.
 // Parent          : none
-// HAS             : draft v0.12, §4.3, §4.4, §4.5, §4.6, Table 4-6
+// HAS             : draft v0.14, §4.3, §4.4, §4.5, §4.6, Table 4-6
 // Clock domains   : none
 // REQ-IDs         : REQ-023, REQ-057, REQ-076, REQ-084, REQ-104, REQ-137, REQ-139, REQ-142,
-//                   REQ-143, REQ-144, REQ-145, REQ-153, REQ-165, REQ-169
+//                   REQ-143, REQ-144, REQ-145, REQ-153, REQ-165, REQ-169, REQ-345
 // OPEN            : none
 //
 // Evolution History:
@@ -94,12 +95,18 @@ package ftel_dphy_rx_pkg;
   localparam logic [C_ESC_BITS-1:0] C_ESC_TRIG_UNKNOWN_5 = 8'b10100000;
 
   // SoT leader ...00011101 (first bit received first) with the first received bit in bit 0,
-  // the order of the AFE words and of rxdatahs_x.
+  // the order of the words of the deserializer of Block No. 1 and of rxdatahs_x.
   // REQ-153
   localparam logic [C_DESER_RATIO-1:0] C_SYNC_LEADER = 8'b1011_1000;
   // A deskew burst starts with a run of at least this many ones after HS-0.
   // REQ-165
   localparam int C_DESKEW_RUN = 16;
+
+  // Clock activity of Block No. 1: two toggles of the DDR clock (every edge, every fourth edge);
+  // the clock is active while one of them changed within the last C_CLK_ACT_WIN_CYC core_clk cycles.
+  // REQ-345
+  localparam int C_ACT_TOGGLES     = 2;
+  localparam int C_CLK_ACT_WIN_CYC = 8;
 
   // Reset value of the lane map (logical lane x selects physical lane x) and of the polarity
   // bits, for the configuration registers of Block No. 8 (absent until K3, rtl_notes D-2).

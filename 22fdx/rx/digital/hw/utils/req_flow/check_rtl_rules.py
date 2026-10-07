@@ -36,13 +36,13 @@ RULES = {
     "N1": "module name m_ftel_dphy_rx[_<block>]",
     "N2": "parameter PARA_<NAME>",
     "N3": "define DEF_<NAME>",
-    "N4": "flip-flop reg_<name>: assigned in always_ff only",
+    "N4": "flip-flop / latch reg_<name>: assigned in always_ff (always_latch in the clock-gate cell)",
     "N5": "port i_<name> / o_<name>",
     "N6": "instance u_<name>_<n>",
     "N7": "case: signals lower case, constants and enum members upper case",
     "N9": "localparam C_<NAME>",
     "N10": "net w_<name>; internal signals are reg_ or w_",
-    "N11": "clock / reset of a block i_<core|byte|cfg>_clk / _rst_n",
+    "N11": "clock / reset of a block i_<core|byte|cfg|ddr|ddrn>_clk / _rst_n",
     "N12": "package ftel_dphy_rx[_<name>]_pkg, type <name>_t",
     "N13": "label g_ (generate), p_ (always), a_ (assertion)",
     "F1": "one module or package per file, file name = unit name",
@@ -58,7 +58,7 @@ RULES = {
     "P3": "no casex / casez",
     "P4": "no defparam",
     "P5": "`default_nettype none",
-    "P6": "no always @, always_latch or plain always",
+    "P6": "no always @, always_latch (except in the clock-gate cell) or plain always",
     "P10": "no system task outside `ifndef SYNTHESIS",
     "P11": "no inout",
     "P12": "negedge only for the asynchronous reset of an always_ff",
@@ -66,6 +66,7 @@ RULES = {
     "K6": "CDC_QUASI_STATIC tag on each configuration input",
     "K7": "CDC_GATING only in m_ftel_dphy_rx_ppi_out",
     "K10": "ports of the shared cells",
+    "K12": "clock cells only in m_ftel_dphy_rx_byte_clk, as u_dont_touch_<name>_<n> with a CLK_STRUCT tag",
     "T1": "header REQ-IDs = REQs tagged in the body; HAS field",
     "T2": "trace tag on each always block, assign group and instance",
     "T3": "OPEN tag format, id in Table 9-1",
@@ -84,16 +85,26 @@ INST_RE = re.compile(r"^u_[a-z0-9_]+_[0-9]+$")
 TYPE_RE = re.compile(r"^[a-z][a-z0-9_]*_t$")
 UPPER_RE = re.compile(r"^[A-Z][A-Z0-9_]*$")
 LOWER_RE = re.compile(r"^[a-z][a-z0-9_]*$")
-BLOCK_CLK_RE = re.compile(r"^i_(core|byte|cfg)_clk$")
-BLOCK_RST_RE = re.compile(r"^i_(core|byte|cfg)_rst_n$")
-LOCAL_RST_RE = re.compile(r"^w_(core|byte|cfg)_rst_n$")
+DOMAINS = r"(core|byte|cfg|ddr|ddrn)"  # K1
+BLOCK_CLK_RE = re.compile(rf"^i_{DOMAINS}_clk$")
+BLOCK_RST_RE = re.compile(rf"^i_{DOMAINS}_rst_n$")
+LOCAL_RST_RE = re.compile(rf"^w_{DOMAINS}(_[a-z0-9]+)*_rst_n$")
 
 CORE, WRAP = "m_ftel_dphy_rx", "m_ftel_dphy_rx_wrap"
 CELL_PORTS = {  # K10
     "m_ftel_dphy_rx_sync": {"i_clk", "i_rstn", "i_data_in", "o_data_out"},
     "m_ftel_dphy_rx_rst_sync": {"i_clk", "i_async_reset_n", "o_sync_reset_n"},
     "m_ftel_dphy_rx_tsync": {"i_src_clk", "i_src_rst_n", "i_dst_clk", "i_dst_rst_n", "i_pulse", "o_pulse"},
+    "m_ftel_dphy_rx_cg": {"i_clk", "i_en", "i_scan_en", "o_clk"},  # ports of m_fpt_lib_cg (fu2 lib)
+    "m_ftel_dphy_rx_clk_inv": {"i_in", "o_out"},  # ports of m_fpt_lib_clk_inv (fu2 lib)
 }
+# K2, K12: the clock structure of Block No. 1 (HAS §4.3) lives in one module, from two clock cells
+CLK_MODULE = "m_ftel_dphy_rx_byte_clk"
+CLK_CELLS = {"m_ftel_dphy_rx_cg", "m_ftel_dphy_rx_clk_inv"}
+LATCH_MODULE = "m_ftel_dphy_rx_cg"  # P6, P7: the latch of the clock gate is the only latch
+GEN_CLK_RE = re.compile(r"^w_ddrn_clk$")  # N11: clock made in CLK_MODULE by the clock inverter
+DONT_TOUCH_RE = re.compile(r"^u_dont_touch_[a-z0-9_]+_[0-9]+$")
+CLK_STRUCT_RE = re.compile(r"CLK_STRUCT \(HAS §4\.3\)")
 GATING_MODULE = "m_ftel_dphy_rx_ppi_out"
 N11_EXEMPT = {CORE, WRAP, *CELL_PORTS}
 HEADER_FIELDS = ("Author", "Email", "Created Date", "Module", "Description", "Parent", "HAS",
@@ -346,7 +357,7 @@ class Checker:
     # ------------------------------------------------------------------ file level
     def check_file(self, path):
         src = Source(path, open(path, encoding="utf-8").read())
-        self.regex_rules(src)
+        self.regex_rules(src, os.path.splitext(os.path.basename(path))[0])
         units = [(t.text, src.toks[k + 1].text, t.line, k) for k, t in enumerate(src.toks)
                  if t.text in ("module", "package") and k + 1 < len(src.toks)]
         stem = os.path.splitext(os.path.basename(path))[0]
@@ -367,7 +378,7 @@ class Checker:
             self.check_layout(src, units[0][1])
         self.check_tags(src, units[0][1] if units else stem)
 
-    def regex_rules(self, src):
+    def regex_rules(self, src, stem=None):
         for n, l in enumerate(src.code_lines, 1):
             ns = n in src.nosynth
             if l.lstrip().startswith("`") and not l.lstrip().startswith("`define"):
@@ -378,8 +389,10 @@ class Checker:
                 self.add(src, n, "P3", "casex/casez")
             if re.search(r"\bdefparam\b", l):
                 self.add(src, n, "P4", "defparam")
-            if re.search(r"\balways\s*@", l) or re.search(r"\balways_latch\b", l) or re.search(r"\balways\b(?!_)", l):
-                self.add(src, n, "P6", "always other than always_ff / always_comb")
+            latch = re.search(r"\balways_latch\b", l) and not (self.profile == "ip" and stem == LATCH_MODULE)
+            if re.search(r"\balways\s*@", l) or latch or re.search(r"\balways\b(?!_)", l):
+                self.add(src, n, "P6", "always other than always_ff / always_comb"
+                         + (f" (always_latch only in {LATCH_MODULE})" if latch else ""))
             m = re.search(r"\balways\s*@\s*(\*|\(([^)]*)\))", l)
             if m and not re.search(r"\b(posedge|negedge)\b", m.group(2) or ""):
                 self.add(src, n, "R2", "combinational always @ (use always_comb)")
@@ -593,6 +606,7 @@ class Checker:
         self.module = name
         self.decls, self.ff_written, self.comb_written, self.assign_groups = {}, set(), set(), []
         self.has_rst_sync = any(t.text == "m_ftel_dphy_rx_rst_sync" for t in toks[k:end])
+        self.has_clk_inv = any(t.text == "m_ftel_dphy_rx_clk_inv" for t in toks[k:end])
         self.items(src, toks, i + 1, end, generate=False)
         for nm, line in self.decls.items():
             if nm.startswith("reg_") and nm not in self.ff_written:
@@ -685,6 +699,7 @@ class Checker:
                 j = close + 1
             else:
                 j += 2
+        latch = kw == "always_latch" and getattr(self, "module", None) == LATCH_MODULE
         if kw == "always_ff":
             self.check_sens(src, line, sens)
         label = None
@@ -702,19 +717,19 @@ class Checker:
             e = skip_to(toks, j, ";")
             body = toks[j:e + 1]
             nxt = e + 1
-        if kw in ("always_ff", "always_comb"):
+        if kw in ("always_ff", "always_comb") or latch:
             if label is None:
                 self.add(src, line, "R8", f"{kw} without 'begin : p_<name>'")
             elif not re.match(r"^p_[a-z0-9_]+$", label):
                 self.add(src, line, "N13", f"always label {label}")
             if not any(TRACE_RE.search(c) for c in src.comment_block_above(line)):
                 self.add(src, line, "T2", f"{kw} {label or ''} without a REQ / D-n tag")
-        if kw == "always_ff":
+        if kw == "always_ff" or latch:
             for lhs, _ in assignments(body, {"<="}):
                 for nm in lhs_names(lhs):
                     self.ff_written.add(nm.text)
                     if not nm.text.startswith("reg_"):
-                        self.add(src, nm.line, "N4", f"{nm.text} assigned in always_ff")
+                        self.add(src, nm.line, "N4", f"{nm.text} assigned in {kw}")
         elif kw == "always_comb":
             for lhs, _ in assignments(body, ASSIGN_OPS):
                 for nm in lhs_names(lhs):
@@ -744,8 +759,10 @@ class Checker:
                 self.add(src, line, "P12", "negedge on a clock")
         if ok and self.profile == "ip" and getattr(self, "module", None) not in N11_EXEMPT:
             clk = terms[0][1].text
-            if not (BLOCK_CLK_RE.match(clk) and clk in self.inputs):
-                self.add(src, line, "N11", f"clock {clk} is not an input i_<core|byte|cfg>_clk")
+            gen = GEN_CLK_RE.match(clk) and self.module == CLK_MODULE and self.has_clk_inv
+            if not ((BLOCK_CLK_RE.match(clk) and clk in self.inputs) or gen):
+                self.add(src, line, "N11", f"clock {clk} is not an input i_<core|byte|cfg|ddr|ddrn>_clk"
+                                           f" (or w_ddrn_clk from the clock inverter of {CLK_MODULE})")
             if len(terms) == 2:
                 rst = terms[1][1].text
                 if not ((BLOCK_RST_RE.match(rst) and rst in self.inputs) or
@@ -803,8 +820,15 @@ class Checker:
                 elif part[0].text != ".":
                     self.add(src, part[0].line, "F6", f"positional connection in instance {inst.text}")
             tags = src.comment_block_above(t0.line)
-            if x in CELL_PORTS and not any(CDC_TAG_RE.search(c) for c in tags):
+            if x in CELL_PORTS and x not in CLK_CELLS and not any(CDC_TAG_RE.search(c) for c in tags):
                 self.add(src, t0.line, "K5", f"instance {inst.text} of {x} without a CDC_CROSSING tag")
+            if x in CLK_CELLS:
+                if self.module != CLK_MODULE:
+                    self.add(src, t0.line, "K12", f"clock cell {x} outside {CLK_MODULE}")
+                if not DONT_TOUCH_RE.match(inst.text):
+                    self.add(src, inst.line, "K12", f"clock cell instance {inst.text} is not u_dont_touch_<name>_<n>")
+                if not any(CLK_STRUCT_RE.search(c) for c in tags):
+                    self.add(src, t0.line, "K12", f"instance {inst.text} of {x} without a CLK_STRUCT (HAS §4.3) tag")
             if not any(TRACE_RE.search(c) for c in tags):
                 self.add(src, t0.line, "T2", f"instance {inst.text} without a REQ / D-n / CDC tag")
             return skip_to(toks, close, ";") + 1
@@ -1031,6 +1055,95 @@ endmodule
 `default_nettype wire
 """
 
+FIX_CG = """`timescale 1ns/1ps
+`default_nettype none
+module m_ftel_dphy_rx_cg (
+  input  logic i_clk,
+  input  logic i_en,
+  input  logic i_scan_en,
+  output logic o_clk
+);
+  logic reg_en_lat;
+
+  // {R1}
+  always_latch begin : p_en_lat
+    if (!i_clk) reg_en_lat <= i_en | i_scan_en;
+  end
+
+  // {R1}
+  assign o_clk = i_clk & reg_en_lat;
+endmodule
+`default_nettype wire
+"""
+
+FIX_INV = """`timescale 1ns/1ps
+`default_nettype none
+module m_ftel_dphy_rx_clk_inv (
+  input  logic i_in,
+  output logic o_out
+);
+  // {R1}
+  assign o_out = ~i_in;
+endmodule
+`default_nettype wire
+"""
+
+FIX_BCLK = """`timescale 1ns/1ps
+`default_nettype none
+module m_ftel_dphy_rx_byte_clk (
+  // ---- clock / reset ----
+  input  logic i_ddr_clk,
+  input  logic i_ddr_rst_n,
+  // ---- control ----
+  input  logic i_load,
+  // ---- clock and data out ----
+  output logic o_byte_clk,
+  output logic o_load_fall
+);
+  logic reg_div_cnt;
+  logic reg_load_fall;
+  logic w_ddrn_clk;
+
+  // CLK_STRUCT (HAS §4.3)
+  // {R1}
+  m_ftel_dphy_rx_clk_inv u_dont_touch_clk_inv_0 (
+    .i_in  (i_ddr_clk),
+    .o_out (w_ddrn_clk)
+  );
+
+  // {R1}
+  always_ff @(posedge i_ddr_clk or negedge i_ddr_rst_n) begin : p_div
+    if (!i_ddr_rst_n) begin
+      reg_div_cnt <= '0;
+    end else begin
+      reg_div_cnt <= ~reg_div_cnt;
+    end
+  end
+
+  // {R1}
+  always_ff @(posedge w_ddrn_clk or negedge i_ddr_rst_n) begin : p_load_fall
+    if (!i_ddr_rst_n) begin
+      reg_load_fall <= '0;
+    end else begin
+      reg_load_fall <= i_load;
+    end
+  end
+
+  // CLK_STRUCT (HAS §4.3)
+  // {R1}
+  m_ftel_dphy_rx_cg u_dont_touch_cg_0 (
+    .i_clk     (reg_div_cnt),
+    .i_en      (i_ddr_rst_n),
+    .i_scan_en ('0),
+    .o_clk     (o_byte_clk)
+  );
+
+  // {R1}
+  assign o_load_fall = reg_load_fall;
+endmodule
+`default_nettype wire
+"""
+
 # Pre-registered negative tests: (name, file, old text, new text, rule that must be reported).
 NEGATIVE = [
     ("N1 module without m_", "demo", "module m_ftel_dphy_rx_demo", "module ftel_dphy_rx_demo", "N1"),
@@ -1045,6 +1158,9 @@ NEGATIVE = [
     ("N10 net without w_", "demo", "w_req", "req_s", "N10"),
     ("N10 assign to a reg_", "demo", "assign w_cnt_done", "assign reg_cnt_done", "N10"),
     ("N11 block clock not i_<domain>_clk", "demo", "i_core_clk", "i_clk", "N11"),
+    ("N11 inverted DDR clock outside the clock module", "demo",
+     "always_ff @(posedge i_core_clk or negedge i_core_rst_n)", "always_ff @(posedge w_ddrn_clk or negedge i_core_rst_n)",
+     "N11"),
     ("N12 type without _t", "pkg", "} demo_state_t;", "} demo_state;", "N12"),
     ("N12 package name", "pkg", "package ftel_dphy_rx_demo_pkg;", "package dphy_demo_pkg;", "N12"),
     ("N13 always label without p_", "demo", "p_state_reg", "state_reg", "N13"),
@@ -1069,6 +1185,9 @@ NEGATIVE = [
     ("P5 `default_nettype none missing", "demo", "`default_nettype none\n", "", "P5"),
     ("R2 combinational always @(*)", "demo", "always_comb begin : p_state_nxt", "always @(*) begin : p_state_nxt", "R2"),
     ("P6 always @*", "demo", "always_comb begin : p_state_nxt", "always @* begin : p_state_nxt", "P6"),
+    ("P6 always_latch outside the clock-gate cell", "demo", "  // {R2}\n  assign o_done",
+     "  // {R2}\n  always_latch begin : p_lat\n    if (!i_core_clk) reg_cnt <= '0;\n  end\n  // {R2}\n  assign o_done", "P6"),
+    ("N4 latch of the clock-gate cell without reg_", "cg", "reg_en_lat", "en_lat", "N4"),
     ("P10 $display", "demo", "w_state_nxt = reg_state;", "w_state_nxt = reg_state;\n    $display(\"x\");", "P10"),
     ("P11 inout", "demo", "input  logic                   i_async_req,", "inout  logic                   i_async_req,", "P11"),
     ("P12 negedge clock", "demo", "always_ff @(posedge i_core_clk or negedge i_core_rst_n)",
@@ -1078,6 +1197,13 @@ NEGATIVE = [
     ("K6 configuration input without CDC_QUASI_STATIC", "demo", "  // CDC_QUASI_STATIC: demo_limit (HAS §4.1)\n", "", "K6"),
     ("K7 CDC_GATING outside the PPI stage", "demo", "  // {R2}\n  assign o_done", "  // {R2} CDC_GATING (HAS §4.9)\n  assign o_done", "K7"),
     ("K10 sync cell port renamed", "sync", "i_rstn", "i_rst_n", "K10"),
+    ("K10 clock-gate cell port renamed", "cg", "input  logic i_scan_en,", "input  logic i_test_en,", "K10"),
+    ("K12 clock cell outside m_ftel_dphy_rx_byte_clk", "demo", "  // {R2}\n  assign o_done",
+     "  // CLK_STRUCT (HAS §4.3)\n  // {R2}\n  m_ftel_dphy_rx_clk_inv u_dont_touch_clk_inv_0 (\n    .i_in  (i_core_clk),\n"
+     "    .o_out (w_req)\n  );\n  // {R2}\n  assign o_done", "K12"),
+    ("K12 clock cell without CLK_STRUCT tag", "bclk", "  // CLK_STRUCT (HAS §4.3)\n  // {R1}\n  m_ftel_dphy_rx_cg",
+     "  // {R1}\n  m_ftel_dphy_rx_cg", "K12"),
+    ("K12 clock cell instance not u_dont_touch_", "bclk", "u_dont_touch_cg_0", "u_cg_0", "K12"),
     ("T1 header REQ-IDs misses a tagged REQ", "demo", "// REQ-IDs         : {R1}, {R2}", "// REQ-IDs         : {R1}", "T1"),
     ("T2 always_comb without tag", "demo", "  // {R1}\n  always_comb", "  always_comb", "T2"),
     ("T2 instance without tag", "demo", "  // CDC_CROSSING: async -> core: i_async_req (HAS §4.1, Table 4-2)\n", "", "T2"),
@@ -1109,6 +1235,12 @@ def selftest_negative(workdir):
                  reqs="{R1}", open="none") + FIX_SYNC),
         "demo": ("m_ftel_dphy_rx_demo.sv", HEADER.format(unit="m_ftel_dphy_rx_demo", dom="core",
                  reqs="{R1}, {R2}", open="none") + FIX_DEMO),
+        "cg": ("m_ftel_dphy_rx_cg.sv", HEADER.format(unit="m_ftel_dphy_rx_cg", dom="any (one)",
+               reqs="{R1}", open="none") + FIX_CG),
+        "inv": ("m_ftel_dphy_rx_clk_inv.sv", HEADER.format(unit="m_ftel_dphy_rx_clk_inv", dom="any (one)",
+                reqs="{R1}", open="none") + FIX_INV),
+        "bclk": ("m_ftel_dphy_rx_byte_clk.sv", HEADER.format(unit="m_ftel_dphy_rx_byte_clk", dom="ddr, ddrn",
+                 reqs="{R1}", open="none") + FIX_BCLK),
     }
     work = os.path.join(workdir, "check_rtl_rules_selftest")
     results = []

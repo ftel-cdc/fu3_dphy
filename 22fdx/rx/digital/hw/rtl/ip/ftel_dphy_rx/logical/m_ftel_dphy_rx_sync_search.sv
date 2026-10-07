@@ -14,7 +14,7 @@
 //                   offset, search counter, deskew-burst detection and barrel shifter. Each
 //                   byte clock it produces one delay-line entry.
 // Parent          : m_ftel_dphy_rx_hs_datapath
-// HAS             : draft v0.12, §4.6, Figure 4-8, ADR-007
+// HAS             : draft v0.14, §4.6, Figure 4-8, ADR-007
 // Clock domains   : byte
 // REQ-IDs         : REQ-033, REQ-150, REQ-151, REQ-152, REQ-153, REQ-154, REQ-155, REQ-156,
 //                   REQ-157, REQ-158, REQ-160, REQ-161, REQ-162, REQ-163, REQ-165, REQ-166,

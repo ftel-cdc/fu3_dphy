@@ -12,12 +12,12 @@
 // Description     : Clock Lane Control, CIL-SCNN (HAS Block No. 2): clock-lane FSM of
 //                   Table 4-4 with its settle counter; outputs are registers.
 // Parent          : m_ftel_dphy_rx
-// HAS             : draft v0.12, §4.4, Table 4-4, Figure 4-4, Appendix B
+// HAS             : draft v0.14, §4.1, §4.4, Table 4-2, Table 4-4, Figure 4-4, Appendix B
 // Clock domains   : core
-// REQ-IDs         : REQ-015, REQ-063, REQ-084, REQ-085, REQ-086, REQ-087, REQ-088, REQ-089,
-//                   REQ-090, REQ-091, REQ-092, REQ-093, REQ-094, REQ-095, REQ-096, REQ-097,
-//                   REQ-098, REQ-099, REQ-100, REQ-101, REQ-102, REQ-224, REQ-226, REQ-229,
-//                   REQ-230, REQ-253, REQ-255, REQ-315, REQ-317, REQ-323
+// REQ-IDs         : REQ-015, REQ-063, REQ-083, REQ-084, REQ-085, REQ-086, REQ-087, REQ-088,
+//                   REQ-089, REQ-090, REQ-091, REQ-092, REQ-093, REQ-094, REQ-095, REQ-096,
+//                   REQ-097, REQ-098, REQ-099, REQ-100, REQ-101, REQ-102, REQ-224, REQ-226,
+//                   REQ-229, REQ-230, REQ-253, REQ-255, REQ-315, REQ-317, REQ-323, REQ-337
 // OPEN            : none
 //
 // Evolution History:
@@ -53,9 +53,11 @@ module m_ftel_dphy_rx_cl_ctrl
   // ---- status (Block No. 8, rtl_notes D-2) ----
   output cl_state_t                     o_sts_state,
   output logic                          o_sts_abort_tgl,
-  // ---- AFE requests (Block No. 1) ----
+  // ---- AFE requests and byte-clock enable (Block No. 1) ----
   output logic                          o_hs_en,
   output logic                          o_term_en,
+  // REQ-090, REQ-102, REQ-337
+  output logic                          o_byteclk_en,
   // ---- configuration ----
   // CDC_QUASI_STATIC: clk_settle_cyc (HAS §4.1)
   input  logic [C_CLK_SETTLE_CYC_W-1:0] i_cfg_clk_settle_cyc
@@ -69,6 +71,7 @@ module m_ftel_dphy_rx_cl_ctrl
   logic                          reg_rxclkactivehs;
   logic                          reg_hs_en;
   logic                          reg_term_en;
+  logic                          reg_byteclk_en;
   logic                          reg_abort_tgl;
   cl_state_t                     w_state_nxt;
   logic                          w_settle_done;
@@ -132,8 +135,11 @@ module m_ftel_dphy_rx_cl_ctrl
   assign w_abort = (w_state_nxt == CL_WAIT) && (reg_state != CL_WAIT);
 
   // State and outputs are registered together, the outputs from the next state, so the PPI
-  // outputs and the AFE requests change with the state and cannot glitch (rtl_notes D-8).
-  // REQ-086, REQ-088, REQ-089, REQ-090, REQ-093, REQ-094, REQ-097, REQ-098, REQ-253, REQ-317
+  // outputs, the AFE requests and the byte-clock enable change with the state and cannot glitch
+  // (rtl_notes D-8). The byte-clock enable has its own register, equal to cl_rxclkactivehs: it
+  // clears the reset synchronizer of the clock gate (rtl_notes D-21).
+  // REQ-083, REQ-086, REQ-088, REQ-089, REQ-090, REQ-093, REQ-094, REQ-097, REQ-098, REQ-253,
+  // REQ-317, REQ-337
   always_ff @(posedge i_core_clk or negedge i_core_rst_n) begin : p_state_reg
     if (!i_core_rst_n) begin
       reg_state         <= CL_INIT;
@@ -143,6 +149,7 @@ module m_ftel_dphy_rx_cl_ctrl
       reg_rxclkactivehs <= 1'b0;
       reg_hs_en         <= 1'b0;
       reg_term_en       <= 1'b0;
+      reg_byteclk_en    <= 1'b0;
       reg_abort_tgl     <= 1'b0;
     end else begin
       reg_state         <= w_state_nxt;
@@ -153,6 +160,7 @@ module m_ftel_dphy_rx_cl_ctrl
       reg_hs_en         <= (w_state_nxt == CL_HS_TERM) || (w_state_nxt == CL_HS_CLK);
       reg_term_en       <= (w_state_nxt == CL_HS_PRPR) || (w_state_nxt == CL_HS_TERM) ||
                            (w_state_nxt == CL_HS_CLK)  || (w_state_nxt == CL_HS_END);
+      reg_byteclk_en    <= (w_state_nxt == CL_HS_CLK);
       reg_abort_tgl     <= reg_abort_tgl ^ w_abort;
     end
   end
@@ -176,6 +184,7 @@ module m_ftel_dphy_rx_cl_ctrl
   assign o_rxclkactivehs = reg_rxclkactivehs;
   assign o_hs_en         = reg_hs_en;
   assign o_term_en       = reg_term_en;
+  assign o_byteclk_en    = reg_byteclk_en;
   assign o_sts_state     = reg_state;
   assign o_sts_abort_tgl = reg_abort_tgl;
 endmodule

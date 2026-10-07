@@ -1,4 +1,4 @@
-# Nháp: nội dung gửi team CSI sau HAS D-PHY v0.9, v0.11 và v0.13 (để duyệt, chưa gửi)
+# Nháp: nội dung gửi team CSI sau HAS D-PHY v0.9, v0.11, v0.13 và v0.14 (để duyệt, chưa gửi)
 
 File nội bộ. Phần 1 dành cho người duyệt và không gửi đi. Phần 2 là bản nháp viết cho team CSI-2 Rx
 controller, theo đúng khuôn của `questions_csi_team.md`. Duyệt xong thì chép các mục được chọn vào
@@ -30,7 +30,7 @@ lựa chọn của bạn ngày 2026-10-02:
 | 8 | **Enable đổi lúc nào cũng được.** Tắt lane giữa burst thì burst kết thúc ngay ở PPI, và phần còn lại không được giao sau khi bật lại | **Gửi một dòng** ở phần cập nhật đầu file | Không đặt yêu cầu nào lên controller; đúng với ngữ nghĩa Enable của D-PHY |
 | 9 | **`rxactivehs_x` chỉ lên từ cuối THS-SETTLE**, nên một HS entry bị hủy giữa chừng không còn tạo xung `rxactivehs_x` | **Gửi một dòng** | Thứ tự với `rxsynchs_x` không đổi. Burst FSM không còn gặp burst rỗng do HS entry bị hủy |
 | 10 | **HAS-CSI Table 4-3 ghi `rxbyteclkhs` = "HS DDR clock divided by eight"**. Đúng ra là line rate / 8 = DDR clock / 4; con số 224 MHz ở 1792 Mb/s của họ đã đúng | **Gửi dạng ghi chú** dưới phụ lục C3 | Chỉ sửa câu chữ trong tài liệu của họ. HAS D-PHY có cùng lỗi tới v0.10 |
-| 11 | `cl_rxclkactivehs` hạ tới khoảng 75 ns sau khi clock dừng (TCLK-MISS, đồng bộ, thanh ghi FSM). Từ v0.13: 50–60 ns sau cạnh cuối của DDR clock, trong TCLK-MISS | **Không gửi** | Controller chỉ dùng tín hiệu này để chẩn đoán (C5) |
+| 11 | `cl_rxclkactivehs` hạ tới khoảng 75 ns sau khi clock dừng (TCLK-MISS, đồng bộ, thanh ghi FSM). Từ v0.13: 50–60 ns sau cạnh cuối của DDR clock; v0.14 sửa thành chậm nhất 60 ns sau cạnh cuối, trong TCLK-MISS | **Không gửi** | Controller chỉ dùng tín hiệu này để chẩn đoán (C5) |
 
 **HAS v0.12 và v0.13 chạm tới team CSI ở đâu.** v0.12 chỉ ghi rõ ranh giới AFE (đọc thành phương án
 B), không đổi kỹ thuật. v0.13 sửa ranh giới thành phương án A, theo thông báo của team AFE ngày
@@ -41,7 +41,7 @@ D-PHY Rx (Block No. 1). Tên, độ rộng và ngữ nghĩa các tín hiệu PPI
 |---|---|---|---|
 | 12 | **PPI không đổi ở v0.12 và v0.13**; `rxbyteclkhs` nay do D-PHY Rx tạo (DDR clock chia 4, qua clock gate) | **Gửi một dòng** ở phần cập nhật đầu file | Giúp team biết không cần xem lại waveform |
 | 13 | **`rxbyteclkhs` bắt đầu chạy trong khoảng một byte clock sau khi `cl_rxclkactivehs` lên.** Clock gate của Block No. 1 chỉ mở khi clock lane đã vào CL_HS_CLK. HAS-CSI Table 4-3 lại ghi `cl_rxclkactivehs` nghĩa là "rxbyteclkhs is running" | **Gửi dạng ghi chú** dưới phụ lục C5 | Controller chỉ dùng tín hiệu này để chẩn đoán (C5), nên không phải đổi gì. Tuy vậy TB hoặc assertion của team CSI có thể dựa vào ngữ nghĩa đó. Cách khác, chỉ ảnh hưởng D-PHY: chỉ nâng `cl_rxclkactivehs` khi gate đã mở. Cách này thêm một crossing ngược về `core_clk`, và tín hiệu lên muộn hơn hiện nay khoảng một byte clock cộng 10–15 ns. Khi đó không cần gửi, nhưng phải sửa thêm HAS D-PHY §4.3 và §4.4 |
-| 14 | **Rủi ro K1: chưa biết tốc độ tối đa của HS-RX.** Sơ đồ AFE tham khảo ghi 80–1000 Mb/s, trong khi HAS D-PHY R1 cần 1500 Mb/s và HAS-CSI cần trên 1500 Mb/s (1792 Mb/s). Ngoài ra sampler nay nằm trong D-PHY Rx: ở 1500 Mb/s chỉ đạt timing khi đặt tay, và chỉ ở corner 1.35 V/125 °C. Đây là ước lượng; corner sign-off chưa chốt | **Chờ** câu trả lời A7 của team AFE và corner của physical design, rồi mới gửi dưới K1 | Con số 1000 Mb/s lấy từ sơ đồ tham khảo, chưa phải thông số của team AFE, nên gửi sớm dễ gây hiểu lầm. Cách khác: gửi ngay dạng rủi ro, không kèm câu hỏi (đoạn tùy chọn ở Phần 2) |
+| 14 | **Rủi ro K1: chưa biết tốc độ tối đa của HS-RX.** Sơ đồ AFE tham khảo ghi 80–1000 Mb/s, trong khi HAS D-PHY R1 cần 1500 Mb/s và HAS-CSI cần trên 1500 Mb/s (1792 Mb/s). Ngoài ra sampler nay nằm trong D-PHY Rx: ở 1500 Mb/s chỉ đạt timing khi đặt tay, và chỉ ở corner 1.35 V/125 °C. HAS v0.14 thêm một điểm: deserializer có đúng một đường nửa chu kỳ DDR (pha load của nửa cạnh xuống). Ở 1.35 V/125 °C, trước khi tính dây, đường này còn khoảng 110 ps ở 1500 Mb/s và gần 0 ở 1792 Mb/s, nên 1792 Mb/s (R2) có thêm rủi ro timing. Các con số đều là ước lượng; corner sign-off chưa chốt | **Chờ** câu trả lời A7 của team AFE và corner của physical design, rồi mới gửi dưới K1 | Con số 1000 Mb/s lấy từ sơ đồ tham khảo, chưa phải thông số của team AFE, nên gửi sớm dễ gây hiểu lầm. Cách khác: gửi ngay dạng rủi ro, không kèm câu hỏi (đoạn tùy chọn ở Phần 2) |
 | 15 | **Rủi ro C4 (R2): deskew cần delay line, mà AFE không có.** Delay line bằng cell chuẩn có bước 65–180 ps tùy corner, trôi khoảng 2.5 lần so với UI 558 ps ở 1792 Mb/s | **Chờ** câu trả lời A4 của team AFE, rồi mới gửi dưới K1 | R2 (1792 Mb/s, 4K staggered HDR) phụ thuộc A4. Cách khác: gửi ngay dạng rủi ro (đoạn tùy chọn ở Phần 2) |
 
 **Những gì đã cập nhật trực tiếp** (theo kế hoạch đã duyệt, cũng chưa gửi):
@@ -81,8 +81,8 @@ bảng tóm tắt, rồi xóa file nháp này.
 
 | Mục | Nội dung |
 |---|---|
-| Ngày | 2026-09-26, cập nhật 2026-09-29 (thêm ADR-006; K3 thêm `eot_skip_bytes`), 2026-09-30 (ADR-006: điều đã biết từ HAS-CSI; phụ lục C6; waveform PPI), 2026-10-02 (ADR-007: leader hỏng, burst kết thúc trước khi lock; S12 mới; K6: `forcerxmode_x`; thay đổi PPI của v0.11) và 2026-10-06 (v0.13: PPI không đổi; `rxbyteclkhs` do D-PHY Rx tạo, ghi chú ở phụ lục C5) |
-| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.13 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.13.docx`), HAS-CSI v1.2 |
+| Ngày | 2026-09-26, cập nhật 2026-09-29 (thêm ADR-006; K3 thêm `eot_skip_bytes`), 2026-09-30 (ADR-006: điều đã biết từ HAS-CSI; phụ lục C6; waveform PPI), 2026-10-02 (ADR-007: leader hỏng, burst kết thúc trước khi lock; S12 mới; K6: `forcerxmode_x`; thay đổi PPI của v0.11), 2026-10-06 (v0.13: PPI không đổi; `rxbyteclkhs` do D-PHY Rx tạo, ghi chú ở phụ lục C5) và 2026-10-07 (v0.14: PPI không đổi; thời điểm `cl_rxclkactivehs` hạ ghi là cận trên 60 ns, phụ lục C5) |
+| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.14 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.14.docx`), HAS-CSI v1.2 |
 
 Thêm vào cuối mục Bối cảnh:
 
@@ -96,7 +96,7 @@ Thêm vào cuối mục Bối cảnh:
 > - `cl_enable` và `dl_enable_x` đổi lúc nào cũng được. Tắt lane giữa burst thì burst kết thúc ngay ở
 >   PPI, và phần còn lại không được giao sau khi bật lại.
 >
-> HAS v0.12 và v0.13 không đổi PPI. Theo thông báo của team AFE, v0.13 chuyển việc lấy mẫu bit HS,
+> HAS v0.12, v0.13 và v0.14 không đổi PPI. Theo thông báo của team AFE, v0.13 chuyển việc lấy mẫu bit HS,
 > deserialize 1:8, tạo `rxbyteclkhs` và phát hiện clock activity từ AFE vào D-PHY Rx. Tên, độ rộng và
 > ngữ nghĩa các tín hiệu PPI giữ nguyên; một điểm nhỏ về `cl_rxclkactivehs` ghi ở phụ lục C5.
 
@@ -133,10 +133,11 @@ Thêm vào cuối mục Bối cảnh:
 
 ### Ghi chú thêm vào phụ lục, dòng C5 (mục 13 ở Phần 1)
 
-> **Cập nhật v0.13.** `rxbyteclkhs` nay do D-PHY Rx tạo: DDR clock của clock lane chia 4, qua một
+> **Cập nhật v0.13, v0.14.** `rxbyteclkhs` nay do D-PHY Rx tạo: DDR clock của clock lane chia 4, qua một
 > clock gate chỉ mở khi clock lane đã ở HS. Vì vậy `rxbyteclkhs` bắt đầu chạy trong khoảng một chu kỳ
 > `rxbyteclkhs` sau khi `cl_rxclkactivehs` lên: khoảng 100 ns ở 80 Mb/s, 5.3 ns ở 1500 Mb/s.
-> `cl_rxclkactivehs` hạ 50–60 ns sau cạnh cuối của DDR clock. HAS-CSI Table 4-3 ghi tín hiệu này
+> `cl_rxclkactivehs` hạ chậm nhất 60 ns sau cạnh cuối của DDR clock (TCLK-MISS); HAS D-PHY v0.13 ghi
+> 50–60 ns, v0.14 sửa thành cận trên này. HAS-CSI Table 4-3 ghi tín hiệu này
 > nghĩa là `rxbyteclkhs` đang chạy. Với cách controller dùng nó (chẩn đoán, C5), khoảng trễ này không
 > ảnh hưởng. Nhờ xác nhận.
 
@@ -149,6 +150,8 @@ Thêm vào cuối mục Bối cảnh:
 > - Deskew calibration (bắt buộc trên 1.5 Gb/s, C4) cần một delay line trước sampler. AFE hiện không
 >   có delay line; một delay line bằng cell chuẩn trôi khoảng 2.5 lần giữa các corner. R2 (1792 Mb/s)
 >   chờ câu trả lời của team AFE.
+> - Deserializer của D-PHY Rx có một đường dài nửa chu kỳ DDR clock. Theo ước lượng, đường này gần
+>   như hết biên ở 1792 Mb/s; physical design sẽ xác nhận (HAS D-PHY v0.14).
 >
 > Chưa có câu hỏi mới cho team CSI. Khi có câu trả lời của team AFE, chúng tôi sẽ cập nhật mục này.
 

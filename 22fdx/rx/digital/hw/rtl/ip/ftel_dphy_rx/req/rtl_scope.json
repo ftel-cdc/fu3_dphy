@@ -1,9 +1,9 @@
 {
  "ip": "ftel_dphy_rx",
  "purpose": "REQs that must carry a tag in logical/*.sv (rtl_rule.md T2); checked by flow_check.py --phase P3a (CF-COVER, CF-TAG)",
- "registered": "2026-10-03",
+ "registered": "2026-10-07",
  "registered_before_rtl": true,
- "structured_spec_sha256": "4b53f168f59d7713c4c7f1bf168490147e7b7e13462ea9bbc729fc1735c5c3d6",
+ "structured_spec_sha256": "1baba459f87d76ba1f7dbca75963da017376422a2d1e085cc3ac6e828b825605",
  "rule": {
   "blocks": [
    "No.1",
@@ -32,14 +32,11 @@
   {
    "req_id": "REQ-055",
    "reason": "FSM states cross into the configuration clock inside Block No. 8, absent until K3/ADR-005; this RTL exports the states only"
-  },
-  {
-   "req_id": "REQ-183",
-   "reason": "Property of the AFE word latency (ADR-001, ADR-007): the RTL has no construct for it; it enters only through hs_settle_cyc (REQ-040, REQ-041)"
-  },
-  {
-   "req_id": "REQ-266",
-   "reason": "Obligation of the AFE (word latency known and fixed, ADR-001, ADR-007): no RTL construct; it enters only through hs_settle_cyc (REQ-040, REQ-041)"
   }
+ ],
+ "history": [
+  "2026-10-03: registered before the draft RTL (HAS v0.11); exclusions REQ-054, REQ-055, REQ-183, REQ-266",
+  "2026-10-07: re-registered for HAS v0.14 before the RTL of Block No. 1 (ADR-001 option A); REQ-183 and REQ-266 (word latency) leave the exclusions: the two-stage HS path of Block No. 1 now sets it",
+  "2026-10-07: structured_spec sha updated after the HAS v0.14 wording fix of the loss-of-clock timing found by the simulation of Block No. 1 (REQ-103, REQ-255, REQ-319, REQ-346 reworded); rule and exclusions unchanged"
  ]
 }

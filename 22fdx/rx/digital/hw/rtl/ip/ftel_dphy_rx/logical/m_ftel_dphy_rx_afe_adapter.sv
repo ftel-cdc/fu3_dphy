@@ -10,17 +10,19 @@
 // Created Date    : 2026-10-03
 // Module          : m_ftel_dphy_rx_afe_adapter
 // Description     : AFE Adapter (HAS Block No. 1): LP path (synchronizers, polarity swap,
-//                   glitch filter), HS word register with polarity inversion, lane mapping,
-//                   AFE enables, clock-activity synchronizer and byte-clock forwarding. The
-//                   only block that changes when the AFE changes.
+//                   glitch filter); HS deserializers, byte clock and clock-activity detection;
+//                   HS path (two rxbyteclkhs stages, polarity inversion); lane mapping; AFE
+//                   enables. The only block that changes when the AFE changes.
 // Parent          : m_ftel_dphy_rx
-// HAS             : draft v0.12, §4.3, Table 4-2, §5.2, Table 5-2
-// Clock domains   : core (LP path, AFE enables), byte (HS word register)
-// REQ-IDs         : REQ-026, REQ-047, REQ-048, REQ-050, REQ-051, REQ-059, REQ-069, REQ-070,
-//                   REQ-072, REQ-073, REQ-074, REQ-075, REQ-077, REQ-079, REQ-080, REQ-081,
-//                   REQ-082, REQ-102, REQ-228, REQ-257, REQ-258, REQ-259, REQ-260, REQ-261,
-//                   REQ-262, REQ-263, REQ-264, REQ-270, REQ-271, REQ-319, REQ-322
-// OPEN            : ADR-001, ADR-004, S9
+// HAS             : draft v0.14, §4.1, §4.3, Table 4-2, Figure 4-2, §5.2, Table 5-2
+// Clock domains   : core (LP path, clock activity, AFE enables), ddr and ddrn (deserializers,
+//                   divider), byte (HS path)
+// REQ-IDs         : REQ-026, REQ-047, REQ-048, REQ-050, REQ-059, REQ-069, REQ-070, REQ-072,
+//                   REQ-074, REQ-075, REQ-077, REQ-079, REQ-080, REQ-081, REQ-102, REQ-183,
+//                   REQ-228, REQ-257, REQ-258, REQ-262, REQ-263, REQ-264, REQ-266, REQ-270,
+//                   REQ-271, REQ-322, REQ-328, REQ-329, REQ-333, REQ-335, REQ-339, REQ-341,
+//                   REQ-343, REQ-345, REQ-348, REQ-355, REQ-356, REQ-357
+// OPEN            : ADR-001, ADR-004, ADR-007, S9
 //
 // Evolution History:
 // -----------------------------------------------------------------------------
@@ -45,6 +47,11 @@ module m_ftel_dphy_rx_afe_adapter
   // ---- clock / reset ----
   input  logic                                             i_core_clk,
   input  logic                                             i_core_rst_n,
+  // DDR clock afe_cl_hs_clk of the AFE, and its reset from Block No. 6.
+  // REQ-026, REQ-333
+  input  logic                                             i_ddr_clk,
+  input  logic                                             i_ddr_rst_n,
+  // rxbyteclkhs, generated here (o_rxbyteclkhs) and returned by the core (rtl_notes D-25).
   input  logic                                             i_byte_clk,
   // ---- control: requests of Blocks No. 2 and 3, per logical lane ----
   // REQ-080, REQ-081
@@ -52,23 +59,24 @@ module m_ftel_dphy_rx_afe_adapter
   input  logic [PARA_NUM_LANES-1:0]                        i_term_en,
   input  logic                                             i_cl_hs_en,
   input  logic                                             i_cl_term_en,
+  // Byte-clock enable of Block No. 2, High in CL_HS_CLK.
+  // REQ-102
+  input  logic                                             i_byteclk_en,
   // ---- data out: line states and words of the logical lanes ----
   output lp_state_t [PARA_NUM_LANES-1:0]                   o_lp_state,
   output logic [PARA_NUM_LANES-1:0][1:0]                   o_lp_sync,
   output lp_state_t                                        o_cl_lp_state,
   output logic                                             o_cl_clk_active,
   output logic [PARA_NUM_LANES-1:0][PARA_DESER_RATIO-1:0]  o_hs_word,
-  // REQ-082, REQ-228
+  // REQ-048, REQ-228
   output logic                                             o_rxbyteclkhs,
   // ---- AFE (Table 5-2) ----
-  // OPEN ADR-001 REQ-257, REQ-258, REQ-259, REQ-260, REQ-261, REQ-262, REQ-263: AFE interface of option B, unaligned 1:8 words and a byte clock (Table 5-2)
+  // OPEN ADR-001 REQ-257, REQ-258, REQ-262, REQ-263, REQ-355, REQ-356, REQ-357: AFE interface of option A: LP-RX outputs, unsampled HS bits, the DDR clock (i_ddr_clk) and the enables (Table 5-2)
   input  logic [PARA_NUM_LANES-1:0]                        i_afe_lp_dp,
   input  logic [PARA_NUM_LANES-1:0]                        i_afe_lp_dn,
   input  logic                                             i_afe_cl_lp_dp,
   input  logic                                             i_afe_cl_lp_dn,
-  input  logic                                             i_afe_byteclk,
-  input  logic [PARA_NUM_LANES-1:0][PARA_DESER_RATIO-1:0]  i_afe_hs_word,
-  input  logic                                             i_afe_cl_clk_active,
+  input  logic [PARA_NUM_LANES-1:0]                        i_afe_hs_bit,
   output logic [PARA_NUM_LANES-1:0]                        o_afe_hs_en,
   output logic [PARA_NUM_LANES-1:0]                        o_afe_term_en,
   output logic                                             o_afe_cl_hs_en,
@@ -83,7 +91,14 @@ module m_ftel_dphy_rx_afe_adapter
 
   localparam int C_SEL_W = f_lane_sel_w(PARA_NUM_LANES);
 
+  logic [PARA_NUM_LANES-1:0][PARA_DESER_RATIO-1:0] reg_hs_pre;
   logic [PARA_NUM_LANES-1:0][PARA_DESER_RATIO-1:0] reg_hs_word;
+  logic [PARA_NUM_LANES-1:0][PARA_DESER_RATIO-1:0] w_deser_word;
+  logic [PARA_NUM_LANES-1:0][PARA_DESER_RATIO-1:0] w_hs_word;
+  logic                                            w_ddrn_clk;
+  logic                                            w_load;
+  logic                                            w_load_fall;
+  logic [C_ACT_TOGGLES-1:0]                        w_act_toggle;
   logic [PARA_NUM_LANES-1:0]                       w_dp_sync;
   logic [PARA_NUM_LANES-1:0]                       w_dn_sync;
   logic [PARA_NUM_LANES-1:0][1:0]                  w_phy_lp_sync;
@@ -136,12 +151,35 @@ module m_ftel_dphy_rx_afe_adapter
       .o_lp         (w_phy_lp_state[p])
     );
 
-    // Raw deserialized word, all bits inverted when the polarity bit is set; a data register
-    // without reset (rtl_rule K4).
-    // REQ-026, REQ-074
+    // Samplers and 1:8 deserializer of the physical lane, on both edges of the DDR clock. The
+    // words of all lanes are cut at the same load phase.
+    // REQ-328, REQ-339, REQ-341
+    m_ftel_dphy_rx_hs_deser #(
+      .PARA_DESER_RATIO (PARA_DESER_RATIO)
+    ) u_hs_deser_0 (
+      .i_ddr_clk    (i_ddr_clk),
+      .i_ddrn_clk   (w_ddrn_clk),
+      .i_load       (w_load),
+      .i_load_fall  (w_load_fall),
+      .o_word       (w_deser_word[p]),
+      .i_afe_hs_bit (i_afe_hs_bit[p])
+    );
+
+    // HS path: two rxbyteclkhs stages, data registers without reset (rtl_rule K4). The first takes
+    // the word three DDR periods after the rising-edge half is loaded, while both halves are
+    // stable; the second is the HS path register (rtl_notes D-18).
+    // OPEN ADR-007 REQ-183, REQ-266: word latency Λ = 2 byte clocks, set by two rxbyteclkhs stages after the parallel registers
+    // SYNC_DDR (HAS §4.3)
+    // REQ-026, REQ-074, REQ-335
     always_ff @(posedge i_byte_clk) begin : p_hs_word
-      reg_hs_word[p] <= i_afe_hs_word[p] ^ {PARA_DESER_RATIO{i_cfg_lane_pol[p]}};
+      reg_hs_pre[p]  <= w_deser_word[p];
+      reg_hs_word[p] <= reg_hs_pre[p];
     end
+
+    // All bits inverted when the polarity bit of the physical lane is set, after the HS path
+    // register (Figure 4-2, rtl_notes D-24).
+    // REQ-074
+    assign w_hs_word[p] = reg_hs_word[p] ^ {PARA_DESER_RATIO{i_cfg_lane_pol[p]}};
   end
 
   // ------------------------------------------------------------------ lane mapping
@@ -163,12 +201,13 @@ module m_ftel_dphy_rx_afe_adapter
     // REQ-069, REQ-070, REQ-074, REQ-075
     assign o_lp_state[x] = w_phy_lp_state[w_mux_sel[x]];
     assign o_lp_sync[x]  = w_phy_lp_sync[w_mux_sel[x]];
-    assign o_hs_word[x]  = reg_hs_word[w_mux_sel[x]];
+    assign o_hs_word[x]  = w_hs_word[w_mux_sel[x]];
   end
 
   // The AFE enables of a physical lane are the OR of the requests of the logical lanes that
-  // select it, without a further register: the requests are FSM registers already.
-  // REQ-077, REQ-080, REQ-081
+  // select it, without a further register: the requests are FSM registers already. The AFE
+  // switches the termination only on these requests, which follow the line-state sequence.
+  // REQ-077, REQ-080, REQ-081, REQ-329, REQ-348
   for (genvar p = 0; p < PARA_NUM_LANES; p++) begin : g_afe_en
     for (genvar x = 0; x < PARA_NUM_LANES; x++) begin : g_req
       // REQ-077
@@ -226,22 +265,30 @@ module m_ftel_dphy_rx_afe_adapter
   assign o_afe_cl_hs_en   = i_cl_hs_en;
   assign o_afe_cl_term_en = i_cl_term_en;
 
-  // Clock activity of the AFE detector for TCLK-MISS, synchronized for Block No. 2.
-  // OPEN ADR-001 REQ-051, REQ-319: synchronized without a glitch filter, TCLK-MISS met by the AFE detector
-  // CDC_CROSSING: afe -> core: i_afe_cl_clk_active (HAS §4.1, Table 4-2)
-  // REQ-073, REQ-102
-  m_ftel_dphy_rx_sync #(
-    .PARA_LEVELS (PARA_LP_SYNC_STAGES)
-  ) u_sync_2 (
-    .i_clk      (i_core_clk),
-    .i_rstn     (i_core_rst_n),
-    .i_data_in  (i_afe_cl_clk_active),
-    .o_data_out (o_cl_clk_active)
+  // ------------------------------------------------------------------ byte clock
+  // Inverted DDR clock, divider by 4 with the load phases, clock gate of rxbyteclkhs and the
+  // clock-activity toggles: the clock structure of rtl_rule K2.
+  // REQ-026, REQ-048, REQ-228, REQ-343
+  m_ftel_dphy_rx_byte_clk #(
+    .PARA_DESER_RATIO (PARA_DESER_RATIO)
+  ) u_byte_clk_0 (
+    .i_ddr_clk    (i_ddr_clk),
+    .i_ddr_rst_n  (i_ddr_rst_n),
+    .i_byteclk_en (i_byteclk_en),
+    .o_byte_clk   (o_rxbyteclkhs),
+    .o_ddrn_clk   (w_ddrn_clk),
+    .o_load       (w_load),
+    .o_load_fall  (w_load_fall),
+    .o_act_toggle (w_act_toggle)
   );
 
-  // ------------------------------------------------------------------ byte clock
-  // afe_byteclk becomes rxbyteclkhs without logic on the clock path (rtl_rule K2).
-  // REQ-047, REQ-048, REQ-082, REQ-228
-  assign o_rxbyteclkhs = i_afe_byteclk;
+  // Clock activity for Block No. 2 (TCLK-MISS), in core_clk.
+  // REQ-047, REQ-102, REQ-345
+  m_ftel_dphy_rx_clk_act u_clk_act_0 (
+    .i_core_clk   (i_core_clk),
+    .i_core_rst_n (i_core_rst_n),
+    .i_act_toggle (w_act_toggle),
+    .o_clk_active (o_cl_clk_active)
+  );
 endmodule
 `default_nettype wire

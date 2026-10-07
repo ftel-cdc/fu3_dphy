@@ -2,8 +2,8 @@
 // CL_HS_TERM ends when clk_settle_cyc has elapsed and the clock is active, so cl_rxclkactivehs rises
 // once the clock runs (the CSI-2 Rx controller: the only indication that rxbyteclkhs is running); the clock
 // gate of Block No. 1 starts rxbyteclkhs within about one byte clock after it (4.3). The clock-activity
-// detection of Block No. 1 ends CL_HS_CLK one column after the clock stops, so cl_rxclkactivehs falls 50-60 ns
-// after the last clock edge (4.3, 5.1). ULPS: LP-10 then LP-00; exit Mark-1 then Stop.
+// detection of Block No. 1 ends CL_HS_CLK one column after the clock stops, so cl_rxclkactivehs falls at most
+// 60 ns after the last clock edge (4.3, 5.1). ULPS: LP-10 then LP-00; exit Mark-1 then Stop.
 { signal: [
   { name: 'clock lane (Cp/Cn)', wave: '=.=.=..=..=|...=..=.=..=.|=..|=.', data: ['LP-11', 'LP-01', 'LP-00', 'HS-0', 'HS clock', 'HS-0', 'LP-11', 'LP-10', 'LP-00', 'LP-10', 'LP-11'] },
   {                                                              node: '....J....K................H...I.' },
@@ -19,6 +19,6 @@
 ],
   edge: ['J<->K TCLK-SETTLE', 'H<->I TWAKEUP'],
   head: { text: 'Clock lane: HS clock start and stop, clock-lane ULPS' },
-  foot: { text: 'CL_HS_TERM ends once clk_settle_cyc has elapsed and the clock is active (4.4); rxbyteclkhs starts about one byte clock later; cl_rxclkactivehs falls 50-60 ns after the last clock edge (4.3)' },
+  foot: { text: 'CL_HS_TERM ends once clk_settle_cyc has elapsed and the clock is active (4.4); rxbyteclkhs starts about one byte clock later; cl_rxclkactivehs falls at most 60 ns after the last clock edge (4.3)' },
   config: { hscale: 1, arcFontSize: 12 }
 }

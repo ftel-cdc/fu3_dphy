@@ -1,6 +1,6 @@
 # ftel_dphy_rx — MIPI D-PHY Receiver High-Level Architecture Specification
 
-**DRAFT v0.13** — architecture level. Items that are not yet agreed are marked **OPEN** with the
+**DRAFT v0.14** — architecture level. Items that are not yet agreed are marked **OPEN** with the
 default assumption used by this draft; they are tracked in chapter 9.
 
 ## Revision and History
@@ -20,6 +20,7 @@ default assumption used by this draft; they are tracked in chapter 9.
 | v0.11 (draft) | 2026-10-02 | Ho Khanh Linh | Ambiguities found by the review of v0.9 resolved. A rising `forcerxmode_x` restarts initialization and no longer holds the lane, so the controller can observe Stop state (§4.2, §4.5, §4.7). `rxbyteclkhs` is the DDR clock divided by 4, line rate / 8. Block No. 3 sends Block No. 4 one signal, the sync-search start: its fall is the EoT request and it sets the active flag, so the crossings cannot arrive out of order and an aborted HS entry gives no `rxactivehs_x` (§4.1, §4.5, §4.6). New state DL_HS_WAIT: after an EoT during which the line showed LP-00 the lane waits for LP-11 (§4.5). EoT without a transition, and `errsotsynchs_x` at the end of a burst that ends before a lock (§4.6). Disabling a lane clears its Block No. 4 (§4.2, §4.9). Lane-map reset value and rule for a map that is not a permutation (§4.3). LP detection and termination-enable latencies stated per parameter, AFE budget corrected (§4.3, §5.2, Appendix B); `clk_settle_cyc` 33; `PARA_EOT_DELAY_BYTES` 36 in R2. Clock after the last burst: new open item S12 and Appendix B row TCLK-POST (§4.6) |
 | v0.12 (draft) | 2026-10-03 | Ho Khanh Linh | AFE boundary stated explicitly, as announced by the AFE team (ADR-001 option B): the AFE samples the HS bits and cuts them into 8-bit words at an arbitrary boundary; this IP finds the byte boundary from the SoT leader and completes the deserialization (§1, §1.1, §1.4, §2.1, §4.3, §4.6, §5.2, chapter 7, chapter 9, Appendix C). ADR-001 stays open for the interface details: one byte clock for all lanes, word timing and latency, clock-activity detection, termination timing, delay taps and LP glitch width. No technical change |
 | v0.13 (draft) | 2026-10-06 | Ho Khanh Linh | AFE boundary corrected, as announced by the AFE team (ADR-001 option A): the AFE contains the HS-RX, the LP-RX and the switched termination only; v0.12 had read the announcement of 2026-10-03 as option B (sampler and 1:8 deserializer in the AFE). This IP now samples the HS bits on both edges of the DDR clock, deserializes them 1:8, generates `rxbyteclkhs` through a clock gate and detects the clock activity for TCLK-MISS (Block No. 1, §4.3). The AFE interface carries one unsampled bit stream per data lane and the DDR clock (§5.2); the word latency Λ is set by Block No. 1. New design notes: why the termination stays switched by this IP, and the sampler timing, whose sign-off corners are open (§4.3, ADR-001). Clocks and crossings (§4.1), start of `rxbyteclkhs` (§4.2), deskew delay line (§4.8, ADR-004), Appendix B row TSETUP[RX] / THOLD[RX], and §1, §2, §5, §8, chapter 9 and Appendix C updated |
+| v0.14 (draft) | 2026-10-07 | Ho Khanh Linh | Errata found while designing the RTL of Block No. 1 (§4.3). A deserializer that samples on both edges has one path of half a DDR clock period: the falling-edge parallel register takes its load phase from the rising-edge strobe of the divider through one falling-edge flip-flop; v0.13 had stated that no path was shorter than one period. The margin of that path is added to the design note on the sampler timing: about 110 ps at 1500 Mb/s and none at 1792 Mb/s, at 1.35 V and 125 °C. The byte-clock divider and the load phase are held in reset while the clock gate is closed, so `rxbyteclkhs` is Low while the gate is closed and restarts with a complete pulse (§4.1, §4.2). Both clock-activity toggles run on the rising edge of the DDR clock, one changing on every edge and one on every fourth edge, independent of the divider (§4.1). The HS path registers each word in two stages, which set Λ = 2. The loss of the clock is stated as an upper bound: `cl_rxclkactivehs` falls at most 60 ns after the last clock edge; the range of 50–60 ns did not hold at the lowest rates, where the last edge is a falling edge half a period after the last toggle change, nor where a toggle aliases (§4.3, §4.4, §5.1, Appendix B). Interfaces unchanged |
 
 ## Conventions
 
@@ -293,7 +294,7 @@ Run-time programmable timing values (reset defaults; the configuration path is O
 | Clock | Source | Frequency | Used by | Notes |
 |---|---|---|---|---|
 | `core_clk` | System, free-running **[CSI]** | 200 MHz | Blocks No. 1 (LP path, clock activity), 2, 3, 6 | All LP-state, escape and timer logic. Escape reception is by oversampling (ADR-002) |
-| DDR clock `afe_cl_hs_clk` | AFE: HS-RX output of the clock lane | Line rate / 2; 750 MHz at 1500 Mb/s, 896 MHz at 1792 Mb/s | Block No. 1: samplers (both edges), deserializer, byte-clock divider, clock-activity toggle | Runs only while the clock lane is in HS; its pulses during TCLK-SETTLE are ignored (§4.3) |
+| DDR clock `afe_cl_hs_clk` | AFE: HS-RX output of the clock lane | Line rate / 2; 750 MHz at 1500 Mb/s, 896 MHz at 1792 Mb/s | Block No. 1: samplers (both edges), deserializer, byte-clock divider, clock-activity toggles | Runs only while the clock lane is in HS; its pulses during TCLK-SETTLE are ignored (§4.3) |
 | `rxbyteclkhs` | Block No. 1: DDR clock / 4 through a clock gate | Line rate / 8; 187.5 MHz at 1500 Mb/s, 224 MHz at 1792 Mb/s | Blocks No. 1 (HS path), 4, 5, 7 | Runs only while the clock lane is in CL_HS_CLK (§4.3). Forwarded to the PPI as `rxbyteclkhs` **[CSI]** C3 |
 | configuration clock | System | To be determined | Block No. 8 | Depends on ADR-005 (OPEN K3) |
 
@@ -306,8 +307,8 @@ Clock-domain crossings:
 | AFE LP-RX (asynchronous) → `core_clk` | `afe_lp_dp_x`, `afe_lp_dn_x`, `afe_cl_lp_dp`, `afe_cl_lp_dn` | `PARA_LP_SYNC_STAGES` flip-flops + `PARA_LP_FILTER_CYC` glitch filter |
 | AFE HS-RX → DDR clock | `afe_hs_bit_x` | Source-synchronous: sampled on both edges of the DDR clock, which the transmitter sends centred in the bits (D-PHY [1] ✅); hand-placed samplers within the setup and hold window (§4.3) ⚠️ |
 | DDR clock → `rxbyteclkhs` | Words of the deserializer of Block No. 1 | Synchronous: `rxbyteclkhs` is generated from the DDR clock, and each word is held for four DDR clock periods; timed by STA, no synchronizer ⚠️ |
-| DDR clock, divided DDR clock → `core_clk` | Clock-activity toggles of Block No. 1 | Level, 2-flop synchronizers; the clock is active while one toggle has changed within the last 8 `core_clk` cycles (§4.3) ⚠️ |
-| `core_clk` → DDR clock | Byte-clock enable (Block No. 2, High in CL_HS_CLK) | Reset synchronizer in the DDR clock: cleared at once when the enable falls, set on the second DDR clock edge after it rises; it enables the clock gate of `rxbyteclkhs` (§4.3) ⚠️ |
+| DDR clock → `core_clk` | Clock-activity toggles of Block No. 1 | Level, 2-flop synchronizers; the clock is active while one toggle has changed within the last 8 `core_clk` cycles (§4.3) ⚠️ |
+| `core_clk` → DDR clock | Byte-clock enable (Block No. 2, High in CL_HS_CLK) | Reset synchronizer in the DDR clock: cleared at once when the enable falls, set on the second DDR clock edge after it rises; it enables the clock gate of `rxbyteclkhs` and releases the byte-clock divider (§4.3) ⚠️ |
 | `core_clk` → `rxbyteclkhs` | Sync-search start (Block No. 3 → No. 4) | Level, 2-flop synchronizer. Block No. 4 starts the sync search on its rise and takes its fall as the EoT request, so the start, the active flag and the EoT request cannot arrive out of order ⚠️ |
 | `rxbyteclkhs` → `core_clk` | EoT done (Block No. 4 → No. 3) | Toggle synchronizer |
 | `core_clk`, `rxbyteclkhs` → configuration clock | Status events of Blocks No. 2, 3 and 4; lane FSM states | Events: toggle synchronizers into the flags and counters of Block No. 8 ⚠️. FSM states: 2-flop synchronizers; a read during a state change may be incoherent (debug use) ⚠️ |
@@ -323,7 +324,7 @@ The crossings use three cells (Figure 4-1):
   pulse in the destination clock. Two events of one kind must be at least three destination cycles
   apart; each event listed above occurs at most once per burst or per LP sequence ⚠️.
 - **Reset synchronizer.** §4.2. One more, in the DDR clock, sets the enable of the clock gate of
-  `rxbyteclkhs` (§4.3).
+  `rxbyteclkhs` and releases the byte-clock divider (§4.3).
 
 ![Figure 4-1 — synchronizer cells: level, toggle and reset](figures/ftel_dphy_rx_sync_cells.svg)
 
@@ -344,11 +345,13 @@ the byte clock runs. The clock lane is in HS before any data lane leaves Stop (T
 [1] ✅), so Block No. 4 is out of reset before its first burst ⚠️: at 80 Mb/s `rxbyteclkhs` starts at
 most about 190 ns after the first clock edge (clock-activity detection and clock gate, §4.3) and
 Block No. 4 is released two byte clocks later, before a data lane that starts its HS request at the
-minimum TCLK-PRE can enter DL_HS_RX. The DDR-clock domain (byte-clock divider and clock-activity
-toggle of Block No. 1) likewise leaves reset on the second DDR clock edge; the samplers and shift
-registers of the deserializer hold data only and have no reset ⚠️. Block No. 4 of each data lane has
-one more reset synchronizer in `rxbyteclkhs`, cleared also while the synchronized `dl_enable_x` or
-`cl_enable` is Low; it is released on the second byte-clock edge after the lane is enabled ⚠️.
+minimum TCLK-PRE can enter DL_HS_RX. The DDR-clock domain (clock-activity toggles of Block No. 1)
+likewise leaves reset on the second DDR clock edge. The byte-clock divider and the load phase of the
+deserializer are held in reset while the clock gate of `rxbyteclkhs` is closed (§4.3); the samplers,
+shift registers and parallel registers of the deserializer hold data only and have no reset ⚠️.
+Block No. 4 of each data lane has one more reset synchronizer in `rxbyteclkhs`, cleared also while
+the synchronized `dl_enable_x` or `cl_enable` is Low; it is released on the second byte-clock edge
+after the lane is enabled ⚠️.
 
 ### 4.3 AFE Adapter (Block No. 1)
 
@@ -377,28 +380,37 @@ only block that changes when the AFE changes.
     received, bit 0 received first: the word of the lane.
   - The word boundary is where the divider happens to be, not where the bytes of the burst begin;
     Block No. 4 finds the byte boundary (§4.6). The words of all lanes are cut at the same time.
-  - No path of the deserializer is shorter than one DDR clock period: each shift register works on
-    one edge, and the parallel registers hold each word for four DDR clock periods, so its transfer
-    into `rxbyteclkhs` has several DDR clock periods ⚠️.
+  - Each sampler, shift register and parallel register works on one edge of the DDR clock. The load
+    phase of the parallel registers is a strobe of the divider on the rising edge; the falling-edge
+    parallel register takes it through one flip-flop on the falling edge, half a DDR clock period
+    later. The path into that flip-flop is the only one of the deserializer shorter than one DDR
+    clock period (design note on the sampler timing) ⚠️. The parallel registers hold each word for
+    four DDR clock periods, so its transfer into `rxbyteclkhs` has several DDR clock periods ⚠️.
 - Byte clock: a divider by 4 of the DDR clock gives line rate / 8. A clock gate passes it as
   `rxbyteclkhs` only while the clock lane is in CL_HS_CLK (Block No. 2). The gate enable is cleared
   at once when the clock lane leaves CL_HS_CLK and set two DDR clock edges after it enters it (reset
   synchronizer, §4.1), so `rxbyteclkhs` starts within about one byte clock after `cl_rxclkactivehs`
-  rises ⚠️. Pulses at the HS-RX output while the clock lane starts or leaves HS never reach
-  `rxbyteclkhs`; D-PHY [1] ✅ lets the receiver ignore the clock-lane transitions during TCLK-SETTLE.
-- Clock activity, for Block No. 2: two toggle flip-flops, one toggled by the rising edges of the DDR
-  clock (line rate / 4) and one by the divided DDR clock (line rate / 16), each cross into
-  `core_clk` through a 2-flop synchronizer. The clock is active while one of them has changed within
-  the last 8 `core_clk` cycles (40 ns), and inactive otherwise ⚠️.
-  - The loss of the clock is seen 45–55 ns after its last edge, so `cl_rxclkactivehs` falls within
-    TCLK-MISS (60 ns) at every rate ⚠️.
+  rises ⚠️. While the gate enable is cleared, the divider and the load phase are held in reset:
+  `rxbyteclkhs` is Low while the gate is closed, even when the DDR clock stopped in the high half of
+  the divided clock, and its first pulse after the gate opens is complete ⚠️. Pulses at the HS-RX
+  output while the clock lane starts or leaves HS never reach `rxbyteclkhs`; D-PHY [1] ✅ lets the
+  receiver ignore the clock-lane transitions during TCLK-SETTLE.
+- Clock activity, for Block No. 2: two toggle flip-flops on the rising edge of the DDR clock, one
+  that changes on every edge (line rate / 4) and one that changes on every fourth edge (line
+  rate / 16). They run whenever the DDR clock runs, independent of the clock gate and the divider.
+  Each crosses into `core_clk` through a 2-flop synchronizer. The clock is active while one of them
+  has changed within the last 8 `core_clk` cycles (40 ns), and inactive otherwise ⚠️.
+  - The loss of the clock is seen 45–55 ns after the last toggle change that `core_clk` sees: the
+    last rising edge of the DDR clock, or up to three DDR clock periods earlier where the toggle of
+    every edge aliases. `cl_rxclkactivehs` falls one `core_clk` cycle later, at most 60 ns after the
+    last clock edge, so within TCLK-MISS (60 ns) at every rate ⚠️.
   - Two toggles are needed because `core_clk` (200 MHz) sees a toggle whose frequency is near a
     multiple of 200 MHz as almost constant: line rate / 4 is 200 MHz at 800 Mb/s and 400 MHz at
-    1600 Mb/s, where line rate / 16 is 50 and 100 MHz. At 80 Mb/s the DDR-clock toggle changes every
-    25 ns ⚠️.
-- HS path: registers the word of each lane on `rxbyteclkhs`, and inverts all its bits when the
-  polarity bit of the physical lane is set (P/N polarity inversion). Alignment is done in Block
-  No. 4.
+    1600 Mb/s, where line rate / 16 is 50 and 100 MHz. At 80 Mb/s the toggle of every edge changes
+    every 25 ns ⚠️.
+- HS path: registers the word of each lane on `rxbyteclkhs` in two stages, which set the word
+  latency Λ = 2 (§5.2), and inverts all its bits when the polarity bit of the physical lane is set
+  (P/N polarity inversion). Alignment is done in Block No. 4.
 - Lane mapping: one configuration field per logical lane selects its physical lane, for the LP
   path and the HS path alike. At reset each logical lane selects the physical lane of the same number
   and every polarity bit is 0 ⚠️. Software programs a permutation. The AFE enables of a physical lane
@@ -441,9 +453,14 @@ the HS-RX of the AFE, the wiring and the clock buffers of this IP.
   clock-to-data delay differences of the AFE and of this IP together, the duty-cycle error of the
   DDR clock included. At 1.2 V and 175 °C the aperture alone exceeds the window, so the samplers
   cannot work in that corner.
-- OPEN with physical design: the sign-off corners and the hand placement. OPEN with the AFE team:
-  the clock-to-data delay difference and the duty cycle of the DDR clock at the AFE outputs, and the
-  maximum line rate of the HS-RX.
+- The load phase of the falling-edge parallel register is the one path of half a DDR clock period
+  (deserializer above). Half a period, plus the delay of the clock inverter of the falling edge, has
+  to hold the clock-to-output delay of one flip-flop and the setup time of the next: at 1.35 V and
+  125 °C about 110 ps are left at 1500 Mb/s and none at 1792 Mb/s, before wiring. Its two
+  flip-flops are placed next to each other, with the samplers ⚠️.
+- OPEN with physical design: the sign-off corners, the hand placement, and the path of the load phase
+  at 1792 Mb/s (R2). OPEN with the AFE team: the clock-to-data delay difference and the duty cycle of
+  the DDR clock at the AFE outputs, and the maximum line rate of the HS-RX.
 
 ### 4.4 Clock Lane Control (Block No. 2)
 
@@ -483,8 +500,8 @@ Figure 4-4 shows the FSM and its settle counter.
 
 **Design note ⚠️ (TCLK-MISS, ≤ 60 ns).** At 80 Mb/s the byte clock period is 100 ns, so the loss of
 the clock cannot be detected within 60 ns from `rxbyteclkhs` alone. Block No. 1 therefore also
-watches a toggle of the DDR clock, and `cl_rxclkactivehs` falls 50–60 ns after the last clock edge
-at every rate (§4.3).
+watches toggles of the DDR clock, and `cl_rxclkactivehs` falls at most 60 ns after the last clock
+edge at every rate (§4.3).
 
 ### 4.5 Data Lane Control (Block No. 3)
 
@@ -870,8 +887,8 @@ some bursts have.
   - Errors (Figure 5-6): `errcontrol_x` and `erresc_x` are held until the next line-state change
     **[CSI]** C13.
   - Clock lane (Figure 5-7): `cl_rxclkactivehs` rises once the clock is active after TCLK-SETTLE, and
-    `rxbyteclkhs` starts within about one byte clock after it. `cl_rxclkactivehs` falls 50–60 ns
-    after the last clock edge, within TCLK-MISS (§4.3, §4.4) ⚠️.
+    `rxbyteclkhs` starts within about one byte clock after it. `cl_rxclkactivehs` falls at most
+    60 ns after the last clock edge, within TCLK-MISS (§4.3, §4.4) ⚠️.
 - Initialization (Figure 5-8): after `phy_core_rst` and the enables, each lane leaves its INIT state
   after `tinit_cyc` cycles of LP-11, and `init_done` follows (§4.7; exact semantics OPEN K6)
   **[CSI]** C14, C16.
@@ -981,7 +998,8 @@ Still OPEN with the AFE team: the maximum line rate of the HS-RX; the clock-to-d
 and the duty cycle of the DDR clock at the AFE outputs, which share the sampler window with this IP;
 the HS-RX outputs while disabled and while starting; one enable or two per lane for the HS-RX and the
 termination; termination timing; the maximum LP glitch width; a delay line for deskew (R2). OPEN with
-physical design: the sign-off corners and the hand placement of the samplers.
+physical design: the sign-off corners and the hand placement of the samplers and of the half-period
+path of the deserializer (§4.3 design note).
 
 ### ADR-002 — LP and escape reception (decided in this draft: A)
 
@@ -1182,7 +1200,7 @@ the CSI-2 controller needs
 | K5 | Register map of the CSI-2 Rx controller (PHY_CONFIG, PHY_STATUS, LANE_STATUS) | — | CSI team |
 | K6 | `phy_core_rst` polarity and synchronicity; whether it is a reset-type port under the wrapper convention of the SoC (active-low `_n` at the wrapper); exact `init_done` and `forcerxmode_x` semantics | Active High, asynchronous; wrapper port active-low with the inverter inside `m_ftel_dphy_rx_wrap`; `forcerxmode_x` restarts initialization on its rising edge (§4.2) | CSI team |
 | K8 | Longest HS burst per lane over all sensor modes and lane/rate combinations (sizes `hs_rx_timeout_cyc`) | 5802-byte line at 80 Mb/s on one lane | CSI team |
-| ADR-001 | AFE interface details: maximum line rate of the HS-RX, clock-to-data delay difference and duty cycle of the DDR clock at the AFE outputs, HS-RX outputs while disabled or starting, one or two enables per lane, termination timing, maximum LP glitch width, delay line (R2); sign-off corners and hand placement of the samplers | Boundary: option A, announced by the AFE team (the AFE has the line receivers and the termination only; this IP samples, deserializes and aligns); details as assumed in §4.3 and §5.2 | AFE team; physical design |
+| ADR-001 | AFE interface details: maximum line rate of the HS-RX, clock-to-data delay difference and duty cycle of the DDR clock at the AFE outputs, HS-RX outputs while disabled or starting, one or two enables per lane, termination timing, maximum LP glitch width, delay line (R2); sign-off corners and hand placement of the samplers and of the half-period path of the deserializer | Boundary: option A, announced by the AFE team (the AFE has the line receivers and the termination only; this IP samples, deserializes and aligns); details as assumed in §4.3 and §5.2 | AFE team; physical design |
 | ADR-004 | Deskew algorithm, tap resolution and periodic calibration (R2) | Centre of the passing window; initial calibration only; needs a delay line, which the AFE does not have (§4.8) | This IP, after ADR-001 and S4 |
 | S4 | Tx deskew behaviour (initial / periodic, exact pattern) | D-PHY v1.2 pattern [3] 🌐 | Tx side |
 | S5 | Tx timing table, in particular the maximum THS-TRAIL (sizes `PARA_EOT_DELAY_BYTES`) | Specification minimums | Tx side |
@@ -1252,7 +1270,7 @@ HS_TERM state 30–35 ns after the start of LP-00.
 | TD-TERM-EN | ≤ 35 ns + 4·UI | `afe_term_en_x` 25–30 ns after the start of LP-00; the AFE has the remaining 5–10 ns + 4·UI for its LP-RX delay and the termination switch (§4.3) ⚠️ |
 | TCLK-TERM-EN | ≤ 38 ns | `afe_cl_term_en` 25–30 ns after the start of LP-00; the AFE has the remaining 8–13 ns (§4.3) ⚠️ |
 | THS-SKIP | 40 … 55 ns + 4·UI | Bits discarded before the last-transition search (Block No. 4): `eot_skip_bytes` places the cut between 40 ns and THS-TRAIL,min before LP-11, exactly only above ~270 Mb/s (§4.6) ⚠️ |
-| TCLK-MISS | ≤ 60 ns | Clock-activity detection of Block No. 1: `cl_rxclkactivehs` falls 50–60 ns after the last DDR clock edge (§4.3) ⚠️ |
+| TCLK-MISS | ≤ 60 ns | Clock-activity detection of Block No. 1: `cl_rxclkactivehs` falls at most 60 ns after the last DDR clock edge (§4.3) ⚠️ |
 | TSETUP[RX], THOLD[RX] | Each ≥ 0.15·UI when the maximum rate is 1 Gb/s, ≥ 0.2·UI above: a setup and hold window of 0.3·UI (300 ps at 1 Gb/s) or 0.4·UI (267 ps at 1500 Mb/s) | Samplers of Block No. 1 on both edges of the DDR clock, hand-placed: the window holds their aperture and the clock-to-data delay differences of the AFE and of this IP (§4.3, OPEN ADR-001) ⚠️ |
 | TCLK-POST | ≥ 60 ns + 52·UI, transmitter | This IP needs the HS clock for `PARA_EOT_DELAY_BYTES` + Λ + 2 byte clocks after the last data lane enters LP-11: 288·UI in R1, 320·UI in R2 with Λ = 2 (§4.6, OPEN S12) ⚠️ |
 | TINIT (slave) | ≥ 100 µs | `tinit_cyc` = 20 000 |

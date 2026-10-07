@@ -13,7 +13,7 @@
 //                   sync-search start into rxbyteclkhs, sync search, EoT delay line, EoT done
 //                   back to core_clk, and the status events of the lane.
 // Parent          : m_ftel_dphy_rx
-// HAS             : draft v0.12, §4.1, §4.2, §4.6, Figures 4-8 and 4-9
+// HAS             : draft v0.14, §4.1, §4.2, §4.6, Figures 4-8 and 4-9
 // Clock domains   : byte (lane reset of Block No. 4), core (EoT done only)
 // REQ-IDs         : REQ-020, REQ-024, REQ-052, REQ-053, REQ-058, REQ-061, REQ-064, REQ-067,
 //                   REQ-150, REQ-172, REQ-181, REQ-231, REQ-232, REQ-233, REQ-234, REQ-235,

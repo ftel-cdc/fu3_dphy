@@ -14,8 +14,8 @@
 //                   other than the inverter. The configuration and status ports stand in for
 //                   Block No. 8 until the configuration path is defined (K3).
 // Parent          : SoC
-// HAS             : draft v0.12, §1.3, §4.2, §5, Table 9-1 (K3, K6)
-// Clock domains   : core, byte
+// HAS             : draft v0.14, §1.3, §4.2, §5, Table 9-1 (K3, K6)
+// Clock domains   : core, byte, ddr, ddrn
 // REQ-IDs         : REQ-001, REQ-004, REQ-005, REQ-006, REQ-007, REQ-221, REQ-302
 // OPEN            : K3, K6
 //
@@ -97,9 +97,8 @@ module m_ftel_dphy_rx_wrap
   input  logic [PARA_NUM_LANES-1:0]                        i_dphy_rx_afe_lp_dn,
   input  logic                                             i_dphy_rx_afe_cl_lp_dp,
   input  logic                                             i_dphy_rx_afe_cl_lp_dn,
-  input  logic                                             i_dphy_rx_afe_byteclk,
-  input  logic [PARA_NUM_LANES-1:0][PARA_DESER_RATIO-1:0]  i_dphy_rx_afe_hs_word,
-  input  logic                                             i_dphy_rx_afe_cl_clk_active,
+  input  logic                                             i_dphy_rx_afe_cl_hs_clk,
+  input  logic [PARA_NUM_LANES-1:0]                        i_dphy_rx_afe_hs_bit,
   output logic [PARA_NUM_LANES-1:0]                        o_dphy_rx_afe_hs_en,
   output logic [PARA_NUM_LANES-1:0]                        o_dphy_rx_afe_term_en,
   output logic                                             o_dphy_rx_afe_cl_hs_en,
@@ -192,9 +191,8 @@ module m_ftel_dphy_rx_wrap
     .i_afe_lp_dn             (i_dphy_rx_afe_lp_dn),
     .i_afe_cl_lp_dp          (i_dphy_rx_afe_cl_lp_dp),
     .i_afe_cl_lp_dn          (i_dphy_rx_afe_cl_lp_dn),
-    .i_afe_byteclk           (i_dphy_rx_afe_byteclk),
-    .i_afe_hs_word           (i_dphy_rx_afe_hs_word),
-    .i_afe_cl_clk_active     (i_dphy_rx_afe_cl_clk_active),
+    .i_afe_cl_hs_clk         (i_dphy_rx_afe_cl_hs_clk),
+    .i_afe_hs_bit            (i_dphy_rx_afe_hs_bit),
     .o_afe_hs_en             (o_dphy_rx_afe_hs_en),
     .o_afe_term_en           (o_dphy_rx_afe_term_en),
     .o_afe_cl_hs_en          (o_dphy_rx_afe_cl_hs_en),

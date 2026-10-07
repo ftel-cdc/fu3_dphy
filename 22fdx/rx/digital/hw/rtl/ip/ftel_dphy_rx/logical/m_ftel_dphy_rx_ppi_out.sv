@@ -13,7 +13,7 @@
 //                   names, forces the inactive value of every output of a disabled lane,
 //                   generates rxclkesc_x and ties the LPDT outputs. Combinational only.
 // Parent          : m_ftel_dphy_rx
-// HAS             : draft v0.12, §4.9, Figure 4-12, §5.1, Table 5-1
+// HAS             : draft v0.14, §4.9, Figure 4-12, §5.1, Table 5-1
 // Clock domains   : none (gates core and byte outputs with the core-synchronized enables)
 // REQ-IDs         : REQ-028, REQ-058, REQ-063, REQ-203, REQ-204, REQ-205, REQ-206, REQ-207,
 //                   REQ-208, REQ-209, REQ-217, REQ-236, REQ-237, REQ-240, REQ-241, REQ-245

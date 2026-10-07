@@ -15,12 +15,12 @@
 //                   (configuration path, K3) are absent: the configuration fields are inputs
 //                   and the status is exported (rtl_notes D-2).
 // Parent          : m_ftel_dphy_rx_wrap
-// HAS             : draft v0.12, §1.4, §2.2, §3, §5, Tables 2-2, 3-1, 5-1 and 5-2
-// Clock domains   : core, byte
+// HAS             : draft v0.14, §1.4, §2.2, §3, §5, Tables 2-2, 3-1, 5-1 and 5-2
+// Clock domains   : core, byte, ddr, ddrn
 // REQ-IDs         : REQ-001, REQ-002, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008, REQ-009,
 //                   REQ-011, REQ-013, REQ-014, REQ-030, REQ-031, REQ-032, REQ-033, REQ-034,
 //                   REQ-035, REQ-036, REQ-038, REQ-057, REQ-218, REQ-219, REQ-220, REQ-221,
-//                   REQ-222
+//                   REQ-222, REQ-331
 // OPEN            : K1, K3
 //
 // Evolution History:
@@ -97,14 +97,13 @@ module m_ftel_dphy_rx
   output logic [PARA_NUM_LANES-1:0]                        o_sts_erresc_tgl,
   output logic [PARA_NUM_LANES-1:0]                        o_sts_esc_timeout_tgl,
   // ---- AFE (Table 5-2), per-lane signals indexed by physical lane ----
-  // REQ-006
+  // REQ-006, REQ-331
   input  logic [PARA_NUM_LANES-1:0]                        i_afe_lp_dp,
   input  logic [PARA_NUM_LANES-1:0]                        i_afe_lp_dn,
   input  logic                                             i_afe_cl_lp_dp,
   input  logic                                             i_afe_cl_lp_dn,
-  input  logic                                             i_afe_byteclk,
-  input  logic [PARA_NUM_LANES-1:0][PARA_DESER_RATIO-1:0]  i_afe_hs_word,
-  input  logic                                             i_afe_cl_clk_active,
+  input  logic                                             i_afe_cl_hs_clk,
+  input  logic [PARA_NUM_LANES-1:0]                        i_afe_hs_bit,
   output logic [PARA_NUM_LANES-1:0]                        o_afe_hs_en,
   output logic [PARA_NUM_LANES-1:0]                        o_afe_term_en,
   output logic                                             o_afe_cl_hs_en,
@@ -122,7 +121,9 @@ module m_ftel_dphy_rx
 );
 
   logic                                            w_core_rst_n;
+  logic                                            w_ddr_rst_n;
   logic                                            w_byte_clk;
+  logic                                            w_cl_byteclk_en;
   logic [PARA_NUM_LANES-1:0]                       w_hs_rst_n;
   logic                                            w_cl_en;
   logic [PARA_NUM_LANES-1:0]                       w_dl_en;
@@ -174,6 +175,7 @@ module m_ftel_dphy_rx
     .PARA_NUM_LANES (PARA_NUM_LANES)
   ) u_timing_init_0 (
     .i_core_clk              (i_core_clk),
+    .i_ddr_clk               (i_afe_cl_hs_clk),
     .i_byte_clk              (w_byte_clk),
     .i_phy_core_rst          (i_phy_core_rst),
     .i_cl_enable             (i_cl_enable),
@@ -183,6 +185,7 @@ module m_ftel_dphy_rx
     .i_lp_state              (w_lp_state),
     .i_dl_state              (w_dl_state),
     .o_core_rst_n            (w_core_rst_n),
+    .o_ddr_rst_n             (w_ddr_rst_n),
     .o_hs_rst_n              (w_hs_rst_n),
     .o_cl_en                 (w_cl_en),
     .o_dl_en                 (w_dl_en),
@@ -211,11 +214,14 @@ module m_ftel_dphy_rx
   ) u_afe_adapter_0 (
     .i_core_clk          (i_core_clk),
     .i_core_rst_n        (w_core_rst_n),
+    .i_ddr_clk           (i_afe_cl_hs_clk),
+    .i_ddr_rst_n         (w_ddr_rst_n),
     .i_byte_clk          (w_byte_clk),
     .i_hs_en             (w_hs_en),
     .i_term_en           (w_term_en),
     .i_cl_hs_en          (w_cl_hs_en),
     .i_cl_term_en        (w_cl_term_en),
+    .i_byteclk_en        (w_cl_byteclk_en),
     .o_lp_state          (w_lp_state),
     .o_lp_sync           (w_lp_sync),
     .o_cl_lp_state       (w_cl_lp_state),
@@ -226,9 +232,7 @@ module m_ftel_dphy_rx
     .i_afe_lp_dn         (i_afe_lp_dn),
     .i_afe_cl_lp_dp      (i_afe_cl_lp_dp),
     .i_afe_cl_lp_dn      (i_afe_cl_lp_dn),
-    .i_afe_byteclk       (i_afe_byteclk),
-    .i_afe_hs_word       (i_afe_hs_word),
-    .i_afe_cl_clk_active (i_afe_cl_clk_active),
+    .i_afe_hs_bit        (i_afe_hs_bit),
     .o_afe_hs_en         (o_afe_hs_en),
     .o_afe_term_en       (o_afe_term_en),
     .o_afe_cl_hs_en      (o_afe_cl_hs_en),
@@ -255,6 +259,7 @@ module m_ftel_dphy_rx
     .o_sts_abort_tgl      (w_cl_abort_tgl),
     .o_hs_en              (w_cl_hs_en),
     .o_term_en            (w_cl_term_en),
+    .o_byteclk_en         (w_cl_byteclk_en),
     .i_cfg_clk_settle_cyc (w_cfg_clk_settle_cyc)
   );
 

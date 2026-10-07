@@ -3,15 +3,21 @@
 MIPI D-PHY receiver controller: receives one clock lane and up to four data lanes and
 presents the received data on the PHY-Protocol Interface (PPI) toward a CSI-2 receiver.
 
-> Status (2026-10-06): architecture draft — [`doc/spec.md`](doc/spec.md) is HAS **draft v0.13**
-> (open items in its chapter 9). v0.13 moves the samplers, the 1:8 deserializer, the byte clock and
-> the clock-activity detection from the AFE into Block No. 1 (ADR-001 option A, as announced by the
-> AFE team). Research, change analysis and sync-up lists are in
+> Status (2026-10-07): architecture draft — [`doc/spec.md`](doc/spec.md) is HAS **draft v0.14**
+> (open items in its chapter 9).
+> - v0.13 moves the samplers, the 1:8 deserializer, the byte clock and the clock-activity detection
+>   from the AFE into Block No. 1 (ADR-001 option A, as announced by the AFE team).
+> - v0.14 corrects four statements found while designing and simulating the RTL of Block No. 1.
+>
+> Research, change analysis and sync-up lists are in
 > [`doc/DPHY_RX_RESEARCH_PLAN.md`](doc/DPHY_RX_RESEARCH_PLAN.md); the requirement-to-RTL flow is
 > planned in [`doc/RTL_FLOW_PLAN.md`](doc/RTL_FLOW_PLAN.md).
-> **Draft RTL** of release R1 in `logical/` (2026-10-03): open items at the defaults of the HAS, each
-> tagged `// OPEN`; lint-clean (VCS, SpyGlass, `check_rtl_rules.py`), **not simulated yet**. It still
-> follows HAS v0.12 (AFE words and byte clock) and is updated to v0.13 in a separate, reviewed step.
+>
+> **Draft RTL** of release R1 in `logical/`, following HAS v0.14:
+> - Open items stay at the defaults of the HAS, each tagged `// OPEN`.
+> - Lint-clean: VCS, SpyGlass with one waiver, `check_rtl_rules.py`.
+> - Only Block No. 1 is simulated, by a directed testbench (`sim/tb_afe_adapter`, five line rates).
+>
 > Decisions and status in [`doc/rtl_notes.md`](doc/rtl_notes.md).
 
 ---
@@ -55,10 +61,10 @@ ftel_dphy_rx/
 │   ├── ftel_dphy_rx.yaml ← configuration: Table 3-1 parameters, Table 3-2 field widths and reset values
 │   └── validate_config.py ← checks the YAML against the HAS formulas, emits logical/ftel_dphy_rx_config_pkg.sv
 ├── doc/
-│   ├── spec.md           ← architecture specification (HAS), draft v0.13 (source of the docx); standalone:
+│   ├── spec.md           ← architecture specification (HAS), draft v0.14 (source of the docx); standalone:
 │   │                       cites no other file or document, the MIPI standards by name only (§1.5)
 │   ├── md2docx.py        ← spec.md → FTEL_IP_MIPI_D-PHY_RX_HAS_v<x.y>.docx in the FTEL HAS format
-│   ├── FTEL_IP_MIPI_D-PHY_RX_HAS_v0.13.docx ← HAS as a Word document (built, do not edit by hand)
+│   ├── FTEL_IP_MIPI_D-PHY_RX_HAS_v0.14.docx ← HAS as a Word document (built, do not edit by hand)
 │   ├── DPHY_RX_RESEARCH_PLAN.md ← research, change analysis, sync-up lists, plan
 │   ├── RTL_FLOW_PLAN.md  ← requirement-to-RTL flow (adapted [reference rule set] flow), stages and gates
 │   ├── rtl_rule.md       ← RTL coding rule (naming, CDC, tags); [M] rules checked by check_rtl_rules.py
@@ -68,9 +74,10 @@ ftel_dphy_rx/
 │   └── figures/          ← diagrams referenced by spec.md (drawio / WaveJSON sources + SVG/PNG)
 ├── req/                  ← requirement artifacts of the flow (structured_spec.json, rtl_scope.json, rtm.json,
 │                           conflicts_<phase>.json, flow_state.json)
-├── logical/              ← RTL (flat, 17 files: 2 packages, 15 modules) + filelist.f (compile order) /
+├── logical/              ← RTL (flat, 22 files: 2 packages, 20 modules) + filelist.f (compile order) /
 │                           filelist_sim.f / filelist_netlist.f
-├── sim/                  ← vcs_lint.sh (VCS +lint=all, 1/2/4 lanes); later testbenches, BFM, models
+├── sim/                  ← vcs_lint.sh (VCS +lint=all, 1/2/4 lanes); tb_afe_adapter/ (directed TB of
+│                           Block No. 1, run.sh); later the unit testbenches, BFM, models
 ├── lint/                 ← lint_constraint.tcl, lint_waiver.tcl (SpyGlass lint_rtl)
 ├── cdc/                  ← cdc.sgdc, cdc_waiver.sgdc (SpyGlass cdc_verify)
 ├── rdc/                  ← rdc.sgdc, rdc_waiver.sgdc (SpyGlass rdc_verify_struct)
@@ -86,12 +93,14 @@ REPO_ROOT=/home/linhhk/Documents/DPHY \
   python3 -B /home/linhhk/Documents/ip-dev/hw/utils/tool_flow/bin/run_ip_tool.py --ip dphy_rx --tool <init|lint|cdc|rdc|vcs|vcs-run>
 ```
 
-`init` (2026-09-26) and `lint` (SpyGlass `lint_rtl`, 2026-10-03: 0 Fatal / 0 Error / 0 Warning, no
-waiver) have been exercised; `cdc`, `rdc` and `vcs-run` come with M4 and M3. VCS lint of the RTL:
+`init` (2026-09-26) and `lint` (SpyGlass `lint_rtl`, 2026-10-07: 0 Fatal / 0 Error / 0 Warning, one
+waiver for the clock structure of Block No. 1, rtl_notes D-19) have been exercised; `cdc`, `rdc` and
+`vcs-run` come with M4 and M3. VCS lint of the RTL and the directed simulation of Block No. 1:
 
 ```bash
 hw/rtl/ip/ftel_dphy_rx/sim/vcs_lint.sh                    # wrapper, PARA_NUM_LANES = 1, 2, 4
 hw/rtl/ip/ftel_dphy_rx/sim/vcs_lint.sh --module <name>    # one module with the files before it
+hw/rtl/ip/ftel_dphy_rx/sim/tb_afe_adapter/run.sh          # Block No. 1 at 80, 800, 1500, 1600, 1792 Mb/s
 ```
 
 ---
@@ -101,7 +110,7 @@ hw/rtl/ip/ftel_dphy_rx/sim/vcs_lint.sh --module <name>    # one module with the 
 FX1 conventions: the IP Wrapper Guideline
 (`~/Documents/FX1_ips/Common_Info/IP_Wrapper_Guideline.pdf`, Tables 1-1 and 1-2) and the ip-dev
 project settings (`ip-dev/hw/utils/tool_flow/config/project.yaml`). The complete rule set is
-[`doc/rtl_rule.md`](doc/rtl_rule.md) (v1.1, approved 2026-10-03); the table below summarizes it.
+[`doc/rtl_rule.md`](doc/rtl_rule.md) (v1.2, 2026-10-07); the table below summarizes it.
 
 | Item | Convention |
 |---|---|
@@ -113,6 +122,7 @@ project settings (`ip-dev/hw/utils/tool_flow/config/project.yaml`). The complete
 | Ports | `i_` / `o_` (no `io_` in this IP); wrapper ports `<dir>_dphy_rx_<type>_<name>` (Guideline Table 1-2, IP token `dphy_rx`) |
 | Resets | Active-low `_n` at the wrapper; an active-high reset gets its inverter inside the wrapper |
 | Clock-domain crossing | Only through the cells `m_ftel_dphy_rx_sync` (level, port-compatible with `m_vlsi_synch`), `m_ftel_dphy_rx_tsync` (toggle) and `m_ftel_dphy_rx_rst_sync` (reset, port-compatible with `m_fpt_lib_reset_sync_rising_edge_async_reset_n`), each instance tagged `// CDC_CROSSING` |
+| Clock structure | Only in `m_ftel_dphy_rx_byte_clk` (Block No. 1, HAS §4.3): inverted DDR clock, divider by 4, clock gate, gate enable from a reset synchronizer, each tagged `// CLK_STRUCT`; the cells `m_ftel_dphy_rx_cg` and `m_ftel_dphy_rx_clk_inv` keep the ports of `m_fpt_lib_cg` and `m_fpt_lib_clk_inv`, instances `u_dont_touch_*` |
 | Traceability | `// REQ-xxx` on every always block, assign group and instance; `// OPEN <id> REQ-xxx: <default>` at the single place of a provisional REQ (`req/rtl_scope.json`, `req/rtm.json`) |
 | Files | One module per file; file name = module name |
 | File header | FTEL copyright + Evolution History block, in the form used by `ftel_intctl` |

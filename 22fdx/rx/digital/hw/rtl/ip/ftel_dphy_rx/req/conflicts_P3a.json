@@ -1,29 +1,29 @@
 {
  "phase": "P3a",
  "mode": "review",
- "at": "2026-10-03T15:10:04+07:00",
+ "at": "2026-10-07T11:05:11+07:00",
  "inputs": {
-  "spec": "a4de6ad8415cf080e1e77f1a2ef1cac40a76d995bf1fd4e5b8fd2392b0979066",
-  "structured_spec": "e880eb2ef5103562b89c19e7bce40fb032653748c0335191a446e300bc3024a0",
-  "config_pkg": "cb7e7ed7a6b0108a61dc94afc51355d2f4edb6e208a23a00c395c158d5261581",
-  "rtl_rule": "ad85792454b127329020565d916552e8fe707645180a19624483746c7658f3d7",
-  "rtl_scope": "ced805a2dc53d321ca1ae99138fd934909b6fea21010f43e59f1e5e78933a549",
-  "vcs_manifest": "6c0a2c0b611b235061ef0c57c394ffbe3709a0c85b0424abd3681f33d55a062e",
-  "spyglass_report": "dd98c823e7da6b59bc15d25d625343cce7e3e1eba0e2b787e0df3ea18f38006a"
+  "spec": "bd7e7288547119332e6ed487c82a7cd9e0ba742a82a39a070fcb4079ca834bcc",
+  "structured_spec": "1baba459f87d76ba1f7dbca75963da017376422a2d1e085cc3ac6e828b825605",
+  "config_pkg": "dc3f1030f0557857c4ada5f740d326c9550061cfa352f241d2b742f6b7d16b11",
+  "rtl_rule": "e63a677e114f847a7881fbb89f5796818ed68ac796f7e06f4b39f51cc958cac2",
+  "rtl_scope": "c76f1913ec23d58859ab93c3b4532be125a9353118cc9217c62da7fe2fbe44cb",
+  "vcs_manifest": "4ada5d7b7a3d0de0dc52a1b0f3f87f0b7ce1267eeb414eab5ed8eee4a9193757",
+  "spyglass_report": "0f8e3bd08a18f650fe8a0cfa0babeba685d04f16829febfacad19f91a35737b3"
  },
  "outputs": {
-  "rtl": "5f34b2bed6a19b5a7f0e60c09a1f6297330d53ed80d728f2fc25e1b0bc3c850c",
-  "rtm": "173922e5b95150545b8c26f6ddfed799b9cc920c4cc0c97806235bbd713a21b7"
+  "rtl": "dd2711e7307de595ee0f2a00e7d84e352c5b5e71fb8c10aaa0e9fcef7cdc30bc",
+  "rtm": "3bf0056c552dcb092e4441f2535674f705fce503165770f2fa842808156c0e35"
  },
  "conflicts": [],
  "waived": [],
  "rejected_waivers": [],
  "info": {
-  "rtl_files": 17,
-  "in_scope": 253,
-  "in_scope_traced": 253,
-  "provisional_in_scope": 39,
-  "traced_total": 256,
-  "open_tags": 24
+  "rtl_files": 22,
+  "in_scope": 281,
+  "in_scope_traced": 281,
+  "provisional_in_scope": 41,
+  "traced_total": 284,
+  "open_tags": 25
  }
 }

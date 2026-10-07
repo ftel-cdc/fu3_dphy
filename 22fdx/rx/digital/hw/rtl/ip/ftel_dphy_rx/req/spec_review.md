@@ -676,3 +676,55 @@ dùng làm enable của gate.
 
 Số REQ chờ ADR-001 là 22, trong đó 4 REQ chờ cả ADR-004. Hai REQ trong số đó chỉ chờ physical design
 (corner sign-off, đặt tay sampler), nên 20 REQ chờ team AFE. Λ (ADR-007) không còn chờ team AFE.
+
+### 7.13 Đồng bộ P1 với spec v0.14 (đính chính Block No. 1, 2026-10-07)
+
+Khi thiết kế RTL của Block No. 1 theo v0.13, có một câu của spec không cài được. Có thêm hai chỗ cài
+được nhưng chưa chắc chắn. Mô phỏng Block No. 1 tìm ra thêm một chỗ ghi sai. Spec v0.14 sửa bốn chỗ
+đó và ghi rõ thêm một chỗ. Giao diện PPI và giao diện AFE không đổi.
+- **REQ-342.** v0.13 ghi rằng không đường nào của deserializer ngắn hơn một chu kỳ DDR clock.
+  Deserializer lấy mẫu trên cả hai cạnh thì phải chuyển giữa hai cạnh ít nhất một lần, và lần chuyển
+  đó dài nửa chu kỳ. v0.14 dồn việc này vào đúng một đường: parallel register cạnh xuống lấy pha load
+  từ strobe cạnh lên, qua một flop cạnh xuống. REQ-342 giữ ID nhưng nghĩa đổi: trước cấm mọi đường
+  ngắn hơn một chu kỳ, nay cho phép đúng một đường.
+- **REQ-365 (mới): biên của đường nửa chu kỳ.** Số đọc từ thư viện 130 nm ở 1.35 V/125 °C, chưa tính
+  dây: còn khoảng 110 ps ở 1500 Mb/s và gần 0 ở 1792 Mb/s. Đây là rủi ro của R2, đã thêm vào phần
+  OPEN với physical design. Cách khác là chuyển mẫu cạnh xuống sang cạnh lên ngay sau sampler; cách
+  này bị trừ độ trễ inverter nên chỉ còn khoảng +10 ps ở 1500 Mb/s và −100 ps ở 1792 Mb/s.
+- **REQ-364 (mới): bộ chia và pha load bị giữ reset khi gate đóng.** Với bộ chia chạy tự do, DDR
+  clock có thể dừng đúng lúc clock chia đang ở mức High. Khi đó latch của ICG giữ 1 và
+  `rxbyteclkhs` treo ở mức High. Xung rác lúc HS-RX khởi động lại có thể làm bộ chia đổi trạng thái
+  dở dang và sinh một cạnh lên lẻ. Ngoài ra enable của gate có thể đổi đúng cạnh DDR mà clock chia
+  lên, gây race ở latch, kể cả trong mô phỏng RTL. Giữ reset thì `rxbyteclkhs` luôn ở Low khi gate
+  đóng, và xung đầu tiên sau khi gate mở là xung đủ. Thời điểm bắt đầu vẫn trong khoảng một byte
+  clock sau `cl_rxclkactivehs` (REQ-343), cụ thể là 3–4 chu kỳ DDR, 5 nếu flop đầu của synchronizer
+  ra muộn.
+- **Clock activity (REQ-336, REQ-345, REQ-347).** Bộ chia nay bị giữ reset ngoài CL_HS_CLK, nhưng
+  bộ phát hiện phải chạy từ trước CL_HS_CLK, nên toggle thứ hai không chạy bằng clock chia được nữa.
+  Cả hai toggle nay chạy ở cạnh lên của DDR clock: một toggle đổi mỗi cạnh, một toggle đổi mỗi 4 cạnh.
+  Tần số vẫn là line rate / 4 và line rate / 16. CDC chỉ còn một domain nguồn (Table 4-2).
+- **REQ-074.** Đường HS ghi word qua 2 tầng `rxbyteclkhs`, và chính 2 tầng này đặt Λ = 2.
+  Appendix B, giá trị YAML và con số 288·UI của S12 giữ nguyên. Mô phỏng Block No. 1 đo được Λ là
+  8.25 chu kỳ DDR, tức 2.0625 byte clock, ở cả 5 tốc độ (`sim/tb_afe_adapter`).
+- **Thời điểm mất clock (REQ-103, REQ-255, REQ-319, REQ-346): cận trên thay cho khoảng.** v0.13 ghi
+  `cl_rxclkactivehs` hạ 50–60 ns sau cạnh cuối của clock. Mô phỏng cho thấy cận dưới không đúng:
+  - Toggle chỉ đổi ở cạnh lên. Trail HS-0 kết thúc bằng một cạnh xuống, sau cạnh lên cuối nửa chu
+    kỳ. Vì vậy ở 80 Mb/s, `cl_rxclkactivehs` hạ 38.5–42.2 ns sau cạnh cuối.
+  - Ở 800 Mb/s, toggle cạnh lên bị alias, nên lần đổi cuối mà `core_clk` thấy có thể là của toggle
+    chậm, sớm hơn tối đa 3 chu kỳ DDR. Khi đó `cl_rxclkactivehs` hạ 44.7–52.8 ns sau cạnh cuối.
+
+  Yêu cầu thật là TCLK-MISS ≤ 60 ns, và RTL đạt ở mọi tốc độ: chậm nhất 54.7 ns sau cạnh lên cuối,
+  60 ns nếu flop đầu của synchronizer ra muộn. v0.14 ghi cận trên "tối đa 60 ns sau cạnh cuối" ở
+  §4.3, §4.4, §5.1, Appendix B và Figure 5-7. RTL không đổi.
+
+| Bước | Kết quả |
+|---|---|
+| `spec_inventory.py` | EXPECTED v0.14 đăng ký **trước** khi sửa spec. Chỉ đổi chữ, không bảng nào thêm hay bớt dòng, nên số đếm bằng v0.13. Selftest PASS. Số dòng phụ thuộc open item 169 → 170 |
+| `rebase_req.py` | Giữ 334/354 REQ và 3/3 finding; 20 REQ lỗi thời |
+| Chunk bổ sung `30_v14_delta.json` | 22 REQ. 20 REQ lỗi thời được neo lại bằng `prev_req_id` nên giữ ID. 2 REQ mới: REQ-364 và REQ-365 |
+| `validate_req.py` | 356 REQ · 3 finding · trích dẫn 359/359 · độ phủ 100% ở 15 nhóm · 0 lỗi · 0 cảnh báo |
+| `flow_check.py` | P1 review: 0 xung đột. `needs_human_decision` giữ ở 76; REQ chờ ADR-001 giữ ở 22. Test âm 26/28, vẫn hai FAIL baseline của P2 và P3a như §7.12; hai FAIL này hết ở bước RTL |
+| Hình | Figure 4-2: thêm flop pha load cạnh xuống và đường reset từ reset synchronizer tới bộ chia và pha load; hai toggle ghi line rate / 4 và line rate / 16; word register ghi 2 stages. Figure 5-7: chú thích ghi cận trên 60 ns. `check_figures`: 0 vi phạm, test âm 13/13 |
+| Docx v0.14 | 83 trang, XSD PASS. Script build tự kiểm: 29 hình, 24 caption bảng, 14 dòng lịch sử. Đã xem bằng mắt các trang 6, 28, 30, 33 và 64 (Figure 5-7) |
+
+Không ID nào bị retire.
