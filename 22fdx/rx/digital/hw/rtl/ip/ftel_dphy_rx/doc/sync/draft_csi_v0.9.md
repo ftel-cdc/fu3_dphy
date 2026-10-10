@@ -1,4 +1,4 @@
-# Nháp: nội dung gửi team CSI sau HAS D-PHY v0.9, v0.11, v0.13 và v0.14 (để duyệt, chưa gửi)
+# Nháp: nội dung gửi team CSI sau HAS D-PHY v0.9, v0.11, v0.13, v0.14 và v0.15 (để duyệt, chưa gửi)
 
 File nội bộ. Phần 1 dành cho người duyệt và không gửi đi. Phần 2 là bản nháp viết cho team CSI-2 Rx
 controller, theo đúng khuôn của `questions_csi_team.md`. Duyệt xong thì chép các mục được chọn vào
@@ -41,8 +41,9 @@ D-PHY Rx (Block No. 1). Tên, độ rộng và ngữ nghĩa các tín hiệu PPI
 |---|---|---|---|
 | 12 | **PPI không đổi ở v0.12 và v0.13**; `rxbyteclkhs` nay do D-PHY Rx tạo (DDR clock chia 4, qua clock gate) | **Gửi một dòng** ở phần cập nhật đầu file | Giúp team biết không cần xem lại waveform |
 | 13 | **`rxbyteclkhs` bắt đầu chạy trong khoảng một byte clock sau khi `cl_rxclkactivehs` lên.** Clock gate của Block No. 1 chỉ mở khi clock lane đã vào CL_HS_CLK. HAS-CSI Table 4-3 lại ghi `cl_rxclkactivehs` nghĩa là "rxbyteclkhs is running" | **Gửi dạng ghi chú** dưới phụ lục C5 | Controller chỉ dùng tín hiệu này để chẩn đoán (C5), nên không phải đổi gì. Tuy vậy TB hoặc assertion của team CSI có thể dựa vào ngữ nghĩa đó. Cách khác, chỉ ảnh hưởng D-PHY: chỉ nâng `cl_rxclkactivehs` khi gate đã mở. Cách này thêm một crossing ngược về `core_clk`, và tín hiệu lên muộn hơn hiện nay khoảng một byte clock cộng 10–15 ns. Khi đó không cần gửi, nhưng phải sửa thêm HAS D-PHY §4.3 và §4.4 |
-| 14 | **Rủi ro K1: chưa biết tốc độ tối đa của HS-RX.** Sơ đồ AFE tham khảo ghi 80–1000 Mb/s, trong khi HAS D-PHY R1 cần 1500 Mb/s và HAS-CSI cần trên 1500 Mb/s (1792 Mb/s). Ngoài ra sampler nay nằm trong D-PHY Rx: ở 1500 Mb/s chỉ đạt timing khi đặt tay, và chỉ ở corner 1.35 V/125 °C. HAS v0.14 thêm một điểm: deserializer có đúng một đường nửa chu kỳ DDR (pha load của nửa cạnh xuống). Ở 1.35 V/125 °C, trước khi tính dây, đường này còn khoảng 110 ps ở 1500 Mb/s và gần 0 ở 1792 Mb/s, nên 1792 Mb/s (R2) có thêm rủi ro timing. Các con số đều là ước lượng; corner sign-off chưa chốt | **Chờ** câu trả lời A7 của team AFE và corner của physical design, rồi mới gửi dưới K1 | Con số 1000 Mb/s lấy từ sơ đồ tham khảo, chưa phải thông số của team AFE, nên gửi sớm dễ gây hiểu lầm. Cách khác: gửi ngay dạng rủi ro, không kèm câu hỏi (đoạn tùy chọn ở Phần 2) |
-| 15 | **Rủi ro C4 (R2): deskew cần delay line, mà AFE không có.** Delay line bằng cell chuẩn có bước 65–180 ps tùy corner, trôi khoảng 2.5 lần so với UI 558 ps ở 1792 Mb/s | **Chờ** câu trả lời A4 của team AFE, rồi mới gửi dưới K1 | R2 (1792 Mb/s, 4K staggered HDR) phụ thuộc A4. Cách khác: gửi ngay dạng rủi ro (đoạn tùy chọn ở Phần 2) |
+| 14 | **Rủi ro K1: chưa biết tốc độ tối đa của HS-RX.** Sơ đồ AFE tham khảo ghi 80–1000 Mb/s, trong khi HAS D-PHY R1 cần 1500 Mb/s và HAS-CSI cần trên 1500 Mb/s (1792 Mb/s). Phần digital của D-PHY Rx không còn là rủi ro chính: HAS v0.15 tính timing với cell 22 nm, công nghệ đích, thay cho 130 nm. Sampler (đặt tay) còn khoảng ±95 ps ở 1792 Mb/s cho lệch clock–data của AFE và phần digital, ở corner chậm 0.72 V/125 °C. Synthesis thử ở corner chậm, trước khi tính dây, đạt timing ở 1792 Mb/s: đường nửa chu kỳ của deserializer còn khoảng 360 ps (ước lượng 130 nm trước đây là gần 0). Các con số vẫn là ước lượng trước layout; thư viện, body bias và corner sign-off chưa chốt | **Chờ** câu trả lời A7 của team AFE, rồi mới gửi dưới K1 | Con số 1000 Mb/s lấy từ sơ đồ tham khảo, chưa phải thông số của team AFE, nên gửi sớm dễ gây hiểu lầm. Cách khác: gửi ngay dạng rủi ro, không kèm câu hỏi (đoạn tùy chọn ở Phần 2) |
+| 15 | **Rủi ro C4 (R2): deskew cần delay line, mà AFE không có.** Delay line bằng cell chuẩn 22 nm có bước khoảng 15–30 ps tùy corner, trôi khoảng 2 lần, so với UI 558 ps ở 1792 Mb/s | **Chờ** câu trả lời A4 của team AFE, rồi mới gửi dưới K1 | R2 (1792 Mb/s, 4K staggered HDR) phụ thuộc A4. Cách khác: gửi ngay dạng rủi ro (đoạn tùy chọn ở Phần 2) |
+| 16 | **224 MHz không còn là rủi ro timing phía D-PHY Rx.** Phần "Vì sao cần" của K1 trong `questions_csi_team.md` ghi `rxbyteclkhs` 224 MHz là rủi ro trên GF 130 nm. Synthesis thử với cell 22 nm, corner chậm 0.72 V/125 °C, trước layout: TNS bằng 0 ở 1792 và 1500 Mb/s, đường xấu nhất của `rxbyteclkhs` còn khoảng 0.95 ns | **Gửi một dòng** cùng đoạn rủi ro K1 (Phần 2) | Sửa một nhận định đã gửi. Số trước layout nên ghi là ước lượng |
 
 **Những gì đã cập nhật trực tiếp** (theo kế hoạch đã duyệt, cũng chưa gửi):
 - v0.9:
@@ -141,17 +142,19 @@ Thêm vào cuối mục Bối cảnh:
 > nghĩa là `rxbyteclkhs` đang chạy. Với cách controller dùng nó (chẩn đoán, C5), khoảng trễ này không
 > ảnh hưởng. Nhờ xác nhận.
 
-### (Tùy chọn, nếu chọn gửi ngay mục 14–15 ở Phần 1) Ghi chú thêm vào cuối mục K1
+### (Tùy chọn, nếu chọn gửi ngay mục 14–16 ở Phần 1) Ghi chú thêm vào cuối mục K1
 
-> **Rủi ro, cập nhật v0.13.** Theo thông báo của team AFE, AFE chỉ có HS-RX, LP-RX và termination;
+> **Rủi ro, cập nhật v0.13 và v0.15.** Theo thông báo của team AFE, AFE chỉ có HS-RX, LP-RX và termination;
 > D-PHY Rx nay tự lấy mẫu và deserialize. Hai điểm có thể ảnh hưởng tốc độ lane:
 > - Tốc độ tối đa của HS-RX đang được hỏi team AFE. Một sơ đồ AFE tham khảo ghi 80–1000 Mb/s; HAS
 >   D-PHY R1 giả định 1500 Mb/s.
 > - Deskew calibration (bắt buộc trên 1.5 Gb/s, C4) cần một delay line trước sampler. AFE hiện không
->   có delay line; một delay line bằng cell chuẩn trôi khoảng 2.5 lần giữa các corner. R2 (1792 Mb/s)
->   chờ câu trả lời của team AFE.
-> - Deserializer của D-PHY Rx có một đường dài nửa chu kỳ DDR clock. Theo ước lượng, đường này gần
->   như hết biên ở 1792 Mb/s; physical design sẽ xác nhận (HAS D-PHY v0.14).
+>   có delay line; một delay line bằng cell chuẩn 22 nm trôi khoảng 2 lần giữa các corner. R2
+>   (1792 Mb/s) chờ câu trả lời của team AFE.
+> - Phần digital của D-PHY Rx đạt timing ở 1792 Mb/s trong synthesis thử với cell 22 nm, công nghệ
+>   đích (corner chậm, trước layout): đường nửa chu kỳ của deserializer còn khoảng 360 ps, và
+>   `rxbyteclkhs` 224 MHz còn khoảng 0.95 ns. Vì vậy 224 MHz không còn là rủi ro như ghi ở mục này
+>   trước đây (GF 130 nm). Physical design sẽ xác nhận sau layout (HAS D-PHY v0.15).
 >
 > Chưa có câu hỏi mới cho team CSI. Khi có câu trả lời của team AFE, chúng tôi sẽ cập nhật mục này.
 

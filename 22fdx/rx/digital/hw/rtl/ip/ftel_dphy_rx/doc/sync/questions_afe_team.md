@@ -4,8 +4,8 @@
 |---|---|
 | Gửi | Team AFE (analog front-end của D-PHY Rx: HS-RX, LP-RX, termination) |
 | Từ | Nhóm thiết kế D-PHY Rx digital (`ftel_dphy_rx`) |
-| Ngày | 2026-10-02; cập nhật 2026-10-03 và 2026-10-06 theo các thông báo của team AFE về ranh giới (A1) |
-| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.14 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`) §1, §2.1 (Figure 2-1, 2-2), §4.1, §4.3, §4.4, §4.6, §4.8, §5.2 (Figure 5-9), ADR-001, ADR-004, ADR-007, Appendix B; MIPI D-PHY v1.1 Table 14 (timing) và Table 27 (setup/hold của receiver) |
+| Ngày | 2026-10-02; cập nhật 2026-10-03 và 2026-10-06 theo các thông báo của team AFE về ranh giới (A1); 2026-10-10: số timing theo thư viện cell 22 nm (Bối cảnh, A4, A8) |
+| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.15 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`) §1, §2.1 (Figure 2-1, 2-2), §4.1, §4.3, §4.4, §4.6, §4.8, §5.2 (Figure 5-9), ADR-001, ADR-004, ADR-007, Appendix B; MIPI D-PHY v1.1 Table 14 (timing) và Table 27 (setup/hold của receiver) |
 
 ## Bối cảnh
 
@@ -44,9 +44,11 @@ Vì sao chọn A dù điểm thấp nhất:
 - **Cái giá của A** là timing của sampler. Cửa sổ setup/hold của receiver là 0.3 UI khi tốc độ tối
   đa ≤ 1 Gb/s (300 ps ở 1 Gb/s) và 0.4 UI khi trên 1 Gb/s (267 ps ở 1500 Mb/s). Cửa sổ này phải chứa
   độ mở của flip-flop lấy mẫu và mọi chênh lệch trễ giữa clock và data, từ đầu vào AFE tới sampler.
-  Clock tree tổng hợp theo flow thường không giữ được độ lệch đó qua các corner. Vì thế sampler và
-  buffer DDR clock được đặt tay sát AFE. Ước lượng ⚠️ với thư viện cell 130 nm: đạt ở 1.35 V/125 °C,
-  không đạt ở 1.2 V/175 °C. Corner sign-off chưa chốt (OPEN với physical design).
+  Clock tree tổng hợp theo flow thường dồn toàn bộ trễ của nó (45–90 ps với cell 22 nm) về một phía
+  cửa sổ. Vì thế sampler và buffer DDR clock được đặt tay sát AFE, đường clock và đường data dùng
+  cùng loại cell. Ước lượng ⚠️ với thư viện cell 22 nm: đạt ở corner chậm 0.72 V/125 °C, còn khoảng
+  ±95 ps ở 1792 Mb/s cho chênh lệch trễ clock–data của AFE và phần digital (A8). Thư viện, body bias
+  và corner sign-off chưa chốt (OPEN với physical design).
 
 **Vì sao termination vẫn do phần digital bật.** Team AFE cho biết AFE có một mạch đơn giản phát
 hiện lane ở LP hay HS để bật termination. Nếu mạch đó chỉ dựa vào LP-00 thì sẽ bật sai:
@@ -180,9 +182,9 @@ theo D-PHY v1.2) cần một delay line trước sampler của mỗi data lane.
    - giao diện điều khiển thế nào: bus tĩnh, và clock domain của bus? Đổi tap khi đang nhận dữ liệu
      thì có glitch không?
    - delay line nằm trên đường data, trên đường clock, hay cả hai?
-2. Nếu không: delay line phải làm bằng cell chuẩn trong phần digital. Mỗi bước là một buffer, 65–180
-   ps tùy corner, so với UI 558 ps ở 1792 Mb/s. Dải chỉnh và độ phân giải vì thế trôi khoảng 2.5 lần
-   giữa các corner ⚠️ (HAS §4.8). Team có ý kiến không?
+2. Nếu không: delay line phải làm bằng cell chuẩn trong phần digital. Mỗi bước là một buffer, khoảng
+   15–30 ps tùy corner với cell 22 nm, so với UI 558 ps ở 1792 Mb/s. Dải chỉnh và độ phân giải vì thế
+   trôi khoảng 2 lần giữa các corner ⚠️ (HAS §4.8). Team có ý kiến không?
 
 **Vì sao cần.**
 - Phần digital nhận deskew burst rồi chọn tap nằm giữa cửa sổ bắt đúng (ADR-004).
@@ -256,11 +258,11 @@ dưới 1 ns ⚠️.
 3. Đầu ra HS-RX nằm ở đâu trên die? Sampler sẽ được đặt tay ngay cạnh đó.
 
 **Vì sao cần.** Cửa sổ setup/hold (A7) phải chứa độ mở của sampler và mọi chênh lệch trễ clock–data,
-từ đầu vào AFE tới sampler. Ước lượng của nhóm digital, với thư viện 130 nm và sampler đặt tay ⚠️:
-- Ở 1.35 V/125 °C còn khoảng ±90 ps ở 1500 Mb/s và ±110 ps ở 1 Gb/s cho AFE và phần digital cộng
-  lại, kể cả lỗi duty cycle.
-- Ở 1.2 V/175 °C, riêng độ mở của flip-flop (khoảng 310 ps) đã vượt cửa sổ.
-- Corner sign-off chưa chốt. Câu này đang hỏi physical design.
+từ đầu vào AFE tới sampler. Ước lượng của nhóm digital, với thư viện cell 22 nm và sampler đặt tay ⚠️:
+- Ở corner chậm (0.72 V, 125 °C) còn khoảng ±115 ps ở 1500 Mb/s, ±95 ps ở 1792 Mb/s và ±130 ps ở
+  1 Gb/s cho AFE và phần digital cộng lại, kể cả lỗi duty cycle.
+- Độ mở của flip-flop lấy mẫu khoảng 20 ps ở corner nhanh (0.88 V, −40 °C) và 35 ps ở corner chậm.
+- Thư viện, body bias và corner sign-off chưa chốt. Câu này đang hỏi physical design.
 
 **Giả định hiện tại.** Chưa chia ngân sách giữa AFE và phần digital: HAS chỉ ghi tổng. Việc chia sẽ
 chốt cùng team AFE và physical design, sau khi có số của AFE.

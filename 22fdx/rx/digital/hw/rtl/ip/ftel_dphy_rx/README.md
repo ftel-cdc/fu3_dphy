@@ -3,17 +3,19 @@
 MIPI D-PHY receiver controller: receives one clock lane and up to four data lanes and
 presents the received data on the PHY-Protocol Interface (PPI) toward a CSI-2 receiver.
 
-> Status (2026-10-10): architecture draft — [`doc/spec.md`](doc/spec.md) is HAS **draft v0.14**
+> Status (2026-10-10): architecture draft — [`doc/spec.md`](doc/spec.md) is HAS **draft v0.15**
 > (open items in its chapter 9).
 > - v0.13 moves the samplers, the 1:8 deserializer, the byte clock and the clock-activity detection
 >   from the AFE into Block No. 1 (ADR-001 option A, as announced by the AFE team).
 > - v0.14 corrects four statements found while designing and simulating the RTL of Block No. 1.
+> - v0.15 moves the timing figures from 130 nm to 22 nm cells, the node of the target; no behaviour
+>   or interface changes.
 >
 > Research, change analysis and sync-up lists are in
 > [`doc/DPHY_RX_RESEARCH_PLAN.md`](doc/DPHY_RX_RESEARCH_PLAN.md); the requirement-to-RTL flow is
 > planned in [`doc/RTL_FLOW_PLAN.md`](doc/RTL_FLOW_PLAN.md).
 >
-> **Draft RTL** of release R1 in `logical/`, following HAS v0.14:
+> **Draft RTL** of release R1 in `logical/`, following HAS v0.14 (v0.15 changes no behaviour):
 > - Open items stay at the defaults of the HAS, each tagged `// OPEN`.
 > - Lint-clean: VCS, SpyGlass with one waiver, `check_rtl_rules.py`.
 > - Only Block No. 1 is simulated, by a directed testbench (`sim/tb_afe_adapter`, five line rates).
@@ -63,10 +65,10 @@ ftel_dphy_rx/
 │   ├── ftel_dphy_rx.yaml ← configuration: Table 3-1 parameters, Table 3-2 field widths and reset values
 │   └── validate_config.py ← checks the YAML against the HAS formulas, emits logical/ftel_dphy_rx_config_pkg.sv
 ├── doc/
-│   ├── spec.md           ← architecture specification (HAS), draft v0.14 (source of the docx); standalone:
+│   ├── spec.md           ← architecture specification (HAS), draft v0.15 (source of the docx); standalone:
 │   │                       cites no other file or document, the MIPI standards by name only (§1.5)
 │   ├── md2docx.py        ← spec.md → FTEL_IP_MIPI_D-PHY_RX_HAS_v<x.y>.docx in the FTEL HAS format
-│   ├── FTEL_IP_MIPI_D-PHY_RX_HAS_v0.14.docx ← HAS as a Word document (built, do not edit by hand)
+│   ├── FTEL_IP_MIPI_D-PHY_RX_HAS_v0.15.docx ← HAS as a Word document (built, do not edit by hand)
 │   ├── DPHY_RX_RESEARCH_PLAN.md ← research, change analysis, sync-up lists, plan
 │   ├── RTL_FLOW_PLAN.md  ← requirement-to-RTL flow (adapted [reference rule set] flow), stages and gates
 │   ├── rtl_rule.md       ← RTL coding rule (naming, CDC, tags); [M] rules checked by check_rtl_rules.py

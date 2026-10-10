@@ -1,6 +1,6 @@
 # ftel_dphy_rx — MIPI D-PHY Receiver High-Level Architecture Specification
 
-**DRAFT v0.14** — architecture level. Items that are not yet agreed are marked **OPEN** with the
+**DRAFT v0.15** — architecture level. Items that are not yet agreed are marked **OPEN** with the
 default assumption used by this draft; they are tracked in chapter 9.
 
 ## Revision and History
@@ -21,6 +21,7 @@ default assumption used by this draft; they are tracked in chapter 9.
 | v0.12 (draft) | 2026-10-03 | Ho Khanh Linh | AFE boundary stated explicitly, as announced by the AFE team (ADR-001 option B): the AFE samples the HS bits and cuts them into 8-bit words at an arbitrary boundary; this IP finds the byte boundary from the SoT leader and completes the deserialization (§1, §1.1, §1.4, §2.1, §4.3, §4.6, §5.2, chapter 7, chapter 9, Appendix C). ADR-001 stays open for the interface details: one byte clock for all lanes, word timing and latency, clock-activity detection, termination timing, delay taps and LP glitch width. No technical change |
 | v0.13 (draft) | 2026-10-06 | Ho Khanh Linh | AFE boundary corrected, as announced by the AFE team (ADR-001 option A): the AFE contains the HS-RX, the LP-RX and the switched termination only; v0.12 had read the announcement of 2026-10-03 as option B (sampler and 1:8 deserializer in the AFE). This IP now samples the HS bits on both edges of the DDR clock, deserializes them 1:8, generates `rxbyteclkhs` through a clock gate and detects the clock activity for TCLK-MISS (Block No. 1, §4.3). The AFE interface carries one unsampled bit stream per data lane and the DDR clock (§5.2); the word latency Λ is set by Block No. 1. New design notes: why the termination stays switched by this IP, and the sampler timing, whose sign-off corners are open (§4.3, ADR-001). Clocks and crossings (§4.1), start of `rxbyteclkhs` (§4.2), deskew delay line (§4.8, ADR-004), Appendix B row TSETUP[RX] / THOLD[RX], and §1, §2, §5, §8, chapter 9 and Appendix C updated |
 | v0.14 (draft) | 2026-10-07 | Ho Khanh Linh | Errata found while designing the RTL of Block No. 1 (§4.3). A deserializer that samples on both edges has one path of half a DDR clock period: the falling-edge parallel register takes its load phase from the rising-edge strobe of the divider through one falling-edge flip-flop; v0.13 had stated that no path was shorter than one period. The margin of that path is added to the design note on the sampler timing: about 110 ps at 1500 Mb/s and none at 1792 Mb/s, at 1.35 V and 125 °C. The byte-clock divider and the load phase are held in reset while the clock gate is closed, so `rxbyteclkhs` is Low while the gate is closed and restarts with a complete pulse (§4.1, §4.2). Both clock-activity toggles run on the rising edge of the DDR clock, one changing on every edge and one on every fourth edge, independent of the divider (§4.1). The HS path registers each word in two stages, which set Λ = 2. The loss of the clock is stated as an upper bound: `cl_rxclkactivehs` falls at most 60 ns after the last clock edge; the range of 50–60 ns did not hold at the lowest rates, where the last edge is a falling edge half a period after the last toggle change, nor where a toggle aliases (§4.3, §4.4, §5.1, Appendix B). Interfaces unchanged |
+| v0.15 (draft) | 2026-10-10 | Ho Khanh Linh | Timing figures moved from the 130 nm cells assumed until v0.14 to 22 nm cells, the node of the target: sampler aperture, clock buffers, the window left for the clock-to-data delay differences and the half-period path, now from a trial synthesis (§4.3 design note); the steps of a standard-cell delay line (§4.8); the basis of the timing score of ADR-001. The 1.2 V, 175 °C corner of the 130 nm cells no longer applies, and the half-period path at 1792 Mb/s is no longer an open risk. The samplers stay hand-placed. The cell library, its body bias and the sign-off corners are open items (chapter 9). No behaviour, interface or figure changes |
 
 ## Conventions
 
@@ -439,28 +440,29 @@ tells them apart; a termination switched on LP-00 alone would load the lines dur
 
 **Design note ⚠️ (sampler timing, OPEN ADR-001).** D-PHY [1] ✅ gives the receiver a setup and hold
 window of 0.3·UI when its maximum rate is 1 Gb/s and of 0.4·UI above: 300 ps at 1 Gb/s, 267 ps at
-1500 Mb/s (Appendix B). The window has to hold the aperture of the sampling flip-flop (setup plus
-hold) and every difference between the clock and data delays from the AFE inputs to the samplers:
-the HS-RX of the AFE, the wiring and the clock buffers of this IP.
-- With the 130 nm standard cells assumed for this IP, the aperture of a D flip-flop is about 40 ps in
-  the fast corner and 85 ps at 1.35 V and 125 °C, but about 310 ps at 1.2 V and 175 °C; one clock
-  buffer takes 65 ps in the fast corner and 160 ps at 1.35 V and 125 °C ⚠️.
-- A clock tree built by the usual flow therefore does not meet the window: its delay alone varies by
-  about as much as the window over the corners. The samplers, the buffers of the DDR clock that drive
-  them and the data inputs to them are placed by hand next to the AFE, with the clock and data paths
-  built from the same cells so that their delays track; the rest of the IP uses the usual flow ⚠️.
-- At 1.35 V and 125 °C this leaves about ±90 ps at 1500 Mb/s and ±110 ps at 1 Gb/s for the
-  clock-to-data delay differences of the AFE and of this IP together, the duty-cycle error of the
-  DDR clock included. At 1.2 V and 175 °C the aperture alone exceeds the window, so the samplers
-  cannot work in that corner.
+1500 Mb/s, 223 ps at 1792 Mb/s (Appendix B). The window has to hold the aperture of the sampling
+flip-flop (setup plus hold) and every difference between the clock and data delays from the AFE
+inputs to the samplers: the HS-RX of the AFE, the wiring and the clock buffers of this IP.
+- With the 22 nm standard cells assumed for this IP (core supply 0.8 V), the aperture of a D
+  flip-flop is about 20 ps in the fast corner (0.88 V, −40 °C) and 35 ps in the slow corner (0.72 V,
+  125 °C); one clock buffer takes about 15–20 ps in the fast corner and 25–30 ps in the slow one ⚠️.
+- A clock tree of three buffer levels built by the usual flow varies by about 30 ps over the
+  corners, and its whole delay, 45–90 ps, falls on one side of the window unless the data inputs are
+  delayed to match. The samplers, the buffers of the DDR clock that drive them and the data inputs to
+  them are therefore placed by hand next to the AFE, with the clock and data paths built from the
+  same cells so that their delays track; the rest of the IP uses the usual flow ⚠️.
+- In the slow corner this leaves about ±115 ps at 1500 Mb/s, ±95 ps at 1792 Mb/s and ±130 ps at
+  1 Gb/s for the clock-to-data delay differences of the AFE and of this IP together, the duty-cycle
+  error of the DDR clock included.
 - The load phase of the falling-edge parallel register is the one path of half a DDR clock period
   (deserializer above). Half a period, plus the delay of the clock inverter of the falling edge, has
-  to hold the clock-to-output delay of one flip-flop and the setup time of the next: at 1.35 V and
-  125 °C about 110 ps are left at 1500 Mb/s and none at 1792 Mb/s, before wiring. Its two
-  flip-flops are placed next to each other, with the samplers ⚠️.
-- OPEN with physical design: the sign-off corners, the hand placement, and the path of the load phase
-  at 1792 Mb/s (R2). OPEN with the AFE team: the clock-to-data delay difference and the duty cycle of
-  the DDR clock at the AFE outputs, and the maximum line rate of the HS-RX.
+  to hold the clock-to-output delay of one flip-flop and the setup time of the next. A trial
+  synthesis in the slow corner, before wiring and with ideal clocks, leaves about 470 ps at
+  1500 Mb/s and 360 ps at 1792 Mb/s. Its two flip-flops are placed next to each other, with the
+  samplers ⚠️.
+- OPEN with physical design: the cell library and its body bias, the sign-off corners and the hand
+  placement. OPEN with the AFE team: the clock-to-data delay difference and the duty cycle of the
+  DDR clock at the AFE outputs, and the maximum line rate of the HS-RX.
 
 ### 4.4 Clock Lane Control (Block No. 2)
 
@@ -771,8 +773,8 @@ about 18 byte clocks after LP-11 at 1500 Mb/s and 7 at 80 Mb/s, while Bn reaches
   of the samplers of its lane, and selects the tap in the centre of the passing window.
 - The algorithm, the tap resolution and the use of periodic calibration are decided in R2
   (ADR-004). The AFE has no delay line (ADR-001). One built from standard cells would have steps of
-  one buffer, 65–180 ps depending on the corner, against a UI of 558 ps at 1792 Mb/s, so its range
-  and resolution drift by a factor of about 2.5 ⚠️.
+  one buffer, about 15–30 ps depending on the corner, against a UI of 558 ps at 1792 Mb/s, so its
+  range and resolution drift by a factor of about 2 ⚠️.
 - RxErrorCalHS is not required **[CSI]** C9.
 - With `PARA_DESKEW_EN` = 0 the block is absent and the taps are held at their reset value.
 - Figure 4-11 shows the boundary of the block; its content stays OPEN until ADR-004.
@@ -990,16 +992,18 @@ the samplers, the 1:8 deserializer, the byte clock and the clock-activity detect
 Basis of the timing score of A: when the maximum rate is above 1 Gb/s, the receiver setup and hold
 window is 0.4 UI, ±133 ps at 1.5 Gb/s (D-PHY [1] ✅). The window must hold the sampler aperture and
 the difference between the clock and data delays inside the chip, which a synthesized clock tree
-cannot guarantee across process corners. The samplers are therefore a hand-placed structure of this
-IP next to the AFE. It fits the window at 1.35 V and 125 °C but not at 1.2 V and 175 °C (§4.3 design
-note).
+does not keep centred across process corners. The samplers are therefore a hand-placed structure of
+this IP next to the AFE. The score was given with 130 nm cells, with which the structure fits the
+window at 1.35 V and 125 °C but not at 1.2 V and 175 °C. With the 22 nm cells assumed since v0.15 it
+fits in the slow corner with about ±95 ps left at 1792 Mb/s (§4.3 design note): the timing risk of A
+is lower, and the choice is unchanged.
 
 Still OPEN with the AFE team: the maximum line rate of the HS-RX; the clock-to-data delay difference
 and the duty cycle of the DDR clock at the AFE outputs, which share the sampler window with this IP;
 the HS-RX outputs while disabled and while starting; one enable or two per lane for the HS-RX and the
 termination; termination timing; the maximum LP glitch width; a delay line for deskew (R2). OPEN with
-physical design: the sign-off corners and the hand placement of the samplers and of the half-period
-path of the deserializer (§4.3 design note).
+physical design: the cell library and its body bias, the sign-off corners, and the hand placement of
+the samplers and of the half-period path of the deserializer (§4.3 design note).
 
 ### ADR-002 — LP and escape reception (decided in this draft: A)
 
@@ -1200,7 +1204,7 @@ the CSI-2 controller needs
 | K5 | Register map of the CSI-2 Rx controller (PHY_CONFIG, PHY_STATUS, LANE_STATUS) | — | CSI team |
 | K6 | `phy_core_rst` polarity and synchronicity; whether it is a reset-type port under the wrapper convention of the SoC (active-low `_n` at the wrapper); exact `init_done` and `forcerxmode_x` semantics | Active High, asynchronous; wrapper port active-low with the inverter inside `m_ftel_dphy_rx_wrap`; `forcerxmode_x` restarts initialization on its rising edge (§4.2) | CSI team |
 | K8 | Longest HS burst per lane over all sensor modes and lane/rate combinations (sizes `hs_rx_timeout_cyc`) | 5802-byte line at 80 Mb/s on one lane | CSI team |
-| ADR-001 | AFE interface details: maximum line rate of the HS-RX, clock-to-data delay difference and duty cycle of the DDR clock at the AFE outputs, HS-RX outputs while disabled or starting, one or two enables per lane, termination timing, maximum LP glitch width, delay line (R2); sign-off corners and hand placement of the samplers and of the half-period path of the deserializer | Boundary: option A, announced by the AFE team (the AFE has the line receivers and the termination only; this IP samples, deserializes and aligns); details as assumed in §4.3 and §5.2 | AFE team; physical design |
+| ADR-001 | AFE interface details: maximum line rate of the HS-RX, clock-to-data delay difference and duty cycle of the DDR clock at the AFE outputs, HS-RX outputs while disabled or starting, one or two enables per lane, termination timing, maximum LP glitch width, delay line (R2); the cell library and its body bias, the sign-off corners, and the hand placement of the samplers and of the half-period path of the deserializer | Boundary: option A, announced by the AFE team (the AFE has the line receivers and the termination only; this IP samples, deserializes and aligns); details as assumed in §4.3 and §5.2 | AFE team; physical design |
 | ADR-004 | Deskew algorithm, tap resolution and periodic calibration (R2) | Centre of the passing window; initial calibration only; needs a delay line, which the AFE does not have (§4.8) | This IP, after ADR-001 and S4 |
 | S4 | Tx deskew behaviour (initial / periodic, exact pattern) | D-PHY v1.2 pattern [3] 🌐 | Tx side |
 | S5 | Tx timing table, in particular the maximum THS-TRAIL (sizes `PARA_EOT_DELAY_BYTES`) | Specification minimums | Tx side |

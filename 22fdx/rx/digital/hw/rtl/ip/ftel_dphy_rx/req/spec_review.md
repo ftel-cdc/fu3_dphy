@@ -728,3 +728,40 @@ Khi thiết kế RTL của Block No. 1 theo v0.13, có một câu của spec kh�
 | Docx v0.14 | 83 trang, XSD PASS. Script build tự kiểm: 29 hình, 24 caption bảng, 14 dòng lịch sử. Đã xem bằng mắt các trang 6, 28, 30, 33 và 64 (Figure 5-7) |
 
 Không ID nào bị retire.
+
+### 7.14 Đồng bộ P1 với spec v0.15 (số timing theo cell 22 nm, 2026-10-10)
+
+Synthesis thử ngày 2026-10-10 chạy trên thư viện 22 nm (`syn/`, `rtl_notes` §6). Công nghệ đích của
+D-PHY là 22 nm (thư viện có trên máy), trong khi HAS
+tới v0.14 tính mọi số timing bằng cell 130 nm. Spec v0.15 chuyển các số đó sang 22 nm theo plan người
+dùng duyệt cùng ngày, và giữ sampler đặt tay. Ranh giới AFE, chức năng, giao diện và hình không đổi.
+- **Sampler (REQ-349 đến REQ-352).** Số đọc từ `.lib` của thư viện (transition 7–40 ps, tải khoảng
+  10 fF): aperture của DFF khoảng 20 ps ở corner nhanh (0.88 V, −40 °C) và 35 ps ở corner chậm
+  (0.72 V, 125 °C); một clock buffer 15–20 ps và 25–30 ps. Ở corner chậm, cửa sổ còn khoảng ±115 ps ở
+  1500 Mb/s, ±95 ps ở 1792 Mb/s và ±130 ps ở 1 Gb/s cho lệch clock–data (130 nm: ±90 ps và ±110 ps).
+  Corner 1.2 V/175 °C của 130 nm BCD không còn áp dụng.
+- **Đặt tay (REQ-351, REQ-326).** Câu "cây clock theo flow thường không đạt cửa sổ" không còn đúng
+  nguyên văn ở 22 nm: cây 3 tầng chỉ trôi khoảng 30 ps qua các corner. Nhưng toàn bộ trễ của cây,
+  45–90 ps, rơi về một phía cửa sổ nếu đường data không được làm trễ theo. Theo lựa chọn của người
+  dùng, sampler vẫn đặt tay, và HAS ghi lý do mới. REQ-326 ghi thêm rằng điểm timing của ADR-001 được
+  chấm với cell 130 nm; với 22 nm rủi ro thấp hơn, lựa chọn A không đổi.
+- **Đường nửa chu kỳ (REQ-365).** Số ước lượng 130 nm (khoảng 110 ps ở 1500 Mb/s, gần 0 ở 1792 Mb/s)
+  thay bằng số synthesis thử ở corner chậm, chưa tính dây, clock lý tưởng: khoảng 470 ps và 360 ps.
+  Đường này ra khỏi danh sách OPEN của R2.
+- **Delay line bằng cell chuẩn (REQ-354).** Bước khoảng 15–30 ps thay cho 65–180 ps; trôi khoảng 2 lần
+  thay cho 2.5 lần.
+- **OPEN (REQ-353, REQ-269, REQ-304).** Thư viện cell và body bias thêm vào phần OPEN với physical
+  design, cạnh corner sign-off và đặt tay. REQ-200 chỉ đổi số dòng.
+
+| Bước | Kết quả |
+|---|---|
+| `spec_inventory.py` | EXPECTED v0.15 đăng ký **trước** khi sửa spec. Chỉ đổi chữ, không bảng nào thêm hay bớt dòng, nên số đếm bằng v0.14. Selftest PASS. Số dòng phụ thuộc open item 170 → 171 |
+| `rebase_req.py` | Giữ 345/356 REQ và 3/3 finding; 11 REQ lỗi thời. Lần thử đầu (10 REQ lỗi thời) cất ở `req/_work/P1_v15_try1/`: khi xem docx thấy đoạn "Still OPEN" của ADR-001 chưa có thư viện và body bias, nên sửa thêm rồi rebase lại từ v0.14 |
+| Chunk bổ sung `31_v15_delta.json` | 11 REQ, cả 11 neo lại bằng `prev_req_id` nên giữ ID; không REQ mới |
+| `validate_req.py` | 356 REQ · 3 finding · trích dẫn 359/359 · độ phủ 100% ở 15 nhóm · 0 lỗi · 0 cảnh báo |
+| `flow_check.py` | P1 review: 0 xung đột, `needs_human_decision` giữ ở 76. P2: config package sinh lại (chỉ header HAS v0.15), 0 xung đột. P3a: package đổi nên VCS lint (1/2/4 lane 0/0/0) và SpyGlass `lint_rtl` (0/0/0, một waiver D-19) chạy lại, 0 xung đột, 281/281 REQ trong phạm vi có tag. Test âm 28/28. `check_rtl_rules`: 0 vi phạm trên 22 file |
+| Hình | Không đổi; `check_figures`: 0 vi phạm |
+| Docx v0.15 | 83 trang, XSD PASS. Script build tự kiểm: 29 hình, 24 caption bảng, 15 dòng lịch sử. Đã xem bằng mắt các trang 7, 33, 34, 54, 70 và 77 |
+
+Không ID nào bị retire. RTL không đổi; 21 file RTL vẫn ghi HAS v0.14 ở header, vì v0.15 không đổi
+hành vi.

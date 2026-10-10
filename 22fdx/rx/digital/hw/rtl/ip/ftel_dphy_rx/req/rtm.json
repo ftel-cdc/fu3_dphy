@@ -1,10 +1,10 @@
 {
  "ip": "ftel_dphy_rx",
  "generated_by": "flow_check.py --phase P3a",
- "spec_sha256": "bd7e7288547119332e6ed487c82a7cd9e0ba742a82a39a070fcb4079ca834bcc",
- "structured_spec_sha256": "1baba459f87d76ba1f7dbca75963da017376422a2d1e085cc3ac6e828b825605",
+ "spec_sha256": "6489b6da4b71f094b1e9ba1076716ae9b96da99db4d0ae3bdf20027b5df174b8",
+ "structured_spec_sha256": "186a6f7032a60d43d18fa57fe8f6492a1f3cb3d9d77481dc52f5e866ce41216f",
  "rtl": {
-  "logical/ftel_dphy_rx_config_pkg.sv": "dc3f1030f0557857c4ada5f740d326c9550061cfa352f241d2b742f6b7d16b11",
+  "logical/ftel_dphy_rx_config_pkg.sv": "68205a275bf6f309d449b9cea8697d566e3791e1f426455474275c27393ecb00",
   "logical/ftel_dphy_rx_pkg.sv": "f728a8def80c92f27a5cfcd7b38ee2c0438f3b69f6d2de1c3f30fc1fe51599de",
   "logical/m_ftel_dphy_rx.sv": "ee7b9e0f2ff09e1eee9e9ebfcd92f2c12310b2deba221dbc966dd31afa3a2ef5",
   "logical/m_ftel_dphy_rx_afe_adapter.sv": "16e8deff5bc306a19a8f7446bb4480811d5f675230e12b183b5e47b30fabf02e",

@@ -1,6 +1,6 @@
 # ftel_dphy_rx — RTL Design Notes (HAS ↔ RTL bridge and decisions)
 
-> Companion to `spec.md` (the RTL follows HAS draft v0.14) and `rtl_rule.md` (v1.2). It records which HAS section each RTL block implements and why each RTL-level decision was
+> Companion to `spec.md` (the RTL follows HAS draft v0.14; v0.15 changes timing figures only) and `rtl_rule.md` (v1.2). It records which HAS section each RTL block implements and why each RTL-level decision was
 > made, so a reviewer can trace the RTL back to the HAS and a later change stays in one place. Same
 > role as `ftel_intctl/doc/rtl_notes.md`.
 > Markers: ✅ checked by a tool · ⚠️ assumption · 🔍 to confirm. Each decision states its confidence.
@@ -39,6 +39,11 @@
   in the slow corners before layout (§6). Two constraints listed in §6 before are corrected: the
   hold multiplier of the DDR → byte transfer is 3, not 2, and the byte clock is defined at the clock
   gate, not at the divider flip-flop.
+- **HAS v0.15, 2026-10-10.** The timing figures of the HAS move from the 130 nm cells to 22 nm cells,
+  the node of the target: sampler window, half-period path (from the trial synthesis of §6),
+  standard-cell delay line. The samplers stay hand-placed. No behaviour change: the RTL is unchanged
+  and its headers keep HAS v0.14; only the configuration package was regenerated (header v0.15), and
+  both lints were rerun (§7).
 - **Checked:** VCS `+lint=all`, SpyGlass `lint_rtl` (one waiver, D-19), `check_rtl_rules.py`,
   `flow_check.py --phase P1|P2|P3a` (§7). **Simulated: Block No. 1 only**, with a directed TB at
   five line rates (§8). The rest of the IP is not simulated: lint-clean does not mean functionally
@@ -188,10 +193,10 @@ the falling-edge one takes that strobe through one flip-flop on the inverted DDR
 path shorter than one DDR period (HAS v0.14 REQ-342, REQ-365). The word interleaves the halves,
 bit 0 from the rising edge.
 - Margin of the arc: half a period, plus the clock-inverter delay, minus clock-to-output and setup.
-  From the 130 nm library at 1.35 V/125 °C, before wiring, this leaves about +110 ps at 1500 Mb/s
-  and about 0 at 1792 Mb/s.
+  From the 130 nm library assumed up to HAS v0.14, at 1.35 V/125 °C, before wiring, this leaves
+  about +110 ps at 1500 Mb/s and about 0 at 1792 Mb/s.
 - Trial synthesis on [target library], SSG 0.72 V/125 °C, ideal clocks (§6): +361 ps at 1792 Mb/s and
-  +470 ps at 1500 Mb/s. ✅
+  +470 ps at 1500 Mb/s. ✅ These are the figures of HAS v0.15.
 - Rejected alternative: retime the falling-edge sample to the rising edge right after the sampler.
   The inverter delay then counts against the arc: about +10 ps at 1500 Mb/s and −100 ps at 1792 Mb/s.
 
@@ -396,8 +401,9 @@ One line per correction round (rule 1 of `/dphy_rtl_gen`: at most 3 rounds per m
 | `m_ftel_dphy_rx_*` (HAS v0.14, rtl_rule 1.2) | 1 | VCS per module (`_cg`, `_clk_inv`, `_clk_act`, `_byte_clk`, `_hs_deser`, `_afe_adapter`, `_timing_init`, `_cl_ctrl`): 0 / 0 / 0 at the first round | — |
 | whole IP (SpyGlass, HAS v0.14) | 1 | STARC05-1.3.1.3 (AsyncResetOtherUse): the gate-enable reset synchronizer output is also the enable of the clock gate | intended structure of rtl_rule K2 (4), waived with D-19 in `lint/lint_waiver.tcl` (first attempt: `-comment {...}` is an SGDC syntax error, the comment must be a quoted string) |
 | whole IP (`flow_check` P3a, HAS v0.14) | 1 | CF-COVER REQ-083 (termination enable from the FSM register, no extra timer) untagged | tags added at the state registers of `_dl_ctrl` and `_cl_ctrl` |
+| whole IP (`flow_check` P3a, HAS v0.15) | 1 | CF-DRIFT: the configuration package was regenerated (header HAS v0.15) after both lints | lints rerun, no RTL change: VCS 0 / 0 / 0 for 1, 2, 4 lanes; SpyGlass `lint_rtl` 0 / 0 / 0, one waiver (D-19) |
 
-Final state (HAS v0.14, rtl_rule 1.2): `check_rtl_rules` 0 violations on 22 files; VCS 0 Error /
+Final state (HAS v0.15, rtl_rule 1.2): `check_rtl_rules` 0 violations on 22 files; VCS 0 Error /
 0 Warning / 0 Lint for `PARA_NUM_LANES` = 1, 2, 4; SpyGlass `lint_rtl` 0 Fatal / 0 Error / 0 Warning,
 one waiver (D-19).
 VCS `+lint=all` does not report latches or unused nets (probe of 2026-10-03); SpyGlass covers them.
