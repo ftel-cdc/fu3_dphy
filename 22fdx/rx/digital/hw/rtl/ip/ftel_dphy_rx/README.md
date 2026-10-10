@@ -3,7 +3,7 @@
 MIPI D-PHY receiver controller: receives one clock lane and up to four data lanes and
 presents the received data on the PHY-Protocol Interface (PPI) toward a CSI-2 receiver.
 
-> Status (2026-10-07): architecture draft — [`doc/spec.md`](doc/spec.md) is HAS **draft v0.14**
+> Status (2026-10-10): architecture draft — [`doc/spec.md`](doc/spec.md) is HAS **draft v0.14**
 > (open items in its chapter 9).
 > - v0.13 moves the samplers, the 1:8 deserializer, the byte clock and the clock-activity detection
 >   from the AFE into Block No. 1 (ADR-001 option A, as announced by the AFE team).
@@ -17,6 +17,8 @@ presents the received data on the PHY-Protocol Interface (PPI) toward a CSI-2 re
 > - Open items stay at the defaults of the HAS, each tagged `// OPEN`.
 > - Lint-clean: VCS, SpyGlass with one waiver, `check_rtl_rules.py`.
 > - Only Block No. 1 is simulated, by a directed testbench (`sim/tb_afe_adapter`, five line rates).
+> - Timing constraints in `sdc/`. A trial synthesis on [target library] (`syn/`) meets timing at 1792 and
+>   1500 Mb/s in the slow corners before layout.
 >
 > Decisions and status in [`doc/rtl_notes.md`](doc/rtl_notes.md).
 
@@ -81,8 +83,11 @@ ftel_dphy_rx/
 ├── lint/                 ← lint_constraint.tcl, lint_waiver.tcl (SpyGlass lint_rtl)
 ├── cdc/                  ← cdc.sgdc, cdc_waiver.sgdc (SpyGlass cdc_verify)
 ├── rdc/                  ← rdc.sgdc, rdc_waiver.sgdc (SpyGlass rdc_verify_struct)
-├── sdc/                  ← m_ftel_dphy_rx_wrap.sdc
-└── syn/                  ← synthesis (Design Compiler)
+├── sdc/                  ← m_ftel_dphy_rx_wrap.sdc: clocks, exceptions, I/O budgets (design intent;
+│                           also read by cdc/ and rdc/)
+└── syn/                  ← synthesis (Design Compiler): run_syn.sh, dc_syn.tcl (environment, reports),
+                            summarize.sh, tech/<tech>.tcl (library), cells/<tech>/ (clock cells on library
+                            cells); work/, output/, netlist/ are generated (gitignored)
 ```
 
 The lint/cdc/rdc/sdc/logical skeleton was created by the FX1 common flow
@@ -101,6 +106,17 @@ waiver for the clock structure of Block No. 1, rtl_notes D-19) have been exercis
 hw/rtl/ip/ftel_dphy_rx/sim/vcs_lint.sh                    # wrapper, PARA_NUM_LANES = 1, 2, 4
 hw/rtl/ip/ftel_dphy_rx/sim/vcs_lint.sh --module <name>    # one module with the files before it
 hw/rtl/ip/ftel_dphy_rx/sim/tb_afe_adapter/run.sh          # Block No. 1 at 80, 800, 1500, 1600, 1792 Mb/s
+```
+
+Synthesis with Design Compiler on [target library]: one run per library corner and line rate. Each run
+writes `syn/work/<run>/` (`dc.log`), `syn/output/<run>/` (reports) and `syn/netlist/<run>/`
+(netlist, ddc, sdc). A run passes when it ends with `SYN DONE` and has no `Error` message.
+Constraints and results are in `doc/rtl_notes.md` §6.
+
+```bash
+hw/rtl/ip/ftel_dphy_rx/syn/run_syn.sh                     # SSG 0.72 V at -40 and 125 °C, 1792 and 1500 Mb/s
+hw/rtl/ip/ftel_dphy_rx/syn/run_syn.sh --rate 1792 --corner [corner]
+hw/rtl/ip/ftel_dphy_rx/syn/summarize.sh                   # WNS/TNS, Block No. 1 paths, area per block
 ```
 
 ---

@@ -34,11 +34,16 @@
   - Small changes: `_cl_ctrl` (byte-clock enable, D-21), `_timing_init` (reset synchronizer of the
     DDR domain), the ports of the core and the wrapper, and the package (clock-activity window).
   - rtl_rule v1.2 allows exactly the clock structure of HAS §4.3, in `_byte_clk` only (K2, K12).
+- **Constraints and trial synthesis, 2026-10-10.** `sdc/m_ftel_dphy_rx_wrap.sdc` replaces the stub of
+  the common flow, and `syn/` runs Design Compiler on [target library]. Timing is met at 1792 and 1500 Mb/s
+  in the slow corners before layout (§6). Two constraints listed in §6 before are corrected: the
+  hold multiplier of the DDR → byte transfer is 3, not 2, and the byte clock is defined at the clock
+  gate, not at the divider flip-flop.
 - **Checked:** VCS `+lint=all`, SpyGlass `lint_rtl` (one waiver, D-19), `check_rtl_rules.py`,
   `flow_check.py --phase P1|P2|P3a` (§7). **Simulated: Block No. 1 only**, with a directed TB at
   five line rates (§8). The rest of the IP is not simulated: lint-clean does not mean functionally
-  correct. The unit testbenches (M3), the CDC/RDC runs (M4) and the timing constraints (M7, §6) are
-  the next steps.
+  correct. The unit testbenches (M3) and the CDC/RDC runs (M4) are the next steps. STA after layout
+  comes with the target technology (M7).
 - **Release R1 only.** Block No. 5 (deskew calibration, R2, ADR-004) is absent: `PARA_DESKEW_EN` is
   locked to 0 and the delay taps are tied to 0. Block No. 8 (configuration and status, K3/ADR-005)
   is absent: see D-2.
@@ -185,6 +190,8 @@ bit 0 from the rising edge.
 - Margin of the arc: half a period, plus the clock-inverter delay, minus clock-to-output and setup.
   From the 130 nm library at 1.35 V/125 °C, before wiring, this leaves about +110 ps at 1500 Mb/s
   and about 0 at 1792 Mb/s.
+- Trial synthesis on [target library], SSG 0.72 V/125 °C, ideal clocks (§6): +361 ps at 1792 Mb/s and
+  +470 ps at 1500 Mb/s. ✅
 - Rejected alternative: retime the falling-edge sample to the rising edge right after the sampler.
   The inverter delay then counts against the arc: about +10 ps at 1500 Mb/s and −100 ps at 1792 Mb/s.
 
@@ -238,6 +245,10 @@ DFT flow connects the scan enable of the `m_fpt_lib_cg` cell.
 `m_fpt_lib_cg` and `m_fpt_lib_clk_inv` of the fu2 lib and their behavioural model. At integration only
 the module name changes, as for the synchronizer cells. The instances are named `u_dont_touch_*`, the
 fu2 convention that keeps synthesis from optimizing them (rtl_rule K10, K12).
+- For synthesis, `syn/run_syn.sh` replaces the two files with `syn/cells/<tech>/`, which instantiate
+  the library cells with the same ports. On [target library] these are the clock-gating cell
+  `[clock-gating cell]` and the clock inverter `[clock inverter cell]`. The script stops if
+  either file is not replaced.
 - Do not use `m_fpt_lib_dff_falling_edge_async_reset_n` for the falling-edge flip-flops: in its
   GF130 branch it maps to `DFFRQ`, a rising-edge flip-flop.
 
@@ -265,36 +276,109 @@ writing the RTL these points were read literally; the HAS could state them to re
 | N-5 | Status of aborted clock-lane requests | Both HS and ULPS aborts (D-14) |
 | N-6 | Loss of the clock, HAS v0.13: `cl_rxclkactivehs` falls 50–60 ns after the last clock edge | The toggles change on rising edges only. The trail ends on a falling edge, and near 800 and 1600 Mb/s the edge toggle aliases. Simulation (§8): 38.5–42.2 ns after the last edge at 80 Mb/s, at most 54.7 ns at every rate. HAS v0.14 states the upper bound, at most 60 ns, which is TCLK-MISS |
 
-## 6. Timing risks for Stage D (not measured)
+## 6. Timing constraints and trial synthesis (Stage D)
 
-- The EoT backward scan (D-12) is combinational over `PARA_EOT_DELAY_BYTES` entries in one byte clock
-  (5.33 ns at 1500 Mb/s). Fallback: pipeline the scan by K cycles and deepen the line by K.
+`sdc/m_ftel_dphy_rx_wrap.sdc` holds the design intent: clocks, exceptions and I/O budgets. `syn/`
+adds the synthesis environment (library, margins before clock-tree synthesis, drive and load) and
+runs Design Compiler on it; the commands are in the README. Both exist since 2026-10-10. STA after
+layout comes with the target technology (M7).
+
+**Logic depth.** Two risks were named before synthesis; the trial below measures them.
+- The EoT backward scan (D-12) is combinational over `PARA_EOT_DELAY_BYTES` entries in one byte
+  clock: +2.61 ns of 4.46 ns at 1792 Mb/s. Fallback if layout takes the margin: pipeline the scan by
+  K cycles and deepen the line by K.
 - The eight comparators, the lock priority and the barrel shifter of the sync search are one cycle.
-  The polarity XOR and the lane-map multiplexer now sit in front of them (D-24).
-- **Block No. 1, constraints the SDC needs at M7** (`sdc/m_ftel_dphy_rx_wrap.sdc` is still a stub):
-  - Clocks:
-    - `afe_cl_hs_clk`: period 2 UI at the top rate of the release.
-    - The inverted DDR clock, through the clock inverter.
-    - The divided clock: a generated clock, divide by 4, on the top bit of `reg_div_cnt`.
-    - `rxbyteclkhs` behind the clock gate. The gating check of the latch-based gate is inferred.
-    - `core_clk` asynchronous to the DDR family (`ddr`, `ddrn`, byte).
-  - Samplers: source-synchronous input delays on `afe_hs_bit_x`, on both edges of `afe_cl_hs_clk`
-    (hand placement, HAS §4.3, OPEN ADR-001).
-  - Load phase, `reg_load` → `reg_load_fall`: half a period, the only short path. About +110 ps at
-    1500 Mb/s and 0 at 1792 Mb/s at 1.35 V/125 °C before wiring. The two flip-flops sit with the
-    samplers (D-17, REQ-365).
-  - Parallel registers → first `rxbyteclkhs` stage: the halves change once per word, 3 DDR periods
-    (2.5 for the falling half) before the byte-clock edge that takes them. This needs a multicycle
-    path (setup 3, hold 2, in the DDR clock); otherwise STA assumes a change on every DDR edge.
-  - Hold of that transfer, rising half: about one DDR period plus the clock-to-output delay, minus
-    the insertion delay of `rxbyteclkhs` relative to the DDR clock (divider flip-flop, gate, byte
-    clock tree). At 1792 Mb/s a byte clock tree slower than about 1.5 ns needs hold buffers on
-    these 8 bits per lane; setup has more than 3 DDR periods.
-  - Reset recovery: the gate-enable reset is released on a rising DDR edge. The divider recovers in
-    one period, `reg_load_fall` in half a period (rtl_rule K3, K11).
-  - Crossings: the reset synchronizers (`byteclk_en`, DDR reset) and the toggle synchronizers have
-    asynchronous inputs, so their first stage is a false path, as for every synchronizer of
-    Table 4-2.
+  The polarity XOR and the lane-map multiplexer now sit in front of them (D-24). At least +2.61 ns at
+  1792 Mb/s.
+
+**Constraints of Block No. 1.**
+- Clocks:
+  - `ddr_clk` on `afe_cl_hs_clk`: period 2 UI at the top line rate, the parameter
+    `DPHY_RX_LINE_RATE_MBPS`. Default 1792 Mb/s, the envelope of HAS-CSI; R1 of the HAS is 1500 Mb/s
+    (OPEN K1).
+  - The inverted DDR clock has no clock of its own: `ddr_clk` propagates through the clock inverter
+    `u_dont_touch_clk_inv_0` with its sense inverted.
+  - `byte_clk`: generated clock, divide by 4, defined at the input `i_clk` of the clock gate
+    `u_dont_touch_cg_0`. This note placed it on the top bit of `reg_div_cnt` before. Defined there,
+    it also reaches the adder of the counter (DC TIM-052) and creates two hold checks inside the
+    divider that do not exist (about −20 ps). ✅
+  - `rxbyteclkhs` is `byte_clk` behind the gate. The enable is checked by the setup and hold of the
+    library clock-gating cell (D-23).
+  - `core_clk` is asynchronous to the DDR family (`ddr`, `ddrn`, byte). The reset synchronizers
+    (`byteclk_en`, DDR reset) and the toggle synchronizers have asynchronous inputs, so their first
+    stage is not timed, as for every synchronizer of Table 4-2.
+- Samplers: input delays on `afe_hs_bit_x` against both edges of `afe_cl_hs_clk`. The transmitter
+  centres each edge in a bit, so a bit changes a quarter of a DDR period after an edge, within the
+  skew of the AFE and the routing. That skew is the parameter `DPHY_RX_HS_SKEW_NS`, 0 until the AFE
+  team answers A8 (OPEN ADR-001). Hand placement next to the AFE (HAS §4.3).
+- Load phase, `reg_load` → `reg_load_fall`: half a period, the only short path. The two flip-flops
+  sit with the samplers (D-17, REQ-365).
+- Parallel registers → first `rxbyteclkhs` stage: each half loads once per word, 3 DDR periods (2.5
+  for the falling half) before the byte-clock edge that takes it, and loads again 1 period (1.5)
+  after that edge. Multicycle setup 3 and hold 3, in DDR periods (`-start`); otherwise STA assumes a
+  change on every DDR edge.
+  - This note said hold 2 before. Hold 2 checks a launch at the capture edge, which the load phase
+    never makes, so it is one DDR period too pessimistic. Trial at 1792 Mb/s, −40 °C: +35 ps with
+    hold 2, +1151 ps with hold 3. ✅
+- Hold of that transfer, rising half: about one DDR period plus the clock-to-output delay, minus the
+  insertion delay of `rxbyteclkhs` relative to the DDR clock (divider flip-flop, gate, byte clock
+  tree). Setup has more than 3 DDR periods.
+  - The trial leaves +1.15 ns at 1792 Mb/s with ideal clocks. A byte clock that reaches these
+    registers more than about 1.15 ns after the DDR clock needs hold buffers on these 8 bits per
+    lane ⚠️. The estimate from the 130 nm library was about 1.5 ns.
+- Reset recovery: the gate-enable reset is released on a rising DDR edge. The divider recovers in
+  one period, `reg_load_fall` in half a period (rtl_rule K3, K11). `syn/dc_syn.tcl` enables the
+  recovery and removal arcs.
+
+**Constraints of the ports.**
+- Inputs: the reset, the PPI control and the LP-RX outputs enter through synchronizers; the
+  configuration is static while it is used (Table 4-2). All are false paths.
+- Outputs:
+  - Launched by `rxbyteclkhs`: 30 % of the byte clock is left to the receiver.
+  - Launched by `core_clk`: 40 % of `core_clk` is left to the receiver.
+  - Both budgets are to agree with the CSI team at integration (OPEN).
+  - The asynchronous outputs and the status of the Block No. 8 placeholder are false paths.
+  - `rxbyteclkhs` and `rxclkesc_x` are clocks for the receiver and have no output delay. They are the
+    5 endpoints that `check_timing` reports as unconstrained ✅.
+- The CDC and RDC flows read the same file (`sdc_data` in `cdc/cdc.sgdc` and `rdc/rdc.sgdc`). Its
+  object names follow the netlist of Design Compiler (`<signal>_reg`). Whether SpyGlass resolves
+  them is seen at the first CDC run (M4) 🔍.
+
+**Trial synthesis, 2026-10-10** (`syn/run_syn.sh`, `syn/summarize.sh`).
+- Tool and design: Design Compiler X-2025.06-SP5, `compile_ultra -no_autoungroup`, 4 lanes, default
+  configuration.
+- Library: [target library] [n]-track cells (`[library cells]`), slow corner SSG 0.72 V at −40 °C and
+  125 °C. Only the libraries of that corner with body bias (0.45 V / −0.45 V) are installed. The body
+  bias of the chip is not decided 🔍.
+- Before clock-tree synthesis: ideal clocks, no wire load. Uncertainty for setup/hold is 30/10 ps
+  for the DDR family and 100/20 ps for `core_clk`; clock transition 30 ps.
+
+Slack in ps, setup unless marked:
+
+| Corner, line rate | Samplers (`ddr_clk` worst) | Half period | Parallel → byte, setup / hold | Gate enable (`byte_clk` worst) | Divider recovery | `core_clk` worst |
+|---|---|---|---|---|---|---|
+| 125 °C, 1792 Mb/s | +235 | +361 | +2685 / +1155 | +950 | +463 | +2768 |
+| −40 °C, 1792 Mb/s | +239 | +372 | +2693 / +1151 | +964 | +472 | +2788 |
+| 125 °C, 1500 Mb/s | +290 | +470 | +3228 / +1373 | +1168 | +572 | +2768 |
+| −40 °C, 1500 Mb/s | +293 | +481 | +3236 / +1368 | +1181 | +581 | +2788 |
+
+- TNS is 0 in every clock group of the 4 runs. The worst hold of the design is +36 ps, from
+  `reg_hs_pre` to `reg_hs_word` (byte clock to byte clock, ideal clocks).
+- `report_constraint` lists one violator: leakage power against a target of 0 that the script does
+  not set. It is an optimization goal of the tool, not a constraint of the design.
+- Samplers: +235 ps of the 279 ps quarter period at 1792 Mb/s. The skew of the AFE and the routing
+  (A8) comes out of this.
+- The worst `byte_clk` path is the gate enable, which has one DDR period from the reset synchronizer
+  in the DDR clock. The EoT backward scan follows with +2.61 ns. The worst `core_clk` path is an AFE
+  enable output against its output budget.
+- Area at 125 °C (about 0.3 % less at −40 °C): 5964 µm² of cells, 9958 cells of which 2654 are
+  flip-flops.
+  - Block No. 4, 4 lanes: 4092, of which EoT 3497 (59 % of the IP) and sync search 522.
+  - No. 6: 875. No. 3: 492. No. 2: 56. No. 7: 36.5.
+  - No. 1: 412, of which deserializers 113, LP filters 64, synchronizers 29, byte clock 18 and clock
+    activity 17.
+- Not modelled: wires, clock trees, the skew at the samplers, the corner and the body bias of the
+  chip. The numbers rank the paths; they do not sign off the timing.
 
 ## 7. Lint log
 
