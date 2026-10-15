@@ -1,6 +1,9 @@
 # Pins of tiny_ibufds_dphy for impl_tiny.tcl: the camera clock lane and data lane 0 of bank 705
-# (FPGA_PROTO_PLAN.md §4), the other ports on spare pins of nibbles 4-7 of the same 1.2 V bank.
-# Only for the implementation probe; no device image is written from it.
+# (FPGA_PROTO_PLAN.md §4). The five LVCMOS12 ports sit on camera control pins of the same 1.2 V bank, not
+# on spare pins: CJ60 FMC_CLK, CK60 FMC_RST, CD60/CD59 FMC_XVS/XHS, CF61 FMC_SCL.
+# Only for the implementation probe: do not write a device image from it and do not load it on the board.
+# opt_design adds a PS block by itself, so a .pdi could be written, and it would drive the camera's reset,
+# sync and I2C lines.
 set_property -dict {PACKAGE_PIN CV60 IOSTANDARD MIPI_DPHY} [get_ports clk_p]
 set_property -dict {PACKAGE_PIN CV59 IOSTANDARD MIPI_DPHY} [get_ports clk_n]
 set_property -dict {PACKAGE_PIN CY61 IOSTANDARD MIPI_DPHY} [get_ports d_p]
