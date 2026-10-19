@@ -9,6 +9,7 @@ a "Radix - ..." line, then one line per sample.
   csi2_dump.py axis CAP.csv --tdata tdata --tvalid tvalid [--tready tready] --tuser tuser \\
                     --tlast tlast [--ppc 4] [--bpp 10] [--pgm lines.pgm]
   csi2_dump.py compare {ppi|axis} A.csv B.csv <options of that mode> [--headers-only]
+  csi2_dump.py bursts --truth TRUTH.txt [--lanes 4] A.csv [B.csv ...]
   csi2_dump.py selftest [--tx-model]
 
 A column is chosen by a part of its name; "{n}" stands for the lane number.
@@ -16,6 +17,13 @@ PPI mode:
   - one packet per HS burst (CSI-2 v1.3 9.7: the lanes go to LPS between packets);
   - bytes after the packet in a burst are counted as trailer;
   - the ECC (single-bit correction) and the CRC-16 are checked.
+Bursts mode (TN1/TN2 of fpga/PLAN_TN1_TN3.md, dummy data, no CSI-2 packets):
+  - per lane, a burst is a run of rxactivehs; its bytes are the samples with rxvalidhs;
+  - burst k of a lane must start with the payload of burst k of that lane in the truth file of the line
+    generator (fpga/exp1/dphy_line_gen.sv); bytes after the payload are counted as trailer, not as errors;
+  - errsoths, errsotsynchs, rxvalidhs outside a burst and a missing or extra burst are errors;
+  - with a sim_time_ps column, the latency of the last payload byte (sample time minus the end of its last
+    bit at the pad) is reported.
 """
 import argparse
 import csv
@@ -115,7 +123,7 @@ def write_pgm(path, lines, maxval):
 class Capture:
     """Columns of a Vivado ILA CSV file."""
 
-    BASE = {'HEX': 16, 'BIN': 2, 'OCT': 8, 'UNSIGNED': 10, 'DEC': 10, 'SIGNED': 10}
+    BASE = {'HEX': 16, 'BIN': 2, 'BINARY': 2, 'OCT': 8, 'UNSIGNED': 10, 'DEC': 10, 'SIGNED': 10}
 
     def __init__(self, path):
         with open(path, newline='') as f:
@@ -143,11 +151,21 @@ class Capture:
         return hits[0]
 
     def values(self, part):
+        """Column values; an X or Z of a simulation capture (no digit of the radix) reads as -1."""
         i = self.col(part)
         if i not in self._cache:
             base = self.BASE.get(self.radix[i].upper(), 16)
-            self._cache[i] = [int(r[i].strip(), base) for r in self.rows]
+            self._cache[i] = [self._int(r[i].strip(), base) for r in self.rows]
         return self._cache[i]
+
+    @staticmethod
+    def _int(text, base):
+        try:
+            return int(text, base)
+        except ValueError:
+            if text and set(text.lower()) <= set('0123456789abcdef_xz'):
+                return -1
+            raise
 
     def window_starts(self):
         """Samples where a new trigger window begins (column 'Sample in Window' restarts)."""
@@ -319,6 +337,132 @@ def first_frame(seq, is_fs):
     return seq[idx:] if idx is not None else seq
 
 # ---------------------------------------------------------------------------------------------------
+# bursts: per-lane dummy data against the truth file of the TN1 line generator
+
+
+def read_truth(path):
+    """{lane: [(burst, payload, t_first_ps, t_end_ps)]} from the lines 'B <burst> <lane> <n> <t0> <t1> <hex>'."""
+    truth = {}
+    with open(path) as f:
+        for line in f:
+            t = line.split()
+            if len(t) < 6 or t[0] != 'B':
+                continue
+            bid, lane, n, t0, t1 = (int(x) for x in t[1:6])
+            data = bytes.fromhex(t[6]) if len(t) > 6 else b''
+            if len(data) != n:
+                sys.exit(f"{path}: burst {bid} lane {lane} has {len(data)} bytes, its header says {n}")
+            truth.setdefault(lane, []).append((bid, data, t0, t1))
+    return truth
+
+
+def has_col(cap, part):
+    return any(part in n for n in cap.names)
+
+
+def decode_bursts(cap, lanes, data, valid, active, flags, time_col):
+    """Per lane, the runs of rxactivehs: bytes and sample times of rxvalidhs, rising edges of each flag
+    column. Also, per lane, the events outside a run: rxvalidhs samples and flag rising edges."""
+    tm = cap.values(time_col) if time_col and has_col(cap, time_col) else None
+    runs_all, stray_all = [], []
+    for i in range(lanes):
+        d, v, a = (cap.values(x.format(n=i)) for x in (data, valid, active))
+        fl = {k: cap.values(c.format(n=i)) for k, c in flags.items()}
+        runs, cur = [], None
+        stray = {'rxvalidhs': 0, **{k: 0 for k in fl}, 'X on rxvalidhs, rxactivehs or a flag': 0}
+        for s in range(len(cap.rows)):
+            if v[s] < 0 or a[s] < 0 or any(fl[k][s] < 0 for k in fl):
+                stray['X on rxvalidhs, rxactivehs or a flag'] += 1
+                v[s], a[s] = max(v[s], 0), max(a[s], 0)
+                for k in fl:
+                    fl[k][s] = max(fl[k][s], 0)
+            rise = {k: int(fl[k][s] and (s == 0 or not fl[k][s - 1])) for k in fl}
+            if a[s]:
+                if cur is None:
+                    cur = {'bytes': [], 'times': [], 'flags': {k: 0 for k in fl}, 'sample': s}
+                if v[s]:
+                    cur['bytes'].append(d[s])
+                    cur['times'].append(tm[s] if tm else None)
+                for k in fl:
+                    cur['flags'][k] += rise[k]
+            else:
+                if cur is not None:
+                    runs.append(cur)
+                    cur = None
+                stray['rxvalidhs'] += v[s]
+                for k in fl:
+                    stray[k] += rise[k]
+        if cur is not None:
+            cur['open'] = True
+            runs.append(cur)
+        runs_all.append(runs)
+        stray_all.append(stray)
+    return runs_all, stray_all
+
+
+def check_bursts(label, runs, stray, truth, lanes, show=8):
+    """Print one capture against the truth; return the number of errors."""
+    errs, msgs, n_ok, n_tot, trailers, lat = 0, [], 0, 0, [], []
+
+    def bad(msg):
+        nonlocal errs
+        errs += 1
+        msgs.append(msg)
+
+    for i in range(lanes):
+        tr = truth.get(i, [])
+        got = [r for r in runs[i] if not r.get('open')]
+        if runs[i] and runs[i][-1].get('open'):
+            bad(f"lane {i}: still in a burst at the end of the capture")
+        if len(got) != len(tr):
+            bad(f"lane {i}: {len(got)} bursts, the truth has {len(tr)}")
+        for k, (bid, pay, _t0, t1) in enumerate(tr):
+            n_tot += 1
+            if k >= len(got):
+                continue
+            r = got[k]
+            b, pay = r['bytes'], list(pay)
+            if b[:len(pay)] == pay:
+                n_ok += 1
+                trailers.append(len(b) - len(pay))
+                if pay and r['times'][len(pay) - 1] is not None:
+                    lat.append((r['times'][len(pay) - 1] - t1) / 1000.0)
+            else:
+                j = next((x for x in range(min(len(b), len(pay))) if b[x] != pay[x]), min(len(b), len(pay)))
+                bad(f"lane {i} burst {bid}: {len(b)} bytes for {len(pay)} sent, first difference at byte {j}:"
+                    f" got {list(b[j:j + 6])}, sent {list(pay[j:j + 6])}")
+            for fk, cnt in r['flags'].items():
+                exp = 1 if fk == 'rxsynchs' else 0
+                if cnt != exp:
+                    bad(f"lane {i} burst {bid}: {fk} {cnt} times (expected {exp})")
+        for fk, cnt in stray[i].items():
+            if cnt:
+                bad(f"lane {i}: {fk} {cnt} times outside a burst")
+    span = (lambda x, f: f"{min(x):{f}}..{max(x):{f}}" if x else "-")
+    print(f"{label}: {lanes} lane(s), {n_ok}/{n_tot} bursts carry the payload sent, trailer bytes"
+          f" {span(trailers, 'd')}, latency of the last payload byte {span(lat, '.1f')} ns, errors {errs}")
+    for m in msgs[:show]:
+        print(f"  {m}")
+    if len(msgs) > show:
+        print(f"  ... {len(msgs) - show} more")
+    return errs
+
+
+def run_bursts(a):
+    truth = read_truth(a.truth)
+    total = []
+    for k, path in enumerate(a.csv):
+        cap = Capture(path)
+        flags = {name: col for name, col in (('rxsynchs', a.sync), ('errsoths', a.errsot),
+                                             ('errsotsynchs', a.errsotsync))
+                 if col and has_col(cap, col.format(n=0))}
+        runs, stray = decode_bursts(cap, a.lanes, a.data, a.valid, a.active, flags, a.time)
+        total.append(check_bursts(f"{chr(65 + k)} {os.path.basename(path)}", runs, stray, truth, a.lanes))
+    print(f"RESULT: {'PASS' if not any(total) else 'FAIL'} "
+          f"({', '.join(f'{chr(65 + k)} {e} errors' for k, e in enumerate(total))})")
+    return int(any(total))
+
+# ---------------------------------------------------------------------------------------------------
 # self test
 
 
@@ -469,10 +613,87 @@ def selftest(tx_model):
     check([x for x, f in lines if not f] == img and lines[0][1] == 'start' and sof == [1],
           "AXIS round trip: lines, partial first line, start of frame")
 
+    bursts_selftest(work, rnd, check)
     if tx_model:
         fails += tx_model_check(work, rnd)
     print(f"selftest: {'PASS' if fails == 0 else f'{fails} FAIL'}")
     return int(fails > 0)
+
+
+def synth_bursts(truth, lanes, rnd, faults):
+    """Lane samples of the truth bursts: payload plus 0..2 trailer bytes, rxsynchs with the first byte,
+    rxactivehs one sample longer than rxvalidhs, idle samples with random data between bursts.
+    faults: {(kind, lane, burst index)}, kind 'flip' (one payload byte), 'drop' (no burst), 'errsot'
+    (errsoths pulse) or 'resync' (a second rxsynchs)."""
+    names = ['sim_time_ps']
+    for i in range(lanes):
+        names += [f'u_rx/dl{i}_rxdatahs[7:0]', f'u_rx/dl{i}_rxvalidhs', f'u_rx/dl{i}_rxactivehs',
+                  f'u_rx/dl{i}_rxsynchs', f'u_rx/dl{i}_errsoths', f'u_rx/dl{i}_errsotsynchs']
+    cols = {n: [] for n in names}
+    t = 0
+
+    def sample(vals):
+        nonlocal t
+        cols['sim_time_ps'].append(t)
+        t += 5556
+        for i in range(lanes):
+            for name, x in zip(names[1 + 6 * i:7 + 6 * i], vals[i] + (0,)):
+                cols[name].append(x)
+
+    def idle():
+        return [(rnd.randrange(256), 0, 0, 0, 0) for _ in range(lanes)]
+
+    for k in range(len(truth[0])):
+        for _ in range(rnd.randrange(3, 7)):
+            sample(idle())
+        streams = []
+        for i in range(lanes):
+            pay = bytearray(truth[i][k][1])
+            if ('flip', i, k) in faults:
+                pay[len(pay) // 2] ^= 0x10
+            streams.append(None if ('drop', i, k) in faults
+                           else list(pay) + [rnd.randrange(256) for _ in range(rnd.randrange(3))])
+        for s in range(max(len(x) for x in streams if x is not None) + 2):
+            vals = []
+            for i, st in enumerate(streams):
+                if st is None:
+                    vals.append((rnd.randrange(256), 0, 0, 0, 0))
+                    continue
+                on = s < len(st)
+                sync = int(on and (s == 0 or (('resync', i, k) in faults and s == 2)))
+                vals.append((st[s] if on else rnd.randrange(256), int(on), int(s <= len(st)), sync,
+                             int(('errsot', i, k) in faults and s == 1)))
+            sample(vals)
+    for _ in range(4):
+        sample(idle())
+    return cols
+
+
+def bursts_selftest(work, rnd, check):
+    """Bursts mode against a truth file of the line generator's format: a clean capture, then one with
+    four planted faults."""
+    lanes, lens = 2, (1, 5, 64, 3)
+    truth = {i: [(k, bytes(rnd.randrange(256) for _ in range(n)), 0, 1000 * k) for k, n in enumerate(lens)]
+             for i in range(lanes)}
+    tpath = os.path.join(work, 'bursts_truth.txt')
+    with open(tpath, 'w') as f:
+        for k in range(len(lens)):
+            for i in range(lanes):
+                bid, pay, t0, t1 = truth[i][k]
+                f.write(f"B {bid} {i} {len(pay)} {t0} {t1} {pay.hex()}\n")
+    flags = {'rxsynchs': 'dl{n}_rxsynchs', 'errsoths': 'dl{n}_errsoths', 'errsotsynchs': 'dl{n}_errsotsynchs'}
+    errs = []
+    for name, faults in (('clean', set()),
+                         ('faults', {('flip', 1, 2), ('drop', 0, 3), ('errsot', 0, 1), ('resync', 1, 1)})):
+        cols = synth_bursts(truth, lanes, rnd, faults)
+        path = os.path.join(work, f'bursts_{name}.csv')
+        ila_csv(path, cols, {c: 'HEX' if 'data' in c else 'BIN' for c in cols})
+        runs, stray = decode_bursts(Capture(path), lanes, 'dl{n}_rxdatahs', 'dl{n}_rxvalidhs',
+                                    'dl{n}_rxactivehs', flags, 'sim_time_ps')
+        errs.append(check_bursts(f"  bursts {name}", runs, stray, read_truth(tpath), lanes))
+    check(errs[0] == 0, "bursts: a clean capture with trailer bytes matches the truth")
+    check(errs[1] == 4, f"bursts: the four planted faults are found ({errs[1]} errors: flipped byte,"
+                        " missing burst, errsoths, second rxsynchs)")
 
 
 def tx_model_check(work, rnd):
@@ -558,12 +779,25 @@ def main():
     ppi_opts(p)
     axis_opts(p)
     p.add_argument('--headers-only', action='store_true', help='PPI: compare VC/DT/WC only (live scene)')
+    p = sub.add_parser('bursts')
+    p.add_argument('csv', nargs='+')
+    p.add_argument('--truth', required=True, help='truth file of fpga/exp1/dphy_line_gen.sv')
+    p.add_argument('--lanes', type=int, default=4)
+    p.add_argument('--data', default='dl{n}_rxdatahs')
+    p.add_argument('--valid', default='dl{n}_rxvalidhs')
+    p.add_argument('--active', default='dl{n}_rxactivehs')
+    p.add_argument('--sync', default='dl{n}_rxsynchs')
+    p.add_argument('--errsot', default='dl{n}_errsoths')
+    p.add_argument('--errsotsync', default='dl{n}_errsotsynchs')
+    p.add_argument('--time', default='sim_time_ps')
     p = sub.add_parser('selftest')
     p.add_argument('--tx-model', action='store_true', help='also check against the Tx model with XSIM')
     a = ap.parse_args()
 
     if a.cmd == 'selftest':
         return selftest(a.tx_model)
+    if a.cmd == 'bursts':
+        return run_bursts(a)
     if a.cmd == 'ppi':
         pk = decode_ppi(Capture(a.csv), a.lanes, a.data, a.valid, a.active)
         bad = report_ppi(pk, a.dt)
