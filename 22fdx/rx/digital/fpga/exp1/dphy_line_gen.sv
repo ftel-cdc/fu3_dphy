@@ -10,6 +10,9 @@
 //   change.
 // - hs_truth/cl_hs_truth: 1 from HS-0 to the end of the trail, with the lane skew; the AFE model's
 //   inferred line state is checked against it.
+// - EoT stress (fpga/PLAN_TN1_FIX.md): trail_jitter adds 0..trail_jitter random bits to the trail of each
+//   lane and burst, so LP-11 falls at every phase of the byte clock; the last t_eot_junk ns of the trail
+//   are random bits, the transition junk that the receiver must skip (THS-SKIP).
 // The testbench sets the knobs (ns, skews in ps) before start_clock() and opens the truth file. Truth line
 // per lane and burst: B <burst> <lane> <bytes> <first sync bit at the pad, ps> <end of the last payload
 // bit, ps> <payload hex>.
@@ -39,6 +42,8 @@ module dphy_line_gen #(
   real t_clk_zero    = 300.0;
   real skew_ps [NL];
   real clk_skew_ps   = 0.0;
+  real t_eot_junk    = 0.0;
+  int  trail_jitter  = 0;
   int  truth_fd      = 0;
 
   // ---- undelayed lane states {p, n} ----
@@ -99,6 +104,8 @@ module dphy_line_gen #(
     longint k_hs0, k0;
     int     zero_bits, trail_bits, total;
     int     nbits [NL];
+    int     tbits [NL];
+    int     jbits [NL];
     logic   last  [NL];
     bit     act   [NL];
     string  s;
@@ -122,7 +129,10 @@ module dphy_line_gen #(
     total      = 0;
     foreach (bytes[l]) begin
       nbits[l] = act[l] ? 8 * (1 + bytes[l].size()) : 0;
-      if (act[l] && nbits[l] + trail_bits + 1 > total) total = nbits[l] + trail_bits + 1;
+      tbits[l] = trail_bits + ((trail_jitter > 0) ? int'($urandom_range(trail_jitter)) : 0);
+      jbits[l] = (t_eot_junk > 0.0) ? int'($ceil(t_eot_junk / ui)) : 0;
+      if (jbits[l] > tbits[l] - 1) jbits[l] = tbits[l] - 1;          // at least one trail bit
+      if (act[l] && nbits[l] + tbits[l] + 1 > total) total = nbits[l] + tbits[l] + 1;
     end
     for (int b = 0; b < total; b++) begin
       #(t0 + real'(k0 + b) * ui - $realtime);
@@ -133,9 +143,13 @@ module dphy_line_gen #(
           v       = (b < 8) ? SYNC[b] : bytes[l][(b - 8) / 8][(b - 8) % 8];
           dl_i[l] = {v, ~v};
           last[l] = v;
-        end else if (b < nbits[l] + trail_bits) begin
+        end else if (b < nbits[l] + tbits[l] - jbits[l]) begin
           dl_i[l] = {~last[l], last[l]};                              // trail
-        end else if (b == nbits[l] + trail_bits) begin
+        end else if (b < nbits[l] + tbits[l]) begin
+          logic v;
+          v       = 1'($urandom_range(1));                            // junk before LP-11
+          dl_i[l] = {v, ~v};
+        end else if (b == nbits[l] + tbits[l]) begin
           dl_i[l] = 2'b11;                                            // LP-11
           hs_i[l] = 1'b0;
         end

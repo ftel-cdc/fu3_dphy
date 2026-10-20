@@ -33,7 +33,7 @@ runtime:                          # Table 3-2: reset value and field width (widt
   tinit_cyc:         {reset: 20000,  width: 16}
   hs_rx_timeout_cyc: {reset: 262144, width: 20}   # 2^18; OPEN K8
   esc_timeout_cyc:   {reset: 262144, width: 20}   # 2^18
-  eot_skip_bytes:    {reset: 16,     width: 6}    # value of Table 3-2 at rate_ref
+  eot_skip_bytes:    {reset: 14,     width: 6}    # value of Table 3-2 at rate_ref
 
 assumptions:
   afe_word_latency:        2      # word latency Λ of Block No. 1 (§5.2), set by its two-stage HS path; OPEN ADR-007

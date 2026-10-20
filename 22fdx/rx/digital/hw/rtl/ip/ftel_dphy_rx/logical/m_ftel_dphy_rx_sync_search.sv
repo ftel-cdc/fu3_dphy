@@ -14,12 +14,12 @@
 //                   offset, search counter, deskew-burst detection and barrel shifter. Each
 //                   byte clock it produces one delay-line entry.
 // Parent          : m_ftel_dphy_rx_hs_datapath
-// HAS             : draft v0.14, §4.6, Figure 4-8, ADR-007
+// HAS             : draft v0.16, §4.6, Figure 4-8, ADR-007
 // Clock domains   : byte
 // REQ-IDs         : REQ-033, REQ-150, REQ-151, REQ-152, REQ-153, REQ-154, REQ-155, REQ-156,
 //                   REQ-157, REQ-158, REQ-160, REQ-161, REQ-162, REQ-163, REQ-165, REQ-166,
 //                   REQ-167, REQ-168, REQ-181, REQ-184, REQ-185, REQ-247, REQ-248, REQ-251,
-//                   REQ-273, REQ-277, REQ-324
+//                   REQ-273, REQ-277, REQ-324, REQ-366
 // OPEN            : none
 //
 // Evolution History:
@@ -237,12 +237,14 @@ module m_ftel_dphy_rx_sync_search
   // the deserialization. The entry after the lock is B1 with the sync flag; a deskew detection
   // clears the flags of this entry and asks the delay line to clear its three newest entries. The
   // active flag is the start itself, so an HS entry aborted before DL_HS_RX produces no active
-  // entry.
-  // REQ-155, REQ-156, REQ-162, REQ-163, REQ-166, REQ-167, REQ-168, REQ-247, REQ-248, REQ-324
+  // entry. Valid, sync and SoT error are set only while the start is High: the lock registers
+  // clear one cycle after it falls, and the entry of that cycle enters the delay line after the
+  // cut, so without this term rxvalidhs_x would pulse once after rxactivehs_x falls.
+  // REQ-155, REQ-156, REQ-162, REQ-163, REQ-166, REQ-167, REQ-168, REQ-247, REQ-248, REQ-324, REQ-366
   assign o_entry = '{data:       w_win[reg_offset +: C_W],
-                     valid:      reg_locked && !w_detect,
-                     sync:       reg_sync_pend && !w_detect,
-                     soterr:     reg_soterr_pend && !w_detect,
+                     valid:      reg_locked && !w_detect && i_start,
+                     sync:       reg_sync_pend && !w_detect && i_start,
+                     soterr:     reg_soterr_pend && !w_detect && i_start,
                      sotsyncerr: w_limit_hit,
                      skewcal:    w_detect || reg_deskew,
                      active:     i_start};

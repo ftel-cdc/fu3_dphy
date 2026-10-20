@@ -20,7 +20,9 @@ PPI mode:
 Bursts mode (TN1/TN2 of fpga/PLAN_TN1_TN3.md, dummy data, no CSI-2 packets):
   - per lane, a burst is a run of rxactivehs; its bytes are the samples with rxvalidhs;
   - burst k of a lane must start with the payload of burst k of that lane in the truth file of the line
-    generator (fpga/exp1/dphy_line_gen.sv); bytes after the payload are counted as trailer, not as errors;
+    generator (fpga/exp1/dphy_line_gen.sv); bytes after the payload are counted as trailer, and are an
+    error only beyond --max-trailer (one limit for every capture, or a comma list in capture order,
+    "-" for no limit);
   - errsoths, errsotsynchs, rxvalidhs outside a burst and a missing or extra burst are errors;
   - with a sim_time_ps column, the latency of the last payload byte (sample time minus the end of its last
     bit at the pad) is reported.
@@ -400,8 +402,9 @@ def decode_bursts(cap, lanes, data, valid, active, flags, time_col):
     return runs_all, stray_all
 
 
-def check_bursts(label, runs, stray, truth, lanes, show=8):
-    """Print one capture against the truth; return the number of errors."""
+def check_bursts(label, runs, stray, truth, lanes, show=8, max_trailer=None):
+    """Print one capture against the truth; return the number of errors. max_trailer: trailer bytes
+    allowed after the payload of a burst (None: any number)."""
     errs, msgs, n_ok, n_tot, trailers, lat = 0, [], 0, 0, [], []
 
     def bad(msg):
@@ -425,6 +428,9 @@ def check_bursts(label, runs, stray, truth, lanes, show=8):
             if b[:len(pay)] == pay:
                 n_ok += 1
                 trailers.append(len(b) - len(pay))
+                if max_trailer is not None and len(b) - len(pay) > max_trailer:
+                    bad(f"lane {i} burst {bid}: {len(b) - len(pay)} trailer bytes after the payload"
+                        f" (at most {max_trailer}): {list(b[len(pay):len(pay) + 6])}")
                 if pay and r['times'][len(pay) - 1] is not None:
                     lat.append((r['times'][len(pay) - 1] - t1) / 1000.0)
             else:
@@ -440,7 +446,8 @@ def check_bursts(label, runs, stray, truth, lanes, show=8):
                 bad(f"lane {i}: {fk} {cnt} times outside a burst")
     span = (lambda x, f: f"{min(x):{f}}..{max(x):{f}}" if x else "-")
     print(f"{label}: {lanes} lane(s), {n_ok}/{n_tot} bursts carry the payload sent, trailer bytes"
-          f" {span(trailers, 'd')}, latency of the last payload byte {span(lat, '.1f')} ns, errors {errs}")
+          f" {span(trailers, 'd')} (in {sum(1 for t in trailers if t)} bursts), latency of the last payload"
+          f" byte {span(lat, '.1f')} ns, errors {errs}")
     for m in msgs[:show]:
         print(f"  {m}")
     if len(msgs) > show:
@@ -448,16 +455,30 @@ def check_bursts(label, runs, stray, truth, lanes, show=8):
     return errs
 
 
+def trailer_limits(spec, n):
+    """--max-trailer: None, one value for all captures, or a comma list ('-' = no limit) of n values."""
+    if spec is None:
+        return [None] * n
+    vals = [None if v.strip() == '-' else int(v) for v in spec.split(',')]
+    if len(vals) == 1:
+        return vals * n
+    if len(vals) != n:
+        sys.exit(f"--max-trailer: {len(vals)} values for {n} captures")
+    return vals
+
+
 def run_bursts(a):
     truth = read_truth(a.truth)
     total = []
+    limits = trailer_limits(a.max_trailer, len(a.csv))
     for k, path in enumerate(a.csv):
         cap = Capture(path)
         flags = {name: col for name, col in (('rxsynchs', a.sync), ('errsoths', a.errsot),
                                              ('errsotsynchs', a.errsotsync))
                  if col and has_col(cap, col.format(n=0))}
         runs, stray = decode_bursts(cap, a.lanes, a.data, a.valid, a.active, flags, a.time)
-        total.append(check_bursts(f"{chr(65 + k)} {os.path.basename(path)}", runs, stray, truth, a.lanes))
+        total.append(check_bursts(f"{chr(65 + k)} {os.path.basename(path)}", runs, stray, truth, a.lanes,
+                                  max_trailer=limits[k]))
     print(f"RESULT: {'PASS' if not any(total) else 'FAIL'} "
           f"({', '.join(f'{chr(65 + k)} {e} errors' for k, e in enumerate(total))})")
     return int(any(total))
@@ -682,7 +703,7 @@ def bursts_selftest(work, rnd, check):
                 bid, pay, t0, t1 = truth[i][k]
                 f.write(f"B {bid} {i} {len(pay)} {t0} {t1} {pay.hex()}\n")
     flags = {'rxsynchs': 'dl{n}_rxsynchs', 'errsoths': 'dl{n}_errsoths', 'errsotsynchs': 'dl{n}_errsotsynchs'}
-    errs = []
+    errs, decoded = [], {}
     for name, faults in (('clean', set()),
                          ('faults', {('flip', 1, 2), ('drop', 0, 3), ('errsot', 0, 1), ('resync', 1, 1)})):
         cols = synth_bursts(truth, lanes, rnd, faults)
@@ -690,10 +711,25 @@ def bursts_selftest(work, rnd, check):
         ila_csv(path, cols, {c: 'HEX' if 'data' in c else 'BIN' for c in cols})
         runs, stray = decode_bursts(Capture(path), lanes, 'dl{n}_rxdatahs', 'dl{n}_rxvalidhs',
                                     'dl{n}_rxactivehs', flags, 'sim_time_ps')
+        decoded[name] = (runs, stray)
         errs.append(check_bursts(f"  bursts {name}", runs, stray, read_truth(tpath), lanes))
     check(errs[0] == 0, "bursts: a clean capture with trailer bytes matches the truth")
     check(errs[1] == 4, f"bursts: the four planted faults are found ({errs[1]} errors: flipped byte,"
                         " missing burst, errsoths, second rxsynchs)")
+    # trailer limit on the clean capture (0..2 trailer bytes per burst): every burst over the limit is one
+    # error, and the limit of 2 passes
+    runs, stray = decoded['clean']
+    over = sum(1 for i in range(lanes) for r, (_b, pay, _t0, _t1) in zip(runs[i], truth[i])
+               if len(r['bytes']) - len(pay) > 0)
+    e0 = check_bursts("  bursts clean, at most 0 trailer bytes", runs, stray, read_truth(tpath), lanes,
+                      show=0, max_trailer=0)
+    e2 = check_bursts("  bursts clean, at most 2 trailer bytes", runs, stray, read_truth(tpath), lanes,
+                      show=0, max_trailer=2)
+    check(over > 0 and e0 == over and e2 == 0,
+          f"bursts: --max-trailer flags each burst over the limit ({e0} errors for {over} bursts with"
+          f" trailer bytes at limit 0, {e2} at limit 2)")
+    check(trailer_limits('-,0', 2) == [None, 0] and trailer_limits('1', 3) == [1, 1, 1],
+          "bursts: --max-trailer lists ('-,0' and one value for all captures)")
 
 
 def tx_model_check(work, rnd):
@@ -790,6 +826,8 @@ def main():
     p.add_argument('--errsot', default='dl{n}_errsoths')
     p.add_argument('--errsotsync', default='dl{n}_errsotsynchs')
     p.add_argument('--time', default='sim_time_ps')
+    p.add_argument('--max-trailer', default=None,
+                   help='trailer bytes allowed per burst: one value, or a comma list per capture ("-": no limit)')
     p = sub.add_parser('selftest')
     p.add_argument('--tx-model', action='store_true', help='also check against the Tx model with XSIM')
     a = ap.parse_args()

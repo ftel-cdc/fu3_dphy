@@ -4,6 +4,13 @@
 > Ký hiệu: ✅ đã kiểm hôm nay · ⚠️ ước lượng hoặc giả định · 🔍 kiểm khi làm.
 >
 > **Cập nhật 2026-10-19 (sau khi duyệt):** VEK280 không làm TX được. Lý do: bank 705/706 của FMCP1 nối vào VADJ_FMC cố định 1.5 V (UG1612), trong khi `MIPI_DPHY` cần VCCO 1.2 V. Bạn chọn phương án B: TX đặt trên một board thứ hai có FMC chạy được 1.2 V, chờ team FPGA cho biết họ có board nào. Bằng chứng, yêu cầu và câu hỏi nằm ở `fpga/exp3/TN3_SPEC.md` v0.1 (phần 1). Thư mục `tx_vek280/` ở §4 đổi tên theo board TX khi đã chốt. Probe `fpga/probe/tn3_pins.tcl` được thêm vào.
+>
+> **Cập nhật 2026-10-20: TN1 xong.**
+> - Lần chạy đầu, RX của mình hỏng hai lỗi: cắt EoT, và `rxvalidhs` nằm ngoài `rxactivehs`. Cả hai sửa theo plan riêng
+>   `fpga/PLAN_TN1_FIX.md` (HAS v0.16).
+> - Lần chạy cuối: 113/113 kịch bản PASS cho cả hai RX.
+> - Kết quả nằm ở §9 của `PLAN_TN1_FIX.md` và §9 của `hw/rtl/ip/ftel_dphy_rx/doc/rtl_notes.md`.
+> - Tiếp theo: TN2.
 
 ## 0. Context
 

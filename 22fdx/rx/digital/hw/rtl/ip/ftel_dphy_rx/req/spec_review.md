@@ -765,3 +765,84 @@ dùng duyệt cùng ngày, và giữ sampler đặt tay. Ranh giới AFE, chức
 
 Không ID nào bị retire. RTL không đổi; 21 file RTL vẫn ghi HAS v0.14 ở header, vì v0.15 không đổi
 hành vi.
+
+### 7.15 Đồng bộ P1 với spec v0.16 (EoT sửa sau mô phỏng toàn bộ receiver, 2026-10-19)
+
+TN1 của plan FPGA (`fpga/exp1`) là lần đầu mô phỏng toàn bộ receiver, từ pad tới PPI. Mô phỏng chạy trong
+XSIM, đặt cạnh D-PHY RX của AMD, và lộ hai lỗi ở Block No. 4. Spec v0.16 sửa hai lỗi đó theo plan
+`fpga/PLAN_TN1_FIX.md` mà người dùng duyệt cùng ngày. Mốc là ngang IP của AMD (từ 260 Mb/s), không làm
+time-stamp theo DDR clock.
+- **Hold yêu cầu EoT (REQ-367, REQ-368, REQ-379 mới).** Block No. 4 giữ sườn xuống đã đồng bộ của
+  sync-search start thêm 3 byte clock. EoT done ra ở sườn xuống chưa giữ. REQ-052, REQ-163, REQ-171,
+  REQ-172 và REQ-179 viết lại theo đó.
+- **`eot_skip_bytes` (REQ-046, REQ-318 viết lại; REQ-369 mới).** Công thức cũ thiếu độ trễ đường dữ
+  liệu: đây đúng là F-003, và TN1 xác nhận nó. Công thức mới lấy mép E = ⌊(THS-TRAIL,min + 27 ns) /
+  byte period⌋, nơi phép cắt chạm payload, rồi giữ 1 byte biên. Mép này đo được trên RTL ở 260–1500
+  Mb/s.
+- **Phạm vi bảo đảm (REQ-186 viết lại, REQ-370 đến REQ-378 mới).** Phạm vi đo trên RTL nằm ở Table 4-7:
+  - không mất payload từ 260 Mb/s;
+  - không còn byte trailer từ 400 Mb/s khi không có nhiễu, và từ 1200 Mb/s khi có 40 ns nhiễu;
+  - các trường hợp còn lại còn tối đa 8 byte trailer.
+
+  REQ-186 trước là quyết định còn mở ("chỉ đúng trên khoảng 270 Mb/s"), nay thành ràng buộc phạm vi.
+  Con số 270 Mb/s của v0.15 bỏ qua việc cắt theo từng byte.
+- **`rxvalidhs_x` chỉ trong `rxactivehs_x` (REQ-366 mới).** Đây là lỗi F2 của TN1, vi phạm REQ-249.
+- **ADR-006 (REQ-275 giữ; REQ-276, REQ-311 viết lại).** Phần "cắt dưới khoảng 270 Mb/s" được đóng.
+  Còn mở hai điểm: thứ tự `stopstate_x` / `rxactivehs_x`, và việc controller có bỏ qua byte trailer
+  sau footer không. Câu 2 của ADR-006 trong `doc/sync/questions_csi_team.md` đã cập nhật số.
+- **Verification (REQ-380 mới).** EoT phải được kiểm trên toàn phạm vi bảo đảm.
+
+| Bước | Kết quả |
+|---|---|
+| `spec_inventory.py` | EXPECTED v0.16 đăng ký **trước** khi sửa spec, bằng v0.15: chỉ đổi chữ trong các dòng bảng có sẵn. Table 4-7 mới không thuộc nhóm nào được chấm. Selftest PASS. Dòng phụ thuộc open item: 171 → 178 |
+| `rebase_req.py` | Giữ 336/356 REQ và 2/3 finding; 20 REQ và F-003 lỗi thời; 17 vùng cần trích |
+| Chunk bổ sung `32_v16_delta.json` | 35 REQ: 20 neo lại bằng `prev_req_id` nên giữ ID, 15 mới (REQ-366 đến REQ-380, mỗi hàng của Table 4-7 một REQ). F-003 bỏ vì đã sửa. F-004 mới (`internal`): Table 4-7 chưa có chữ ký bảng trong `spec_inventory.py` |
+| `validate_req.py` | 371 REQ · 3 finding · trích dẫn 374/374 · độ phủ 100% ở 15 nhóm · 0 lỗi · 0 cảnh báo. Lượt đầu có 1 CONSIST ở REQ-172 (dòng nguồn mang ⚠️ của câu trước), sửa trong chunk |
+| `flow_check.py` | P1 review: 0 xung đột, `needs_human_decision` 76 → 77. P2: package sinh lại (reset 14, tag `OPEN ADR-001 REQ-046`), 0 xung đột. P3a: 0 xung đột sau khi gắn tag REQ-186, 296/296 REQ trong phạm vi có tag. Test âm 28/28. `check_rtl_rules`: 0 vi phạm trên 22 file. VCS 1/2/4 lane 0/0/0. SpyGlass `lint_rtl` 0/0/0, một waiver (D-19). B7 PASS |
+| Hình | 4-8 (thanh ghi hold, cổng OR, bộ dò sườn cho EoT done, ghi chú valid), 4-9 (đầu vào held, bỏ EoT done), 5-9 (hàng "start held"). `check_figures`: 0 vi phạm |
+| Docx v0.16 | 84 trang, XSD PASS. Script build tự kiểm: 29 hình, 25 caption bảng, 16 dòng lịch sử. Đã xem bằng mắt trang 48 (Figure 4-8) và 51 (Table 4-7) |
+
+Không ID REQ nào bị retire. RTL: header của `_hs_datapath`, `_sync_search`, `_eot` và package ghi HAS
+v0.16 (D-26, D-27 trong `doc/rtl_notes.md`); các file khác vẫn ghi v0.14.
+
+### 7.16 Đồng bộ P1 với spec v0.16 sửa lần 2 (đo lại phép cắt EoT, 2026-10-20)
+
+Chạy lại TN1 trên RTL đã sửa, có 2 kịch bản E1-5 hỏng vì số byte trailer vượt Table 4-7: 400 Mb/s không
+nhiễu còn 4 byte; 1200 Mb/s có nhiễu, trail dài nhất, còn 10 byte. Payload vẫn nguyên ở mọi burst.
+
+Nguyên nhân: lần đo trước giữ `core_clk` theo tỉ lệ cố định với đường truyền, nên LP-11 chỉ gặp vài pha
+của `core_clk`. Bench được bổ sung hai thứ:
+- `+CORE_HALF=2.501`: `core_clk` chậm 400 ppm, trôi qua mọi pha;
+- target `fpga/exp1/run_exp1.sh window`: quét `eot_skip_bytes` từ giá trị của model − 1 tới + 2, mỗi ô
+  280 burst × 4 lane, bảng in bằng `eot_window.py`.
+
+- **Hằng số 27 ns → 24 ns (REQ-046, REQ-318 viết lại).** Ở 600, 800 và 1440 Mb/s, giá trị cũ + 1 đã mất
+  payload: 1–7 trong 1120 burst. Như vậy biên 1 byte mà HAS ghi không còn ở ba rate này.
+  - Chỉ hằng số trong khoảng 24–25 ns khớp mép mất payload đo được ở cả 8 rate. Chọn 24 ns theo luật
+    của plan (thiên về cắt muộn).
+  - Giá trị đổi: 600 Mb/s 5 → 4, 800 Mb/s 7 → 6, 1440 Mb/s 14 → 13. Các rate khác và giá trị reset 14
+    giữ nguyên.
+  - Đo lại: giá trị + 1 không mất payload ở rate nào; giá trị + 2 mất ở mọi rate.
+- **Table 4-7 viết lại (REQ-371 đến REQ-378, REQ-186, REQ-369, REQ-370 viết lại).** Cột mới:
+  - giá trị nhỏ nhất làm mất payload;
+  - tỉ lệ burst còn trailer, không nhiễu và có 40 ns nhiễu;
+  - số byte trailer tối đa: ⌊(THS-TRAIL + 29 ns) / byte period⌋ − `eot_skip_bytes`, tính tại TEOT,max.
+    Công thức này khớp hoặc chặn trên mọi số đo.
+
+  Kết quả:
+  - không nhiễu: chính xác từ 600 Mb/s; 13 % burst còn trailer ở 260 Mb/s, 0,9 % ở 400 Mb/s;
+  - có 40 ns nhiễu: 99 % burst ở 260–400 Mb/s, còn 0,3–3 % từ 1000 Mb/s, 0 ở 1500 Mb/s;
+  - mỗi burst còn tối đa 4–12 byte trailer (trước ghi 0–8).
+- **§8 (REQ-380) và Table 9-1 (REQ-311).** §8 kiểm thêm mọi pha của `core_clk` và giá trị + 1. Dòng
+  ADR-006 bỏ chữ "below 1200 Mb/s".
+
+| Bước | Kết quả |
+|---|---|
+| `validate_config.py` | `EOT_PHASE_NS` 2 → −1 (hằng số 24 ns); answer key 600/800/1440 = 4/6/13. Selftest 28/28 |
+| `rebase_req.py` | Rebase từ v0.16 lần 1: giữ 356/371 REQ và 3/3 finding; 15 REQ lỗi thời; 7 vùng cần trích |
+| Chunk bổ sung `33_v16b_delta.json` | 15 REQ, cả 15 neo lại bằng `prev_req_id` nên giữ ID; không có REQ mới. F-004 (chunk 32) cập nhật `proposed_default` theo cột mới, giữ ID |
+| `validate_req.py` | 371 REQ · 3 finding · trích dẫn 374/374 · độ phủ 100% ở 15 nhóm · 0 lỗi · 0 cảnh báo |
+| `flow_check.py` | P1 review: 0 xung đột, `needs_human_decision` 77. P2: 0 xung đột, package không đổi (reset 14). P3a: 0 xung đột, 296/296 REQ trong phạm vi có tag; `rtl_scope.json` ghi sha mới. RTL không đổi |
+| Docx v0.16 | Build lại: 85 trang, XSD PASS. Đã xem bằng mắt trang 51 (Table 4-7) |
+
+Không ID REQ nào bị retire. `doc/sync/questions_csi_team.md` (ADR-006 câu 2) đã cập nhật số mới.

@@ -13,12 +13,13 @@
 //                   PARA_EOT_DELAY_BYTES entries of a byte and its flags; on the EoT request
 //                   the stored tail is scanned backwards and cut at the last payload byte.
 // Parent          : m_ftel_dphy_rx_hs_datapath
-// HAS             : draft v0.14, §4.6, Figure 4-9, ADR-006, Appendix B
+// HAS             : draft v0.16, §4.6, Figure 4-9, Table 4-7, ADR-006, Appendix B
 // Clock domains   : byte
 // REQ-IDs         : REQ-016, REQ-017, REQ-024, REQ-159, REQ-164, REQ-166, REQ-169, REQ-170,
 //                   REQ-171, REQ-172, REQ-173, REQ-174, REQ-175, REQ-176, REQ-177, REQ-178,
-//                   REQ-179, REQ-180, REQ-187, REQ-188, REQ-249, REQ-252, REQ-274, REQ-318,
-//                   REQ-320
+//                   REQ-180, REQ-186, REQ-187, REQ-188, REQ-249, REQ-252, REQ-274, REQ-318, REQ-320,
+//                   REQ-369, REQ-370, REQ-371, REQ-372, REQ-373, REQ-374, REQ-375, REQ-376,
+//                   REQ-377, REQ-378
 // OPEN            : ADR-006, ADR-007, S12
 //
 // Evolution History:
@@ -50,7 +51,6 @@ module m_ftel_dphy_rx_eot
   // ---- data out: oldest entry, the PPI outputs of the lane ----
   output hs_entry_t                     o_entry,
   // ---- status ----
-  output logic                          o_eot_done,
   output logic                          o_eot_sync_err,
   // ---- configuration ----
   // CDC_QUASI_STATIC: eot_skip_bytes (HAS §4.1)
@@ -85,8 +85,10 @@ module m_ftel_dphy_rx_eot
   logic [C_D-1:0]          w_flag_clr;
   logic [C_D-1:0]          w_active_clr;
 
-  // A programmed skip beyond the line is clamped to its oldest entry (rtl_notes D-12).
-  // REQ-173, REQ-318
+  // A programmed skip beyond the line is clamped to its oldest entry (rtl_notes D-12). The value of
+  // Table 3-2 keeps one byte of margin to the payload; Table 4-7 gives the trailer bytes it leaves.
+  // REQ-173, REQ-186, REQ-318, REQ-369, REQ-371, REQ-372, REQ-373, REQ-374, REQ-375, REQ-376, REQ-377,
+  // REQ-378
   assign w_skip = (int'(i_cfg_eot_skip_bytes) >= C_D) ? C_IDX_W'(C_D - 1) : C_IDX_W'(i_cfg_eot_skip_bytes);
 
   // ------------------------------------------------------------------ backward scan
@@ -108,7 +110,7 @@ module m_ftel_dphy_rx_eot
   end
 
   // Newest candidate: the lowest set bit of w_cand, as a one-hot vector, then its index.
-  // OPEN ADR-006 REQ-274: the tail is buffered and cut at the last transition before THS-SKIP; the cut is exact above ~270 Mb/s only
+  // OPEN ADR-006 REQ-274: the tail is buffered and cut at the last transition before THS-SKIP; guaranteed range in HAS Table 4-7
   // REQ-174, REQ-175
   assign w_first = w_cand & (~w_cand + 1'b1);
   assign w_found = |w_cand;
@@ -124,8 +126,9 @@ module m_ftel_dphy_rx_eot
   end
 
   // The last payload bit is bit 7: that entry is the last byte; otherwise it is dropped too. The
-  // last active entry after the cut is that entry, or the one before it when it is dropped.
-  // REQ-176, REQ-178
+  // last active entry after the cut is that entry, or the one before it when it is dropped. A cut
+  // inside the transition junk thus keeps the trail bytes before it.
+  // REQ-176, REQ-178, REQ-370
   assign w_last_full = (reg_data[w_e][C_W-1] != w_tv);
   assign w_last_idx  = {1'b0, w_e} + (w_last_full ? '0 : (C_IDX_W+1)'(1));
 
@@ -203,10 +206,9 @@ module m_ftel_dphy_rx_eot
                      skewcal:    reg_skewcal[C_D-1],
                      active:     reg_active[C_D-1]};
 
-  // EoT done leaves once the cut is decided, before the line drains; a partial last byte or a
-  // tail without a transition is an EoT sync error (status only).
-  // REQ-175, REQ-176, REQ-179, REQ-180
-  assign o_eot_done     = i_eot_req;
+  // A partial last byte or a tail without a transition is an EoT sync error (status only). EoT done
+  // leaves the parent at the synchronized fall, before the cut (m_ftel_dphy_rx_hs_datapath).
+  // REQ-175, REQ-176, REQ-180, REQ-370
   assign o_eot_sync_err = i_eot_req && (!w_found || !w_last_full);
 endmodule
 `default_nettype wire

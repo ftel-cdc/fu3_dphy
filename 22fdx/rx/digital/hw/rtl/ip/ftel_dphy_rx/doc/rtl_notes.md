@@ -1,6 +1,6 @@
 # ftel_dphy_rx — RTL Design Notes (HAS ↔ RTL bridge and decisions)
 
-> Companion to `spec.md` (the RTL follows HAS draft v0.14; v0.15 changes timing figures only) and `rtl_rule.md` (v1.2). It records which HAS section each RTL block implements and why each RTL-level decision was
+> Companion to `spec.md` (the RTL follows HAS draft v0.16 in Block No. 4 and the configuration package, v0.14 elsewhere; v0.15 changes timing figures only) and `rtl_rule.md` (v1.2). It records which HAS section each RTL block implements and why each RTL-level decision was
 > made, so a reviewer can trace the RTL back to the HAS and a later change stays in one place. Same
 > role as `ftel_intctl/doc/rtl_notes.md`.
 > Markers: ✅ checked by a tool · ⚠️ assumption · 🔍 to confirm. Each decision states its confidence.
@@ -44,10 +44,24 @@
   standard-cell delay line. The samplers stay hand-placed. No behaviour change: the RTL is unchanged
   and its headers keep HAS v0.14; only the configuration package was regenerated (header v0.15), and
   both lints were rerun (§7).
+- **HAS v0.16, 2026-10-19** (`fpga/PLAN_TN1_FIX.md`, approved the same day). The first simulation of
+  the whole receiver, pads to PPI, against AMD's D-PHY RX (TN1 of the FPGA plan, XSIM, `fpga/exp1`,
+  §9) found two faults in Block No. 4, fixed together with HAS v0.16:
+  - the synchronized fall of the sync-search start reached Block No. 4 before the bytes of the same
+    moment, so the sync search cleared them and the cut lost the last bytes below about 800 Mb/s.
+    `_hs_datapath` now holds the fall three byte clocks (D-26), and `eot_skip_bytes` gained the data
+    path latency it lacked (Table 3-2, Table 4-7; its constant refitted on 2026-10-20 with LP-11 at
+    every phase of `core_clk`, D-26);
+  - in every burst, one `rxvalidhs_x` pulse left after `rxactivehs_x` fell (against REQ-249).
+    `_sync_search` sets valid, sync and SoT error only while the start is High (D-27).
+
+  EoT done now leaves `_hs_datapath` at the synchronized fall, so `_eot` lost its `o_eot_done` port.
+  The headers of the three files and the package say HAS v0.16; the other files keep v0.14.
 - **Checked:** VCS `+lint=all`, SpyGlass `lint_rtl` (one waiver, D-19), `check_rtl_rules.py`,
-  `flow_check.py --phase P1|P2|P3a` (§7). **Simulated: Block No. 1 only**, with a directed TB at
-  five line rates (§8). The rest of the IP is not simulated: lint-clean does not mean functionally
-  correct. The unit testbenches (M3) and the CDC/RDC runs (M4) are the next steps. STA after layout
+  `flow_check.py --phase P1|P2|P3a` (§7). **Simulated:** Block No. 1 with a directed TB at five line
+  rates (§8), and the whole receiver behind an AFE model in XSIM by TN1 (§9): dummy bursts, not
+  CSI-2 packets, and no escape, ULPS or deskew traffic. The unit testbenches (M3) and the CDC/RDC runs
+  (M4) are the next steps. STA after layout
   comes with the target technology (M7).
 - **Release R1 only.** Block No. 5 (deskew calibration, R2, ADR-004) is absent: `PARA_DESKEW_EN` is
   locked to 0 and the delay taps are tied to 0. Block No. 8 (configuration and status, K3/ADR-005)
@@ -95,7 +109,7 @@ packages: ftel_dphy_rx_config_pkg (generated from config/ftel_dphy_rx.yaml), fte
 | §4.3 Block No. 1 | `_afe_adapter`, `_lp_filter`, `_hs_deser`, `_byte_clk`, `_clk_act`, `_cg`, `_clk_inv` | D-5, D-6, D-17 – D-25 |
 | §4.4 Block No. 2 | `_cl_ctrl` | D-8, D-9 |
 | §4.5 Block No. 3 | `_dl_ctrl`, `_esc_decoder` | D-7, D-8, D-9 |
-| §4.6 Block No. 4 | `_hs_datapath`, `_sync_search`, `_eot` | D-12, D-13, D-15 |
+| §4.6 Block No. 4 | `_hs_datapath`, `_sync_search`, `_eot` | D-12, D-13, D-15, D-26, D-27 |
 | §4.7 Block No. 6 | `_timing_init` | D-10, D-11 |
 | §4.9 Block No. 7 | `_ppi_out` | — |
 | §4.10 Block No. 8 | absent | D-2 |
@@ -266,6 +280,34 @@ it before its single register. Same function; the XOR now sits in front of Block
 `i_byte_clk` of the HS path registers (rtl_rule N11: a block clocks its flip-flops from inputs) and
 goes to Blocks No. 4, 6 and 7.
 
+**D-26 Hold of the EoT request** (HIGH, HAS v0.16 §4.6, REQ-367, REQ-368, REQ-379). `_hs_datapath`
+keeps the synchronized sync-search start High for `C_EOT_HOLD_BYTES` = 3 byte clocks after it falls:
+a 3-bit shift register of the synchronized level, ORed with it. The sync search, the active flag and
+the EoT request follow the held level.
+- Why: at the line the bytes of the LP-11 detection reach the delay line 4–5 byte clocks after their
+  last bit (Λ = 2.06, the window and the entry register), while the synchronized fall arrives 2–3
+  byte clocks after the core detection. Without the hold, the sync search cleared its window and lock
+  on the fall, so at 80 Mb/s the last 5–6 bytes of a burst were lost for every `eot_skip_bytes`, and
+  at 260 Mb/s only `eot_skip_bytes` = 0 was exact.
+- Why 3: measured windows of exact values at 260 Mb/s, minimum trail: {0} without a hold, {1, 2}
+  with 2, {2, 3} with 3. With 3 the crossing and the data path latency cancel to within one byte
+  clock, and the edge where the cut reaches the payload is ⌊(THS-TRAIL,min + 24 ns) / byte period⌋
+  at every rate from 260 to 1500 Mb/s (Table 3-2), measured with LP-11 at every phase of the byte
+  clock and of `core_clk` (`fpga/exp1/run_exp1.sh window`). The first fit, 27 ns, came from runs with
+  `core_clk` in a fixed ratio to the line and left no margin at 600, 800 and 1440 Mb/s.
+- A rise of the start during the hold (only below 260 Mb/s at the minimum THS-EXIT) forces one Low
+  cycle, the EoT request of the previous burst, and delays the new start by one byte clock.
+- EoT done is the synchronized fall, before the hold, so the ADR-006 round trip and S5 do not change
+  (no missed burst at 80 Mb/s from THS-EXIT + TLPX ≥ 315 ns; S5 asks 415 ns).
+- The hold length is the default of the open ADR-006 decision: tag `// OPEN ADR-006 REQ-379`.
+
+**D-27 Valid, sync and SoT error only while the search has started** (HIGH, HAS v0.16 §4.6, REQ-366).
+In the cycle where the start fell, `reg_locked` was still 1, so the entry of that cycle had valid = 1
+and active = 0. `_eot` shifts the entry of the cycle into the line without the cut, so one
+`rxvalidhs_x` pulse, a byte after the trail, left after `rxactivehs_x` in every burst on every lane
+(TN1, against REQ-249). `_sync_search` now ANDs valid, sync and SoT error with the start; the
+skew-calibration flag is kept, as §4.6 asks.
+
 ## 5. Notes for the HAS (no RTL question pending)
 
 No CF-GAP stop occurred: every behaviour visible at the PPI or the AFE is defined by the HAS (v0.11; Block No. 1
@@ -402,13 +444,16 @@ One line per correction round (rule 1 of `/dphy_rtl_gen`: at most 3 rounds per m
 | whole IP (SpyGlass, HAS v0.14) | 1 | STARC05-1.3.1.3 (AsyncResetOtherUse): the gate-enable reset synchronizer output is also the enable of the clock gate | intended structure of rtl_rule K2 (4), waived with D-19 in `lint/lint_waiver.tcl` (first attempt: `-comment {...}` is an SGDC syntax error, the comment must be a quoted string) |
 | whole IP (`flow_check` P3a, HAS v0.14) | 1 | CF-COVER REQ-083 (termination enable from the FSM register, no extra timer) untagged | tags added at the state registers of `_dl_ctrl` and `_cl_ctrl` |
 | whole IP (`flow_check` P3a, HAS v0.15) | 1 | CF-DRIFT: the configuration package was regenerated (header HAS v0.15) after both lints | lints rerun, no RTL change: VCS 0 / 0 / 0 for 1, 2, 4 lanes; SpyGlass `lint_rtl` 0 / 0 / 0, one waiver (D-19) |
+| `_hs_datapath`, `_sync_search`, `_eot` (HAS v0.16) | 1 | VCS 0 / 0 / 0 and SpyGlass 0 / 0 / 0 at the first round; `flow_check` P3a CF-COVER REQ-186 (guaranteed range of the trailer removal, a constraint in v0.16, a decision before) untagged | tag added at `w_skip` of `_eot` |
 
-Final state (HAS v0.15, rtl_rule 1.2): `check_rtl_rules` 0 violations on 22 files; VCS 0 Error /
+Final state (HAS v0.16, rtl_rule 1.2): `check_rtl_rules` 0 violations on 22 files; VCS 0 Error /
 0 Warning / 0 Lint for `PARA_NUM_LANES` = 1, 2, 4; SpyGlass `lint_rtl` 0 Fatal / 0 Error / 0 Warning,
 one waiver (D-19).
 VCS `+lint=all` does not report latches or unused nets (probe of 2026-10-03); SpyGlass covers them.
 
 ## 8. Simulation of Block No. 1 (directed, 2026-10-07)
+
+Rerun on 2026-10-19 after the Block No. 4 fix of HAS v0.16: PASS at the five line rates.
 
 `sim/tb_afe_adapter/run.sh`: `tb_afe_adapter.sv` drives the core `m_ftel_dphy_rx` with four lanes.
 The clock-lane FSM, the reset synchronizers and the byte-clock enable are the real ones.
@@ -440,3 +485,58 @@ edge toggle aliases. At 800 Mb/s it is seen up to about 3 DDR periods early, fro
 
 One TB artefact was corrected before the final runs: the half UI is rounded to the 1 ps simulation
 resolution, and the expected periods are derived from it.
+
+## 9. Simulation of the whole receiver against AMD's D-PHY RX (TN1, XSIM, 2026-10-19/20)
+
+`fpga/exp1/run_exp1.sh` (TN1 of `fpga/PLAN_TN1_TN3.md`; fix plan `fpga/PLAN_TN1_FIX.md`) sends one
+D-PHY line from `dphy_line_gen.sv` to two receivers:
+- AMD's D-PHY RX (mipi_dphy 4.3, Vivado 2025.2), generated for each rate and lane count;
+- the core `m_ftel_dphy_rx` behind `afe_model.sv` (ADR-001 option A: LP-RX outputs, unsampled HS
+  bit, DDR clock; HS-RX output 0 outside HS).
+
+Both PPIs are written as ILA-style CSVs and compared with the truth file of the generator by
+`fpga/tools/csi2_dump.py bursts`. The bursts carry dummy data, not CSI-2 packets, and there is no
+escape, ULPS or deskew traffic. The RTL is zero-delay and `core_clk` runs at 200 MHz.
+
+A burst passes on a lane when:
+- the payload arrives intact and in order;
+- `rxsynchs` is seen once and no error flag is raised;
+- no `rxvalidhs` occurs outside a burst;
+- for ftel_dphy_rx only, the trailer bytes stay within HAS Table 4-7. AMD's receiver keeps the
+  trailer, so it has no limit.
+
+| Scenario | Rate (Mb/s), lanes | What varies | AMD: trailer bytes | ftel_dphy_rx: trailer bytes | Result |
+|---|---|---|---|---|---|
+| E1-1 | 1440, 4 | 1 to 1024 bytes | 16–17 | 0 | PASS |
+| E1-2a–c | 1440, 4 | PRBS9, sync-like data, uneven lanes | 16–17 | 0 | PASS |
+| E1-3a–g | 1440, 4 | THS-PREPARE and THS-ZERO at their limits, minimum TRAIL/EXIT/LPX, clock skew, lane skew up to 139 ps, AFE noise | 14–17 | 0 | PASS |
+| E1-4a | 260, 4 | default and minimum timing | 1–2 | 0; 0–2 in 8 of 40 bursts at minimum timing (limit 4) | PASS |
+| E1-4b, E1-4c | 800 and 1500, 4 | rate | 9 and 17–18 | 0 | PASS |
+| E1-4d, E1-4e | 1440, 2 and 1 | lanes | 16–17 | 0 | PASS |
+| E1-5, 96 runs | 260–1500, ftel_dphy_rx alone | trail min/def/max × jitter × 0 or 40 ns of junk, `core_clk` 400 ppm slow | — | within Table 4-7; most 12, at 1440 Mb/s with junk | PASS |
+| R-80 | 80, ftel_dphy_rx alone | outside the guarantee | — | 0–1, in 10 of 36 bursts | report only |
+
+How the results were reached:
+
+1. **First run, 2026-10-19, RTL of HAS v0.15.** AMD's receiver passed everything; ftel_dphy_rx
+   failed two ways.
+   - F1: below about 800 Mb/s the last bytes of a burst were lost. Fixed by D-26 and the new
+     `eot_skip_bytes` formula.
+   - F2: one `rxvalidhs` pulse after `rxactivehs` in every burst. Fixed by D-27.
+
+   The outputs of this run are kept in `fpga/work/exp1/_v015` (gitignored).
+2. **Second run, RTL of HAS v0.16.** Everything passed except two E1-5 runs, which kept more trailer
+   bytes than the first Table 4-7 allowed (4 at 400 Mb/s without junk, 10 at 1200 Mb/s with junk).
+   The payload was intact. That table had been measured with `core_clk` in a fixed ratio to the
+   line, so LP-11 met only a few of its phases.
+3. **Window measurement.** `run_exp1.sh window` adds `+CORE_HALF=2.501` (`core_clk` 400 ppm slow,
+   so it drifts through every phase). It runs `eot_skip_bytes` from the model value − 1 to + 2, with
+   280 bursts on four lanes per cell; `eot_window.py` prints the table.
+   - At 600, 800 and 1440 Mb/s the model value + 1 already lost payload, in 1 to 7 of 1120 bursts.
+   - The constant of Table 3-2 was therefore refitted from 27 to 24 ns (D-26). The values change
+     at 600 Mb/s from 5 to 4, at 800 from 7 to 6 and at 1440 from 14 to 13.
+   - With the new values, + 1 loses no payload at any rate and + 2 loses some at every rate.
+   - Table 4-7 was rewritten from this measurement (HAS v0.16, amended 2026-10-20).
+4. **Final run, 2026-10-20.** All 113 scenarios pass for both receivers (`run_exp1.sh summary`). The
+   full sequence took 8 minutes, including the new compilation of the six Vivado builds after the
+   source change.

@@ -1,6 +1,6 @@
 # ftel_dphy_rx — MIPI D-PHY Receiver High-Level Architecture Specification
 
-**DRAFT v0.15** — architecture level. Items that are not yet agreed are marked **OPEN** with the
+**DRAFT v0.16** — architecture level. Items that are not yet agreed are marked **OPEN** with the
 default assumption used by this draft; they are tracked in chapter 9.
 
 ## Revision and History
@@ -22,6 +22,7 @@ default assumption used by this draft; they are tracked in chapter 9.
 | v0.13 (draft) | 2026-10-06 | Ho Khanh Linh | AFE boundary corrected, as announced by the AFE team (ADR-001 option A): the AFE contains the HS-RX, the LP-RX and the switched termination only; v0.12 had read the announcement of 2026-10-03 as option B (sampler and 1:8 deserializer in the AFE). This IP now samples the HS bits on both edges of the DDR clock, deserializes them 1:8, generates `rxbyteclkhs` through a clock gate and detects the clock activity for TCLK-MISS (Block No. 1, §4.3). The AFE interface carries one unsampled bit stream per data lane and the DDR clock (§5.2); the word latency Λ is set by Block No. 1. New design notes: why the termination stays switched by this IP, and the sampler timing, whose sign-off corners are open (§4.3, ADR-001). Clocks and crossings (§4.1), start of `rxbyteclkhs` (§4.2), deskew delay line (§4.8, ADR-004), Appendix B row TSETUP[RX] / THOLD[RX], and §1, §2, §5, §8, chapter 9 and Appendix C updated |
 | v0.14 (draft) | 2026-10-07 | Ho Khanh Linh | Errata found while designing the RTL of Block No. 1 (§4.3). A deserializer that samples on both edges has one path of half a DDR clock period: the falling-edge parallel register takes its load phase from the rising-edge strobe of the divider through one falling-edge flip-flop; v0.13 had stated that no path was shorter than one period. The margin of that path is added to the design note on the sampler timing: about 110 ps at 1500 Mb/s and none at 1792 Mb/s, at 1.35 V and 125 °C. The byte-clock divider and the load phase are held in reset while the clock gate is closed, so `rxbyteclkhs` is Low while the gate is closed and restarts with a complete pulse (§4.1, §4.2). Both clock-activity toggles run on the rising edge of the DDR clock, one changing on every edge and one on every fourth edge, independent of the divider (§4.1). The HS path registers each word in two stages, which set Λ = 2. The loss of the clock is stated as an upper bound: `cl_rxclkactivehs` falls at most 60 ns after the last clock edge; the range of 50–60 ns did not hold at the lowest rates, where the last edge is a falling edge half a period after the last toggle change, nor where a toggle aliases (§4.3, §4.4, §5.1, Appendix B). Interfaces unchanged |
 | v0.15 (draft) | 2026-10-10 | Ho Khanh Linh | Timing figures moved from the 130 nm cells assumed until v0.14 to 22 nm cells, the node of the target: sampler aperture, clock buffers, the window left for the clock-to-data delay differences and the half-period path, now from a trial synthesis (§4.3 design note); the steps of a standard-cell delay line (§4.8); the basis of the timing score of ADR-001. The 1.2 V, 175 °C corner of the 130 nm cells no longer applies, and the half-period path at 1792 Mb/s is no longer an open risk. The samplers stay hand-placed. The cell library, its body bias and the sign-off corners are open items (chapter 9). No behaviour, interface or figure changes |
+| v0.16 (draft) | 2026-10-19 | Ho Khanh Linh | EoT corrected after the first simulation of the whole receiver, pads to PPI: the synchronized fall of the sync-search start reached Block No. 4 before the bytes of the same moment, so below about 800 Mb/s the last bytes of a burst were lost. Block No. 4 now holds that fall for three byte clocks; EoT done still leaves at the synchronized fall (§4.1, §4.5, §4.6). `eot_skip_bytes` lacked the latency of the data path: new formula from the value that cuts into the payload, with one byte of margin, fitted with LP-11 at every phase of the byte clock and of `core_clk` (Table 3-2, Appendix B). Range of the trailer removal measured and stated: no payload byte lost from 260 Mb/s; no trailer byte from 600 Mb/s without transition junk; otherwise some bursts keep trailer bytes, at most 4 at 260 Mb/s and 12 at 1500 Mb/s (Table 4-7, ADR-006). `rxvalidhs_x`, `rxsynchs_x` and `errsoths_x` only while the search has started, so `rxvalidhs_x` no longer pulses after `rxactivehs_x` falls (§4.6) |
 
 ## Conventions
 
@@ -267,7 +268,7 @@ Synthesis-time parameters. Values that depend on an open item show the default u
 | 5 | `PARA_LPDT_EN` | 0 | Configurable | Instantiates LPDT reception. When 0, LPDT PPI outputs are tied inactive (OPEN K2) |
 | 6 | `PARA_LP_SYNC_STAGES` | 2 | Fixed | Synchronizer depth of the LP-RX inputs into `core_clk` |
 | 7 | `PARA_LP_FILTER_CYC` | 2 ⚠️ | Configurable | Glitch filter on LP states, in `core_clk` cycles. Bounded by the termination-enable budget (Appendix B) and by the maximum LP glitch width passed by the AFE (OPEN ADR-001) |
-| 8 | `PARA_EOT_DELAY_BYTES` | 32 (R1), 36 (R2) ⚠️ | Configurable | Depth of the EoT delay line (Block No. 4). Shall hold TEOT,max plus the LP-11 detection latency and the crossing at the highest line rate: about 30 bytes at 1500 Mb/s, 35 at 1792 Mb/s (§4.6) ⚠️. S5 confirms the Tx timing. The depth also sets the clock the Tx must supply after the last burst (S12) |
+| 8 | `PARA_EOT_DELAY_BYTES` | 32 (R1), 36 (R2) ⚠️ | Configurable | Depth of the EoT delay line (Block No. 4). Shall hold TEOT,max plus the LP-11 detection latency, the crossing and the hold of the EoT request at the highest line rate, less the data path latency: about 30 bytes at 1500 Mb/s, 35 at 1792 Mb/s (§4.6) ⚠️. S5 confirms the Tx timing. The depth also sets the clock the Tx must supply after the last burst (S12) |
 | 9 | `PARA_SYNC_SEARCH_BYTES` | 16 ⚠️ | Configurable | Byte clocks searched for the sync sequence before `errsotsynchs_x` is raised, counted from the first non-zero word after the sync-search start ⚠️ (§4.6); a burst that ends earlier without a lock raises it at its end |
 | 10 | `PARA_DLY_TAP_WIDTH` | To be determined | Configurable | Width of the delay-tap control of a delay line in front of the samplers (R2, ADR-004; the AFE has none) |
 
@@ -282,7 +283,7 @@ Run-time programmable timing values (reset defaults; the configuration path is O
 | `tinit_cyc` | 20 000 | TINIT,SLAVE ≥ 100 µs (D-PHY [1] ✅) |
 | `hs_rx_timeout_cyc` | 2^18 (1.31 ms) ⚠️ | Longer than the longest burst: 5802-byte line at 80 Mb/s on one lane ≈ 580 µs; the longest burst per lane is OPEN K8 |
 | `esc_timeout_cyc` | 2^18 ⚠️ | Escape-mode watchdog (D-PHY [1] ✅, informative); scope and expiry in §4.7 |
-| `eot_skip_bytes` | 16 ⚠️ | Newest delay-line entries discarded before the last-transition search (§4.6): (LP-11 detection latency ≈ 20 ns + crossing ≈ 2.5 byte clocks + centre of the cut window (40 + 60 + 4·UI) / 2 ns) / byte period; at 1500 Mb/s (20 + 13.3 + 51.3) / 5.33 ≈ 16. Rate dependent, programmed with `hs_settle_cyc` ⚠️ |
+| `eot_skip_bytes` | 14 ⚠️ | Newest delay-line entries discarded before the last-transition search (§4.6). E = ⌊(THS-TRAIL,min + 24 ns) / byte period⌋ is the smallest value that can cut into the payload: THS-TRAIL,min = max(8·UI, 60 ns + 4·UI), and 24 ns is the shortest delay from LP-11 to the fall of the sync-search start, (`PARA_LP_SYNC_STAGES` + `PARA_LP_FILTER_CYC` + 1) × 5 ns = 25 ns less 1 ns, fitted to the RTL with LP-11 at every phase of the byte clock and of `core_clk`; the hold of Block No. 4 offsets the crossing against the data path latency (§4.6). `eot_skip_bytes` = max(E − 2, 0) keeps one byte of margin to E; at 1500 Mb/s ⌊(62.7 + 24) / 5.33⌋ − 2 = 14. The difference between the LP-RX and HS-RX delays of the AFE adds to the 24 ns (OPEN ADR-001). Rate dependent, programmed with `hs_settle_cyc` (Appendix B) ⚠️ |
 
 ---
 
@@ -310,7 +311,7 @@ Clock-domain crossings:
 | DDR clock → `rxbyteclkhs` | Words of the deserializer of Block No. 1 | Synchronous: `rxbyteclkhs` is generated from the DDR clock, and each word is held for four DDR clock periods; timed by STA, no synchronizer ⚠️ |
 | DDR clock → `core_clk` | Clock-activity toggles of Block No. 1 | Level, 2-flop synchronizers; the clock is active while one toggle has changed within the last 8 `core_clk` cycles (§4.3) ⚠️ |
 | `core_clk` → DDR clock | Byte-clock enable (Block No. 2, High in CL_HS_CLK) | Reset synchronizer in the DDR clock: cleared at once when the enable falls, set on the second DDR clock edge after it rises; it enables the clock gate of `rxbyteclkhs` and releases the byte-clock divider (§4.3) ⚠️ |
-| `core_clk` → `rxbyteclkhs` | Sync-search start (Block No. 3 → No. 4) | Level, 2-flop synchronizer. Block No. 4 starts the sync search on its rise and takes its fall as the EoT request, so the start, the active flag and the EoT request cannot arrive out of order ⚠️ |
+| `core_clk` → `rxbyteclkhs` | Sync-search start (Block No. 3 → No. 4) | Level, 2-flop synchronizer. Block No. 4 starts the sync search on its rise; it holds the fall for three byte clocks and takes the held fall as the EoT request, so the start, the active flag and the EoT request cannot arrive out of order ⚠️. EoT done returns at the fall before the hold (§4.6) |
 | `rxbyteclkhs` → `core_clk` | EoT done (Block No. 4 → No. 3) | Toggle synchronizer |
 | `core_clk`, `rxbyteclkhs` → configuration clock | Status events of Blocks No. 2, 3 and 4; lane FSM states | Events: toggle synchronizers into the flags and counters of Block No. 8 ⚠️. FSM states: 2-flop synchronizers; a read during a state change may be incoherent (debug use) ⚠️ |
 | Enables (`lite_aclk`) → `core_clk` | `cl_enable`, `dl_enable_x`, `forcerxmode_x` | Level, 2-flop synchronizers; `lite_aclk` is the register clock of the CSI-2 Rx controller, and the PPI defines the enables as level sensitive **[CSI]** C14 |
@@ -594,9 +595,10 @@ below roughly 240 Mb/s, and the lane then misses that burst.
   only when THS-EXIT + TLPX exceeds the round trip, about 32·UI + 15 ns (415 ns at 80 Mb/s) ⚠️; the
   Tx side is asked in S5. Otherwise the lane waits in DL_HS_WAIT for the LP-11 that ends that burst.
 - Order at the PPI, OPEN ADR-006: the CSI-2 Rx controller expects `stopstate_x` to rise at or after
-  the last byte **[CSI]**. EoT done leaves Block No. 4 once the cut is decided, before the delay
-  line drains (§4.6), so `stopstate_x` can rise up to `PARA_EOT_DELAY_BYTES` byte clocks (3.2 µs at
-  80 Mb/s) before the last byte reaches the PPI ⚠️ (Figure 5-1); the CSI team is asked. The controller
+  the last byte **[CSI]**. EoT done leaves Block No. 4 at the synchronized fall of the sync-search
+  start, before the cut and before the delay line drains (§4.6), so `stopstate_x` can rise up to
+  `PARA_EOT_DELAY_BYTES` byte clocks (3.2 µs at 80 Mb/s) before the last byte reaches the PPI ⚠️
+  (Figure 5-1); the CSI team is asked. The controller
   routes `stopstate_x` to IRQ_STATUS bit 11 and LANE_STATUS only, and its Burst FSM opens and
   closes a burst on `rxactivehs_x` **[CSI]**. Sending EoT done only after the drain would meet that
   expectation, but the lane would then miss bursts at the minimum THS-EXIT + TLPX below roughly
@@ -645,7 +647,7 @@ that Block No. 1 starts (§1).
 - **Deskew-burst detection (R1 and R2).** A run of ≥ 16 ones after HS-0 (v1.2 skew-calibration sync,
   a run of ones [3] 🌐) asserts `rxskewcalhs_x` until after the lane has returned to Stop state; no
   `rxvalidhs_x` or `rxsynchs_x` is produced **[CSI]** C9. In R2 the burst is forwarded to Block No. 5.
-  - The skew-calibration flag is set on every delay-line entry written from the detection until the
+  - The skew-calibration flag is set on every delay-line entry written from the detection until the held
     sync-search start falls. At the PPI `rxskewcalhs_x` therefore falls after `rxactivehs_x`, by about
     `eot_skip_bytes` byte clocks, and after `stopstate_x` rises (Figure 5-3) ⚠️; the CSI-2 Rx
     controller expects `rxskewcalhs_x` to stay asserted after `rxactivehs_x` has fallen **[CSI]**.
@@ -664,11 +666,16 @@ that Block No. 1 starts (§1).
   flags: valid, sync, SoT error, SoT sync error, skew calibration and active. Every PPI output of the
   lane is taken from the oldest entry, so the outputs follow the line by `PARA_EOT_DELAY_BYTES` byte
   clocks (3.2 µs at 80 Mb/s) and consecutive bursts leave in order ⚠️. `rxactivehs_x` is the active
-  flag at the output: it is set for every entry written while the synchronized sync-search start is
-  High, so an HS entry aborted in DL_HS_TERM (LP-11 before THS-SETTLE ends) gives no `rxactivehs_x` ⚠️.
-- **EoT and trailer removal** (Figure 4-9). On the EoT request (the fall of the sync-search start:
-  LP-11, the HS RX timeout or `forcerxmode_x` in Block No. 3) the stored tail is scanned backwards
-  (D-PHY [1] ✅):
+  flag at the output: it is set for every entry written while the synchronized sync-search start,
+  held as below, is High, so an HS entry aborted in DL_HS_TERM (LP-11 before THS-SETTLE ends) gives no
+  `rxactivehs_x` ⚠️. The valid, sync and SoT error flags are set only on such entries, so `rxvalidhs_x`
+  never stays High after `rxactivehs_x` falls ⚠️.
+- **EoT and trailer removal** (Figures 4-8 and 4-9). The sync-search start falls on LP-11, on the HS
+  RX timeout or on `forcerxmode_x` in Block No. 3. Block No. 4 holds its synchronized fall for three
+  byte clocks: the sync search, the active flag and the EoT request follow the held level, so the
+  bytes received up to the LP-11 detection, which reach the delay line 4–5 byte clocks after their
+  last bit at the line, are stored before the cut ⚠️. On the EoT request, the fall of the held level,
+  the stored tail is scanned backwards (D-PHY [1] ✅):
   - the `eot_skip_bytes` newest entries are discarded: the THS-SKIP interval and the detection
     latency (Appendix B) ⚠️;
   - the newest remaining bit gives the trailer value; the newest entry that is not uniformly equal to
@@ -682,7 +689,9 @@ that Block No. 1 starts (§1).
   - entries after the last byte lose their valid and active flags, so `rxactivehs_x` falls after the
     last byte. A burst without a lock, without a deskew detection and without `errsotsynchs_x` at the
     search limit gets the SoT sync error flag on its last active entry ⚠️. EoT done goes to Block No. 3
-    once the cut is decided, before the delay line drains ⚠️.
+    at the synchronized fall, before the hold ends, so the hold does not delay the return to Stop. A
+    rise of the sync-search start during the hold, possible only below 260 Mb/s at the minimum
+    THS-EXIT, ends the hold with one Low cycle, so two bursts never merge ⚠️.
 - **Timeout.** The HS RX timeout of Block No. 3 forces the same EoT sequence, so `rxactivehs_x`
   always falls while the byte clock runs **[CSI]** C11; the lane then waits in DL_HS_WAIT until the
   line returns to LP-11 (§4.5).
@@ -709,21 +718,52 @@ between Λ and Λ − 1 byte clocks before the entry into DL_HS_RX, at every lin
 - The HS-RX output during THS-PREPARE, and so the words, may be junk, including all ones (ADR-001). Because they are ignored,
   they cannot make the deskew detection take a normal burst for a deskew burst.
 
-**Design note ⚠️ (EoT cut at low rates, OPEN ADR-006).** The cut must fall inside the trailer: after
-the last payload bit, and at least THS-SKIP,min = 40 ns before LP-11. With a minimum trailer
-(THS-TRAIL ≥ 60 ns + 4·UI, D-PHY [1] ✅) this window is 20 ns + 4·UI wide. The EoT request reaches
-this block with an uncertainty of one byte clock plus one `core_clk` cycle (8·UI + 5 ns), so a fixed
-`eot_skip_bytes` places the cut correctly only above roughly 270 Mb/s.
-- Below that rate, a late cut delivers trailer bytes after the packet footer, and an early cut loses
-  payload bytes (`err_wc` in the CSI-2 Rx controller). The controller finds the end of a packet from
-  its Word Count; whether it ignores bytes after the footer is not known ⚠️.
-- Options: bias `eot_skip_bytes` late at low rates; time-stamp the LP-11 detection against byte-clock
-  edges seen in `core_clk`; or deliver the trailer and let the CSI-2 controller drop it, since D-PHY
-  [1] ✅ allows EoT processing by the protocol.
+**Design note ⚠️ (EoT cut and its guaranteed range, ADR-006).** The cut is exact when the first
+entry examined after the `eot_skip_bytes` skipped ones lies wholly in the trail: after the last
+payload byte, and before both the junk of the line transition, which may start THS-SKIP,min = 40 ns
+before LP-11 (D-PHY [1] ✅), and the HS-RX output after LP-11. Three things move that entry from burst
+to burst: the phase of LP-11 within a byte (one entry), the LP-11 detection and the crossing of the
+fall (one `core_clk` cycle plus one byte clock) and the length of the trail.
+- `eot_skip_bytes` (Table 3-2) keeps one byte of margin to the smallest value that cuts into the
+  payload, so the payload is never lost. LP-11 lies at most 29 ns plus one byte period before the
+  newest entry (the 24 ns of Table 3-2, one `core_clk` cycle and one byte clock): without junk the
+  cut is exact when `eot_skip_bytes` byte periods cover that, from 600 Mb/s. With 40 ns of junk the
+  entry examined needs 40 ns more; of the rates of Table 4-7 only 1500 Mb/s has them, by 0.3 ns.
+- A cut that misses keeps the trail bytes before the entry examined: they leave after the last
+  payload byte with `rxvalidhs_x` High, at most ⌊(THS-TRAIL + 29 ns) / byte period⌋ −
+  `eot_skip_bytes` of them, and the EoT sync error status is raised when the last transition is not
+  on a byte boundary. With THS-TRAIL at TEOT,max this is the last column of Table 4-7, fewer than the
+  bytes of the trail.
+- Table 4-7 was measured on the RTL with bursts of 1 to 16 bytes on four lanes, 280 bursts per setting,
+  LP-11 at every phase of the byte clock (0 to 7 extra trail bits) and of `core_clk` (400 ppm slow),
+  THS-TRAIL at its minimum and at TEOT,max − 8·UI, and random bits in the last 0 or 40 ns of the
+  trail. One above the Table 3-2 value lost no payload byte either; two above lost some at every rate.
+
+**Table 4-7 — Trailer removal with the Table 3-2 value of `eot_skip_bytes`**
+
+| Line rate (Mb/s) | `eot_skip_bytes` | Smallest value that lost payload | Bursts with trailer bytes, no junk | Bursts with trailer bytes, 40 ns of junk | Trailer bytes in a burst, at most |
+|---|---|---|---|---|---|
+| 260 | 1 | 3 | 13 % | 99 % | 4 |
+| 400 | 2 | 4 | 0.9 % | 99 % | 6 |
+| 600 | 4 | 6 | 0 | 97 % | 7 |
+| 800 | 6 | 8 | 0 | 80 % | 8 |
+| 1000 | 9 | 11 | 0 | 3.1 % | 9 |
+| 1200 | 11 | 13 | 0 | 0.3 % | 10 |
+| 1440 | 13 | 15 | 0 | 1.2 % | 12 |
+| 1500 | 14 | 16 | 0 | 0 | 12 |
+
+- The removal is guaranteed from 260 Mb/s: no payload byte is lost and a burst keeps at most the
+  trailer bytes of the last column of Table 4-7. Below 260 Mb/s the value is 0 and has no margin;
+  without junk, 80 Mb/s delivered the payload with at most one trailer byte, which is not guaranteed
+  ⚠️.
+- The CSI-2 Rx controller finds the end of a packet from its Word Count; whether it ignores the bytes
+  after the footer is asked (ADR-006) ⚠️. An exact removal at every rate would need the position of
+  LP-11 within a byte, time-stamped in the DDR clock, and a cut at bit level; not done.
 
 **Design note ⚠️ (delay line depth).** The tail to hold is TEOT,max (105 ns + 12·UI, D-PHY [1] ✅)
-plus the LP-11 detection latency and the crossing into `rxbyteclkhs`: about 30 bytes at 1500 Mb/s and
-35 at 1792 Mb/s. The default `PARA_EOT_DELAY_BYTES` of 32 therefore covers R1 only.
+plus the LP-11 detection latency, the crossing into `rxbyteclkhs` and the hold of three byte clocks,
+less the data path latency of 4–5 byte clocks: about 30 bytes at 1500 Mb/s and 35 at 1792 Mb/s. The
+default `PARA_EOT_DELAY_BYTES` of 32 therefore covers R1 only.
 
 **Design note ⚠️ (clock after the last burst, OPEN S12).** The delay line drains only while
 `rxbyteclkhs` runs, and the transmitter stops the clock TCLK-POST after the last burst: after every
@@ -943,7 +983,8 @@ byte boundary (§4.6).
   began at the line between Λ and Λ − 1 byte clocks before the entry into DL_HS_RX, so the words
   received during THS-PREPARE are ignored (§4.6).
 - EoT. LP-11 moves the lane to DL_HS_EOT, which clears both AFE enables and lowers the sync-search
-  start, the EoT request; EoT done returns the lane to DL_STOP (§4.5, §4.6). The PPI outputs of the
+  start. Block No. 4 sends EoT done at the synchronized fall, which returns the lane to DL_STOP, and
+  holds the fall for three byte clocks before the EoT request (§4.5, §4.6). The PPI outputs of the
   burst follow `PARA_EOT_DELAY_BYTES` byte clocks later (Figure 5-1).
 
 ![Figure 5-9 — data lane at the AFE interface: SoT and EoT](figures/ftel_dphy_rx_wave_afe_sot_eot.svg)
@@ -1042,7 +1083,7 @@ fixed now: the R1 datapath already detects deskew bursts, so R2 only adds Block 
 | Area (1) | 5 | 3 | 5 |
 | **Total** | 42 | **55** | 34 |
 
-### ADR-006 — Trailer removal (decided: delay line + last transition, wait for EoT done; OPEN: cut below ~270 Mb/s, order at the PPI)
+### ADR-006 — Trailer removal (decided: delay line + last transition, wait for EoT done, hold of the EoT request; OPEN: order at the PPI)
 
 The PHY does not know packet lengths (it never parses content), so the only method that follows
 D-PHY [1] ✅ is to buffer the tail of the burst and cut it at the last transition before the
@@ -1050,8 +1091,11 @@ THS-SKIP interval. Discarding a fixed number of bytes fails when the Tx trail le
 
 Reopened by the block-level design (design notes of §4.5 and §4.6). Decided: DL_HS_EOT keeps waiting
 for EoT done; §4.5 states the resulting rate limit and keeps not waiting as the faster option.
-Still open: the precision of the cut below ~270 Mb/s and the order of `stopstate_x` and
-`rxactivehs_x` at the PPI (CSI team).
+Decided in v0.16 after the simulation of the whole receiver: Block No. 4 holds the EoT request for
+three byte clocks so that the tail is stored before the cut, and `eot_skip_bytes` keeps one byte of
+margin to the payload; the guaranteed range is stated in §4.6 (Table 4-7). Still open: the order of
+`stopstate_x` and `rxactivehs_x` at the PPI, and whether the CSI-2 Rx controller ignores trailer
+bytes after the packet footer (CSI team).
 
 ### ADR-007 — Start of the sync search (decided: D)
 
@@ -1173,6 +1217,10 @@ the CSI-2 controller needs
     after the last burst with TCLK-POST at its minimum (tail delayed until the clock runs again) and at
     the S12 value (tail delivered).
   - EoT on and off a byte boundary; a stored tail without a transition (stuck line, HS RX timeout).
+  - EoT over the guaranteed range: 260–1500 Mb/s, THS-TRAIL from its minimum to TEOT,max, LP-11 at
+    every phase of the byte clock and of `core_clk`, 0 and 40 ns of junk before LP-11; no payload byte
+    lost and the trailer bytes within Table 4-7; with `eot_skip_bytes` one above Table 3-2, still no
+    payload byte lost.
   - Clock-lane and data-lane ULPS entry/exit; the four triggers; unknown escape command
     (`erresc_x`); false control (`errcontrol_x`).
   - HS RX timeout with the line still in HS (`stopstate_x` only after LP-11) and escape watchdog
@@ -1211,7 +1259,7 @@ the CSI-2 controller needs
 | S9 | Lane order and P/N polarity on the board and package | Straight, no inversion; the data lanes can be remapped and inverted (§4.3), the clock lane cannot | Tx side |
 | S12 | HS clock after the last burst, before the clock lane leaves HS (TCLK-POST) | Specification minimum: the tail of the last burst waits in the delay line until the clock runs again; this IP needs `PARA_EOT_DELAY_BYTES` + Λ + 2 byte clocks, 288·UI in R1 (§4.6) | Tx side; CSI team (its own need) |
 | T1 | Mapping of the four trigger commands to `rxtriggeresc_x[3:0]` | Order of Table 4-6 (D-PHY [1]) | Specification check |
-| ADR-006 | EoT: cut precision below ~270 Mb/s; order of `stopstate_x` and `rxactivehs_x` at the PPI; gap between bursts below ~240 Mb/s | Lane waits for EoT done (decided); `stopstate_x` may rise before the last byte, earlier than the CSI-2 Rx controller expects (to confirm); limits in §4.5 and §4.6 | This IP, CSI team, Tx side |
+| ADR-006 | EoT: order of `stopstate_x` and `rxactivehs_x` at the PPI; trailer bytes after the packet footer (Table 4-7); gap between bursts below ~240 Mb/s | Lane waits for EoT done (decided); EoT request held three byte clocks (decided); `stopstate_x` may rise before the last byte, earlier than the CSI-2 Rx controller expects (to confirm); limits in §4.5 and §4.6 | This IP, CSI team, Tx side |
 | ADR-007 | Sync search, start decided (DL_HS_RX, option D): word latency Λ of Block No. 1, which places `hs_settle_cyc`; behaviour after a corrupted leader at the PPI, including a burst that ends before a lock | Λ = 2; `PARA_SYNC_SEARCH_BYTES` = 16; `errsotsynchs_x` at the end of a burst without a lock (§4.6) | This IP (Λ, with the RTL of Block No. 1); CSI team (corrupted leader) |
 
 ---
@@ -1273,7 +1321,7 @@ HS_TERM state 30–35 ns after the start of LP-00.
 | TCLK-SETTLE | 95 … 300 ns | `clk_settle_cyc` = (197.5 − 32.5) / 5 = 33: CL_HS_TERM is entered 30–35 ns after the start of LP-00 and lasts 33 cycles, so it ends 195–200 ns after it, at the centre of TCLK-SETTLE |
 | TD-TERM-EN | ≤ 35 ns + 4·UI | `afe_term_en_x` 25–30 ns after the start of LP-00; the AFE has the remaining 5–10 ns + 4·UI for its LP-RX delay and the termination switch (§4.3) ⚠️ |
 | TCLK-TERM-EN | ≤ 38 ns | `afe_cl_term_en` 25–30 ns after the start of LP-00; the AFE has the remaining 8–13 ns (§4.3) ⚠️ |
-| THS-SKIP | 40 … 55 ns + 4·UI | Bits discarded before the last-transition search (Block No. 4): `eot_skip_bytes` places the cut between 40 ns and THS-TRAIL,min before LP-11, exactly only above ~270 Mb/s (§4.6) ⚠️ |
+| THS-SKIP | 40 … 55 ns + 4·UI | Bits discarded before the last-transition search (Block No. 4): `eot_skip_bytes` = max(⌊(THS-TRAIL,min + 24 ns) / byte period⌋ − 2, 0), one byte of margin to the payload (Table 3-2); with the defaults 80 Mb/s 0, 750 Mb/s 6, 1500 Mb/s 14, 1792 Mb/s 17. Without junk the cut is exact from 600 Mb/s; with 40 ns of junk before LP-11 some bursts keep trailer bytes (§4.6, Table 4-7) ⚠️ |
 | TCLK-MISS | ≤ 60 ns | Clock-activity detection of Block No. 1: `cl_rxclkactivehs` falls at most 60 ns after the last DDR clock edge (§4.3) ⚠️ |
 | TSETUP[RX], THOLD[RX] | Each ≥ 0.15·UI when the maximum rate is 1 Gb/s, ≥ 0.2·UI above: a setup and hold window of 0.3·UI (300 ps at 1 Gb/s) or 0.4·UI (267 ps at 1500 Mb/s) | Samplers of Block No. 1 on both edges of the DDR clock, hand-placed: the window holds their aperture and the clock-to-data delay differences of the AFE and of this IP (§4.3, OPEN ADR-001) ⚠️ |
 | TCLK-POST | ≥ 60 ns + 52·UI, transmitter | This IP needs the HS clock for `PARA_EOT_DELAY_BYTES` + Λ + 2 byte clocks after the last data lane enters LP-11: 288·UI in R1, 320·UI in R2 with Λ = 2 (§4.6, OPEN S12) ⚠️ |

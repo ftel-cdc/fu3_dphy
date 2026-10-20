@@ -115,6 +115,11 @@ CAPTION_RE = re.compile(r"^\*\*[^|]*\*\*\s*$")
 #              half-period path and of a standard-cell delay line moved from the 130 nm cells to the
 #              22 nm cells of the target node). Wording only, no table gains or loses a row, so the
 #              counts equal v0.14.
+#   v0.16 — registered before the spec edit of 2026-10-19 (EoT fixes found by the TN1 simulation,
+#              fpga/PLAN_TN1_FIX.md: Block No. 4 holds the burst open a fixed number of byte clocks
+#              after the synchronized fall of the sync-search start, eot_skip_bytes subtracts the data
+#              path latency, the guaranteed range of the trailer cut is stated). Rows of the runtime,
+#              cdc, open and timing tables change their text only, so the counts equal v0.15.
 _V03 = {
     "param": 10, "runtime": 5, "clock": 3, "cdc": 5, "reset": 3,
     "fsm_cl": 10, "fsm_dl": 16, "ppi": 29, "afe": 8, "open": 10, "timing": 9,
@@ -137,6 +142,8 @@ EXPECTED = {
     "v0.14": dict(_V03, runtime=6, clock=4, cdc=11, fsm_cl=11, fsm_dl=17, afe=7, open=16, timing=11,
                   c_ids=16),
     "v0.15": dict(_V03, runtime=6, clock=4, cdc=11, fsm_cl=11, fsm_dl=17, afe=7, open=16, timing=11,
+                  c_ids=16),
+    "v0.16": dict(_V03, runtime=6, clock=4, cdc=11, fsm_cl=11, fsm_dl=17, afe=7, open=16, timing=11,
                   c_ids=16),
 }
 REVISION_RE = re.compile(r"\*\*DRAFT (v[0-9]+\.[0-9]+)\*\*")

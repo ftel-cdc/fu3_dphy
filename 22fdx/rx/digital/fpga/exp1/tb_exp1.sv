@@ -13,12 +13,20 @@
 //   +UNEVEN=1                     lanes NL/2..NL-1 carry one byte less, as in a CSI-2 packet whose length
 //                                 is not a multiple of NL
 //   +TLPX= +THS_PREPARE= +THS_ZERO= +THS_TRAIL= +THS_EXIT= +TCLK_PREPARE= +TCLK_ZERO=   in ns
-//   +PREP=min|max  +ZERO=min  +TRAIL=min  +EXIT=min  +LPX=min    D-PHY v1.1 limits at the rate
+//   +PREP=min|max  +ZERO=min  +TRAIL=min|max  +EXIT=min  +LPX=min    D-PHY v1.1 limits at the rate
+//                                 (TRAIL=max: TEOT,max - 8 UI = 105 ns + 4 UI, room for the jitter)
 //   +SKEW0..3=<ps> +CLK_SKEW=<ps>  extra delay of a data lane / of the clock lane at the pads
+//   +TRAIL_JITTER=1               0..7 random extra trail bits per lane and burst (LP-11 at every phase
+//                                 of the byte clock)
+//   +EOT_JUNK=<ns>                the last <ns> of the trail are random bits (transition junk; 40 = the
+//                                 THS-SKIP,min that the HAS assumes)
+//   +SEED=<n>                     seed of the random trail and junk bits (default: the simulator's)
 //   +HS_SETTLE= +CLK_SETTLE= +EOT_SKIP= +TINIT=   run-time fields of ftel_dphy_rx (default: reset values)
 //   +FTEL=0                       hold ftel_dphy_rx in reset: AMD's receiver alone
 //   +AFE_NOISE=1                  random HS-RX output during LP-00
 //   +TIMEOUT_US=<us>              simulation limit (default 600)
+//   +CORE_HALF=<ns>               half period of core_clk (default 2.5); 2.501 (400 ppm slow) lets core_clk
+//                                 drift against the line, so LP-11 meets it at every phase
 // Defaults of the line timing sit inside the D-PHY v1.1 ranges at the rate (see p_main).
 `timescale 1ns/1ps
 module tb_exp1;
@@ -35,7 +43,8 @@ module tb_exp1;
   logic xrst     = 1'b1;
   logic f_rst_n  = 1'b0;
   logic mon_en   = 1'b0;
-  always #2.5 core_clk = ~core_clk;      // 200 MHz for both receivers
+  real  core_half = 2.5;
+  always #(core_half) core_clk = ~core_clk;   // 200 MHz for both receivers
 
   // ------------------------------------------------------------------ line
   logic          clk_p, clk_n;
@@ -324,6 +333,7 @@ module tb_exp1;
     if ($value$plusargs("UNEVEN=%d", v_i)) uneven = (v_i != 0);
     if ($value$plusargs("FTEL=%d", v_i)) ftel_on = (v_i != 0);
     if ($value$plusargs("AFE_NOISE=%d", v_i)) u_afe.noise = (v_i != 0);
+    v_ok = $value$plusargs("CORE_HALF=%f", core_half);
     parse_list(lens_s, lens);
 
     // Half a UI rounded to the 1 ps resolution, so the bit grid stays exact (B7, tb_afe_adapter).
@@ -341,8 +351,13 @@ module tb_exp1;
     if ($value$plusargs("PREP=%s", sel))
       u_gen.t_hs_prepare = (sel == "min") ? 40.0 + 4.0 * ui : ((sel == "max") ? 85.0 + 6.0 * ui : u_gen.t_hs_prepare);
     if ($value$plusargs("ZERO=%s", sel) && sel == "min") u_gen.t_hs_zero = 145.0 + 10.0 * ui - u_gen.t_hs_prepare;
-    if ($value$plusargs("TRAIL=%s", sel) && sel == "min")
-      u_gen.t_hs_trail = (8.0 * ui > 60.0 + 4.0 * ui) ? 8.0 * ui : 60.0 + 4.0 * ui;
+    if ($value$plusargs("TRAIL=%s", sel)) begin
+      if (sel == "min") u_gen.t_hs_trail = (8.0 * ui > 60.0 + 4.0 * ui) ? 8.0 * ui : 60.0 + 4.0 * ui;
+      if (sel == "max") u_gen.t_hs_trail = 105.0 + 4.0 * ui;
+    end
+    if ($value$plusargs("TRAIL_JITTER=%d", v_i)) u_gen.trail_jitter = (v_i != 0) ? 7 : 0;
+    if ($value$plusargs("EOT_JUNK=%f", v_r)) u_gen.t_eot_junk = v_r;
+    if ($value$plusargs("SEED=%d", v_i)) v_i = $urandom(v_i);
     if ($value$plusargs("EXIT=%s", sel) && sel == "min") u_gen.t_hs_exit = 100.0;
     if ($value$plusargs("LPX=%s", sel) && sel == "min") u_gen.t_lpx = 50.0;
     if ($value$plusargs("TLPX=%f", v_r)) u_gen.t_lpx = v_r;
@@ -366,10 +381,10 @@ module tb_exp1;
     if (ftel_on) u_mon_f.open({outdir, "/ftel_ppi.csv"});
     $display("TB START: NL %0d, rate %.2f Mb/s (UI %.3f ns), lengths %p x %0d, pattern %s%s, ftel %0d",
              NL, 1000.0 / ui, ui, lens, repeat_n, pattern, uneven ? " uneven" : "", ftel_on);
-    $display("TB LINE: TLPX %.3f, THS-PREPARE %.3f, THS-ZERO %.3f (PREPARE + ZERO %.3f, min %.3f), THS-TRAIL %.3f, THS-EXIT %.3f, TCLK-PREPARE %.3f, TCLK-ZERO %.3f ns; skew %p ps, clock %.0f ps",
+    $display("TB LINE: TLPX %.3f, THS-PREPARE %.3f, THS-ZERO %.3f (PREPARE + ZERO %.3f, min %.3f), THS-TRAIL %.3f (+0..%0d UI, last %.1f ns junk), THS-EXIT %.3f, TCLK-PREPARE %.3f, TCLK-ZERO %.3f ns; skew %p ps, clock %.0f ps; core_clk period %.3f ns",
              u_gen.t_lpx, u_gen.t_hs_prepare, u_gen.t_hs_zero, u_gen.t_hs_prepare + u_gen.t_hs_zero,
-             145.0 + 10.0 * ui, u_gen.t_hs_trail, u_gen.t_hs_exit, u_gen.t_clk_prepare, u_gen.t_clk_zero,
-             u_gen.skew_ps, u_gen.clk_skew_ps);
+             145.0 + 10.0 * ui, u_gen.t_hs_trail, u_gen.trail_jitter, u_gen.t_eot_junk, u_gen.t_hs_exit,
+             u_gen.t_clk_prepare, u_gen.t_clk_zero, u_gen.skew_ps, u_gen.clk_skew_ps, 2.0 * core_half);
     $display("TB FTEL CFG: hs_settle_cyc %0d, clk_settle_cyc %0d, eot_skip_bytes %0d, tinit_cyc %0d",
              cfg_hs_settle, cfg_clk_settle, cfg_eot_skip, cfg_tinit);
 

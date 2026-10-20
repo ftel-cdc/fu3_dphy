@@ -4,7 +4,7 @@
 |---|---|
 | Gửi | Team CSI-2 Rx controller (HAS-CSI = `FTEL_IP_MIPI_CSI-2_CONTROLLER_HAS_v1.2.docx`) |
 | Từ | Nhóm thiết kế D-PHY Rx (`ftel_dphy_rx`) |
-| Ngày | 2026-09-26, cập nhật 2026-09-29 (thêm ADR-006; K3 thêm `eot_skip_bytes`) và 2026-09-30 (ADR-006: điều đã biết từ HAS-CSI; phụ lục C6; waveform PPI) |
+| Ngày | 2026-09-26, cập nhật 2026-09-29 (thêm ADR-006; K3 thêm `eot_skip_bytes`), 2026-09-30 (ADR-006: điều đã biết từ HAS-CSI; phụ lục C6; waveform PPI), 2026-10-19 (ADR-006 câu 2: phạm vi cắt trailer đo trên RTL, HAS v0.16) và 2026-10-20 (ADR-006 câu 2: đo lại với LP-11 ở mọi pha của `core_clk`, số mới) |
 | Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.8 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.8.docx`), HAS-CSI v1.2 |
 
 ## Bối cảnh
@@ -219,9 +219,17 @@ Timeout đặt 2^18 chu kỳ `core_clk`, khoảng 1.31 ms.
    `stopstate_x` sớm hơn thế, tối đa `PARA_EOT_DELAY_BYTES` chu kỳ `rxbyteclkhs` trước khi byte cuối
    ra PPI (3.2 µs ở 80 Mb/s), tức là trước khi `rxactivehs_x` hạ. Controller có chấp nhận thứ tự này
    không? Controller có dùng `stopstate_x` để nhận biết burst đã kết thúc không?
-2. Dưới khoảng 270 Mb/s, D-PHY không bảo đảm cắt trailer đúng tới từng byte. Nếu D-PHY cắt muộn, vài
-   byte trailer sẽ ra sau packet footer với `rxvalidhs_x` = 1. HAS-CSI tìm cuối packet theo Word
-   Count; controller có bỏ qua các byte sau footer không, hay coi đó là lỗi?
+2. Từ 260 Mb/s, D-PHY bảo đảm không mất byte payload nào, nhưng một số burst có thể còn sót byte
+   trailer ra sau packet footer với `rxvalidhs_x` = 1 (HAS D-PHY v0.16, Table 4-7):
+   - đường truyền sạch lúc chuyển sang LP-11: từ 600 Mb/s không burst nào sót; ở 260 Mb/s khoảng
+     13 % số burst sót, ở 400 Mb/s khoảng 1 %;
+   - đường truyền nhiễu 40 ns trước LP-11 (trường hợp xấu nhất mà D-PHY cho phép): ở 260–800 Mb/s
+     phần lớn burst sót; từ 1000 Mb/s chỉ 0,3–3 % số burst, ở 1440 Mb/s của camera khoảng 1 %;
+   - mỗi burst sót tối đa ⌊(THS-TRAIL + 29 ns) / byte period⌋ − `eot_skip_bytes` byte: 4 byte ở
+     260 Mb/s, 8 byte ở 800 Mb/s, 12 byte ở 1440 và 1500 Mb/s, luôn ít hơn số byte của trail.
+
+   HAS-CSI tìm cuối packet theo Word Count. Controller có bỏ qua các byte sau footer không, hay coi
+   đó là lỗi?
 3. Dữ liệu ra PPI trễ `PARA_EOT_DELAY_BYTES` chu kỳ `rxbyteclkhs` so với đường truyền: 32 chu kỳ, tức
    3.2 µs ở 80 Mb/s và 0.17 µs ở 1500 Mb/s. Controller có ràng buộc nào về độ trễ này không?
 
@@ -230,12 +238,13 @@ Timeout đặt 2^18 chu kỳ `core_clk`, khoảng 1.31 ms.
   hiện, yêu cầu EoT phải đi qua `core_clk` rồi sang `rxbyteclkhs`, nên thời điểm LP-11 chỉ biết được
   với sai số cỡ một chu kỳ byte clock. Ở tốc độ thấp, sai số này lớn hơn khoảng an toàn mà D-PHY để
   lại giữa trailer và LP-11.
-- Lane đợi D-PHY cắt xong (EoT done) rồi mới về Stop. EoT done được gửi ngay khi cắt xong, trước khi
-  delay line xả hết, nên `stopstate_x` lên trước khi byte cuối ra PPI (câu 1). Nếu controller cần
+- Lane đợi EoT done của D-PHY rồi mới về Stop. Từ HAS v0.16, EoT done được gửi ngay khi D-PHY thấy
+  yêu cầu kết thúc burst, trước khi cắt và trước khi delay line xả hết, nên `stopstate_x` lên trước
+  khi byte cuối ra PPI (câu 1). Nếu controller cần
   đúng thứ tự của Figure 4-1, D-PHY phải đợi xả hết delay line mới về Stop. Khi đó, dưới khoảng
   1.2 Gb/s, lane bỏ lỡ burst kế tiếp nếu Tx dùng THS-EXIT và TLPX ở mức tối thiểu.
-- Câu 2 quyết định hướng xử lý ở tốc độ thấp: nghiêng về cắt muộn (thừa byte), hay phải đo thêm
-  thời điểm LP-11 ở mức dưới một byte (phức tạp hơn).
+- Câu 2: nếu controller bỏ qua byte sau footer thì phạm vi hiện tại đủ dùng. Nếu coi đó là lỗi,
+  D-PHY phải đo thời điểm LP-11 ở mức dưới một byte và cắt ở mức bit (phức tạp hơn nhiều).
 
 **Đã biết từ HAS-CSI.** `ppi_stopstate` chỉ đi vào IRQ_STATUS bit 11 và LANE_STATUS (Interrupt & Error
 Aggregator, Table 4-25). Burst FSM mở và đóng burst theo `rxactivehs_x` (Table 4-6). Nếu đúng như vậy,
@@ -246,7 +255,7 @@ Nhờ team xác nhận, hoặc cho biết chỗ khác có dùng `stopstate_x`.
 - Lane đợi EoT done rồi mới về Stop (đã chốt). Hệ quả phía Tx: dưới khoảng 240 Mb/s, hai burst liền
   nhau cần THS-EXIT + TLPX lớn hơn khoảng 32·UI + 15 ns (HAS D-PHY §4.5). Phần này đã hỏi phía Tx.
 - `stopstate_x` có thể lên trước byte cuối như ở câu 1, cho tới khi team trả lời.
-- Cắt trailer chính xác trên khoảng 270 Mb/s. Dưới mức đó chưa chốt (ADR-006).
+- Không mất payload từ 260 Mb/s; số byte trailer theo HAS D-PHY Table 4-7 (ADR-006).
 
 **Tham chiếu.** HAS D-PHY §4.5 và §4.6 (các design note), §5.1 Figure 5-1, ADR-006, §9. HAS-CSI
 Figure 4-1, Table 4-3, Table 4-6, Table 4-25, §4.4 (`err_wc` chỉ báo khi thiếu byte).

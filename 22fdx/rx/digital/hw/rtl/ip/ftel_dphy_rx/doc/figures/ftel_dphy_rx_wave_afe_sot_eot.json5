@@ -3,8 +3,9 @@
 // afe_term_en_x from DL_HS_PRPR (TD-TERM-EN), afe_hs_en_x from DL_HS_TERM, DL_HS_RX and the
 // sync-search start after hs_settle_cyc (ADR-007). The sync-search start reaches Block No. 4 2-3 byte
 // clocks later (4.1); the words received before it are ignored (4.6). LP-11 ends the burst: DL_HS_EOT
-// drops the AFE enables and lowers the sync-search start, whose fall is the EoT request; EoT done
-// returns the lane to DL_STOP.
+// drops the AFE enables and lowers the sync-search start. Block No. 4 sends EoT done at the
+// synchronized fall, which returns the lane to DL_STOP, and holds the fall three byte clocks: the fall
+// of the held level is the EoT request (4.6).
 { signal: [
   { name: 'lane (Dp/Dn)',             wave: '===.=.==|==..=..', data: ['LP-11', 'LP-01', 'LP-00', 'HS-0', 'SYNC', 'B1 ...', 'Bn', 'TRAIL', 'LP-11'] },
   {                                                            node: '.AB.C.D...E..F.G' },
@@ -17,6 +18,7 @@
   { name: 'afe_hs_en_x',              wave: '0..1....|....0..' },
   { name: 'sync-search start',        wave: '0....1..|....0..' },
   { name: 'sync-search start, No. 4', wave: '0....x.1|....x0.' },
+  { name: 'start held, No. 4',        wave: '0....x.1|.....x0' },
   {                                                            node: '.....J.K........' },
   { name: 'EoT done',                 wave: '0.......|.....10' },
   { name: 'stopstate_x',              wave: '10......|......1' },
@@ -24,6 +26,6 @@
   edge: ['A<->B TLPX', 'B<->C THS-PREPARE', 'C<->D THS-ZERO', 'E<->F THS-TRAIL', 'F<->G THS-EXIT',
          'H<->I THS-SETTLE (hs_settle_cyc)', 'L<->M ignored by the sync search', 'J<->K 2-3 byte clocks'],
   head: { text: 'Data lane at the AFE interface: SoT and EoT' },
-  foot: { text: 'the sync-search start falling at No. 4 is the EoT request; PPI outputs follow PARA_EOT_DELAY_BYTES byte clocks later (Figure 5-1); latency not drawn: words and start reach No. 4 alike (4.6)' },
+  foot: { text: 'EoT done at the synchronized fall; the held start falls 3 byte clocks later: the EoT request (not to scale). The PPI follows PARA_EOT_DELAY_BYTES byte clocks later; latency not drawn (4.6)' },
   config: { hscale: 2, arcFontSize: 12 }
 }

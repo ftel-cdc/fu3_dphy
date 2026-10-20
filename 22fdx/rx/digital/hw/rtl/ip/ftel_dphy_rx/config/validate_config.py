@@ -21,7 +21,7 @@ Every error starts with its constraint id:
   CFG-11  tinit_cyc covers TINIT,SLAVE >= 100 us
   CFG-12  hs_rx_timeout_cyc longer than the longest burst (K8)
   CFG-13  esc_timeout_cyc >= 1
-  CFG-14  eot_skip_bytes: reset value = Table 3-2 formula at rate_ref; every value < EOT_DELAY_BYTES and fits
+  CFG-14  eot_skip_bytes: reset value = Table 3-2 formula at rate_ref; every value 0..EOT_DELAY_BYTES-1 and fits
   CFG-15  assumptions: word latency >= 1, rate_ref inside the release, rate points positive
   CFG-16  unknown or missing keys
   CFG-90  formula self-check: the formulas reproduce the values printed in the HAS (answer key)
@@ -71,14 +71,19 @@ LEADER_FIRST_ONE = (145.0, 13)  # first 1 of a leader sent at the minimum THS-PR
 TCLK_SETTLE = (95.0, 300.0)
 TEOT_MAX = (105.0, 12)
 TINIT_NS = 100_000.0
-CUT_WINDOW = (40.0, 60.0, 4)  # THS-SKIP,min .. THS-TRAIL,min (60 ns + 4 UI)
 SYNC_CROSSING_MAX = 3         # byte clocks of the 2-flop crossing (2-3, §5.2)
+TRAIL_MIN = (60.0, 4)         # THS-TRAIL,min = max(8 UI, 60 ns + 4 UI)
+EOT_PHASE_NS = -1.0           # crossing phase in the delay from LP-11 to the fall of the sync-search start,
+                              # fitted to the RTL simulation with LP-11 at every phase of the byte clock and of
+                              # core_clk (fpga/exp1/run_exp1.sh window; Table 3-2, Table 4-7)
+EOT_MARGIN_BYTES = 2          # eot_skip_bytes = E - 2: one byte of margin to the payload edge E (Table 3-2)
 
 # Answer key: values printed in the HAS for the defaults (S = 2, F = 2, Λ = 2, 200 MHz)
 ANSWER_KEY = {
     "hs_settle_cyc": {80: 70, 750: 22, 1500: 19, 1792: 18},    # Appendix B, THS-SETTLE row
     "clk_settle_cyc": 33,                                     # Appendix B, TCLK-SETTLE row
-    "eot_skip_bytes": {1500: 16},                             # Table 3-2
+    "eot_skip_bytes": {80: 0, 260: 1, 400: 2, 600: 4, 750: 6, 800: 6, 1000: 9, 1200: 11, 1440: 13,
+                       1500: 14, 1792: 17},                   # Table 3-2, Table 4-7, Appendix B THS-SKIP
     "eot_delay_need": {1500: 30, 1792: 35},                   # Table 3-1 #8, §4.6 design note
     "tclk_post_ui": {"R1": 288, "R2": 320},                   # §4.6 design note, Appendix B TCLK-POST
     "term_budget_ns": {"data": (5.0, 10.0), "clock": (8.0, 13.0), "late_less": 5.0},  # §4.3, + 4 UI on a data lane
@@ -147,10 +152,13 @@ class Model:
         return lo + clk * self.T, late + clk * self.T
 
     def eot_skip(self, rate):
-        """Table 3-2: (LP-11 detection latency + 2.5 byte clocks + centre of the cut window) / byte period."""
+        """Table 3-2: E = floor((THS-TRAIL,min + LP-11 to the fall of the sync-search start) / byte period) is
+        the smallest value that cuts into the payload; eot_skip_bytes = max(E - 2, 0). The hold of Block No. 4
+        offsets the crossing against the data path latency (§4.6), so neither appears."""
         u, b = ui(rate), 8 * ui(rate)
-        centre = (CUT_WINDOW[0] + CUT_WINDOW[1] + CUT_WINDOW[2] * u) / 2
-        return rnd(((self.S + self.F) * self.T + 2.5 * b + centre) / b)
+        trail = max(8 * u, TRAIL_MIN[0] + TRAIL_MIN[1] * u)
+        lp_to_fall = (self.S + self.F + 1) * self.T + EOT_PHASE_NS
+        return max(int(math.floor((trail + lp_to_fall) / b)) - EOT_MARGIN_BYTES, 0)
 
     def eot_delay_need(self, rate):
         """§4.6: TEOT,max + LP-11 detection latency (worst case) + crossing, in byte clocks."""
@@ -313,10 +321,10 @@ def validate(cfg):
                             f"the Table 3-2 value at {ref} Mb/s")
     for x in rates + [ref]:
         v = skip.get(x, m.eot_skip(x))
-        if not 1 <= v < s["EOT_DELAY_BYTES"] or not fits("eot_skip_bytes", v):
-            err(errs, "CFG-14", f"eot_skip_bytes {v} at {x} Mb/s must be 1..EOT_DELAY_BYTES-1 and fit the width")
-    if not 1 <= r["eot_skip_bytes"]["reset"] < s["EOT_DELAY_BYTES"]:
-        err(errs, "CFG-14", f"eot_skip_bytes reset {r['eot_skip_bytes']['reset']} must be 1..EOT_DELAY_BYTES-1")
+        if not 0 <= v < s["EOT_DELAY_BYTES"] or not fits("eot_skip_bytes", v):
+            err(errs, "CFG-14", f"eot_skip_bytes {v} at {x} Mb/s must be 0..EOT_DELAY_BYTES-1 and fit the width")
+    if not 0 <= r["eot_skip_bytes"]["reset"] < s["EOT_DELAY_BYTES"]:
+        err(errs, "CFG-14", f"eot_skip_bytes reset {r['eot_skip_bytes']['reset']} must be 0..EOT_DELAY_BYTES-1")
 
     # ---- CFG-90 formula self-check against the values printed in the HAS
     if (s["LP_SYNC_STAGES"], s["LP_FILTER_CYC"], lam, s["CORE_CLK_MHZ"]) == (2, 2, 2, 200):

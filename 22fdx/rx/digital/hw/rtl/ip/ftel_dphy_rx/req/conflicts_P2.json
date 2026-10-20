@@ -1,15 +1,15 @@
 {
  "phase": "P2",
  "mode": "review",
- "at": "2026-10-10T13:52:15+07:00",
+ "at": "2026-10-20T14:12:50+07:00",
  "inputs": {
-  "spec": "6489b6da4b71f094b1e9ba1076716ae9b96da99db4d0ae3bdf20027b5df174b8",
-  "structured_spec": "186a6f7032a60d43d18fa57fe8f6492a1f3cb3d9d77481dc52f5e866ce41216f",
-  "config": "1ea8026644ebd4d5895e799626faaee738c18e65f8d49c8829ee0081cab755c1",
-  "validator": "84eee9423189f2e1d3b71818704068eabbe29207196c23956e66240c8bbbe0c6"
+  "spec": "9e6ec588dd17ef237b08aadfd2634622cf7239c62dac65a5aa8392de858eab04",
+  "structured_spec": "01424e671a885722c1f1d9316664b76bd077347aacca167f022a16e5bf14d921",
+  "config": "6b166badbfe4e72442103c65d4cd945fdbfc7098855dee75c8b6290ea365663a",
+  "validator": "a7bee5b359f8199fada34c2e03ea6093960e8a841b8312d50296a4c597b28808"
  },
  "outputs": {
-  "config_pkg": "68205a275bf6f309d449b9cea8697d566e3791e1f426455474275c27393ecb00"
+  "config_pkg": "4cbcea6ac894197b2c6a06b24ce6bada257bb6ef116357cfac0587727c6c6ba3"
  },
  "conflicts": [],
  "waived": [],

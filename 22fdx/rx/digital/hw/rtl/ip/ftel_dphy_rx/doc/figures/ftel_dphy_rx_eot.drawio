@@ -117,7 +117,7 @@
         <mxCell id="o_ppi_t" value="rxdatahs_x, rxvalidhs_x, rxactivehs_x,&lt;br&gt;rxsynchs_x, errsoths_x, errsotsynchs_x,&lt;br&gt;rxskewcalhs_x (No.7)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="1475" y="75" width="560" height="120" as="geometry" />
         </mxCell>
-        <mxCell id="i_eot" value="search started&lt;br&gt;(Figure 4-8)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=right;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+        <mxCell id="i_eot" value="search started,&lt;br&gt;held (Figure 4-8)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=right;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="5" y="235" width="200" height="60" as="geometry" />
         </mxCell>
         <mxCell id="w_eot" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;edgeStyle=none;endArrow=none;" edge="1" parent="1">
@@ -457,15 +457,6 @@
         </mxCell>
         <mxCell id="o_err_t" value="EoT sync&lt;br&gt;error (No.8)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="1895" y="635" width="140" height="50" as="geometry" />
-        </mxCell>
-        <mxCell id="o_done" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;edgeStyle=none;" edge="1" parent="1">
-          <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1730" y="720" as="sourcePoint" />
-            <mxPoint x="1890" y="720" as="targetPoint" />
-          </mxGeometry>
-        </mxCell>
-        <mxCell id="o_done_t" value="EoT done&lt;br&gt;(No.3)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
-          <mxGeometry x="1895" y="697" width="140" height="50" as="geometry" />
         </mxCell>
         <mxCell id="leg_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=none;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="0" y="800" width="2040" height="80" as="geometry" />
