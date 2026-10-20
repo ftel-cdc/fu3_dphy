@@ -6,8 +6,12 @@
 Checks, one result line each:
   checker   fpga/tools/csi2_dump.py selftest passes: planted faults are found, a clean capture passes.
   decode    every PPI capture is decoded again by code written apart from csi2_dump.py (bursts = runs of
-            rxactivehs, bytes = rxdatahs where rxvalidhs) and compared with truth.txt; the bursts with an intact
-            payload, the trailer span and the verdict must equal check.txt.
+            rxactivehs, bytes = rxdatahs where rxvalidhs) and compared with truth.txt, in order and in time
+            (each burst reaches the PPI after it left the pad, as long after it as the median of the capture,
+            within half the smallest gap between bursts); the bursts with an intact payload, the trailer span
+            and the verdict must equal check.txt. The decoder is first tried on synthetic captures: a clean one
+            must pass, and one where a lane loses a burst and repeats another with the same payload (count and
+            payloads still match in order) must show the three bursts out of time.
   runs      every run ended with "TB DONE OK", and truth.txt has one line per burst and lane.
   front     both receivers had the same front end (fpga/PLAN_TN1_FAIR.md): in every run of both, the LP outputs
             of AMD's buffers and of the IBUFDS_DPHY buffers of ftel_dphy_rx were equal at every change, and
@@ -25,9 +29,12 @@ import csv
 import glob
 import hashlib
 import os
+import random
 import re
+import statistics
 import subprocess
 import sys
+import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FPGA = os.path.dirname(HERE)
@@ -40,23 +47,27 @@ FIELDS = (('hs_settle_cyc', 'HS_SETTLE'), ('clk_settle_cyc', 'CLK_SETTLE'), ('eo
 
 
 def read_truth(path):
-    """{lane: [payload of burst 0, 1, ...]} from the truth file of the line generator."""
+    """{lane: [(payload, t0, t1) of burst 0, 1, ...]} from the truth file of the line generator (t0: start of
+    the sync byte at the pad, t1: end of the last payload byte, ps)."""
     t = {}
     for line in open(path):
         f = line.split()
         if f and f[0] == 'B':
-            t.setdefault(int(f[2]), []).append((int(f[1]), bytes.fromhex(f[6]) if len(f) > 6 else b''))
-    return {lane: [p for _, p in sorted(v)] for lane, v in t.items()}
+            t.setdefault(int(f[2]), []).append((int(f[1]), bytes.fromhex(f[6]) if len(f) > 6 else b'',
+                                                int(f[4]), int(f[5])))
+    return {lane: [(p, t0, t1) for _, p, t0, t1 in sorted(v)] for lane, v in t.items()}
 
 
 def decode(path, truth, lanes, limit):
     """Bursts of one capture against the truth: (bursts with an intact payload, all bursts, trailer span, errors).
     Errors: X on a control signal, rxvalidhs or a flag outside a burst, a burst open at the end, a missing or
-    extra burst, a payload difference, rxsynchs not seen once, errsoths or errsotsynchs, a trailer over limit."""
+    extra burst, a payload difference, rxsynchs not seen once, errsoths or errsotsynchs, a trailer over limit,
+    a burst out of time."""
     rows = list(csv.reader(open(path)))
     col = {name: i for i, name in enumerate(rows[0])}
+    tcol = col['sim_time_ps']
     n_ok = n_all = errs = 0
-    trailers = []
+    trailers, delays, gaps = [], [], []
     for lane in range(lanes):
         d, v, a = (col[f'dl{lane}_rxdatahs[7:0]'], col[f'dl{lane}_rxvalidhs'], col[f'dl{lane}_rxactivehs'])
         fl = {k: col[f'dl{lane}_{k}'] for k in ('rxsynchs', 'errsoths', 'errsotsynchs')}
@@ -67,9 +78,10 @@ def decode(path, truth, lanes, limit):
                 continue
             if r[a] == '1':
                 if cur is None:
-                    cur = {'bytes': bytearray(), 'sync': 0, 'err': 0}
+                    cur = {'bytes': bytearray(), 'times': [], 'sync': 0, 'err': 0}
                 if r[v] == '1':
                     cur['bytes'].append(int(r[d], 16))
+                    cur['times'].append(int(r[tcol]))
                 cur['sync'] += r[fl['rxsynchs']] == '1' and prev_sync == '0'
                 cur['err'] += (r[fl['errsoths']] == '1') + (r[fl['errsotsynchs']] == '1')
             else:
@@ -81,11 +93,16 @@ def decode(path, truth, lanes, limit):
         errs += cur is not None
         sent = truth.get(lane, [])
         errs += len(bursts) != len(sent)
-        for k, pay in enumerate(sent):
+        gaps += [b[2] - a[2] for a, b in zip(sent, sent[1:])]
+        for k, (pay, t0, t1) in enumerate(sent):
             n_all += 1
             if k >= len(bursts):
                 continue
             got = bursts[k]['bytes']
+            last = min(len(got), len(pay)) - 1     # the last byte of the burst within the payload length
+            if last >= 0:
+                # its byte period on the line: the sync byte and the payload span t0..t1
+                delays.append(bursts[k]['times'][last] - (t0 + (last + 2) * (t1 - t0) / (len(pay) + 1)))
             if bytes(got[:len(pay)]) == pay:
                 n_ok += 1
                 trailers.append(len(got) - len(pay))
@@ -93,8 +110,39 @@ def decode(path, truth, lanes, limit):
             else:
                 errs += 1
             errs += (bursts[k]['sync'] != 1) + (bursts[k]['err'] > 0)
+    if delays:
+        # pairing in time: after it left the pad, and within half the smallest gap of the median delay
+        mid = statistics.median(delays)
+        half_gap = min(gaps) / 2 if gaps else float('inf')
+        errs += sum(1 for x in delays if x <= 0 or abs(x - mid) > half_gap)
     span = f'{min(trailers)}..{max(trailers)}' if trailers else '-'
     return n_ok, n_all, span, errs
+
+
+def decode_selftest():
+    """decode() on synthetic captures from the selftest generator of csi2_dump.py, written in the layout of
+    ppi_csv_mon.sv: eight bursts with the same payload on one lane; clean, it must find no error; with burst 5
+    lost and burst 7 once more, the three bursts from 5 on are out of time. True when both hold."""
+    sys.path.insert(0, os.path.join(FPGA, 'tools'))
+    import csi2_dump as cd
+    rnd = random.Random(1)
+    slot = 80
+    same = bytes(rnd.randrange(256) for _ in range(3))
+    times = [cd.synth_times(k, len(same), slot) for k in range(8)]
+    errs = []
+    with tempfile.TemporaryDirectory() as work:
+        path = os.path.join(work, 'ftel_ppi.csv')
+        for faults in (set(), {('drop', 0, 5), ('again', 0, 7)}):
+            cols = cd.synth_bursts({0: [(k, same, *t) for k, t in enumerate(times)]}, 1, rnd, faults, slot)
+            names = [n.split('/')[-1] for n in cols]
+            with open(path, 'w', newline='') as f:
+                w = csv.writer(f)
+                w.writerow(names)
+                w.writerow(['Radix - UNSIGNED'] + ['HEX' if 'data' in n else 'BIN' for n in names[1:]])
+                for vals in zip(*cols.values()):
+                    w.writerow([f'{v:02x}' if 'data' in n else str(v) for n, v in zip(names, vals)])
+            errs.append(decode(path, {0: [(same, *t) for t in times]}, 1, None)[3])
+    return errs == [0, 3]
 
 
 def sources_hash():
@@ -182,8 +230,11 @@ def main():
             exp = int(m[1]) if m else want[field]
             if exp is not None and int(cfg[i + 1]) != exp:
                 cfg_bad.append(f'{name} {field} {cfg[i + 1]} (expected {exp})')
-    report('decode', n_cap > 0 and same == n_cap,
-           f'{same}/{n_cap} captures of {len(runs)} runs decoded again with the same result as check.txt')
+    own = decode_selftest()
+    report('decode', n_cap > 0 and same == n_cap and own,
+           f'{same}/{n_cap} captures of {len(runs)} runs decoded again with the same result as check.txt;'
+           f' decoder selftest {"PASS" if own else "FAIL"} (a clean synthetic capture passes, a lost and a'
+           f' repeated burst with the same payload are found by their time)')
     for b in bad:
         print(f'          {b}')
     report('runs', n_done == n_truth == len(runs), f'{n_done}/{len(runs)} runs ended with TB DONE OK, {n_truth} with'

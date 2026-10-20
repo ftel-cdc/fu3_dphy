@@ -15,6 +15,7 @@
 #                                                              # behind afe_model, outputs in M_<name>
 #   fpga/exp1/run_exp1.sh report                               # 80 Mb/s, outside the guaranteed range
 #   fpga/exp1/run_exp1.sh summary                              # result line of every scenario run so far
+#   fpga/exp1/run_exp1.sh recheck                              # check every run again (new csi2_dump.py), no sim
 # A build lives in fpga/work/exp1/build_<rate>_<lanes>l (build_stub for the stub); it is compiled and
 # elaborated again when a source changed. A scenario writes fpga/work/exp1/<name>/: truth.txt, xil_ppi.csv, ftel_ppi.csv, xsim.log and
 # check.txt (fpga/tools/csi2_dump.py bursts). ftel_dphy_rx gets the run-time fields of its configuration
@@ -208,6 +209,22 @@ report() {
   MAXTR=1 run 80 stub R-80 +LENS=1,2,3,4,5,8,16,64,256 +THS_EXIT=400 +TIMEOUT_US=2500
 }
 
+# The check of every run so far again, with the current csi2_dump.py: same truth, captures, lane count and
+# trailer limits as recorded by run (tb.txt, args.txt); the window runs too. No simulation.
+recheck() {
+  local c out nl lim
+  local -a csv
+  for c in "$W"/*/check.txt "$W"/window/*/check.txt; do
+    out=$(dirname "$c")
+    nl=$(sed -n 's/^TB START: NL \([0-9]*\),.*/\1/p' "$out/tb.txt")
+    lim=$(sed -n 's/^trailer limit .*: //p' "$out/args.txt")
+    csv=("$out/ftel_ppi.csv")
+    grep -q ' stub lane(s)' "$out/args.txt" || csv=("$out/xil_ppi.csv" "$out/ftel_ppi.csv")
+    python3 "$FPGA/tools/csi2_dump.py" bursts --truth "$out/truth.txt" --lanes "$nl" --max-trailer="$lim" \
+      "${csv[@]}" > "$c" 2>&1
+  done
+}
+
 summary() {
   for c in "$W"/*/check.txt; do
     printf '%-20s %s\n' "$(basename "$(dirname "$c")")" "$(grep -m1 '^RESULT' "$c")"
@@ -229,5 +246,6 @@ case "${1:-}" in
   model)   shift; TN1_PRE=M_ TN1_ARGS=+AFE=model "$0" "${@:-all}" ;;
   report)  report ;;
   summary) summary ;;
-  *)       sed -n '2,24p' "$0"; exit 2 ;;
+  recheck) recheck; summary ;;
+  *)       sed -n '2,25p' "$0"; exit 2 ;;
 esac

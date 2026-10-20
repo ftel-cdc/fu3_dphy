@@ -114,8 +114,10 @@ Mô phỏng chạy trong XSIM của Vivado 2025.2, part xcvp1902.
 | Điều kiện | Cách kiểm |
 |---|---|
 | Burst định nghĩa thế nào | Mỗi lần `rxactivehs` = 1 liên tục là một burst. Byte của burst là các mẫu có `rxvalidhs` = 1 |
+| Ghép với truth | Burst thứ k trong capture của một lane ghép với burst thứ k của lane đó trong truth (theo thứ tự, không theo nội dung) |
 | Số burst | Mỗi lane đủ đúng số burst của truth: không thiếu, không thừa, không burst nào còn mở lúc kết thúc |
 | Payload | N byte đầu của burst thứ k phải bằng đúng payload của burst k trong truth, đúng thứ tự |
+| Ghép đúng cả về thời gian | Byte cuối của burst (trong N byte đầu) phải tới PPI sau khi nó rời pad, và trễ xấp xỉ trung vị của capture: lệch không quá nửa khoảng cách nhỏ nhất giữa hai burst của một lane. Luật này cần vì payload có thể lặp lại: nếu một lane mất một burst rồi thừa một burst khác, số burst và payload vẫn có thể khớp theo thứ tự, chỉ có thời gian lộ ra |
 | Cờ trong burst | `rxsynchs` lên đúng 1 lần; `errsoths` và `errsotsynchs` không lên |
 | Ngoài burst | Không có `rxvalidhs` hay cờ nào, không có giá trị X |
 | Byte trailer (sau payload) | RX AMD: không giới hạn, vì IP này không cắt trailer. RX mình: tối đa theo HAS Table 4-7 (0 nếu không nhiễu, từ 600 Mb/s) |
@@ -232,8 +234,8 @@ Kết quả ngày 2026-10-20: **EVIDENCE: PASS (8/8 checks)**.
 
 | Check | Kiểm gì | Kết quả 2026-10-20 |
 |---|---|---|
-| `checker` | Selftest của `csi2_dump.py`: tìm được các lỗi cài sẵn, capture sạch thì đạt | PASS |
-| `decode` | Giải mã lại mọi capture bằng code riêng, kết quả phải trùng `check.txt` | 453/453 capture |
+| `checker` | Selftest của `csi2_dump.py`: tìm được các lỗi cài sẵn, kể cả ca chỉ sai thời gian; capture sạch thì đạt | PASS |
+| `decode` | Giải mã lại mọi capture bằng code riêng, theo thứ tự và theo thời gian; kết quả phải trùng `check.txt`. Bộ giải mã tự thử trên capture giả trước | 453/453 capture |
 | `runs` | Mọi run kết thúc `TB DONE OK`; file truth có một dòng cho mỗi burst và lane | 227/227 run |
 | `front` | Mỗi run có hai RX: đầu ra LP của buffer AMD và của buffer trước RX mình trùng nhau ở mọi lần đổi; RX mình đứng sau `IBUFDS_DPHY` trừ khi kịch bản đặt `+AFE=model` | 226/226 run, 4 854 302 lần đổi, 0 khác |
 | `afe` | Mô hình AFE không lỗi trạng thái; `term_en` không trễ, không thiếu | 227/227 run |
@@ -260,6 +262,7 @@ Các con số trong bảng:
 | Bằng chứng | Kết quả |
 |---|---|
 | Selftest của `csi2_dump.py`: capture giả có cài sẵn 4 lỗi (đảo một byte, mất một burst, `errsoths`, `rxsynchs` hai lần) | Bắt đủ 4 lỗi; capture sạch thì 0 lỗi |
+| Selftest của `csi2_dump.py`: một lane có 8 burst cùng payload, mất burst 5 rồi phát lại burst 7. Số burst và payload vẫn khớp theo thứ tự | Luật thời gian bắt đúng 3 burst lệch, bắt đầu từ burst 5 |
 | Lần chạy đầu (2026-10-19, RTL v0.15), cùng line, cùng bộ kiểm | AMD 40/40 burst đúng ở E1-1; RX mình chỉ 20/40 (E1-1), 0/16 (E1-3c), 0/40 (E1-4b). Nguyên nhân tìm được trong code RTL (F1, F2) |
 | Cố tình đặt `eot_skip_bytes` model + 2 (`run_exp1.sh window`) | Báo mất payload ở mọi rate, ví dụ 711 / 2240 burst ở 260 Mb/s với trail min |
 | Lần chạy thứ hai (RTL v0.16 bản đầu) | Bắt được 2 run E1-5 vượt Table 4-7 bản cũ, dẫn tới việc đo lại |
@@ -271,10 +274,24 @@ PASS chỉ xuất hiện sau khi sửa code, và các chỗ sửa đó giải th
 
 `tn1_evidence.py` giải mã lại mọi capture bằng code viết riêng, không dùng chung dòng nào với `csi2_dump.py`:
 - burst là mỗi lần `rxactivehs` = 1 liên tục; byte là các mẫu có `rxvalidhs` = 1;
-- so với `truth.txt` theo cùng luật ở §4;
+- so với `truth.txt` theo cùng luật ở §4, gồm cả luật thời gian;
 - kết quả phải trùng `check.txt`: số burst có payload đúng, khoảng byte trailer, và kết luận đạt/hỏng.
 
-Ngày 2026-10-20: 453/453 capture trùng.
+Trước đó, bộ giải mã tự thử trên capture giả: capture sạch phải đạt, và capture "mất burst 5, phát lại burst 7" phải
+lộ ra 3 burst lệch thời gian.
+
+Ngày 2026-10-20: 453/453 capture trùng, và 128/128 capture của `window` (chạy `tn1_evidence.py fpga/work/exp1/window`).
+
+**Ghép theo thứ tự có đúng không?** Payload có thể lặp lại: 128 run `window` (REPEAT=40) có payload trùng nhau trên
+cùng một lane, vì mẫu `counter` quay vòng sau 16 burst. Luật thời gian (§4) loại trừ việc ghép nhầm:
+- Mọi run TN1 và mọi run `window` đạt đều ghép đúng cả về thời gian. Dải độ trễ rộng nhất chỉ bằng 7 % khoảng cách
+  nhỏ nhất giữa hai burst (R-80), nên ghép lệch một burst sẽ lộ ngay.
+- Hai capture `window` ở model + 2 (`W_1000_min_n40_s11`, `W_260_min_n40_s3`) có lane 1 mất trọn một burst. Từ burst
+  140 (và 252) trở đi, các cặp lệch một vị trí. Luật thời gian chỉ đúng chỗ đó. Hai run này vốn đã FAIL vì sai số
+  burst và mất payload.
+
+Luật thời gian được thêm ngày 2026-10-20, sau các lần chạy. `run_exp1.sh recheck` đã kiểm lại toàn bộ output (không
+mô phỏng lại): 355 run không đổi kết luận, bảng `window` (Table 4-7) giống hệt.
 
 ### 7.4 Lớp 4: thứ được test có đúng là thứ đã commit không?
 
@@ -337,6 +354,7 @@ Script kiểm chứng cũng phải biết báo FAIL. Các phép thử ngày 2026
   - `afe` FAIL ở 5 run 80 Mb/s có burst quá sát nhau, `term_en` bị thiếu;
   - `sources` FAIL: thư mục đó không có build.
 - **Hai front end khác nhau** ([`neg_front.sh`](neg_front.sh), §7.6): `front` FAIL.
+- **Gỡ luật thời gian khỏi bộ giải mã** (bản copy tạm): selftest của bộ giải mã FAIL, nên `decode` FAIL.
 
 ### 7.8 Giới hạn của phần kiểm chứng
 
@@ -385,6 +403,7 @@ fpga/exp1/run_exp1.sh run 600 stub <tên> +TRAIL=min +EOT_JUNK=40     # chỉ RX
 fpga/exp1/run_exp1.sh window               # đo cửa sổ eot_skip_bytes (~7 phút)
 fpga/exp1/run_exp1.sh report               # R-80
 fpga/exp1/run_exp1.sh summary              # dòng kết quả của mọi kịch bản đã chạy
+fpga/exp1/run_exp1.sh recheck              # kiểm lại mọi output bằng csi2_dump.py hiện tại (~25 s, không mô phỏng)
 python3 fpga/exp1/tn1_evidence.py          # kiểm chứng kết quả (§7)
 fpga/exp1/neg_front.sh                     # phép thử âm của check front end (§7.6, ~1 phút)
 ```
