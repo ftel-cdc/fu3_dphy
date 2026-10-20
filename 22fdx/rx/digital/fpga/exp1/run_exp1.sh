@@ -1,14 +1,18 @@
 #!/bin/bash
-# TN1 of fpga/PLAN_TN1_TN3.md and fpga/PLAN_TN1_FIX.md: dummy D-PHY data into AMD's D-PHY RX and into ftel_dphy_rx (the ASIC RTL behind
-# an AFE model), in XSIM. Outputs in fpga/work/exp1 (gitignored).
+# TN1 of fpga/PLAN_TN1_TN3.md, PLAN_TN1_FIX.md and PLAN_TN1_FAIR.md: dummy D-PHY data into AMD's D-PHY RX and
+# into ftel_dphy_rx (the ASIC RTL behind IBUFDS_DPHY, the input buffer of AMD's receiver, or behind afe_model
+# with +AFE=model), in XSIM. Outputs in fpga/work/exp1 (gitignored).
 #   fpga/exp1/run_exp1.sh build <rate> <lanes>                 # xrx IP, project, compile, elaborate (~5 min);
 #                                                              # once per rate and lane count
 #   fpga/exp1/run_exp1.sh run <rate> <lanes> <name> [+arg ...] # one scenario (~15 s), then the check
 #   fpga/exp1/run_exp1.sh run <rate> stub <name> [+arg ...]    # ftel_dphy_rx alone, 4 lanes, with xrx_stub.sv
 #                                                              # (any rate; AMD's IP needs 260..3200 Mb/s)
-#   fpga/exp1/run_exp1.sh E1-1|E1-2|E1-3|E1-4|E1-5|all         # the scenarios of the plans
+#   fpga/exp1/run_exp1.sh E1-1|E1-2|E1-3|E1-4|all              # the scenarios of the plans
+#   fpga/exp1/run_exp1.sh E1-5 [<rate> ...]                    # EoT stress of both receivers (default: 8 rates)
 #   fpga/exp1/run_exp1.sh window [<rate> ...]                  # eot_skip_bytes from its model value - 1 to + 2
 #                                                              # (measurement, ~7 min, table by eot_window.py)
+#   fpga/exp1/run_exp1.sh model [E1-1|...|E1-5 [<rate> ...]]   # the same scenarios (default: all) with ftel_dphy_rx
+#                                                              # behind afe_model, outputs in M_<name>
 #   fpga/exp1/run_exp1.sh report                               # 80 Mb/s, outside the guaranteed range
 #   fpga/exp1/run_exp1.sh summary                              # result line of every scenario run so far
 # A build lives in fpga/work/exp1/build_<rate>_<lanes>l (build_stub for the stub); it is compiled and
@@ -72,8 +76,11 @@ stub_build() {
   sha=$(sources | xargs sha256sum | sha256sum | cut -c1-16)
   if [ "$(cat "$d/src.sha" 2>/dev/null)" != "$sha" ]; then
     echo "build stub: compile and elaborate ftel_dphy_rx with xrx_stub.sv (~10 s)"
-    if ! (cd "$d" && xvlog -sv --relax -i "$REPO/hw/rtl/ip/ftel_dphy_rx/logical" $(sources) > compile.log 2>&1 \
-          && xelab --relax -debug off tb_exp1 -generic_top NL=4 -s tb_exp1_stub > elaborate.log 2>&1); then
+    # TN1_STUB: no AMD front end to compare; IBUFDS_DPHY comes from Vivado's unisims_ver and needs glbl
+    if ! (cd "$d" && xvlog -sv --relax -d TN1_STUB -i "$REPO/hw/rtl/ip/ftel_dphy_rx/logical" $(sources) \
+            "$(dirname "$XBIN")/data/verilog/src/glbl.v" > compile.log 2>&1 \
+          && xelab --relax -debug off -L unisims_ver tb_exp1 glbl -generic_top NL=4 -s tb_exp1_stub \
+            > elaborate.log 2>&1); then
       echo "build stub FAIL: see $d/compile.log and $d/elaborate.log"
       return 1
     fi
@@ -82,8 +89,9 @@ stub_build() {
 }
 
 run() {
-  local rate=$1 lanes=$2 name=$3 out sim snap=tb_exp1_behav nl=$2 t0 args=() csv=()
+  local rate=$1 lanes=$2 name=${TN1_PRE:-}$3 out sim snap=tb_exp1_behav nl=$2 t0 args=() csv=()
   shift 3
+  set -- "$@" ${TN1_ARGS:-}       # set by "model"
   if [ "$lanes" = stub ]; then
     stub_build || return 1
     sim=$W/build_stub
@@ -131,7 +139,8 @@ e1_3() {
   run 1440 4 E1-3d $l +CLK_SKEW=139
   run 1440 4 E1-3e $l +SKEW0=139 +SKEW1=139 +SKEW2=139 +SKEW3=139
   run 1440 4 E1-3f $l +SKEW1=46 +SKEW2=93 +SKEW3=139
-  run 1440 4 E1-3g $l +AFE_NOISE=1
+  # the noise is afe_model's: ftel_dphy_rx behind afe_model, a test of ftel_dphy_rx alone (fpga/PLAN_TN1_FAIR.md D)
+  run 1440 4 E1-3g $l +AFE=model +AFE_NOISE=1
 }
 # Trailer bytes that HAS v0.16 Table 4-7 allows ftel_dphy_rx with the eot_skip_bytes of Table 3-2: none without
 # junk from 600 Mb/s, otherwise its last column, floor((TEOT,max + 29 ns) / byte period) - eot_skip_bytes.
@@ -153,16 +162,17 @@ e1_4() {
   run 1440 2 E1-4d
   run 1440 1 E1-4e
 }
-# EoT stress of ftel_dphy_rx alone (the trailer cut is its own): every rate of HAS v0.16 Table 4-7 x trail x
-# jitter x junk, LP-11 at every phase of core_clk (400 ppm slow), trailer bytes limited by that table.
+# EoT stress of both receivers: every rate of HAS v0.16 Table 4-7 x trail x jitter x junk, LP-11 at every phase
+# of core_clk (400 ppm slow). Trailer bytes of ftel_dphy_rx limited by that table (the cut is its own); AMD's
+# receiver keeps them. The rates can be given, to run them in parallel (one build each).
 e1_5() {
   local r t j n
-  for r in 260 400 600 800 1000 1200 1440 1500; do
+  for r in ${@:-260 400 600 800 1000 1200 1440 1500}; do
     for t in min def max; do
       for j in 0 1; do
         for n in 0 40; do
           MAXTR=$(tmax "$r" "$n") \
-            run "$r" stub "E1-5_${r}_${t}_j${j}_n${n}" +LENS=1,2,3,4,5,8,16,64,256 +REPEAT=2 \
+            run "$r" 4 "E1-5_${r}_${t}_j${j}_n${n}" +LENS=1,2,3,4,5,8,16,64,256 +REPEAT=2 \
               $([ "$t" != def ] && echo "+TRAIL=$t") +TRAIL_JITTER=$j +EOT_JUNK=$n +SEED=$(( r + j + n )) \
               +CORE_HALF=2.501 +TIMEOUT_US=2500
         done
@@ -173,7 +183,8 @@ e1_5() {
 # Window of eot_skip_bytes (fpga/PLAN_TN1_FIX.md §5): ftel_dphy_rx alone from the value of its configuration
 # model - 1 to + 2, where the payload of the shortest trail is lost; trail min and max, junk 0 and 40 ns; LP-11 at every phase of the byte clock
 # (trail jitter) and of core_clk (400 ppm slow). A measurement, not a verdict: every burst with trailer bytes
-# counts as an error (MAXTR 0) and payload loss shows in the bursts count. Outputs in fpga/work/exp1/window/,
+# counts as an error (MAXTR 0) and payload loss shows in the bursts count. Behind afe_model, as when HAS v0.16
+# Table 4-7 was measured (its HS output is 0 from LP-11 on, the worse case). Outputs in fpga/work/exp1/window/,
 # outside summary.
 window() {
   local r t n d s
@@ -184,7 +195,8 @@ window() {
         for d in -1 0 1 2; do
           [ $(( s + d )) -lt 0 ] && continue
           run "$r" stub "window/W_${r}_${t}_n${n}_s$(( s + d ))" +EOT_SKIP=$(( s + d )) +TRAIL=$t +TRAIL_JITTER=1 \
-            +EOT_JUNK=$n +CORE_HALF=2.501 +SEED=$(( r + n + s + d )) +LENS=1,2,3,4,5,8,16 +REPEAT=40 +TIMEOUT_US=8000
+            +EOT_JUNK=$n +CORE_HALF=2.501 +SEED=$(( r + n + s + d )) +LENS=1,2,3,4,5,8,16 +REPEAT=40 +TIMEOUT_US=8000 \
+            +AFE=model
         done
       done
     done
@@ -209,10 +221,13 @@ case "${1:-}" in
   E1-2)    e1_2 ;;
   E1-3)    e1_3 ;;
   E1-4)    e1_4 ;;
-  E1-5)    e1_5 ;;
+  E1-5)    shift; e1_5 "$@" ;;
   all)     e1_1; e1_2; e1_3; e1_4; e1_5; summary ;;
   window)  shift; window "$@" ;;
+  # Secondary set (fpga/PLAN_TN1_FAIR.md E): ftel_dphy_rx behind afe_model (LP-00 during HS, as on silicon), AMD's
+  # receiver unchanged; the scenario arguments still win over +AFE=model.
+  model)   shift; TN1_PRE=M_ TN1_ARGS=+AFE=model "$0" "${@:-all}" ;;
   report)  report ;;
   summary) summary ;;
-  *)       sed -n '2,20p' "$0"; exit 2 ;;
+  *)       sed -n '2,24p' "$0"; exit 2 ;;
 esac

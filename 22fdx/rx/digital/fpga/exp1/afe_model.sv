@@ -1,5 +1,7 @@
 // TN1/TN2 AFE model (fpga/PLAN_TN1_TN3.md §1), testbench only: D-PHY pads (logic levels) -> the AFE
 // outputs of ftel_dphy_rx (HAS Table 5-2, ADR-001 option A: LP-RX outputs, unsampled HS bit, DDR clock).
+// In TN1 it drives ftel_dphy_rx with +AFE=model only; by default ftel_dphy_rx sits behind IBUFDS_DPHY, the
+// buffer of AMD's receiver (fpga/PLAN_TN1_FAIR.md), and this model checks the line state and the enables.
 // - Line state per lane, inferred from the pads as the AFE sees them: LP-11 -> LP-01 (HS request) -> LP-00
 //   (bridge) -> the next differential state is HS-0; HS lasts until LP-11. An escape entry starts with
 //   LP-10, so a LP-01 that does not follow LP-11 stays an LP state.

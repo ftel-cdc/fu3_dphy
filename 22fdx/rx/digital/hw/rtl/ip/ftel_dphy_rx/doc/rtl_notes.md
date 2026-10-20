@@ -491,8 +491,12 @@ resolution, and the expected periods are derived from it.
 `fpga/exp1/run_exp1.sh` (TN1 of `fpga/PLAN_TN1_TN3.md`; fix plan `fpga/PLAN_TN1_FIX.md`) sends one
 D-PHY line from `dphy_line_gen.sv` to two receivers:
 - AMD's D-PHY RX (mipi_dphy 4.3, Vivado 2025.2), generated for each rate and lane count;
-- the core `m_ftel_dphy_rx` behind `afe_model.sv` (ADR-001 option A: LP-RX outputs, unsampled HS
-  bit, DDR clock; HS-RX output 0 outside HS).
+- the core `m_ftel_dphy_rx` behind a front end:
+  - `IBUFDS_DPHY`, the input buffer of AMD's receiver, with the same strength on the pads (default
+    since the fair run, `fpga/PLAN_TN1_FAIR.md`; LP-RX outputs follow the HS levels, the HS-RX output
+    keeps its last bit at LP-11);
+  - or `afe_model.sv` (`+AFE=model`; ADR-001 option A: LP-RX outputs, unsampled HS bit, DDR clock;
+    LP-00 during HS and HS-RX output 0 outside HS).
 
 Both PPIs are written as ILA-style CSVs and compared with the truth file of the generator by
 `fpga/tools/csi2_dump.py bursts`. The bursts carry dummy data, not CSI-2 packets, and there is no
@@ -509,11 +513,11 @@ A burst passes on a lane when:
 |---|---|---|---|---|---|
 | E1-1 | 1440, 4 | 1 to 1024 bytes | 16–17 | 0 | PASS |
 | E1-2a–c | 1440, 4 | PRBS9, sync-like data, uneven lanes | 16–17 | 0 | PASS |
-| E1-3a–g | 1440, 4 | THS-PREPARE and THS-ZERO at their limits, minimum TRAIL/EXIT/LPX, clock skew, lane skew up to 139 ps, AFE noise | 14–17 | 0 | PASS |
-| E1-4a | 260, 4 | default and minimum timing | 1–2 | 0; 0–2 in 8 of 40 bursts at minimum timing (limit 4) | PASS |
+| E1-3a–g | 1440, 4 | THS-PREPARE and THS-ZERO at their limits, minimum TRAIL/EXIT/LPX, clock skew, lane skew up to 139 ps, AFE noise (E1-3g, behind `afe_model`) | 14–17 | 0 | PASS |
+| E1-4a | 260, 4 | default and minimum timing | 1–2 | 0; behind `afe_model`, 0–2 in 8 of 40 bursts at minimum timing (limit 4) | PASS |
 | E1-4b, E1-4c | 800 and 1500, 4 | rate | 9 and 17–18 | 0 | PASS |
 | E1-4d, E1-4e | 1440, 2 and 1 | lanes | 16–17 | 0 | PASS |
-| E1-5, 96 runs | 260–1500, ftel_dphy_rx alone | trail min/def/max × jitter × 0 or 40 ns of junk, `core_clk` 400 ppm slow | — | within Table 4-7; most 12, at 1440 Mb/s with junk | PASS |
+| E1-5, 96 runs | 260–1500, 4 (fair run: both receivers; before it: ftel_dphy_rx alone) | trail min/def/max × jitter × 0 or 40 ns of junk, `core_clk` 400 ppm slow | 1–25 | within Table 4-7; most 12, at 1440 Mb/s with junk | PASS |
 | R-80 | 80, ftel_dphy_rx alone | outside the guarantee | — | 0–1, in 10 of 36 bursts | report only |
 
 How the results were reached:
@@ -540,3 +544,15 @@ How the results were reached:
 4. **Final run, 2026-10-20.** All 113 scenarios pass for both receivers (`run_exp1.sh summary`). The
    full sequence took 8 minutes, including the new compilation of the six Vivado builds after the
    source change.
+5. **Fair run, 2026-10-20 (`fpga/PLAN_TN1_FAIR.md`).** The core sits behind `IBUFDS_DPHY`, as AMD's
+   receiver does, and E1-5 runs both receivers at eight rates.
+   - All 113 scenarios pass for both receivers. Every run of both shows equal LP outputs of the two
+     sets of buffers at every change (4 854 302 changes in 226 runs).
+   - Without junk the core keeps no trailer byte at any rate.
+   - Behind `afe_model`, the core keeps up to 4 trailer bytes at 260 and 400 Mb/s without junk. Behind
+     `IBUFDS_DPHY` it keeps none, because that model keeps the last trail bit after LP-11 where
+     `afe_model` gives 0. Table 4-7, measured behind `afe_model`, stays the worse case.
+   - With junk the trailer bytes are the same behind both front ends.
+   - The same scenarios behind `afe_model` (`run_exp1.sh model`) pass. Their captures, and those of the
+     window measurement, equal the run before the change byte for byte.
+   - `fpga/exp1/tn1_evidence.py` passes its 8 checks.

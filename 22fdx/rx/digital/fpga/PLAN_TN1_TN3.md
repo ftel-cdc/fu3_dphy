@@ -11,6 +11,14 @@
 > - Lần chạy cuối: 113/113 kịch bản PASS cho cả hai RX.
 > - Kết quả nằm ở §9 của `PLAN_TN1_FIX.md` và §9 của `hw/rtl/ip/ftel_dphy_rx/doc/rtl_notes.md`.
 > - Tiếp theo: TN2.
+>
+> **Cập nhật 2026-10-20 (sau): TN1 so công bằng phần digital** (`fpga/PLAN_TN1_FAIR.md`).
+> - RX mình nay đứng sau `IBUFDS_DPHY`, đúng buffer mà RX AMD dùng, với cùng strength trên pad. Mỗi run, bench kiểm
+>   rằng đầu ra LP của hai bộ buffer trùng nhau.
+> - E1-5 (stress EoT) nay chạy cả hai RX ở 8 rate.
+> - Kết quả: 113/113 kịch bản PASS cho cả hai RX. Bộ phụ, với RX mình sau `afe_model`, cũng 113/113 PASS và trùng
+>   từng byte với lần chạy trước.
+> - Chi tiết ở `fpga/exp1/README.md` §6–§7.
 
 ## 0. Context
 
