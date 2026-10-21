@@ -18,7 +18,7 @@ cần một hành vi mà HAS chưa định nghĩa thì dừng lại và hỏi (l
 |---|---|---|
 | 1 | IP Wrapper Guideline (FU1, 2026-03-07), Table 1-1 và 1-2 | Tên module, parameter, define, flip-flop, port, instance; port của wrapper; reset active-low ở wrapper |
 | 2 | Tiền lệ FX1 | `ip-dev/hw/utils/tool_flow/config/project.yaml` (tiền tố `m_ftel`, layout), header của các cell `m_fpt_lib_*` trong lib fu2, `ftel_intctl` (sync cell tương thích `m_vlsi_synch`, lệnh lint VCS) |
-| 3 | [reference rule set] `rtl_rule.md` | R1–R11, P1–P12, cấu trúc module, đã chuyển thể cho IP nhiều clock domain |
+| 3 | Bộ luật RTL tham khảo (`rtl_rule.md` của flow sinh RTL ban đầu) | R1–R11, P1–P12, cấu trúc module, đã chuyển thể cho IP nhiều clock domain |
 | 4 | Tài liệu này | Phần các nguồn trên không quy định |
 
 Khi hai nguồn mâu thuẫn, nguồn có ưu tiên cao hơn thắng.
@@ -44,8 +44,8 @@ Khi hai nguồn mâu thuẫn, nguồn có ưu tiên cao hơn thắng.
 
 | ID | Đối tượng | Quy tắc | Lý do |
 |---|---|---|---|
-| N9 [M] | localparam | `C_<NAME>` | Phân biệt với `PARA_` (override được). Không dùng `LP_` như [reference rule set] vì trong IP này LP là Low-Power |
-| N10 [M] | Net tổ hợp | `w_<name>`; next-state của `reg_<name>` là `w_<name>_nxt` | [reference rule set] §2.2; tách được flop và net khi đọc và khi kiểm |
+| N9 [M] | localparam | `C_<NAME>` | Phân biệt với `PARA_` (override được). Không dùng `LP_` như bộ luật tham khảo vì trong IP này LP là Low-Power |
+| N10 [M] | Net tổ hợp | `w_<name>`; next-state của `reg_<name>` là `w_<name>_nxt` | Bộ luật tham khảo §2.2; tách được flop và net khi đọc và khi kiểm |
 | N11 [M] | Clock / reset của module con | `i_<domain>_clk`, `i_<domain>_rst_n`; `<domain>` ∈ {`core`, `byte`, `cfg`, `ddr`, `ddrn`} (K1). Áp dụng cho input clock và input reset active-low của khối. Core và wrapper dùng tên HAS (§2.3); các cell dùng chung theo K10; reset do khối sinh ra (output) và yêu cầu reset `phy_core_rst` của PPI (tên HAS, chỉ vào reset synchronizer của No.6) không thuộc luật này. Reset nội bộ lấy từ reset synchronizer của chính module có dạng `w_<domain>[_<tên>]_rst_n`. Riêng `m_ftel_dphy_rx_byte_clk` được dùng clock `w_ddrn_clk` do chính nó sinh qua cell clock inverter (K2) | Theo mẫu `i_i2c_clk`, `i_i2c_rst_n` của Table 1-2 |
 | N12 [M] | Package, kiểu | Package `ftel_dphy_rx[_<name>]_pkg` (package không phải module nên không có `m_`); kiểu có hậu tố `_t` | `ftel_dphy_rx_pkg::dl_state_t` |
 | N13 [M] | Nhãn | `g_<name>` cho generate, `p_<name>` cho always, `a_<name>` cho assertion | `g_lane`, `p_state_reg` |
