@@ -1,4 +1,26 @@
 #!/usr/bin/env bash
+#-------------------------------------------------------------------------------
+# Copyright (c) 2026 FPT Telecom. All rights reserved.
+#
+# This source code and the associated design are the proprietary
+# and confidential information of FPT Telecom.
+# Any unauthorized use, reproduction, or disclosure is strictly prohibited.
+#-------------------------------------------------------------------------------
+# Author          : Ho Khanh Linh
+# Email           : linhhk26@fpt.com
+# Created Date    : 2026-10-03
+# Description     : VCS lint of the ftel_dphy_rx RTL (doc/rtl_rule.md L1), in the form of
+#                   ftel_intctl/sim/compile_rtl.sh.
+#
+# Evolution History:
+# ------------------------------------------------------------------------------
+# Date         Version    Author        Description
+# 2026-10-03   0.1        Ho Khanh Linh Initial creation.
+#
+# This section is not intended for routine updates or minor design changes.
+# A new version is strictly reserved for major architectural shifts
+# that require software modifications across different chip generations.
+#-------------------------------------------------------------------------------
 # ============================================================================
 # VCS lint of the ftel_dphy_rx RTL (doc/rtl_rule.md L1), in the form of ftel_intctl/sim/compile_rtl.sh.
 #

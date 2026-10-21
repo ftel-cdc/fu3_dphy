@@ -1,3 +1,25 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2026 FPT Telecom. All rights reserved.
+#
+# This source code and the associated design are the proprietary
+# and confidential information of FPT Telecom.
+# Any unauthorized use, reproduction, or disclosure is strictly prohibited.
+#-------------------------------------------------------------------------------
+# Author          : Ho Khanh Linh
+# Email           : linhhk26@fpt.com
+# Created Date    : 2026-10-12
+# Description     : Probe: an Advanced IO Wizard 1.1 with the MIPI_RX template, made outside the MIPI
+#                   D-PHY IP with the parameters the IP sets.
+#
+# Evolution History:
+# ------------------------------------------------------------------------------
+# Date         Version    Author        Description
+# 2026-10-12   0.1        Ho Khanh Linh Initial creation.
+#
+# This section is not intended for routine updates or minor design changes.
+# A new version is strictly reserved for major architectural shifts
+# that require software modifications across different chip generations.
+#-------------------------------------------------------------------------------
 # Probe: an Advanced IO Wizard 1.1 with the MIPI_RX template, created on its own (outside the
 # MIPI D-PHY IP), with the 44 parameter values the MIPI D-PHY 4.3 sets on its wizard sub-core
 # (see dphy_rx_versal.tcl). Reports the ports of the generated wizard and the input buffer it

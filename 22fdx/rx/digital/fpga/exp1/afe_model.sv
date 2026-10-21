@@ -1,3 +1,25 @@
+//------------------------------------------------------------------------------
+// Copyright (c) 2026 FPT Telecom. All rights reserved.
+//
+// This source code and the associated design are the proprietary
+// and confidential information of FPT Telecom.
+// Any unauthorized use, reproduction, or disclosure is strictly prohibited.
+//------------------------------------------------------------------------------
+// Author          : Ho Khanh Linh
+// Email           : linhhk26@fpt.com
+// Created Date    : 2026-10-19
+// Description     : TN1/TN2 AFE model, testbench only: D-PHY pads (logic levels) to the AFE outputs of
+//                   ftel_dphy_rx (HAS Table 5-2).
+//
+// Evolution History:
+// -----------------------------------------------------------------------------
+// Date         Version    Author        Description
+// 2026-10-19   0.1        Ho Khanh Linh Initial creation.
+//
+// This section is not intended for routine updates or minor design changes.
+// A new version is strictly reserved for major architectural shifts
+// that require software modifications across different chip generations.
+//------------------------------------------------------------------------------
 // TN1/TN2 AFE model (fpga/PLAN_TN1_TN3.md §1), testbench only: D-PHY pads (logic levels) -> the AFE
 // outputs of ftel_dphy_rx (HAS Table 5-2, ADR-001 option A: LP-RX outputs, unsampled HS bit, DDR clock).
 // In TN1 it drives ftel_dphy_rx with +AFE=model only; by default ftel_dphy_rx sits behind IBUFDS_DPHY, the

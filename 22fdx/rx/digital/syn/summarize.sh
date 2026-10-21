@@ -1,4 +1,26 @@
 #!/usr/bin/env bash
+#-------------------------------------------------------------------------------
+# Copyright (c) 2026 FPT Telecom. All rights reserved.
+#
+# This source code and the associated design are the proprietary
+# and confidential information of FPT Telecom.
+# Any unauthorized use, reproduction, or disclosure is strictly prohibited.
+#-------------------------------------------------------------------------------
+# Author          : Ho Khanh Linh
+# Email           : linhhk26@fpt.com
+# Created Date    : 2026-10-10
+# Description     : Key numbers of each synthesis run in syn/output/: WNS and TNS per clock group,
+#                   cells, the paths of Block No. 1, violators and area per block.
+#
+# Evolution History:
+# ------------------------------------------------------------------------------
+# Date         Version    Author        Description
+# 2026-10-10   0.1        Ho Khanh Linh Initial creation.
+#
+# This section is not intended for routine updates or minor design changes.
+# A new version is strictly reserved for major architectural shifts
+# that require software modifications across different chip generations.
+#-------------------------------------------------------------------------------
 # ============================================================================
 # Key numbers of each run in syn/output/: WNS and TNS per clock group, cells, the Block No. 1
 # paths of doc/rtl_notes.md §6, violators and area per block (lanes summed). Times in the unit of

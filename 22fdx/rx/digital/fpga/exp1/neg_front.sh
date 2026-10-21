@@ -1,4 +1,25 @@
 #!/bin/bash
+#-------------------------------------------------------------------------------
+# Copyright (c) 2026 FPT Telecom. All rights reserved.
+#
+# This source code and the associated design are the proprietary
+# and confidential information of FPT Telecom.
+# Any unauthorized use, reproduction, or disclosure is strictly prohibited.
+#-------------------------------------------------------------------------------
+# Author          : Ho Khanh Linh
+# Email           : linhhk26@fpt.com
+# Created Date    : 2026-10-20
+# Description     : Negative test of the front-end check of tb_exp1.sv (fpga/exp1/README.md §7.6).
+#
+# Evolution History:
+# ------------------------------------------------------------------------------
+# Date         Version    Author        Description
+# 2026-10-20   0.1        Ho Khanh Linh Initial creation.
+#
+# This section is not intended for routine updates or minor design changes.
+# A new version is strictly reserved for major architectural shifts
+# that require software modifications across different chip generations.
+#-------------------------------------------------------------------------------
 # Negative test of the front-end check of tb_exp1.sv (fpga/exp1/README.md §7.6). A copy of the 1440 Mb/s, 4-lane
 # build gets a testbench whose buffers in front of ftel_dphy_rx see pull strength during HS (the option dropped in
 # fpga/PLAN_TN1_FAIR.md §8), while AMD's buffers still see strong. E1-1 runs on that copy: the check must count

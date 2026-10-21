@@ -1,4 +1,26 @@
 #!/usr/bin/env python3
+#-------------------------------------------------------------------------------
+# Copyright (c) 2026 FPT Telecom. All rights reserved.
+#
+# This source code and the associated design are the proprietary
+# and confidential information of FPT Telecom.
+# Any unauthorized use, reproduction, or disclosure is strictly prohibited.
+#-------------------------------------------------------------------------------
+# Author          : Ho Khanh Linh
+# Email           : linhhk26@fpt.com
+# Created Date    : 2026-09-26
+# Description     : Deterministic inventory of a HAS spec.md — the pre-registered answer key of the req
+#                   flow.
+#
+# Evolution History:
+# ------------------------------------------------------------------------------
+# Date         Version    Author        Description
+# 2026-09-26   0.1        Ho Khanh Linh Initial creation.
+#
+# This section is not intended for routine updates or minor design changes.
+# A new version is strictly reserved for major architectural shifts
+# that require software modifications across different chip generations.
+#-------------------------------------------------------------------------------
 """Deterministic inventory of a HAS spec.md — the pre-registered answer key of the req flow.
 
 Every table of the spec is recognised by its HEADER SIGNATURE (the tuple of header cells), not by

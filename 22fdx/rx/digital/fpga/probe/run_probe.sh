@@ -1,4 +1,25 @@
 #!/bin/bash
+#-------------------------------------------------------------------------------
+# Copyright (c) 2026 FPT Telecom. All rights reserved.
+#
+# This source code and the associated design are the proprietary
+# and confidential information of FPT Telecom.
+# Any unauthorized use, reproduction, or disclosure is strictly prohibited.
+#-------------------------------------------------------------------------------
+# Author          : Ho Khanh Linh
+# Email           : linhhk26@fpt.com
+# Created Date    : 2026-10-12
+# Description     : Run the Vivado probes of fpga/probe in batch mode.
+#
+# Evolution History:
+# ------------------------------------------------------------------------------
+# Date         Version    Author        Description
+# 2026-10-12   0.1        Ho Khanh Linh Initial creation.
+#
+# This section is not intended for routine updates or minor design changes.
+# A new version is strictly reserved for major architectural shifts
+# that require software modifications across different chip generations.
+#-------------------------------------------------------------------------------
 # Run the Vivado probes of fpga/probe in batch mode. Each probe writes into fpga/work/<probe>/
 # (gitignored): vivado.log, stdout.txt and probe.txt (the "PROBE" result lines).
 #   fpga/probe/run_probe.sh                     # all light probes

@@ -4,7 +4,7 @@
   "P1": {
    "status": "pass",
    "mode": "review",
-   "at": "2026-10-21T14:43:48+07:00",
+   "at": "2026-10-21T14:52:51+07:00",
    "inputs": {
     "spec": "9e6ec588dd17ef237b08aadfd2634622cf7239c62dac65a5aa8392de858eab04"
    },
@@ -17,7 +17,7 @@
   "P2": {
    "status": "pass",
    "mode": "review",
-   "at": "2026-10-21T14:43:48+07:00",
+   "at": "2026-10-21T14:52:51+07:00",
    "inputs": {
     "spec": "9e6ec588dd17ef237b08aadfd2634622cf7239c62dac65a5aa8392de858eab04",
     "structured_spec": "6cac5aca87af1e0b0186770b6b1cdcfb6926a27ca09598ba21ee0f4385063650",
@@ -32,21 +32,21 @@
    "gate_2": {
     "status": "auto-signed",
     "by": "flow_check.py (0 conflicts)",
-    "at": "2026-10-21T14:43:48+07:00"
+    "at": "2026-10-21T14:52:51+07:00"
    }
   },
   "P3a": {
    "status": "pass",
    "mode": "review",
-   "at": "2026-10-21T14:44:48+07:00",
+   "at": "2026-10-21T14:52:51+07:00",
    "inputs": {
     "spec": "9e6ec588dd17ef237b08aadfd2634622cf7239c62dac65a5aa8392de858eab04",
     "structured_spec": "6cac5aca87af1e0b0186770b6b1cdcfb6926a27ca09598ba21ee0f4385063650",
     "config_pkg": "4cbcea6ac894197b2c6a06b24ce6bada257bb6ef116357cfac0587727c6c6ba3",
     "rtl_rule": "cea053a8addced2df175b5bc0c2cca2c6b0700782ea626aa0d8d707144f5d8e1",
     "rtl_scope": "165d4d3971709ebdcbb7feceb53e6c94e039af3b4c06e4e60424dde6a7dee150",
-    "vcs_manifest": "d8345fb5eb4e5c7fd3b968d562a1f8e38f61226a4c3616a942dbb2dbd4cdee59",
-    "spyglass_report": "f029cd5241d07092a5220d4840a309b676645d5f01aeb44e1b51954fded35ba6"
+    "vcs_manifest": "6a90ccd7633f7d3450bad2ae8cb95c9d07c0fc9d5d3db53bb2d76ec496114a18",
+    "spyglass_report": "1eb1041a84ce5a2fd7a0ea8af130ebea02e47e3268e0eda99c14138a52ffa83f"
    },
    "outputs": {
     "rtl": "d92668b8ef8845097175de140dae7f8da8f920f0a4543a2b8cad8cf4c0b4adec",

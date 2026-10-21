@@ -1,4 +1,26 @@
 #!/bin/bash
+#-------------------------------------------------------------------------------
+# Copyright (c) 2026 FPT Telecom. All rights reserved.
+#
+# This source code and the associated design are the proprietary
+# and confidential information of FPT Telecom.
+# Any unauthorized use, reproduction, or disclosure is strictly prohibited.
+#-------------------------------------------------------------------------------
+# Author          : Ho Khanh Linh
+# Email           : linhhk26@fpt.com
+# Created Date    : 2026-10-19
+# Description     : TN1 in XSIM: dummy D-PHY data into AMD's D-PHY RX and into ftel_dphy_rx; builds,
+#                   scenarios and checks.
+#
+# Evolution History:
+# ------------------------------------------------------------------------------
+# Date         Version    Author        Description
+# 2026-10-19   0.1        Ho Khanh Linh Initial creation.
+#
+# This section is not intended for routine updates or minor design changes.
+# A new version is strictly reserved for major architectural shifts
+# that require software modifications across different chip generations.
+#-------------------------------------------------------------------------------
 # TN1 of fpga/PLAN_TN1_TN3.md, PLAN_TN1_FIX.md and PLAN_TN1_FAIR.md: dummy D-PHY data into AMD's D-PHY RX and
 # into ftel_dphy_rx (the ASIC RTL behind IBUFDS_DPHY, the input buffer of AMD's receiver, or behind afe_model
 # with +AFE=model), in XSIM. Outputs in fpga/work/exp1 (gitignored).

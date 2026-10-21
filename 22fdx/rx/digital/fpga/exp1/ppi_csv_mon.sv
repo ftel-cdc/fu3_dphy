@@ -1,3 +1,25 @@
+//------------------------------------------------------------------------------
+// Copyright (c) 2026 FPT Telecom. All rights reserved.
+//
+// This source code and the associated design are the proprietary
+// and confidential information of FPT Telecom.
+// Any unauthorized use, reproduction, or disclosure is strictly prohibited.
+//------------------------------------------------------------------------------
+// Author          : Ho Khanh Linh
+// Email           : linhhk26@fpt.com
+// Created Date    : 2026-10-19
+// Description     : TN1/TN2 PPI monitor, testbench only: one CSV row per byte clock, in the layout of
+//                   Vivado's write_hw_ila_data.
+//
+// Evolution History:
+// -----------------------------------------------------------------------------
+// Date         Version    Author        Description
+// 2026-10-19   0.1        Ho Khanh Linh Initial creation.
+//
+// This section is not intended for routine updates or minor design changes.
+// A new version is strictly reserved for major architectural shifts
+// that require software modifications across different chip generations.
+//------------------------------------------------------------------------------
 // TN1/TN2 PPI monitor (fpga/PLAN_TN1_TN3.md §1), testbench only: one CSV row per rising edge of the byte
 // clock while en is High, in the layout of Vivado's write_hw_ila_data (a line of probe names, a "Radix - "
 // line, then the samples), so that fpga/tools/csi2_dump.py reads simulation and ILA captures alike.

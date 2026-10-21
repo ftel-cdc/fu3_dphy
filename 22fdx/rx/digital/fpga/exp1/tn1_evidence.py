@@ -1,4 +1,26 @@
 #!/usr/bin/env python3
+#-------------------------------------------------------------------------------
+# Copyright (c) 2026 FPT Telecom. All rights reserved.
+#
+# This source code and the associated design are the proprietary
+# and confidential information of FPT Telecom.
+# Any unauthorized use, reproduction, or disclosure is strictly prohibited.
+#-------------------------------------------------------------------------------
+# Author          : Ho Khanh Linh
+# Email           : linhhk26@fpt.com
+# Created Date    : 2026-10-20
+# Description     : Evidence for the TN1 results (fpga/exp1/README.md §7): re-checks the outputs of
+#                   run_exp1.sh in fpga/work/exp1.
+#
+# Evolution History:
+# ------------------------------------------------------------------------------
+# Date         Version    Author        Description
+# 2026-10-20   0.1        Ho Khanh Linh Initial creation.
+#
+# This section is not intended for routine updates or minor design changes.
+# A new version is strictly reserved for major architectural shifts
+# that require software modifications across different chip generations.
+#-------------------------------------------------------------------------------
 """Evidence for the TN1 results (fpga/exp1/README.md §7): re-checks the outputs of run_exp1.sh in fpga/work/exp1.
 
   tn1_evidence.py [<dir>]      (default: fpga/work/exp1)

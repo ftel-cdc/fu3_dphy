@@ -1,3 +1,25 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2026 FPT Telecom. All rights reserved.
+#
+# This source code and the associated design are the proprietary
+# and confidential information of FPT Telecom.
+# Any unauthorized use, reproduction, or disclosure is strictly prohibited.
+#-------------------------------------------------------------------------------
+# Author          : Ho Khanh Linh
+# Email           : linhhk26@fpt.com
+# Created Date    : 2026-10-12
+# Description     : Pins of tiny_ibufds_dphy for impl_tiny.tcl: the camera clock lane and data lane 0
+#                   of bank 705 (FPGA_PROTO_PLAN.md §4).
+#
+# Evolution History:
+# ------------------------------------------------------------------------------
+# Date         Version    Author        Description
+# 2026-10-12   0.1        Ho Khanh Linh Initial creation.
+#
+# This section is not intended for routine updates or minor design changes.
+# A new version is strictly reserved for major architectural shifts
+# that require software modifications across different chip generations.
+#-------------------------------------------------------------------------------
 # Pins of tiny_ibufds_dphy for impl_tiny.tcl: the camera clock lane and data lane 0 of bank 705
 # (FPGA_PROTO_PLAN.md §4). The five LVCMOS12 ports sit on camera control pins of the same 1.2 V bank, not
 # on spare pins: CJ60 FMC_CLK, CK60 FMC_RST, CD60/CD59 FMC_XVS/XHS, CF61 FMC_SCL.

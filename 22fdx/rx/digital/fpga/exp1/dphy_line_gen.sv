@@ -1,3 +1,25 @@
+//------------------------------------------------------------------------------
+// Copyright (c) 2026 FPT Telecom. All rights reserved.
+//
+// This source code and the associated design are the proprietary
+// and confidential information of FPT Telecom.
+// Any unauthorized use, reproduction, or disclosure is strictly prohibited.
+//------------------------------------------------------------------------------
+// Author          : Ho Khanh Linh
+// Email           : linhhk26@fpt.com
+// Created Date    : 2026-10-19
+// Description     : TN1 line generator (fpga/PLAN_TN1_TN3.md §1): a D-PHY v1.1 transmitter at the
+//                   pads, testbench only.
+//
+// Evolution History:
+// -----------------------------------------------------------------------------
+// Date         Version    Author        Description
+// 2026-10-19   0.1        Ho Khanh Linh Initial creation.
+//
+// This section is not intended for routine updates or minor design changes.
+// A new version is strictly reserved for major architectural shifts
+// that require software modifications across different chip generations.
+//------------------------------------------------------------------------------
 // TN1 line generator (fpga/PLAN_TN1_TN3.md §1): a D-PHY v1.1 transmitter at the pads, testbench only.
 // - The clock lane enters HS once (LP-11 -> LP-01 -> LP-00 -> HS-0) and then runs continuously; its edges
 //   sit in the middle of the data bits (bit k spans [t0 + k*ui, t0 + (k+1)*ui), clock edge k at its

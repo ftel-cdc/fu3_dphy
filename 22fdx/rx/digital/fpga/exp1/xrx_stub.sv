@@ -1,3 +1,25 @@
+//------------------------------------------------------------------------------
+// Copyright (c) 2026 FPT Telecom. All rights reserved.
+//
+// This source code and the associated design are the proprietary
+// and confidential information of FPT Telecom.
+// Any unauthorized use, reproduction, or disclosure is strictly prohibited.
+//------------------------------------------------------------------------------
+// Author          : Ho Khanh Linh
+// Email           : linhhk26@fpt.com
+// Created Date    : 2026-10-19
+// Description     : Stand-in for AMD's D-PHY RX in the TN1 testbench, used by "run_exp1.sh stub" to
+//                   run ftel_dphy_rx alone.
+//
+// Evolution History:
+// -----------------------------------------------------------------------------
+// Date         Version    Author        Description
+// 2026-10-19   0.1        Ho Khanh Linh Initial creation.
+//
+// This section is not intended for routine updates or minor design changes.
+// A new version is strictly reserved for major architectural shifts
+// that require software modifications across different chip generations.
+//------------------------------------------------------------------------------
 // Stand-in for AMD's D-PHY RX of the TN1 testbench (module xrx, ports of mipi_dphy 4.3 SLAVE with 4 lanes),
 // used by "run_exp1.sh stub": it runs ftel_dphy_rx alone, below 260 Mb/s where AMD's IP cannot be built
 // (C_HS_LINE_RATE 260..3200 on xcvp1902) and for quick sweeps (compile about 10 s, a run a few seconds).

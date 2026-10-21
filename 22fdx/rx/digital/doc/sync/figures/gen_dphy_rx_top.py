@@ -1,4 +1,26 @@
 #!/usr/bin/env python3
+#-------------------------------------------------------------------------------
+# Copyright (c) 2026 FPT Telecom. All rights reserved.
+#
+# This source code and the associated design are the proprietary
+# and confidential information of FPT Telecom.
+# Any unauthorized use, reproduction, or disclosure is strictly prohibited.
+#-------------------------------------------------------------------------------
+# Author          : Ho Khanh Linh
+# Email           : linhhk26@fpt.com
+# Created Date    : 2026-10-21
+# Description     : Write the drawio sources of the D-PHY RX top figures for the AFE team and the GPIO
+#                   options.
+#
+# Evolution History:
+# ------------------------------------------------------------------------------
+# Date         Version    Author        Description
+# 2026-10-21   0.1        Ho Khanh Linh Initial creation.
+#
+# This section is not intended for routine updates or minor design changes.
+# A new version is strictly reserved for major architectural shifts
+# that require software modifications across different chip generations.
+#-------------------------------------------------------------------------------
 """Write the drawio sources of the D-PHY RX top figures for the AFE team and the GPIO options.
 
 dphy_rx_top.drawio shows the analog front-end (AFE) and ftel_dphy_rx with one clock lane and four

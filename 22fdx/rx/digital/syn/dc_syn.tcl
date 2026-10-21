@@ -1,3 +1,25 @@
+#-------------------------------------------------------------------------------
+# Copyright (c) 2026 FPT Telecom. All rights reserved.
+#
+# This source code and the associated design are the proprietary
+# and confidential information of FPT Telecom.
+# Any unauthorized use, reproduction, or disclosure is strictly prohibited.
+#-------------------------------------------------------------------------------
+# Author          : Ho Khanh Linh
+# Email           : linhhk26@fpt.com
+# Created Date    : 2026-10-10
+# Description     : Design Compiler synthesis of ftel_dphy_rx, top m_ftel_dphy_rx_wrap with its default
+#                   parameters (4 lanes).
+#
+# Evolution History:
+# ------------------------------------------------------------------------------
+# Date         Version    Author        Description
+# 2026-10-10   0.1        Ho Khanh Linh Initial creation.
+#
+# This section is not intended for routine updates or minor design changes.
+# A new version is strictly reserved for major architectural shifts
+# that require software modifications across different chip generations.
+#-------------------------------------------------------------------------------
 # ============================================================================
 # Design Compiler synthesis of ftel_dphy_rx, top m_ftel_dphy_rx_wrap with its default parameters
 # (4 lanes). Started by syn/run_syn.sh in syn/work/<run>, which sets SYN_TECH_FILE, SYN_CORNER,
