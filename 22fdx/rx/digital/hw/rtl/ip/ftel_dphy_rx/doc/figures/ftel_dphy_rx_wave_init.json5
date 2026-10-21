@@ -1,0 +1,23 @@
+// Figure 5-8 - initialization (spec.md 5.1; 4.2, 4.7; bring-up sequence of the CSI-2 Rx controller).
+// phy_core_rst is asserted for at least 40 core_clk cycles; after its release and the enables, each
+// lane counts consecutive LP-11 cycles and leaves its INIT state at tinit_cyc; init_done is the
+// registered AND of the clock lane and every enabled data lane (exact semantics OPEN K6).
+{ signal: [
+  { name: 'phy_core_rst',          wave: '1.0..|...' },
+  {                                                   node: 'A.B......' },
+  { name: 'cl_enable',             wave: '0..1.|...' },
+  { name: 'dl_enable_x',           wave: '0..1.|...' },
+  { name: 'lane lines',            wave: 'x...=|...', data: ['LP-11'] },
+  { name: 'LP-11 counter (No. 6)', wave: '=...=|=..', data: ['0', 'counting', 'tinit_cyc'] },
+  {                                                   node: '....C.D..' },
+  { name: 'CL FSM (No. 2)',        wave: '=....|=..', data: ['CL_INIT', 'CL_STOP'] },
+  { name: 'DL FSM (No. 3)',        wave: '=....|=..', data: ['DL_INIT', 'DL_STOP'] },
+  { name: 'cl_stopstate',          wave: '0....|1..' },
+  { name: 'stopstate_x',           wave: '0....|1..' },
+  { name: 'init_done',             wave: '0....|.1.' },
+],
+  edge: ['A<->B >= 40 core_clk', 'C<->D TINIT (tinit_cyc)'],
+  head: { text: 'Initialization of the lanes' },
+  foot: { text: 'counting restarts on any line state other than LP-11; init_done semantics OPEN K6' },
+  config: { hscale: 2, arcFontSize: 12 }
+}

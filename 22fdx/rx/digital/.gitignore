@@ -1,0 +1,40 @@
+# ---- VCS / Verdi simulation output -------------------------------------------
+simv
+simv_*
+simv.daidir/
+simv.vdb/
+csrc/
+ucli.key
+vc_hdrs.h
+*.fsdb
+*.vpd
+verdiLog/
+novas.*
+urgReport/
+coverage_report/
+hw/rtl/ip/*/sim/*.log
+
+# ---- Design Compiler ---------------------------------------------------------
+*.ddc
+*.mr
+*.pvl
+*.syn
+*.svf
+alib-52/
+command.log
+hw/rtl/ip/*/syn/work/
+hw/rtl/ip/*/syn/netlist/
+hw/rtl/ip/*/syn/output/
+
+# ---- SpyGlass ----------------------------------------------------------------
+spyglass*/
+cksum_dir/
+hw/rtl/ip/*/lint/lint_results/
+
+# ---- Office lock files (LibreOffice / MS Office) ------------------------------
+.~lock.*#
+~$*
+__pycache__/
+
+# ---- Local secrets (kept on disk, never committed) ---------------------------
+/ref/spec/password.txt

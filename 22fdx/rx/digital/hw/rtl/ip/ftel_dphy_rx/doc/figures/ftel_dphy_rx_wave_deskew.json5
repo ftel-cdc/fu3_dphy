@@ -1,0 +1,19 @@
+// Figure 5-3 - deskew burst at the PPI (spec.md 5.1; 4.6 deskew-burst detection).
+// rxskewcalhs_x is set on every delay-line entry written from the detection until the lane leaves
+// HS mode, so it falls after rxactivehs_x (which the EoT cut clears after the last transition).
+{ signal: [
+  { name: 'rxbyteclkhs',    wave: 'p.|....|....|...' },
+  { name: 'rxdatahs_x',     wave: 'x.|....|....|...' },
+  { name: 'rxactivehs_x',   wave: '0.|1...|..0.|...' },
+  { name: 'rxskewcalhs_x',  wave: '0.|...1|....|.0.' },
+  {                                                   node: '..........G...H.' },
+  { name: 'rxvalidhs_x',    wave: '0.|....|....|...' },
+  { name: 'rxsynchs_x',     wave: '0.|....|....|...' },
+  { name: 'errsoths_x',     wave: '0.|....|....|...' },
+  { name: 'stopstate_x',    wave: '10|....|x1..|...' },
+],
+  edge: ['G<->H eot_skip_bytes'],
+  head: { text: 'PPI, one data lane: deskew burst' },
+  foot: { text: 'the lock on the deskew sync is cancelled before it reaches the PPI (4.6)' },
+  config: { hscale: 1, arcFontSize: 12 }
+}

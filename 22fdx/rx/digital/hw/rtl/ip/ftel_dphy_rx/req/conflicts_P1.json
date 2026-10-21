@@ -1,0 +1,14 @@
+{
+ "phase": "P1",
+ "mode": "review",
+ "at": "2026-10-20T14:12:50+07:00",
+ "spec_sha256": "9e6ec588dd17ef237b08aadfd2634622cf7239c62dac65a5aa8392de858eab04",
+ "structured_spec_sha256": "01424e671a885722c1f1d9316664b76bd077347aacca167f022a16e5bf14d921",
+ "conflicts": [],
+ "waived": [],
+ "rejected_waivers": [],
+ "info": {
+  "warnings": 0,
+  "needs_human_decision": 77
+ }
+}

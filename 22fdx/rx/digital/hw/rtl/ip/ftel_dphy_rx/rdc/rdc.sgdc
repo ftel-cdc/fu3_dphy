@@ -1,0 +1,2 @@
+current_design m_ftel_dphy_rx_wrap
+sdc_data -file ../sdc/m_ftel_dphy_rx_wrap.sdc

@@ -1,0 +1,9 @@
+{
+ "drawio_version": "31.5.3",
+ "url": "https://raw.githubusercontent.com/jgraph/drawio/v31.5.3/src/main/webapp/js/",
+ "license": "Apache-2.0 (jgraph/drawio)",
+ "files": {
+  "viewer-static.min.js": "41f8360963bb485db74517ae7ca8ca01e563b587607a82238f901750b14e26d0",
+  "stencils.min.js": "fc65a689e87869b51196cf91e738d5cb1dba4e1be412c4541f451dd57b7b7e57"
+ }
+}

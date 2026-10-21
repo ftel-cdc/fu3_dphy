@@ -1,0 +1,44 @@
+{
+ "ip": "ftel_dphy_rx",
+ "purpose": "REQs that must carry a tag in logical/*.sv (rtl_rule.md T2); checked by flow_check.py --phase P3a (CF-COVER, CF-TAG)",
+ "registered": "2026-10-07",
+ "registered_before_rtl": true,
+ "structured_spec_sha256": "01424e671a885722c1f1d9316664b76bd077347aacca167f022a16e5bf14d921",
+ "rule": {
+  "blocks": [
+   "No.1",
+   "No.2",
+   "No.3",
+   "No.4",
+   "No.6",
+   "No.7",
+   "top",
+   "all"
+  ],
+  "exclude_categories": [
+   "decision",
+   "verification"
+  ],
+  "exclude_releases": [
+   "R2"
+  ],
+  "why": "blocks of release R1 that this draft implements; No.5 (R2, ADR-004) and No.8 (K3, ADR-005) are not in this RTL; decision and verification REQs have no RTL construct"
+ },
+ "exclusions": [
+  {
+   "req_id": "REQ-054",
+   "reason": "Status events cross into the configuration clock inside Block No. 8, absent until K3/ADR-005; this RTL exports the source toggles only"
+  },
+  {
+   "req_id": "REQ-055",
+   "reason": "FSM states cross into the configuration clock inside Block No. 8, absent until K3/ADR-005; this RTL exports the states only"
+  }
+ ],
+ "history": [
+  "2026-10-03: registered before the draft RTL (HAS v0.11); exclusions REQ-054, REQ-055, REQ-183, REQ-266",
+  "2026-10-07: re-registered for HAS v0.14 before the RTL of Block No. 1 (ADR-001 option A); REQ-183 and REQ-266 (word latency) leave the exclusions: the two-stage HS path of Block No. 1 now sets it",
+  "2026-10-07: structured_spec sha updated after the HAS v0.14 wording fix of the loss-of-clock timing found by the simulation of Block No. 1 (REQ-103, REQ-255, REQ-319, REQ-346 reworded); rule and exclusions unchanged",
+  "2026-10-19: re-registered for HAS v0.16 before the RTL fix of Block No. 4 (hold of the EoT request, valid only while the search has started; fpga/PLAN_TN1_FIX.md); rule and exclusions unchanged: the new REQ-366 to REQ-379 are in scope, REQ-380 (verification) is not",
+  "2026-10-20: structured_spec sha updated for the amended HAS v0.16 (eot_skip_bytes constant 24 ns and Table 4-7 re-measured with LP-11 at every phase of the byte clock and of core_clk; REQ-046, REQ-186, REQ-311, REQ-318, REQ-369 to REQ-378 and REQ-380 reworded, same ids); rule and exclusions unchanged"
+ ]
+}
