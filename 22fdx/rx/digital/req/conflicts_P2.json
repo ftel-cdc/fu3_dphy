@@ -1,10 +1,10 @@
 {
  "phase": "P2",
  "mode": "review",
- "at": "2026-10-20T14:12:50+07:00",
+ "at": "2026-10-21T14:43:48+07:00",
  "inputs": {
   "spec": "9e6ec588dd17ef237b08aadfd2634622cf7239c62dac65a5aa8392de858eab04",
-  "structured_spec": "01424e671a885722c1f1d9316664b76bd077347aacca167f022a16e5bf14d921",
+  "structured_spec": "6cac5aca87af1e0b0186770b6b1cdcfb6926a27ca09598ba21ee0f4385063650",
   "config": "6b166badbfe4e72442103c65d4cd945fdbfc7098855dee75c8b6290ea365663a",
   "validator": "a7bee5b359f8199fada34c2e03ea6093960e8a841b8312d50296a4c597b28808"
  },

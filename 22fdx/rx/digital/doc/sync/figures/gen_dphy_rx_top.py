@@ -26,10 +26,10 @@ names are those of the HAS (doc/spec.md, Tables 5-1 and 5-2); the pin counts are
 Table 5-1, and the script stops when a group no longer matches the table.
 
 The .drawio files are generated: edit this script, then run it, render the figures and check them.
-  python3 hw/rtl/ip/ftel_dphy_rx/doc/sync/figures/gen_dphy_rx_top.py
-  python3 hw/rtl/ip/ftel_dphy_rx/doc/figures/render_drawio.py \
-          hw/rtl/ip/ftel_dphy_rx/doc/sync/figures/dphy_rx_top*.drawio
-  python3 hw/rtl/ip/ftel_dphy_rx/doc/sync/figures/gen_dphy_rx_top.py --check
+  python3 doc/sync/figures/gen_dphy_rx_top.py
+  python3 doc/figures/render_drawio.py \
+          doc/sync/figures/dphy_rx_top*.drawio
+  python3 doc/sync/figures/gen_dphy_rx_top.py --check
 --check runs the rules F-XML, F-ASCII, F-FONT, F-SHAPE, F-NAME (names against doc/spec.md) and
 F-STALE of check_figures.py on every figure. F-REF does not apply: the figures are not in the HAS.
 """

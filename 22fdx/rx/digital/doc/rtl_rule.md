@@ -5,7 +5,7 @@
 | Ngôn ngữ | SystemVerilog-2012, synthesizable subset |
 | Áp dụng cho | Mọi file trong `logical/` (RTL của IP) |
 | Phiên bản | 1.2 (2026-10-07), duyệt cùng plan RTL theo HAS v0.13/v0.14: cấu trúc clock của Block No. 1. Lịch sử ở cuối tài liệu |
-| Kiểm bằng máy | Luật có nhãn **[M]** được `hw/utils/req_flow/check_rtl_rules.py` kiểm |
+| Kiểm bằng máy | Luật có nhãn **[M]** được `req_flow/check_rtl_rules.py` kiểm |
 
 Tài liệu này quy định **hình thức** của RTL. **Hành vi** do HAS (`doc/spec.md`) quy định. Khi RTL
 cần một hành vi mà HAS chưa định nghĩa thì dừng lại và hỏi (luật T5); không tự chọn hành vi.
@@ -186,7 +186,7 @@ Theo header của các cell `m_fpt_lib_*` (FX1 lib), thêm các trường truy v
 | T3 [M] | REQ cần người quyết (provisional) được cài ở đúng một chỗ: một hằng, một parameter hoặc một khối. Chỗ đó mang tag `// OPEN <id> REQ-xxx: <default đang dùng>`, với `<id>` có trong Table 9-1 của HAS |
 | T4 | Quyết định vi kiến trúc mà HAS không cố định mang tag `// D-n`, giải thích ở `doc/rtl_notes.md` |
 | T5 | Hành vi HAS không định nghĩa: ghi câu hỏi Q-n trong `doc/rtl_notes.md` và dừng (CF-GAP); chưa viết phần đó cho tới khi có câu trả lời |
-| T6 [M] | REQ-ID trong tag phải có trong `req/structured_spec.json`. ID ổn định qua các revision của spec (`hw/utils/req_flow/README.md`) |
+| T6 [M] | REQ-ID trong tag phải có trong `req/structured_spec.json`. ID ổn định qua các revision của spec (`req_flow/README.md`) |
 
 ---
 

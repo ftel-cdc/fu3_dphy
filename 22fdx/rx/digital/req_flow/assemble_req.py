@@ -255,7 +255,7 @@ def main():
     ap.add_argument("--renumber", action="store_true", help="ignore any previous artifact (fresh extraction)")
     ap.add_argument("--selftest-ids", action="store_true")
     ap.add_argument("--workdir", help="scratch directory for --selftest-ids")
-    ap.add_argument("--repo", default=os.path.abspath(os.path.join(os.path.dirname(__file__), "..", "..", "..")))
+    ap.add_argument("--repo", default=os.path.abspath(os.path.join(os.path.dirname(__file__), "..")))
     a = ap.parse_args()
 
     prev_path = None if a.renumber else (a.prev or (a.out if a.out and os.path.exists(a.out) else None))

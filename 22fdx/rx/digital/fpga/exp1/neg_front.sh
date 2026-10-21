@@ -36,7 +36,7 @@ for old, new in ((loop, neg + loop), (".I            (d_p[l]),", ".I            
     s = s.replace(old, new)
 open(sys.argv[2], 'w').write(s)
 EOF
-if ! (cd "$N/xsim" && xvlog --relax -sv -L uvm -work xil_defaultlib -i "$(dirname "$FPGA")/hw/rtl/ip/ftel_dphy_rx/logical" \
+if ! (cd "$N/xsim" && xvlog --relax -sv -L uvm -work xil_defaultlib -i "$(dirname "$FPGA")/logical" \
         "$N/tb_exp1.sv" > "$N/compile.log" 2>&1 && bash elaborate.sh > "$N/elaborate.log" 2>&1); then
   echo "neg_front: build FAIL, see $N/compile.log and $N/elaborate.log"
   exit 1

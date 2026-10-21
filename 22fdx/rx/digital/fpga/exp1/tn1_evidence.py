@@ -38,7 +38,7 @@ import tempfile
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FPGA = os.path.dirname(HERE)
-IP = os.path.join(os.path.dirname(FPGA), 'hw', 'rtl', 'ip', 'ftel_dphy_rx')
+IP = os.path.dirname(FPGA)   # the IP files sit in the folder that holds fpga/
 sys.path.insert(0, os.path.join(IP, 'config'))
 import validate_config as vc  # noqa: E402
 

@@ -13,7 +13,7 @@ set lanes [lindex $argv 2]
 set dbg   [expr {[llength $argv] > 3 ? [lindex $argv 3] : "off"}]
 set here  [file dirname [file normalize [info script]]]
 set repo  [file dirname [file dirname $here]]
-set ip    [file join $repo hw rtl ip ftel_dphy_rx]
+set ip    $repo                ;# the IP files sit in the folder that holds fpga/
 set part  xcvp1902-vsva6865-2MP-e-S
 
 create_project exp1 [file join $work prj] -part $part -force

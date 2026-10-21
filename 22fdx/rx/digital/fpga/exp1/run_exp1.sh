@@ -34,7 +34,7 @@ export PATH="$XBIN:$PATH"     # the XSIM scripts Vivado writes call xvlog, xelab
 DEBUG=${EXP1_DEBUG:-off}
 
 sources() {
-  sed -n 's#^${FTEL_DPHY_RX_PATH}#'"$REPO"'/hw/rtl/ip/ftel_dphy_rx#p' "$REPO/hw/rtl/ip/ftel_dphy_rx/logical/filelist.f"
+  sed -n 's#^${FTEL_DPHY_RX_PATH}#'"$REPO"'#p' "$REPO/logical/filelist.f"
   ls "$HERE"/*.sv
 }
 
@@ -78,7 +78,7 @@ stub_build() {
   if [ "$(cat "$d/src.sha" 2>/dev/null)" != "$sha" ]; then
     echo "build stub: compile and elaborate ftel_dphy_rx with xrx_stub.sv (~10 s)"
     # TN1_STUB: no AMD front end to compare; IBUFDS_DPHY comes from Vivado's unisims_ver and needs glbl
-    if ! (cd "$d" && xvlog -sv --relax -d TN1_STUB -i "$REPO/hw/rtl/ip/ftel_dphy_rx/logical" $(sources) \
+    if ! (cd "$d" && xvlog -sv --relax -d TN1_STUB -i "$REPO/logical" $(sources) \
             "$(dirname "$XBIN")/data/verilog/src/glbl.v" > compile.log 2>&1 \
           && xelab --relax -debug off -L unisims_ver tb_exp1 glbl -generic_top NL=4 -s tb_exp1_stub \
             > elaborate.log 2>&1); then

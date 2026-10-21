@@ -53,7 +53,7 @@ sys.path.insert(0, HERE)
 import validate_req  # noqa: E402
 import check_rtl_rules  # noqa: E402
 
-REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
+REPO = os.path.abspath(os.path.join(HERE, ".."))   # the IP folder (22fdx/rx/digital), which holds req_flow/
 CODE_MAP = {"SPEC": "CF-SPEC", "SCHEMA": "CF-SCHEMA", "CONSIST": "CF-SCHEMA", "NAME": "CF-SCHEMA",
             "DERIVE": "CF-SCHEMA",
             "QUOTE": "CF-QUOTE", "COVER": "CF-COVER", "OPEN": "CF-OPEN", "GATE_OPEN": "CF-OPEN"}
@@ -75,8 +75,8 @@ FIX["CF-COVER"] = FIX["CF-COVER"] + "; at P3a: tag the REQ where the RTL impleme
 
 
 def paths(ip, root=REPO):
-    d = os.path.join(root, "hw", "rtl", "ip", ip)
-    return {"ip_dir": d, "spec": os.path.join(d, "doc", "spec.md"),
+    d = root   # the IP files sit directly in the IP folder; ip names the files
+    return {"ip": ip, "ip_dir": d, "spec": os.path.join(d, "doc", "spec.md"),
             "structured": os.path.join(d, "req", "structured_spec.json"),
             "waivers": os.path.join(d, "req", "waivers.yaml"),
             "state": os.path.join(d, "req", "flow_state.json"),
@@ -366,7 +366,7 @@ def check_p3a(p, mode, waivers=None):
         if mode == "gate":
             add("CF-OPEN", "GATE_OPEN", r, f"{r} is provisional (open items {reqs[r].get('open_item_ref')})")
 
-    rtm = {"ip": os.path.basename(p["ip_dir"]), "generated_by": "flow_check.py --phase P3a",
+    rtm = {"ip": p["ip"], "generated_by": "flow_check.py --phase P3a",
            "spec_sha256": sha(p["spec"]), "structured_spec_sha256": sha(p["structured"]),
            "rtl": {"logical/" + k: v for k, v in sorted(cur.items())},
            "requirements": [{"req_id": r, "block": reqs[r]["block"], "category": reqs[r]["category"],

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-"""Machine check of the [M] rules of hw/rtl/ip/ftel_dphy_rx/doc/rtl_rule.md.
+"""Machine check of the [M] rules of doc/rtl_rule.md.
 
 The checker reads SystemVerilog the way the rule set asks for it to be written: one module or package
 per file, ANSI ports, always_ff / always_comb / assign, named instance connections. It is a lexical
@@ -28,8 +28,8 @@ import sys
 from collections import Counter, defaultdict
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-REPO = os.path.abspath(os.path.join(HERE, "..", "..", ".."))
-IP_DIR = os.path.join(REPO, "hw", "rtl", "ip", "ftel_dphy_rx")
+REPO = os.path.abspath(os.path.join(HERE, ".."))
+IP_DIR = REPO   # the IP files sit directly in the IP folder (22fdx/rx/digital), which holds req_flow/
 RULE_DOC = os.path.join(IP_DIR, "doc", "rtl_rule.md")
 
 RULES = {

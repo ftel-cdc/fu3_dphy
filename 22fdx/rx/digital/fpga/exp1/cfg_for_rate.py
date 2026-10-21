@@ -4,13 +4,13 @@
   cfg_for_rate.py <rate Mb/s>   ->   +HS_SETTLE=<cyc> +CLK_SETTLE=<cyc> +EOT_SKIP=<bytes>
 
 The values come from the timing model of the configuration validator
-(hw/rtl/ip/ftel_dphy_rx/config/validate_config.py, class Model) and its YAML; nothing is recomputed here.
+(config/validate_config.py, class Model) and its YAML; nothing is recomputed here.
 """
 import os
 import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
-CONFIG = os.path.join(os.path.dirname(os.path.dirname(HERE)), 'hw', 'rtl', 'ip', 'ftel_dphy_rx', 'config')
+CONFIG = os.path.join(os.path.dirname(os.path.dirname(HERE)), 'config')
 sys.path.insert(0, CONFIG)
 import validate_config as vc  # noqa: E402
 

@@ -4,12 +4,12 @@
   "P1": {
    "status": "pass",
    "mode": "review",
-   "at": "2026-10-20T14:12:50+07:00",
+   "at": "2026-10-21T14:43:48+07:00",
    "inputs": {
     "spec": "9e6ec588dd17ef237b08aadfd2634622cf7239c62dac65a5aa8392de858eab04"
    },
    "outputs": {
-    "structured_spec": "01424e671a885722c1f1d9316664b76bd077347aacca167f022a16e5bf14d921"
+    "structured_spec": "6cac5aca87af1e0b0186770b6b1cdcfb6926a27ca09598ba21ee0f4385063650"
    },
    "conflicts": 0,
    "waived": 0
@@ -17,10 +17,10 @@
   "P2": {
    "status": "pass",
    "mode": "review",
-   "at": "2026-10-20T14:12:50+07:00",
+   "at": "2026-10-21T14:43:48+07:00",
    "inputs": {
     "spec": "9e6ec588dd17ef237b08aadfd2634622cf7239c62dac65a5aa8392de858eab04",
-    "structured_spec": "01424e671a885722c1f1d9316664b76bd077347aacca167f022a16e5bf14d921",
+    "structured_spec": "6cac5aca87af1e0b0186770b6b1cdcfb6926a27ca09598ba21ee0f4385063650",
     "config": "6b166badbfe4e72442103c65d4cd945fdbfc7098855dee75c8b6290ea365663a",
     "validator": "a7bee5b359f8199fada34c2e03ea6093960e8a841b8312d50296a4c597b28808"
    },
@@ -32,25 +32,25 @@
    "gate_2": {
     "status": "auto-signed",
     "by": "flow_check.py (0 conflicts)",
-    "at": "2026-10-20T14:12:50+07:00"
+    "at": "2026-10-21T14:43:48+07:00"
    }
   },
   "P3a": {
    "status": "pass",
    "mode": "review",
-   "at": "2026-10-20T14:13:07+07:00",
+   "at": "2026-10-21T14:44:48+07:00",
    "inputs": {
     "spec": "9e6ec588dd17ef237b08aadfd2634622cf7239c62dac65a5aa8392de858eab04",
-    "structured_spec": "01424e671a885722c1f1d9316664b76bd077347aacca167f022a16e5bf14d921",
+    "structured_spec": "6cac5aca87af1e0b0186770b6b1cdcfb6926a27ca09598ba21ee0f4385063650",
     "config_pkg": "4cbcea6ac894197b2c6a06b24ce6bada257bb6ef116357cfac0587727c6c6ba3",
-    "rtl_rule": "e63a677e114f847a7881fbb89f5796818ed68ac796f7e06f4b39f51cc958cac2",
+    "rtl_rule": "cea053a8addced2df175b5bc0c2cca2c6b0700782ea626aa0d8d707144f5d8e1",
     "rtl_scope": "165d4d3971709ebdcbb7feceb53e6c94e039af3b4c06e4e60424dde6a7dee150",
-    "vcs_manifest": "6151cf3fccd7be6705ccf772c17152e4515914202ab4a4d14cb53bce095f69bb",
-    "spyglass_report": "4412e4e0ecfd5c48944a23f802455e557612ebf2dfe30569144888b6597f7189"
+    "vcs_manifest": "d8345fb5eb4e5c7fd3b968d562a1f8e38f61226a4c3616a942dbb2dbd4cdee59",
+    "spyglass_report": "f029cd5241d07092a5220d4840a309b676645d5f01aeb44e1b51954fded35ba6"
    },
    "outputs": {
     "rtl": "d92668b8ef8845097175de140dae7f8da8f920f0a4543a2b8cad8cf4c0b4adec",
-    "rtm": "abf35a6579efba1726855d9293073a57bc531398c9241dba078bc71ed4341a93"
+    "rtm": "5fd984d3b7a814c3ffa70be524d3fddaa49dbec774033d4c9e7aab75c87d378e"
    },
    "conflicts": 0,
    "waived": 0

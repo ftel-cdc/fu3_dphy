@@ -1,4 +1,6 @@
-# ---- VCS / Verdi simulation output -------------------------------------------
+# Tool outputs in 22fdx/rx/digital: everything listed here is rebuilt by the scripts of this folder.
+
+# ---- VCS / Verdi -------------------------------------------------------------
 simv
 simv_*
 simv.daidir/
@@ -12,7 +14,10 @@ verdiLog/
 novas.*
 urgReport/
 coverage_report/
-hw/rtl/ip/*/sim/*.log
+sim/simv.daidir
+sim/simv
+sim/vcs_lint
+sim/tb_afe_adapter/out
 
 # ---- Design Compiler ---------------------------------------------------------
 *.ddc
@@ -22,19 +27,44 @@ hw/rtl/ip/*/sim/*.log
 *.svf
 alib-52/
 command.log
-hw/rtl/ip/*/syn/work/
-hw/rtl/ip/*/syn/netlist/
-hw/rtl/ip/*/syn/output/
+syn/alib-52
+syn/cksum_dir
+syn/work
+syn/netlist/
+syn/output/
 
-# ---- SpyGlass ----------------------------------------------------------------
+# ---- SpyGlass and the ip-dev tool_flow (work and reports of each tool) -------
 spyglass*/
 cksum_dir/
-hw/rtl/ip/*/lint/lint_results/
+lint/lint
+lint/work
+lint/reports
+lint/lint_results/
+cdc/cdc
+cdc/work
+cdc/reports
+rdc/rdc
+rdc/work
+rdc/reports
+logical/csrc
+logical/RTL
+logical/Debug
 
-# ---- Office lock files (LibreOffice / MS Office) ------------------------------
+# ---- Logs and text reports ---------------------------------------------------
+*.log
+*.txt
+*.out
+
+# ---- Requirement flow and documents ------------------------------------------
+req/_work
+doc/_docx_build
+# HAS .docx builds of doc/md2docx.py are kept locally, not in this repository
+doc/*.docx
+doc/figures/.drawio_cache
+doc/figures/*.png
+doc/sync/figures/*.png
+
+# ---- Python and office lock files --------------------------------------------
+__pycache__/
 .~lock.*#
 ~$*
-__pycache__/
-
-# ---- Local secrets (kept on disk, never committed) ---------------------------
-/ref/spec/password.txt

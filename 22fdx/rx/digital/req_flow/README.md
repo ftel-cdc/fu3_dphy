@@ -1,8 +1,8 @@
 # req_flow — requirement tooling for the adapted RTL flow
 
-Deterministic scripts behind `/dphy_autoflow` and `/dphy_spec_parse` (`.claude/commands/`). They do
-the parts of the flow that a machine can check exactly; the LLM only interprets the spec. Plan and
-rationale: `hw/rtl/ip/ftel_dphy_rx/doc/RTL_FLOW_PLAN.md`.
+Deterministic scripts behind the flow commands `/dphy_autoflow` and `/dphy_spec_parse`, which are kept
+outside this repository. They do the parts of the flow that a machine can check exactly; the LLM only
+interprets the spec. The scripts work on the IP folder that holds `req_flow/` (`22fdx/rx/digital`).
 
 Standard library only, except `flow_check.py`, which reads `req/waivers.yaml` (and, through the IP's
 `config/validate_config.py`, the configuration YAML) with PyYAML.
@@ -15,22 +15,21 @@ Standard library only, except `flow_check.py`, which reads `req/waivers.yaml` (a
 | `assemble_req.py` | Merges the per-section chunks written by the parse step, orders by source line, assigns `REQ-NNN` / `F-NNN` (stable ids, below), fills metadata (spec sha256, revision, next free ids), applies `derive_rules.py` and prints how many values it overrode. `--selftest-ids` checks id stability on scratch copies |
 | `rebase_req.py` | Carries chunks over to a new spec revision: items whose quote and text unit are unchanged get their new line number; the others and the changed / new spec text are listed in a worklist, so only those parts are re-extracted. With `--old-json` each stale item carries its old id (`prev_id`) |
 | `validate_req.py` | Grades `structured_spec.json`: schema, verbatim quotes at their line, coverage of every graded row and id, OPEN/⚠️ flag consistency, derived fields (`DERIVE`). `--report-md` prints the metric table |
-| `compare_req.py` | Stability metric between two independent extractions (RTL_FLOW_PLAN A6), per anchor row; `--kinds` restricts the anchor kinds |
+| `compare_req.py` | Stability metric between two independent extractions, per anchor row; `--kinds` restricts the anchor kinds |
 | `flow_check.py` | Conflict check after each autoflow phase: P1 (spec parse), P2 (configuration: `config/validate_config.py`, package up to date, Gate 2 signed automatically at 0 conflicts), P3a (RTL: rules, VCS and SpyGlass lint results, coverage of `req/rtl_scope.json`, OPEN tags; writes `req/rtm.json`). Maps findings to conflict codes (`CF-*`), applies waivers, writes `req/conflicts_<phase>.json` and `req/flow_state.json`. Exit 2 stops the autoflow. `--selftest-negative` runs the pre-registered negative tests of the three phases on scratch copies |
-| `check_rtl_rules.py` | Lexical checker of the [M] rules of `hw/rtl/ip/ftel_dphy_rx/doc/rtl_rule.md` (naming, file layout, header, constructs, CDC tags, REQ/OPEN tags). Profile `construct` keeps the language rules only, to check it on another IP (0 false positive on `ftel_intctl`). `--selftest-negative`: one seeded violation per rule |
+| `check_rtl_rules.py` | Lexical checker of the [M] rules of `doc/rtl_rule.md` (naming, file layout, header, constructs, CDC tags, REQ/OPEN tags). Profile `construct` keeps the language rules only, to check it on another IP (0 false positive on `ftel_intctl`). `--selftest-negative`: one seeded violation per rule |
 | `schemas/structured_spec.schema.json` | Schema of `structured_spec.json` |
 
 ```bash
-cd /home/linhhk/Documents/DPHY
-python3 hw/utils/req_flow/spec_inventory.py hw/rtl/ip/ftel_dphy_rx/doc/spec.md --selftest
-python3 hw/utils/req_flow/validate_req.py hw/rtl/ip/ftel_dphy_rx/req/structured_spec.json \
-        --spec hw/rtl/ip/ftel_dphy_rx/doc/spec.md --report-md
-python3 hw/utils/req_flow/flow_check.py --phase P1 --ip ftel_dphy_rx --mode review
-python3 hw/utils/req_flow/flow_check.py --phase P2 --ip ftel_dphy_rx      # after validate_config.py --emit
-python3 hw/utils/req_flow/flow_check.py --phase P3a --ip ftel_dphy_rx     # after sim/vcs_lint.sh and tool_flow lint
-python3 hw/utils/req_flow/flow_check.py --selftest-negative --ip ftel_dphy_rx --workdir <scratch dir>
-python3 hw/utils/req_flow/check_rtl_rules.py hw/rtl/ip/ftel_dphy_rx/logical/
-python3 hw/utils/req_flow/check_rtl_rules.py --selftest-negative --workdir <scratch dir>
+# from the IP folder (22fdx/rx/digital)
+python3 req_flow/spec_inventory.py doc/spec.md --selftest
+python3 req_flow/validate_req.py req/structured_spec.json --spec doc/spec.md --report-md
+python3 req_flow/flow_check.py --phase P1 --ip ftel_dphy_rx --mode review
+python3 req_flow/flow_check.py --phase P2 --ip ftel_dphy_rx      # after validate_config.py --emit
+python3 req_flow/flow_check.py --phase P3a --ip ftel_dphy_rx     # after sim/vcs_lint.sh and tool_flow lint
+python3 req_flow/flow_check.py --selftest-negative --ip ftel_dphy_rx --workdir <scratch dir>
+python3 req_flow/check_rtl_rules.py logical/
+python3 req_flow/check_rtl_rules.py --selftest-negative --workdir <scratch dir>
 ```
 
 **Answer key.** `EXPECTED` in `spec_inventory.py` holds one set of counts per spec revision; the v0.2
@@ -49,12 +48,12 @@ numbering, which invalidates every tag: use it only before anything cites the id
 **Spec changed (CF-SPEC).** Re-sync incrementally instead of re-extracting everything:
 
 ```bash
-W=hw/rtl/ip/ftel_dphy_rx/req/_work
-git show HEAD:hw/rtl/ip/ftel_dphy_rx/doc/spec.md > $W/spec_old.md     # the revision the chunks were built on
+W=req/_work
+git show HEAD:./doc/spec.md > $W/spec_old.md     # the revision the chunks were built on
 mv $W/P1 $W/P1_<old revision>
-python3 hw/utils/req_flow/rebase_req.py --chunks $W/P1_<old revision> --old-spec $W/spec_old.md \
-        --new-spec hw/rtl/ip/ftel_dphy_rx/doc/spec.md --out $W/P1 --worklist $W/P1_rebase_worklist.json \
-        --old-json hw/rtl/ip/ftel_dphy_rx/req/structured_spec.json
+python3 req_flow/rebase_req.py --chunks $W/P1_<old revision> --old-spec $W/spec_old.md \
+        --new-spec doc/spec.md --out $W/P1 --worklist $W/P1_rebase_worklist.json \
+        --old-json req/structured_spec.json
 # then /dphy_spec_parse regenerates only the worklist items into a delta chunk (a regenerated item that
 # states the same requirement copies the stale item's prev_id as prev_req_id), and assembles as usual:
 # assemble_req.py keeps the ids of the existing structured_spec.json

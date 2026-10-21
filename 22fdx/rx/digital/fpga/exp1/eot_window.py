@@ -4,7 +4,7 @@
   eot_window.py [<dir>]      (default: fpga/work/exp1/window)
 
 One row per rate, trail and junk; one column per eot_skip_bytes value, from the value of the configuration
-model (hw/rtl/ip/ftel_dphy_rx/config/validate_config.py) - 1 to + 2. A cell gives the skip value,
+model (config/validate_config.py) - 1 to + 2. A cell gives the skip value,
 then "0" when no burst had trailer bytes, "<max> (<bursts>/<all>)" when some had, or "LOST <bursts>/<all>"
 when the payload of a burst did not arrive intact.
 """
@@ -15,7 +15,7 @@ import sys
 
 HERE = os.path.dirname(os.path.abspath(__file__))
 FPGA = os.path.dirname(HERE)
-CONFIG = os.path.join(os.path.dirname(FPGA), 'hw', 'rtl', 'ip', 'ftel_dphy_rx', 'config')
+CONFIG = os.path.join(os.path.dirname(FPGA), 'config')
 sys.path.insert(0, CONFIG)
 import validate_config as vc  # noqa: E402
 

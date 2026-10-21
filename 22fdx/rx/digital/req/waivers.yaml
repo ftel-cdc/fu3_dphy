@@ -1,4 +1,4 @@
-# Waivers for /dphy_autoflow conflicts (hw/utils/req_flow/flow_check.py).
+# Waivers for /dphy_autoflow conflicts (req_flow/flow_check.py).
 # Each entry: code (CF-*), match (substring of the conflict 'where' or evidence), reason,
 # ref (ADR/REQ id), by, date. CF-SPEC, CF-QUOTE and CF-INDEP can never be waived.
 waivers: []

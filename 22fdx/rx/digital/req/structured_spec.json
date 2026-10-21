@@ -1,7 +1,7 @@
 {
  "metadata": {
   "ip_name": "ftel_dphy_rx",
-  "spec_path": "hw/rtl/ip/ftel_dphy_rx/doc/spec.md",
+  "spec_path": "doc/spec.md",
   "spec_sha256": "9e6ec588dd17ef237b08aadfd2634622cf7239c62dac65a5aa8392de858eab04",
   "spec_revision": "v0.16 (draft)",
   "mode": "review",

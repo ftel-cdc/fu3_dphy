@@ -81,9 +81,9 @@ Mô phỏng chạy trong XSIM của Vivado 2025.2, part xcvp1902.
 - Trên xcvp1902, IP này chỉ chạy 260–3200 Mb/s.
 
 **RX mình:**
-- RTL lấy nguyên từ [`hw/rtl/ip/ftel_dphy_rx/logical/filelist.f`](../../hw/rtl/ip/ftel_dphy_rx/logical/filelist.f).
+- RTL lấy nguyên từ [`logical/filelist.f`](../../logical/filelist.f).
 - Field run-time (`hs_settle_cyc`, `clk_settle_cyc`, `eot_skip_bytes`) lấy từ model của
-  [`validate_config.py`](../../hw/rtl/ip/ftel_dphy_rx/config/validate_config.py) theo rate
+  [`validate_config.py`](../../config/validate_config.py) theo rate
   ([`cfg_for_rate.py`](cfg_for_rate.py)). `tinit` là 100 µs.
 
 **Monitor** ([`ppi_csv_mon.sv`](ppi_csv_mon.sv)):
@@ -216,7 +216,7 @@ sửa theo `PLAN_TN1_FIX.md` (HAS v0.16).
   thuộc front end.
 
 Chi tiết từng kịch bản nằm trong `fpga/work/exp1/<tên>/check.txt` (gitignored) và ở
-[`hw/rtl/ip/ftel_dphy_rx/doc/rtl_notes.md`](../../hw/rtl/ip/ftel_dphy_rx/doc/rtl_notes.md) §9.
+[`doc/rtl_notes.md`](../../doc/rtl_notes.md) §9.
 
 ## 7. Kiểm chứng: vì sao tin được kết quả
 
