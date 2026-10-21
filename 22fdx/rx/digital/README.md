@@ -30,8 +30,8 @@ this folder.
 > - Lint-clean: VCS, SpyGlass with one waiver, `check_rtl_rules.py`.
 > - Simulated: Block No. 1 by a directed testbench (`sim/tb_afe_adapter`, five line rates), and the
 >   whole receiver behind an AFE model against AMD's D-PHY RX in XSIM (`fpga/exp1`, TN1).
-> - Timing constraints in `sdc/`. A trial synthesis on [target library] (`syn/`) meets timing at 1792 and
->   1500 Mb/s in the slow corners before layout.
+> - Timing constraints in `sdc/`. A trial synthesis on the library of the target (`syn/`) meets timing
+>   at 1792 and 1500 Mb/s in the slow corners before layout.
 >
 > Decisions and status in [`doc/rtl_notes.md`](doc/rtl_notes.md).
 
@@ -73,7 +73,8 @@ in v1.2 (data rates above 1.5 Gbps, the deskew calibration sequence) are defined
 22fdx/rx/digital/
 ├── README.md             ← this file
 ├── ip_config.yaml        ← tool_flow design overrides (all commented = default convention)
-├── .gitignore            ← tool outputs, flow work files, local HAS .docx builds
+├── .gitignore            ← tool outputs, flow work files, local HAS .docx builds, .env
+├── .env.example          ← the local environment to copy to .env and fill in (see Environment Setup)
 ├── config/
 │   ├── ftel_dphy_rx.yaml ← configuration: Table 3-1 parameters, Table 3-2 field widths and reset values
 │   └── validate_config.py ← checks the YAML against the HAS formulas, emits logical/ftel_dphy_rx_config_pkg.sv
@@ -101,9 +102,9 @@ in v1.2 (data rates above 1.5 Gbps, the deskew calibration sequence) are defined
 ├── sdc/                  ← m_ftel_dphy_rx_wrap.sdc: clocks, exceptions, I/O budgets (design intent;
 │                           also read by cdc/ and rdc/)
 ├── syn/                  ← synthesis (Design Compiler): run_syn.sh, dc_syn.tcl (environment, reports),
-│                           summarize.sh, tech/<tech>.tcl (library), cells/<tech>/ (clock cells on library
-│                           cells); work/, output/, netlist/ are generated (gitignored)
-└── fpga/                 ← FPGA prototype on the [board vendor] [VP1902 board] and the simulation experiments TN1 to TN3,
+│                           summarize.sh, tech.tcl (the library, from .env), cells/ (clock cells on the
+│                           library cells named in .env); work/, output/, netlist/ are generated (gitignored)
+└── fpga/                 ← FPGA prototype on a Versal VP1902 board and the simulation experiments TN1 to TN3,
                             see its README
 ```
 
@@ -127,15 +128,15 @@ sim/vcs_lint.sh --module <name>    # one module with the files before it
 sim/tb_afe_adapter/run.sh          # Block No. 1 at 80, 800, 1500, 1600, 1792 Mb/s
 ```
 
-Synthesis with Design Compiler on [target library]: one run per library corner and line rate. Each run
-writes `syn/work/<run>/` (`dc.log`), `syn/output/<run>/` (reports) and `syn/netlist/<run>/`
-(netlist, ddc, sdc). A run passes when it ends with `SYN DONE` and has no `Error` message.
-Constraints and results are in `doc/rtl_notes.md` §6.
+Synthesis with Design Compiler on the standard-cell library named in `.env`: one run per library
+corner and line rate. Each run writes `syn/work/<run>/` (`dc.log`), `syn/output/<run>/` (reports)
+and `syn/netlist/<run>/` (netlist, ddc, sdc). A run passes when it ends with `SYN DONE` and has no
+`Error` message. Constraints and results are in `doc/rtl_notes.md` §6.
 
 ```bash
-syn/run_syn.sh                     # SSG 0.72 V at -40 and 125 °C, 1792 and 1500 Mb/s
-syn/run_syn.sh --rate 1792 --corner [corner]
-syn/summarize.sh                   # WNS/TNS, Block No. 1 paths, area per block
+syn/run_syn.sh                                # the corners of FTEL_LIB_CORNERS, 1792 and 1500 Mb/s
+syn/run_syn.sh --rate 1792 --corner <corner>  # one corner, named as in the .db files of the library
+syn/summarize.sh                              # WNS/TNS, Block No. 1 paths, area per block
 ```
 
 ---
@@ -167,10 +168,17 @@ project settings (`ip-dev/hw/utils/tool_flow/config/project.yaml`). The complete
 
 ## Environment Setup
 
+What depends on the local installation and must not be published (the standard-cell library of the
+target technology, the reference design of the FPGA board) is read from `.env` in this folder, which
+is never committed. `.env.example` lists every variable with a placeholder and says what it must hold:
+
 ```bash
+cp .env.example .env                                  # then replace each placeholder with the local value
 export FTEL_DPHY_RX_PATH=<path of 22fdx/rx/digital>   # read by the filelists and by tool_flow
 export VERDI_HOME=/opt/synopsys/verdi/X-2025.06
 ```
+
+`syn/run_syn.sh` stops and names the missing variable when `.env` is incomplete.
 
 ### Tools
 

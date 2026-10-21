@@ -1,5 +1,8 @@
 # Tool outputs in 22fdx/rx/digital: everything listed here is rebuilt by the scripts of this folder.
 
+# ---- Local environment: copy .env.example to .env and fill it in; .env stays local --------
+.env
+
 # ---- VCS / Verdi -------------------------------------------------------------
 simv
 simv_*

@@ -23,8 +23,8 @@
 #-------------------------------------------------------------------------------
 # ============================================================================
 # Key numbers of each run in syn/output/: WNS and TNS per clock group, cells, the Block No. 1
-# paths of doc/rtl_notes.md §6, violators and area per block (lanes summed). Times in the unit of
-# the library (ps for [target library]), area in um2.
+# paths of doc/rtl_notes.md §6, violators and area per block (lanes summed). Times in the time unit
+# of the library (FTEL_LIB_TIME_PER_NS in .env), area in um2.
 # ============================================================================
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 slack() { grep -m1 -E "slack \((MET|VIOLATED)" "$1" 2>/dev/null | awk '{print $NF}'; }

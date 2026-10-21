@@ -41,11 +41,12 @@ set_app_var link_library   [list * $DB]
 set_app_var enable_recovery_removal_arcs true
 define_design_lib WORK -path ./WORK
 
-# ---- RTL: logical/filelist.f with the clock cells of the technology (rtl_rule K10)
+# ---- RTL: logical/filelist.f with the clock cells of the library (rtl_rule K10); their cell and pin
+# names are the defines of syn/tech.tcl
 set fh [open $::env(SYN_FILES) r]
 set files [split [string trim [read $fh]] "\n"]
 close $fh
-if {![analyze -format sverilog $files]} { echo "SYN: ANALYZE FAILED"; exit 1 }
+if {![analyze -format sverilog -define $TECH(defines) $files]} { echo "SYN: ANALYZE FAILED"; exit 1 }
 if {![elaborate m_ftel_dphy_rx_wrap]}   { echo "SYN: ELABORATE FAILED"; exit 1 }
 current_design m_ftel_dphy_rx_wrap
 if {![link]} { echo "SYN: LINK FAILED"; exit 1 }

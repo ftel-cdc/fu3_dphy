@@ -35,10 +35,10 @@
     DDR domain), the ports of the core and the wrapper, and the package (clock-activity window).
   - rtl_rule v1.2 allows exactly the clock structure of HAS §4.3, in `_byte_clk` only (K2, K12).
 - **Constraints and trial synthesis, 2026-10-10.** `sdc/m_ftel_dphy_rx_wrap.sdc` replaces the stub of
-  the common flow, and `syn/` runs Design Compiler on [target library]. Timing is met at 1792 and 1500 Mb/s
-  in the slow corners before layout (§6). Two constraints listed in §6 before are corrected: the
-  hold multiplier of the DDR → byte transfer is 3, not 2, and the byte clock is defined at the clock
-  gate, not at the divider flip-flop.
+  the common flow, and `syn/` runs Design Compiler on the library of the target (`.env`). Timing is
+  met at 1792 and 1500 Mb/s in the slow corners before layout (§6). Two constraints listed in §6
+  before are corrected: the hold multiplier of the DDR → byte transfer is 3, not 2, and the byte clock
+  is defined at the clock gate, not at the divider flip-flop.
 - **HAS v0.15, 2026-10-10.** The timing figures of the HAS move from the 130 nm cells to 22 nm cells,
   the node of the target: sampler window, half-period path (from the trial synthesis of §6),
   standard-cell delay line. The samplers stay hand-placed. No behaviour change: the RTL is unchanged
@@ -209,8 +209,8 @@ bit 0 from the rising edge.
 - Margin of the arc: half a period, plus the clock-inverter delay, minus clock-to-output and setup.
   From the 130 nm library assumed up to HAS v0.14, at 1.35 V/125 °C, before wiring, this leaves
   about +110 ps at 1500 Mb/s and about 0 at 1792 Mb/s.
-- Trial synthesis on [target library], SSG 0.72 V/125 °C, ideal clocks (§6): +361 ps at 1792 Mb/s and
-  +470 ps at 1500 Mb/s. ✅ These are the figures of HAS v0.15.
+- Trial synthesis on the library of the target, slow corner (0.72 V, 125 °C), ideal clocks (§6):
+  +361 ps at 1792 Mb/s and +470 ps at 1500 Mb/s. ✅ These are the figures of HAS v0.15.
 - Rejected alternative: retime the falling-edge sample to the rising edge right after the sampler.
   The inverter delay then counts against the arc: about +10 ps at 1500 Mb/s and −100 ps at 1792 Mb/s.
 
@@ -264,10 +264,10 @@ DFT flow connects the scan enable of the `m_fpt_lib_cg` cell.
 `m_fpt_lib_cg` and `m_fpt_lib_clk_inv` of the fu2 lib and their behavioural model. At integration only
 the module name changes, as for the synchronizer cells. The instances are named `u_dont_touch_*`, the
 fu2 convention that keeps synthesis from optimizing them (rtl_rule K10, K12).
-- For synthesis, `syn/run_syn.sh` replaces the two files with `syn/cells/<tech>/`, which instantiate
-  the library cells with the same ports. On [target library] these are the clock-gating cell
-  `[clock-gating cell]` and the clock inverter `[clock inverter cell]`. The script stops if
-  either file is not replaced.
+- For synthesis, `syn/run_syn.sh` replaces the two files with `syn/cells/`, which instantiate the
+  clock-gating cell and the clock inverter of the library with the same ports; the cell and pin names
+  come from `.env` (`FTEL_LIB_CG_*`, `FTEL_LIB_CKINV_*`). The script stops if either file is not
+  replaced.
 - Do not use `m_fpt_lib_dff_falling_edge_async_reset_n` for the falling-edge flip-flops: in its
   GF130 branch it maps to `DFFRQ`, a rising-edge flip-flop.
 
@@ -394,8 +394,8 @@ layout comes with the target technology (M7).
 **Trial synthesis, 2026-10-10** (`syn/run_syn.sh`, `syn/summarize.sh`).
 - Tool and design: Design Compiler X-2025.06-SP5, `compile_ultra -no_autoungroup`, 4 lanes, default
   configuration.
-- Library: [target library] [n]-track cells (`[library cells]`), slow corner SSG 0.72 V at −40 °C and
-  125 °C. Only the libraries of that corner with body bias (0.45 V / −0.45 V) are installed. The body
+- Library: the standard-cell library of the target, named in `.env` (see `.env.example`), slow corner
+  (0.72 V) at −40 °C and 125 °C. The installed models of that corner include a body bias; the body
   bias of the chip is not decided 🔍.
 - Before clock-tree synthesis: ideal clocks, no wire load. Uncertainty for setup/hold is 30/10 ps
   for the DDR family and 100/20 ps for `core_clk`; clock transition 30 ps.
