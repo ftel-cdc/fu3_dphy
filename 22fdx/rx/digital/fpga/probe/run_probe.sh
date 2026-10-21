@@ -30,8 +30,8 @@ set -uo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
 ROOT=$(dirname "$HERE")
 VIVADO=${VIVADO:-/opt/xilinx/2025.2/Vivado/bin/vivado}
-known=(csi2_rx_no_phy dphy_rx_versal iowiz_mipi_rx synth_tiny s0_ip_options)
-heavy=(impl_tiny dphy_exdes_sim sample_inventory xilinx_cam_exdes tn3_pins)
+known=(csi2_rx_no_phy dphy_rx_versal iowiz_mipi_rx synth_tiny)
+heavy=(impl_tiny dphy_exdes_sim tn3_pins)
 probes=("$@")
 [ ${#probes[@]} -eq 0 ] && probes=("${known[@]}")
 status=0

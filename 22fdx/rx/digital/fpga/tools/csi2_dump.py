@@ -9,8 +9,7 @@
 # Author          : Ho Khanh Linh
 # Email           : linhhk26@fpt.com
 # Created Date    : 2026-10-12
-# Description     : Check the CSI-2 traffic in ILA captures of the FPGA prototype
-#                   (fpga/FPGA_PROTO_PLAN.md).
+# Description     : Check the CSI-2 traffic in ILA captures of the FPGA prototype.
 #
 # Evolution History:
 # ------------------------------------------------------------------------------
@@ -21,7 +20,7 @@
 # A new version is strictly reserved for major architectural shifts
 # that require software modifications across different chip generations.
 #-------------------------------------------------------------------------------
-"""Check the CSI-2 traffic in ILA captures of the FPGA prototype (fpga/FPGA_PROTO_PLAN.md).
+"""Check the CSI-2 traffic in ILA captures of the FPGA prototype.
 
 A capture is the CSV file that Vivado writes with write_hw_ila_data -csv_file: a line of probe names,
 a "Radix - ..." line, then one line per sample.

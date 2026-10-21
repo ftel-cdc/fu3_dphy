@@ -202,7 +202,7 @@ AXIS frame generator (TB, RAW10, pattern biết trước, frame nhỏ)
 | `fpga/exp2/`: `tb_exp2a.sv`, `tb_exp2b.sv`, `axil_bfm.sv`, `exp2.tcl`, `run_exp2.sh` | TN2a, TN2b; 2c thêm script sinh biến thể FPGA |
 | `fpga/tools/csi2_dump.py` | Mode `bursts` (so với truth) và selftest cho mode này |
 | `fpga/exp3/`: `TN3_SPEC.md`, `tx_vek280/*.tcl`, `rx_vp1902/*.tcl`, `xsdb/*.tcl` | TN3 |
-| `fpga/FPGA_PROTO_PLAN.md` (lên v0.6), `fpga/README.md` | §6 chuyển sang TN1–TN3; S0 thành build mốc R-X; thêm rủi ro mới |
+| Plan nội bộ của prototype (lên v0.6), `fpga/README.md` | §6 chuyển sang TN1–TN3; S0 thành build mốc R-X; thêm rủi ro mới |
 | Output | `fpga/work/exp*/` (gitignored) |
 
 **Dùng lại, không viết mới:**
@@ -210,7 +210,7 @@ AXIS frame generator (TB, RAW10, pattern biết trước, frame nhỏ)
 - bộ đọc CSV và các mode ppi/axis/compare của `fpga/tools/csi2_dump.py`;
 - `fpga/tools/f2_timing.py` để đo độ trễ;
 - model rate trong `config/validate_config.py`;
-- script S0 trong `fpga/build/` (cho R-X) và proc `s0_cap` để bắt ILA.
+- script S0 (nội bộ, cho R-X) và proc `s0_cap` để bắt ILA.
 
 **Không sửa RTL** trong `hw/rtl/ip/ftel_dphy_rx/`. Nếu TN1/TN2 lộ lỗi RTL thì dừng lại, báo kèm bằng chứng; sửa RTL cần plan riêng.
 
@@ -225,7 +225,7 @@ AXIS frame generator (TB, RAW10, pattern biết trước, frame nhỏ)
 | TN3: đặc tả đầy đủ + build TX và R-X | 2–3 ngày | TN2b (cấu hình IP đã mô phỏng) |
 | TN2c (bản FPGA của RX mình) + build R-F | khoảng 1 tuần | TN2b |
 
-Mỗi bước dài sẽ báo trước thời gian chạy. Build trên VP1902 chạy dưới `ram_watch.sh`.
+Mỗi bước dài sẽ báo trước thời gian chạy. Build trên VP1902 chạy dưới một watchdog RAM.
 
 ## 6. Kiểm chứng
 

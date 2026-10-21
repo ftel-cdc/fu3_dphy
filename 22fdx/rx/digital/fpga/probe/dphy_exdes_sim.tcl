@@ -22,7 +22,7 @@
 #-------------------------------------------------------------------------------
 # Probe (step F2): simulate the example design of the MIPI D-PHY 4.3 receiver on Versal with XSIM, to see
 # how AMD's D-PHY drives the Advanced IO Wizard (bitslice reset, HS-RX disable, FIFO, byte clock), and
-# with which latency and bit order the words reach the PPI (FP-2, FP-3, FP-4, FP-6 of FPGA_PROTO_PLAN.md).
+# with which latency and bit order the words reach the PPI (open points FP-2, FP-3, FP-4, FP-6 of the prototype plan).
 # Heavy: run it by name (fpga/probe/run_probe.sh dphy_exdes_sim). Optional 2nd argument: simulated time
 # limit in us (default 400).
 # Writes <work>/f2.vcd with the signals listed in the "PROBE signal" lines; they are also logged in the

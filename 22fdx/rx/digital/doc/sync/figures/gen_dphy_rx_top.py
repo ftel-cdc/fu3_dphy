@@ -41,8 +41,7 @@ show four ways to need fewer GPIO pins, options 1 to 3 each built on the one bef
 ftel_dphy_rx keeps its standard PPI in every option: the SPI registers, the encoders, the
 multiplexers and the DDR outputs are chip-top logic outside it.
 
-The figures follow the rules of ../../figures/README.md, with the helpers of
-fpga/figures/gen_figures.py, and keep the text short: the clock lane and data lane 0 carry the
+The figures follow the rules of ../../figures/README.md and keep the text short: the clock lane and data lane 0 carry the
 signal names, data lanes 1 to 3 repeat their arrows without names (as HAS Figure 2-3 does). Signal
 names are those of the HAS (doc/spec.md, Tables 5-1 and 5-2); the pin counts are computed from
 Table 5-1, and the script stops when a group no longer matches the table.

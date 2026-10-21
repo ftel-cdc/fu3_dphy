@@ -9,7 +9,7 @@
 # Email           : linhhk26@fpt.com
 # Created Date    : 2026-10-12
 # Description     : Pins of tiny_ibufds_dphy for impl_tiny.tcl: the camera clock lane and data lane 0
-#                   of bank 705 (FPGA_PROTO_PLAN.md §4).
+#                   of bank 705 of the VP1902 board.
 #
 # Evolution History:
 # ------------------------------------------------------------------------------
@@ -21,7 +21,7 @@
 # that require software modifications across different chip generations.
 #-------------------------------------------------------------------------------
 # Pins of tiny_ibufds_dphy for impl_tiny.tcl: the camera clock lane and data lane 0 of bank 705
-# (FPGA_PROTO_PLAN.md §4). The five LVCMOS12 ports sit on camera control pins of the same 1.2 V bank, not
+# of the VP1902 board. The five LVCMOS12 ports sit on camera control pins of the same 1.2 V bank, not
 # on spare pins: CJ60 FMC_CLK, CK60 FMC_RST, CD60/CD59 FMC_XVS/XHS, CF61 FMC_SCL.
 # Only for the implementation probe: do not write a device image from it and do not load it on the board.
 # opt_design adds a PS block by itself, so a .pdi could be written, and it would drive the camera's reset,

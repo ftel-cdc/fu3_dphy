@@ -28,8 +28,8 @@
 //   (bridge) -> the next differential state is HS-0; HS lasts until LP-11. An escape entry starts with
 //   LP-10, so a LP-01 that does not follow LP-11 stays an LP state.
 // - In HS the LP receivers read LP-00, because the HS swing stays below VIL, as on silicon. (The XSIM
-//   model of AMD's IBUFDS_DPHY lets its LP outputs follow the HS levels instead, FPGA_PROTO_PLAN.md
-//   Appendix A.)
+//   model of AMD's IBUFDS_DPHY lets its LP outputs follow the HS levels instead, as the internal
+//   prototype plan records.)
 // - HS-RX output = Dp while the lane is in HS and the RTL enables the HS receiver (hs_en), else 0. With
 //   noise = 1: random bits while hs_en is High during LP-00, when the comparator sees no differential
 //   signal.

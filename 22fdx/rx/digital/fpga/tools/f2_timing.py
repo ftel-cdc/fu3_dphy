@@ -23,7 +23,7 @@
 #-------------------------------------------------------------------------------
 """Timing of AMD's D-PHY RX on Versal, from the VCD of fpga/probe/dphy_exdes_sim.tcl (step F2).
 
-Answers, for fpga/FPGA_PROTO_PLAN.md:
+Answers, for the open points of the prototype plan:
   FP-2  order of PHY reset, PLL lock, interface ready, bitslice reset and HS-RX disable
         (at start-up and around each HS burst)
   FP-3  latency from the pad to the wizard word and to the PPI, in ns and in byte-clock cycles

@@ -1,0 +1,8 @@
+# Vivado runs of probe/ (projects, logs, generated IP) and outputs of tools/
+work/
+# Material of the board kept locally (reference design, vendor files), never committed
+vendor/
+.Xil/
+*.jou
+# PNG renders of figures/ are local build products (the .drawio and .svg are committed)
+figures/*.png
