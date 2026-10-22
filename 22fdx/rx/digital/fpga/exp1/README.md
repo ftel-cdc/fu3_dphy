@@ -7,6 +7,10 @@ Thí nghiệm TN1 của [`../PLAN_TN1_TN3.md`](../PLAN_TN1_TN3.md) §1.
 
 Kết quả ở §6 là của lần chạy 2026-10-20 với bench theo `PLAN_TN1_FAIR.md`, trên RTL tại commit `465ff69` (HAS v0.16).
 
+README này là ghi chép kỹ thuật của nhóm. Cho team FPGA có hai tài liệu riêng, không dùng thuật ngữ nội bộ:
+[`TN1_DESCRIPTION.md`](TN1_DESCRIPTION.md) (mô tả thí nghiệm, cách chạy) và [`TN1_REPORT.md`](TN1_REPORT.md) (báo
+cáo kết quả).
+
 ## 1. Mục đích
 
 TN1 trả lời ba câu hỏi:

@@ -40,6 +40,7 @@ fpga/
 ├── PLAN_TN1_FAIR.md     ← plan of the fair TN1: both receivers behind IBUFDS_DPHY, E1-5 for both
 ├── exp1/                ← TN1: D-PHY line generator, AFE model, PPI monitor, testbench, run_exp1.sh (XSIM),
 │                          eot_window.py (table of the eot_skip_bytes window); README.md describes the tests;
+│                          TN1_DESCRIPTION.md and TN1_REPORT.md: description and report for the FPGA team;
 │                          tn1_evidence.py re-checks the results independently of csi2_dump.py;
 │                          neg_front.sh shows that its front-end check fails on a different front end
 ├── exp3/                ← TN3: TN3_SPEC.md, the experiment specification for the FPGA team
