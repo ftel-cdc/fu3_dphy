@@ -19,6 +19,11 @@
 > - Kết quả: 113/113 kịch bản PASS cho cả hai RX. Bộ phụ, với RX mình sau `afe_model`, cũng 113/113 PASS và trùng
 >   từng byte với lần chạy trước.
 > - Chi tiết ở `fpga/exp1/README.md` §6–§7.
+>
+> **Cập nhật 2026-10-22: bắt đầu TN2, làm ở repo `fu3_dphy`** (thư mục `22fdx/rx/digital/fpga/`).
+> - Plan chi tiết của TN2a: [`PLAN_TN2A.md`](PLAN_TN2A.md). TN2b và TN2c sẽ có plan riêng sau.
+> - Plan này viết cho layout cũ. Đường dẫn `hw/rtl/ip/ftel_dphy_rx/<x>` ở dưới nay là `22fdx/rx/digital/<x>`, và
+>   `fpga/` nay là `22fdx/rx/digital/fpga/`.
 
 ## 0. Context
 
