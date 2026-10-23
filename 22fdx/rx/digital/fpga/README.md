@@ -9,7 +9,7 @@ board) are kept by the team and are not in this repository. This folder holds wh
 them: the simulation experiments, the specification of TN3 for the FPGA team, the Vivado probes of AMD's
 IP and of the device, and the tools that check the captures.
 
-> Status (2026-10-22): the work is split into three experiments ([`PLAN_TN1_TN3.md`](PLAN_TN1_TN3.md)).
+> Status (2026-10-23): the work is split into three experiments ([`PLAN_TN1_TN3.md`](PLAN_TN1_TN3.md)).
 > TN1 and TN2 run in Vivado simulation; TN3 (TX on a second FPGA board, test board, RX on the VP1902
 > board) is specified for the FPGA team in [`exp3/TN3_SPEC.md`](exp3/TN3_SPEC.md) (part 1; the VEK280
 > cannot be the TX, its FMC banks are fixed at 1.5 V). TN1 is in `exp1/`. Its first run found two faults
@@ -42,6 +42,19 @@ IP and of the device, and the tools that check the captures.
 > - The timing of the TX measured at the pads is within D-PHY v1.1 at every rate. Its TCLK-PREPARE (82–89 ns) and
 >   its THS-PREPARE at 260 Mb/s (96–103 ns) go beyond the values TN1 tried.
 > - Details are in [`exp2/README.md`](exp2/README.md); `exp2/tn2a_evidence.py evidence` re-checks all of it.
+>
+> TN2b (`exp2b/`, [`PLAN_TN2B.md`](PLAN_TN2B.md)) sends synthetic RAW10 frames through AMD's CSI-2 TX Subsystem into
+> two complete receive paths: AMD's CSI-2 RX Subsystem with its D-PHY, and ftel_dphy_rx followed by the same RX
+> Subsystem without PHY, the path of the prototype.
+> - AMD's receive path gives every pixel in every run. AMD's controller without PHY takes none of the packets of
+>   ftel_dphy_rx, although they are the same packets: ftel_dphy_rx raises `rxactivehs` some byte clocks before
+>   `rxsynchs` (as its HAS allows), AMD's D-PHY raises both together, and AMD's controller needs `rxactivehs` not to
+>   rise before `rxsynchs`. This is a mismatch of the PPI contract with AMD's controller, not a fault against the
+>   HAS; how to resolve it is open.
+> - With the testbench holding `rxactivehs` until `rxsynchs` (no added delay), all 27 runs pass for both receive
+>   paths: four rates from 260 to 1500 Mb/s, 2 and 1 active lanes without a new build, ±400 ppm, receivers set up
+>   late, stream off and on, and behind `afe_model`. The three negative tests fail where planted.
+> - Details are in [`exp2b/README.md`](exp2b/README.md); `exp2b/tn2b_evidence.py evidence` re-checks all of it.
 
 ```
 fpga/
@@ -49,6 +62,7 @@ fpga/
 ├── PLAN_TN1_FIX.md      ← plan of the fix of the two faults found by TN1 (EoT hold, eot_skip_bytes, HAS v0.16)
 ├── PLAN_TN1_FAIR.md     ← plan of the fair TN1: both receivers behind IBUFDS_DPHY, E1-5 for both
 ├── PLAN_TN2A.md         ← plan of TN2a: AMD's D-PHY TX into both receivers, its findings and results
+├── PLAN_TN2B.md         ← plan of TN2b: CSI-2 frames from AMD's TX Subsystem into both receive paths, its findings
 ├── exp1/                ← TN1: D-PHY line generator, AFE model, PPI monitor, testbench, run_exp1.sh (XSIM),
 │                          eot_window.py (table of the eot_skip_bytes window); README.md describes the tests;
 │                          TN1_DESCRIPTION.md and TN1_REPORT.md: description and report for the FPGA team;
@@ -57,6 +71,9 @@ fpga/
 ├── exp2/                ← TN2a: PPI driver of AMD's D-PHY TX, pad decoder (truth and TX timing), testbench,
 │                          run_exp2.sh (XSIM); README.md describes the tests; tn2a_evidence.py checks each run
 │                          and re-checks all of them (decode, pads, front end, sources, copy from TN1)
+├── exp2b/               ← TN2b: frame generator, AXI4-Stream monitor, AXI4-Lite master, testbench, run_exp2b.sh
+│                          (XSIM); README.md describes the tests and the finding; tn2b_evidence.py checks each run
+│                          and re-checks all of them (decode, registers, front end, sources, copy, negative tests)
 ├── exp3/                ← TN3: TN3_SPEC.md, the experiment specification for the FPGA team
 ├── probe/               ← Vivado batch probes of AMD's D-PHY and CSI-2 IP and of the device (run_probe.sh)
 ├── tools/               ← csi2_dump.py: checks the CSI-2 traffic in ILA captures (PPI or AXI4-Stream) and
@@ -88,6 +105,10 @@ fpga/exp2/run_exp2.sh model                # the same with ftel_dphy_rx behind a
 fpga/exp2/run_exp2.sh neg                  # negative tests: a byte sent inverted, pull strength at the buffers
 fpga/exp2/run_exp2.sh evidence             # re-checks all TN2a outputs (decode, pads, front end, sources, copy, ...)
 fpga/exp2/run_exp2.sh txtiming             # timing of AMD's D-PHY TX at the pads per rate, against D-PHY v1.1
+fpga/exp2b/run_exp2b.sh E2b-1              # TN2b at 1440 Mb/s: AMD's CSI-2 TX Subsystem into both receive paths
+fpga/exp2b/run_exp2b.sh shim               # all TN2b scenarios with the PPI into AMD's controller re-timed (SH_*)
+fpga/exp2b/run_exp2b.sh finding            # the runs of the finding: not re-timed, and the diagnosis runs
+fpga/exp2b/run_exp2b.sh evidence           # re-checks all TN2b outputs (decode, registers, front end, sources, ...)
 fpga/probe/run_probe.sh tn3_pins           # pins and package delays behind exp3/TN3_SPEC.md §3-4
 ```
 

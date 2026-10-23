@@ -22,6 +22,8 @@
 >
 > **Cập nhật 2026-10-22: bắt đầu TN2, làm ở repo `fu3_dphy`** (thư mục `22fdx/rx/digital/fpga/`).
 > - Plan chi tiết của TN2a: [`PLAN_TN2A.md`](PLAN_TN2A.md). TN2b và TN2c sẽ có plan riêng sau.
+> - Cập nhật cùng ngày: plan của TN2b là [`PLAN_TN2B.md`](PLAN_TN2B.md), với bench ở `exp2b/`. Trong plan đó, R-X là CSI-2 RX SS
+>   có PHY, R-F là RX mình + CSI-2 RX SS không PHY, như §2 ở dưới. Dữ liệu vào là frame RAW10 tổng hợp do testbench sinh.
 > - Plan này viết cho layout cũ. Đường dẫn `hw/rtl/ip/ftel_dphy_rx/<x>` ở dưới nay là `22fdx/rx/digital/<x>`, và
 >   `fpga/` nay là `22fdx/rx/digital/fpga/`.
 
