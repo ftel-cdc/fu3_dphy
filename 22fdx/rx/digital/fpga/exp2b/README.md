@@ -10,8 +10,9 @@ Thí nghiệm TN2b của [`../PLAN_TN2B.md`](../PLAN_TN2B.md), phần sau của 
     không PHY (`C_INC_PHY` = false). Đây là đường của prototype.
 - Đây là lần đầu PPI của `ftel_dphy_rx` đi vào controller CSI-2 của AMD.
 
-README này là ghi chép kỹ thuật của nhóm. Tài liệu cho team FPGA (`TN2_DESCRIPTION.md`, `TN2_REPORT.md`) sẽ viết
-sau, phủ cả TN2a và TN2b.
+README này là ghi chép kỹ thuật của nhóm. Cho team FPGA có hai tài liệu riêng, phủ cả TN2a và TN2b, không dùng thuật
+ngữ nội bộ, đặt trong `../exp2/`: [`TN2_DESCRIPTION.md`](../exp2/TN2_DESCRIPTION.md) (mô tả thí nghiệm, cách chạy) và
+[`TN2_REPORT.md`](../exp2/TN2_REPORT.md) (báo cáo kết quả).
 
 ## Tóm tắt (2026-10-26)
 

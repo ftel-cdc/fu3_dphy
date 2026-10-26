@@ -7,8 +7,9 @@ Thí nghiệm TN2a của [`../PLAN_TN2A.md`](../PLAN_TN2A.md), phần đầu c�
 - Phần RX giữ như TN1: RX AMD, RX mình sau `IBUFDS_DPHY` hoặc `afe_model`, monitor, bộ kiểm. Phần lớn là code của
   TN1 dùng lại, không sửa.
 
-README này là ghi chép kỹ thuật của nhóm. Tài liệu cho team FPGA (`TN2_DESCRIPTION.md`, `TN2_REPORT.md`) sẽ viết
-sau khi xong TN2a và TN2b.
+README này là ghi chép kỹ thuật của nhóm. Cho team FPGA có hai tài liệu riêng, phủ cả TN2a và TN2b, không dùng thuật
+ngữ nội bộ: [`TN2_DESCRIPTION.md`](TN2_DESCRIPTION.md) (mô tả thí nghiệm, cách chạy) và
+[`TN2_REPORT.md`](TN2_REPORT.md) (báo cáo kết quả).
 
 ## 1. Mục đích
 

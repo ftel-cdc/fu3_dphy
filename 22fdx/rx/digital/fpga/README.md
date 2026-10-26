@@ -90,7 +90,9 @@ fpga/
 │                          neg_front.sh shows that its front-end check fails on a different front end
 ├── exp2/                ← TN2a: PPI driver of AMD's D-PHY TX, pad decoder (truth and TX timing), testbench,
 │                          run_exp2.sh (XSIM); README.md describes the tests; tn2a_evidence.py checks each run
-│                          and re-checks all of them (decode, pads, front end, sources, copy from TN1)
+│                          and re-checks all of them (decode, pads, front end, sources, copy from TN1);
+│                          TN2_DESCRIPTION.md and TN2_REPORT.md: description and report of TN2a and TN2b for the
+│                          FPGA team
 ├── exp2b/               ← TN2b: frame generator, AXI4-Stream monitor, AXI4-Lite master, testbench, run_exp2b.sh
 │                          (XSIM); README.md describes the tests and the finding; tn2b_evidence.py checks each run
 │                          and re-checks all of them (decode, registers, front end, sources, copy, negative tests)
