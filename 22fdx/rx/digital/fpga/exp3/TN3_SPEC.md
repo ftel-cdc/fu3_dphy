@@ -6,6 +6,7 @@
 > | Phiên bản | Ngày | Nội dung |
 > |---|---|---|
 > | v0.1 | 2026-10-19 | Phần 1: mục tiêu, sơ đồ, phần cứng, mạch test, bảng chân, câu hỏi. Board TX chưa chốt, vì VEK280 không dùng được (§3.2). Các mục 5–11 (design TX và RX, quy trình, tiêu chí đạt, dữ liệu gửi về, xử lý sự cố, phụ lục Tcl) sẽ viết sau, khi đã chốt board TX và mô phỏng TN2 xong |
+> | v0.2 | 2026-10-26 | R-F có thêm khối chỉnh `rxactivehs` của nhóm D-PHY, giữa RX của nhóm và CSI-2 RX Subsystem (§0, §1, §2). Lý do: kết quả mô phỏng TN2b |
 
 ---
 
@@ -20,6 +21,12 @@
 3. **Trả lời câu hỏi Q1–Q7** dưới đây.
 
 Nhóm D-PHY sẽ build trước thiết kế FPGA cho cả hai đầu (mục 5–6), kèm script. Team FPGA cũng có thể build lại từ đặc tả.
+
+Design R-F có thêm một khối nhỏ do nhóm D-PHY giao: `fpga/rtl/m_ftel_ppi_act_gate.sv`, 6 flip-flop với 4 lane. Khối nằm giữa RX của nhóm và CSI-2 RX Subsystem (§2):
+- Ở mỗi lane, khối giữ `rxactivehs` ở mức thấp cho tới `rxsynchs`. Lý do: mô phỏng TN2b cho thấy controller CSI-2 của AMD cần hai tín hiệu này lên cùng lúc, như D-PHY của AMD.
+- Mọi tín hiệu PPI khác đi thẳng, không qua khối.
+- Khối chạy bằng byte clock của RX và dùng chung reset với RX.
+- Nếu build lại từ đặc tả, nối khối đúng chỗ này.
 
 | ID | Câu hỏi | Dùng cho |
 |---|---|---|
@@ -41,7 +48,7 @@ Nhóm D-PHY sẽ build trước thiết kế FPGA cho cả hai đầu (mục 5�
 
 **RX:** chạy hai pha, cùng chân và cùng mạch test.
 - **R-X (mốc):** MIPI CSI-2 RX Subsystem của AMD, có D-PHY bên trong. Lấy từ build S0 (design camera tham chiếu của board, đã cắt gọn), bỏ phần điều khiển camera.
-- **R-F:** RX D-PHY của nhóm (`ftel_dphy_rx`, bản FPGA), nối vào CSI-2 RX Subsystem không có PHY.
+- **R-F:** RX D-PHY của nhóm (`ftel_dphy_rx`, bản FPGA), qua khối chỉnh `rxactivehs` (§0), nối vào CSI-2 RX Subsystem không có PHY.
 
 **Rate:** 4 lane, continuous clock.
 - 800 Mb/s để bring-up;
@@ -70,8 +77,9 @@ Trước TN3, cấu hình IP của TX và RX đã được mô phỏng trong Viv
  +-----------------------------------+                        +------------------------------------------+
  | nguồn pattern -> CSI-2 TX SS      |  FMC    mạch test      | FMC+ "01"                                |
  | (frame RAW10)    + D-PHY TX ======|========================|==> bank 705 -> R-X: CSI-2 RX SS + D-PHY  |
- |                  bank IO 1.2 V    |  5 cặp: CLK, D0-D3     |    1.2 V    hoặc R-F: RX nhóm + CSI-2 RX |
- | ILA, JTAG (xsdb)                  |  + GND                 | ILA ở PPI, AXI4-Stream, LP; JTAG (xsdb)  |
+ |                  bank IO 1.2 V    |  5 cặp: CLK, D0-D3     |    1.2 V    hoặc R-F: RX nhóm -> khối    |
+ |                                   |  + GND                 |             chỉnh rxactivehs -> CSI-2 RX |
+ | ILA, JTAG (xsdb)                  |                        | ILA ở PPI, AXI4-Stream, LP; JTAG (xsdb)  |
  +-----------------------------------+                        +------------------------------------------+
    nguồn riêng ---------- GND chung qua mạch test (thêm dây GND riêng nếu cần, §3.3) ---------- nguồn ATX
 ```

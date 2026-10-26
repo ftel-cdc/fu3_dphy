@@ -26,29 +26,41 @@ A capture is the CSV file that Vivado writes with write_hw_ila_data -csv_file: a
 a "Radix - ..." line, then one line per sample.
 
   csi2_dump.py ppi  CAP.csv --lanes 4 --data dl{n}_rxdatahs --valid dl{n}_rxvalidhs \\
-                    --active dl{n}_rxactivehs [--dt 0x2B] [--pgm lines.pgm]
+                    --active dl{n}_rxactivehs [--dt 0x2B] [--pgm lines.pgm] \\
+                    [--sync dl{n}_rxsynchs] [--sync-at 0] [--max-lane-spread 6]
   csi2_dump.py axis CAP.csv --tdata tdata --tvalid tvalid [--tready tready] --tuser tuser \\
                     --tlast tlast [--ppc 4] [--bpp 10] [--pgm lines.pgm]
   csi2_dump.py compare {ppi|axis} A.csv B.csv <options of that mode> [--headers-only]
-  csi2_dump.py bursts --truth TRUTH.txt [--lanes 4] A.csv [B.csv ...]
+  csi2_dump.py bursts --truth TRUTH.txt [--lanes 4] [--sync-at -1,0] [--max-lane-spread 6] A.csv [B.csv ...]
   csi2_dump.py selftest [--tx-model]
 
 A column is chosen by a part of its name; "{n}" stands for the lane number.
 PPI mode:
   - one packet per HS burst (CSI-2 v1.3 9.7: the lanes go to LPS between packets);
   - bytes after the packet in a burst are counted as trailer;
-  - the ECC (single-bit correction) and the CRC-16 are checked.
+  - the ECC (single-bit correction) and the CRC-16 are checked;
+  - with --sync-at or --max-lane-spread, the timing of the bursts the capture holds whole (below).
 Bursts mode (TN1/TN2 of fpga/PLAN_TN1_TN3.md, dummy data, no CSI-2 packets):
   - per lane, a burst is a run of rxactivehs; its bytes are the samples with rxvalidhs;
   - burst k of a lane pairs with burst k of that lane in the truth file of the line generator
     (fpga/exp1/dphy_line_gen.sv) and must start with its payload; bytes after the payload are counted as
     trailer, and are an error only beyond --max-trailer (one limit for every capture, or a comma list in
     capture order, "-" for no limit);
-  - errsoths, errsotsynchs, rxvalidhs outside a burst and a missing or extra burst are errors;
+  - errsoths, errsotsynchs, rxvalidhs outside a burst and a missing or extra burst are errors, and rxsynchs
+    must rise once in a burst;
   - with a sim_time_ps column, the pairing must also hold in time (the payloads may repeat): the last byte
     of a burst up to its payload length must reach the PPI after it left the pad (truth times), and as long
     after it as the median of the capture, within half the smallest gap between two bursts of a lane. The
     latency of the last payload byte (sample time minus the end of its last bit at the pad) is reported.
+Timing at the PPI, both modes (C6 and C10 of the HAS of ftel_dphy_rx, Table A-2):
+  - --sync-at: rxsynchs is High in exactly one sample of a burst, that many samples from its first byte
+    (0: in the cycle of the first byte, as ftel_dphy_rx, C6; -1: one cycle before it, as AMD's D-PHY and the
+    PPI example of the D-PHY specification); in bursts mode one value for every capture or a comma list in
+    capture order, "-" for no check; this replaces the count of the rises of rxsynchs;
+  - --max-lane-spread: in a burst, each byte that every lane has reaches the PPI on all lanes within that many
+    samples (inter-lane byte divergence, C10; the bursts of the lanes pair by the truth in bursts mode, by
+    the samples where any lane is active in PPI mode);
+  - the sample offsets of rxsynchs and the widest spread are reported even without the checks.
 """
 import argparse
 import csv
@@ -386,9 +398,70 @@ def has_col(cap, part):
     return any(part in n for n in cap.names)
 
 
+def span(x, f='d'):
+    """'min..max' of the values in format f, '-' when there are none."""
+    return f"{min(x):{f}}..{max(x):{f}}" if x else "-"
+
+
+def spread(lane_samples):
+    """Widest spread of the samples of byte k over the lanes, for each k that every lane has (None: a lane has
+    no byte)."""
+    n = min(len(x) for x in lane_samples)
+    if n == 0:
+        return None
+    return max(max(x[k] for x in lane_samples) - min(x[k] for x in lane_samples) for k in range(n))
+
+
+def ppi_timing(cap, lanes, valid, active, sync, sync_at=None, max_spread=None):
+    """C6 and C10 (module docstring) on the bursts of a PPI capture as decode_ppi cuts them: runs of samples where
+    any lane is active; a burst cut by the start or the end of a capture window is left out. Per lane with
+    bytes: the samples with rxsynchs against its first byte; over the lanes with bytes: the spread of each byte.
+    Returns (error messages, sync offsets, spread per burst)."""
+    v = [cap.values(valid.format(n=i)) for i in range(lanes)]
+    a = [cap.values(active.format(n=i)) for i in range(lanes)]
+    y = [cap.values(sync.format(n=i)) for i in range(lanes)] if sync and has_col(cap, sync.format(n=0)) else None
+    if sync_at is not None and y is None:
+        sys.exit(f"{cap.path}: --sync-at without a column '{sync}'")
+    starts = cap.window_starts()
+    msgs, offsets, spreads = [], [], []
+
+    def finish(b0, b1):
+        samples = [[s for s in range(b0, b1) if v[i][s] > 0] for i in range(lanes)]
+        live = [i for i in range(lanes) if samples[i]]
+        for i in live:
+            ss = [s for s in range(b0, b1) if y[i][s] > 0] if y else None
+            if ss is not None and len(ss) == 1:
+                offsets.append(ss[0] - samples[i][0])
+            if sync_at is None:
+                continue
+            if len(ss) != 1:
+                msgs.append(f"sample {b0}: lane {i}: rxsynchs High in {len(ss)} samples (expected one, C6)")
+            elif ss[0] - samples[i][0] != sync_at:
+                msgs.append(f"sample {b0}: lane {i}: rxsynchs {ss[0] - samples[i][0]:+d} samples from the first"
+                            f" byte (expected {sync_at:+d}, C6)")
+        sp = spread([samples[i] for i in live]) if len(live) > 1 else None
+        if sp is not None:
+            spreads.append(sp)
+            if max_spread is not None and sp > max_spread:
+                msgs.append(f"sample {b0}: a byte reaches the PPI {sp} samples apart on the lanes"
+                            f" (at most {max_spread}, C10)")
+
+    b0, partial = None, False
+    for s in range(len(cap.rows)):
+        act = any(a[i][s] > 0 for i in range(lanes))
+        if b0 is not None and (s in starts or not act):
+            if not partial and not (s in starts and act):
+                finish(b0, s)
+            b0 = None
+        if b0 is None and act:
+            b0, partial = s, s in starts
+    return msgs, offsets, spreads   # a burst still open at the end is cut by the capture
+
+
 def decode_bursts(cap, lanes, data, valid, active, flags, time_col):
-    """Per lane, the runs of rxactivehs: bytes and sample times of rxvalidhs, rising edges of each flag
-    column. Also, per lane, the events outside a run: rxvalidhs samples and flag rising edges."""
+    """Per lane, the runs of rxactivehs: bytes, sample times and sample numbers of rxvalidhs, rising edges of each
+    flag column, and the sample numbers with rxsynchs. Also, per lane, the events outside a run: rxvalidhs samples
+    and flag rising edges."""
     tm = cap.values(time_col) if time_col and has_col(cap, time_col) else None
     runs_all, stray_all = [], []
     for i in range(lanes):
@@ -405,10 +478,14 @@ def decode_bursts(cap, lanes, data, valid, active, flags, time_col):
             rise = {k: int(fl[k][s] and (s == 0 or not fl[k][s - 1])) for k in fl}
             if a[s]:
                 if cur is None:
-                    cur = {'bytes': [], 'times': [], 'flags': {k: 0 for k in fl}, 'sample': s}
+                    cur = {'bytes': [], 'times': [], 'samples': [], 'syncs': [], 'flags': {k: 0 for k in fl},
+                           'sample': s}
                 if v[s]:
                     cur['bytes'].append(d[s])
                     cur['times'].append(tm[s] if tm else None)
+                    cur['samples'].append(s)
+                if 'rxsynchs' in fl and fl['rxsynchs'][s]:
+                    cur['syncs'].append(s)
                 for k in fl:
                     cur['flags'][k] += rise[k]
             else:
@@ -426,15 +503,18 @@ def decode_bursts(cap, lanes, data, valid, active, flags, time_col):
     return runs_all, stray_all
 
 
-def check_bursts(label, runs, stray, truth, lanes, show=8, max_trailer=None):
+def check_bursts(label, runs, stray, truth, lanes, show=8, max_trailer=None, sync_at=None, max_spread=None):
     """Print one capture against the truth; return the number of errors. max_trailer: trailer bytes
-    allowed after the payload of a burst (None: any number).
+    allowed after the payload of a burst (None: any number); sync_at, max_spread: the timing checks of the module
+    docstring (None: not checked).
     Burst k of a lane pairs with burst k of that lane in the truth. A lost and an added burst on one lane keep
     the count, and the bursts between them then pair with their neighbours; when the payloads repeat, only the
     time shows it. So, with sample times, each pair must also hold in time: the last byte of the burst up to its
     payload length reaches the PPI after it left the pad, as long after it as the median of the capture,
-    within half the smallest gap between two bursts of a lane. Lane-level messages come first."""
+    within half the smallest gap between two bursts of a lane. The bursts of the lanes with the same burst number
+    of the truth are one burst for the spread. Lane-level messages come first."""
     errs, head, msgs, n_ok, n_tot, trailers, lat, late = 0, [], [], 0, 0, [], [], []
+    offsets, paired = [], []
 
     def bad(msg, lane_level=False, n=1):
         nonlocal errs
@@ -444,6 +524,7 @@ def check_bursts(label, runs, stray, truth, lanes, show=8, max_trailer=None):
     for i in range(lanes):
         tr = truth.get(i, [])
         got = [r for r in runs[i] if not r.get('open')]
+        paired.append({tr[k][0]: got[k] for k in range(min(len(tr), len(got)))})
         if runs[i] and runs[i][-1].get('open'):
             bad(f"lane {i}: still in a burst at the end of the capture", True)
         if len(got) != len(tr):
@@ -471,12 +552,31 @@ def check_bursts(label, runs, stray, truth, lanes, show=8, max_trailer=None):
                 bad(f"lane {i} burst {bid}: {len(b)} bytes for {len(pay)} sent, first difference at byte {j}:"
                     f" got {list(b[j:j + 6])}, sent {list(pay[j:j + 6])}")
             for fk, cnt in r['flags'].items():
+                if fk == 'rxsynchs' and sync_at is not None:
+                    continue                    # C6 below counts the samples, not the rises
                 exp = 1 if fk == 'rxsynchs' else 0
                 if cnt != exp:
                     bad(f"lane {i} burst {bid}: {fk} {cnt} times (expected {exp})")
+            ss = r['syncs']
+            if len(ss) == 1 and r['samples']:
+                offsets.append(ss[0] - r['samples'][0])
+            if sync_at is not None and 'rxsynchs' in r['flags']:
+                if len(ss) != 1:
+                    bad(f"lane {i} burst {bid}: rxsynchs High in {len(ss)} samples (expected one, C6)")
+                elif r['samples'] and ss[0] - r['samples'][0] != sync_at:
+                    bad(f"lane {i} burst {bid}: rxsynchs {ss[0] - r['samples'][0]:+d} samples from the first byte"
+                        f" (expected {sync_at:+d}, C6)")
         for fk, cnt in stray[i].items():
             if cnt:
                 bad(f"lane {i}: {fk} {cnt} times outside a burst", True)
+    spreads = []
+    for bid in sorted(set.intersection(*map(set, paired))) if lanes > 1 else []:
+        sp = spread([paired[i][bid]['samples'] for i in range(lanes)])
+        if sp is None:
+            continue
+        spreads.append(sp)
+        if max_spread is not None and sp > max_spread:
+            bad(f"burst {bid}: a byte reaches the PPI {sp} samples apart on the lanes (at most {max_spread}, C10)")
     if late:
         med = statistics.median(x for _, _, x in late)
         gaps = [b[3] - a[3] for i in range(lanes) for a, b in zip(truth.get(i, []), truth.get(i, [])[1:])]
@@ -487,10 +587,10 @@ def check_bursts(label, runs, stray, truth, lanes, show=8, max_trailer=None):
                 bad(f"lane {i}: {len(off)} bursts out of time, the first is burst {off[0][0]} ({off[0][1]:.1f} ns"
                     f" after it left the pad; capture median {med:.1f} ns, tolerance {tol:.1f} ns): paired with"
                     f" another burst", True, len(off))
-    span = (lambda x, f: f"{min(x):{f}}..{max(x):{f}}" if x else "-")
     print(f"{label}: {lanes} lane(s), {n_ok}/{n_tot} bursts carry the payload sent, trailer bytes"
           f" {span(trailers, 'd')} (in {sum(1 for t in trailers if t)} bursts), latency of the last payload"
-          f" byte {span(lat, '.1f')} ns, errors {errs}")
+          f" byte {span(lat, '.1f')} ns, rxsynchs {span(offsets, '+d')} samples from the first byte, lane spread"
+          f" {span(spreads, 'd')}, errors {errs}")
     for x in (head + msgs)[:show]:
         print(f"  {x}")
     if len(head + msgs) > show:
@@ -498,15 +598,16 @@ def check_bursts(label, runs, stray, truth, lanes, show=8, max_trailer=None):
     return errs
 
 
-def trailer_limits(spec, n):
-    """--max-trailer: None, one value for all captures, or a comma list ('-' = no limit) of n values."""
+def trailer_limits(spec, n, opt='--max-trailer'):
+    """--max-trailer (or --sync-at): None, one value for all captures, or a comma list ('-' = no limit, no check)
+    of n values."""
     if spec is None:
         return [None] * n
     vals = [None if v.strip() == '-' else int(v) for v in spec.split(',')]
     if len(vals) == 1:
         return vals * n
     if len(vals) != n:
-        sys.exit(f"--max-trailer: {len(vals)} values for {n} captures")
+        sys.exit(f"{opt}: {len(vals)} values for {n} captures")
     return vals
 
 
@@ -514,14 +615,17 @@ def run_bursts(a):
     truth = read_truth(a.truth)
     total = []
     limits = trailer_limits(a.max_trailer, len(a.csv))
+    sync_at = trailer_limits(a.sync_at, len(a.csv), '--sync-at')
     for k, path in enumerate(a.csv):
         cap = Capture(path)
         flags = {name: col for name, col in (('rxsynchs', a.sync), ('errsoths', a.errsot),
                                              ('errsotsynchs', a.errsotsync))
                  if col and has_col(cap, col.format(n=0))}
+        if sync_at[k] is not None and 'rxsynchs' not in flags:
+            sys.exit(f"{path}: --sync-at without a column '{a.sync}'")
         runs, stray = decode_bursts(cap, a.lanes, a.data, a.valid, a.active, flags, a.time)
         total.append(check_bursts(f"{chr(65 + k)} {os.path.basename(path)}", runs, stray, truth, a.lanes,
-                                  max_trailer=limits[k]))
+                                  max_trailer=limits[k], sync_at=sync_at[k], max_spread=a.max_lane_spread))
     print(f"RESULT: {'PASS' if not any(total) else 'FAIL'} "
           f"({', '.join(f'{chr(65 + k)} {e} errors' for k, e in enumerate(total))})")
     return int(any(total))
@@ -678,6 +782,7 @@ def selftest(tx_model):
           "AXIS round trip: lines, partial first line, start of frame")
 
     bursts_selftest(work, rnd, check)
+    timing_selftest(work, rnd, check)
     if tx_model:
         fails += tx_model_check(work, rnd)
     print(f"selftest: {'PASS' if fails == 0 else f'{fails} FAIL'}")
@@ -696,13 +801,15 @@ def synth_times(k, n, slot, lat_ps=20000):
     return t0, t0 + (n + 1) * SYNTH_PS
 
 
-def synth_bursts(truth, lanes, rnd, faults, slot):
+def synth_bursts(truth, lanes, rnd, faults, slot, sync_at=0):
     """Lane samples of the truth bursts, burst k in samples k * slot to (k + 1) * slot - 1: SYNTH_IDLE idle
     samples, the payload plus 0..2 trailer bytes (rxsynchs with the first byte, rxactivehs one sample longer
-    than rxvalidhs), then idle samples to the end of the slot. Idle samples carry random data.
+    than rxvalidhs), then idle samples to the end of the slot. Idle samples carry random data. With sync_at -1
+    a burst starts one sample earlier, with rxactivehs and rxsynchs and no byte (AMD's D-PHY).
     faults: {(kind, lane, burst index)}, kind 'flip' (one payload byte), 'drop' (no burst), 'errsot'
-    (errsoths pulse), 'resync' (a second rxsynchs) or 'again' (the burst once more, in a slot after the last
-    one)."""
+    (errsoths pulse), 'resync' (a second rxsynchs), 'sync3' (rxsynchs High with the first three bytes),
+    'synclate' (rxsynchs with the third byte instead of the first) or 'again' (the burst once more, in a slot
+    after the last one)."""
     names = ['sim_time_ps']
     for i in range(lanes):
         names += [f'u_rx/dl{i}_rxdatahs[7:0]', f'u_rx/dl{i}_rxvalidhs', f'u_rx/dl{i}_rxactivehs',
@@ -738,6 +845,9 @@ def synth_bursts(truth, lanes, rnd, faults, slot):
         for _ in range(SYNTH_IDLE):
             sample(idle())
         live = [x for x in streams if x is not None]
+        if sync_at == -1 and live:
+            sample([(rnd.randrange(256), 0, 0, 0, 0) if st is None else (rnd.randrange(256), 0, 1, 1, 0)
+                    for st in streams])
         for s in range(max(map(len, live)) + 2 if live else 0):
             vals = []
             for i, st in enumerate(streams):
@@ -745,9 +855,15 @@ def synth_bursts(truth, lanes, rnd, faults, slot):
                     vals.append((rnd.randrange(256), 0, 0, 0, 0))
                     continue
                 on = s < len(st)
-                sync = int(on and (s == 0 or (not copy and ('resync', i, k) in faults and s == 2)))
-                vals.append((st[s] if on else rnd.randrange(256), int(on), int(s <= len(st)), sync,
-                             int(not copy and ('errsot', i, k) in faults and s == 1)))
+                fault = (lambda kind: not copy and (kind, i, k) in faults)
+                if fault('sync3'):
+                    sync = s < 3
+                elif fault('synclate'):
+                    sync = s == 2
+                else:
+                    sync = (s == 0 and sync_at == 0) or (fault('resync') and s == 2)
+                vals.append((st[s] if on else rnd.randrange(256), int(on), int(s <= len(st)), int(on and sync),
+                             int(fault('errsot') and s == 1)))
             sample(vals)
         if len(cols['sim_time_ps']) - start > slot:
             sys.exit(f"synth_bursts: burst {k} needs more than {slot} samples")
@@ -819,6 +935,116 @@ def bursts_selftest(work, rnd, check):
           "bursts: --max-trailer lists ('-,0' and one value for all captures)")
 
 
+def delay_lane(cols, lane, n, rnd):
+    """Every column of one lane of a synthetic capture n samples later (the first n samples idle)."""
+    for name in cols:
+        if f'dl{lane}_' in name:
+            idle = [rnd.randrange(256) if 'data' in name else 0 for _ in range(n)]
+            cols[name] = idle + cols[name][:-n]
+
+
+def synth_ppi_timing(lanes, rnd, gap=30, lens=(40, 12, 64, 7, 20, 33, 16, 25)):
+    """Lane samples of bursts as ftel_dphy_rx gives them (rxactivehs three samples before the first byte,
+    rxsynchs with it, one sample after the last byte), each lane zero or one sample later than the others, gap
+    idle samples between bursts; the capture starts inside the first burst and ends inside the last one, so the
+    bursts in between are whole: (columns, their first bytes as [[sample per lane]])."""
+    names = [f'u_ppi/dl{i}_{s}' for i in range(lanes) for s in ('rxdatahs[7:0]', 'rxvalidhs', 'rxactivehs',
+                                                                 'rxsynchs')]
+    cols = {n: [] for n in names}
+    firsts, t = [], 0
+    for n in lens:
+        skew = [rnd.randrange(2) for _ in range(lanes)]
+        length = max(skew) + n + 4 + gap
+        firsts.append([t + 3 + s for s in skew])
+        for s in range(length):
+            for i in range(lanes):
+                k = s - 3 - skew[i]
+                cols[f'u_ppi/dl{i}_rxdatahs[7:0]'].append(rnd.randrange(256))
+                cols[f'u_ppi/dl{i}_rxvalidhs'].append(int(0 <= k < n))
+                cols[f'u_ppi/dl{i}_rxactivehs'].append(int(-3 <= k <= n))
+                cols[f'u_ppi/dl{i}_rxsynchs'].append(int(k == 0))
+        t += length
+    cut0, cut1 = firsts[0][0] + 5, firsts[-1][0] + 5      # inside the first and the last burst
+    for name in cols:
+        cols[name] = cols[name][cut0:cut1]
+    return cols, [[s - cut0 for s in f] for f in firsts[1:-1]]
+
+
+def timing_selftest(work, rnd, check):
+    """The timing checks (C6, C10) on synthetic captures, with the faults a tester of the FPGA team planted in
+    copies of real captures (2026-10-26): rxsynchs High for three cycles, rxsynchs with the third payload byte,
+    lane 3 eight cycles later. Each must fail, the clean capture must pass, and without the checks the faults
+    pass (what the tester found)."""
+    lanes, lens, slot = 4, (5, 64, 3, 9), 80
+    truth = {i: [(k, bytes(rnd.randrange(256) for _ in range(n)), *synth_times(k, n, slot))
+                 for k, n in enumerate(lens)] for i in range(lanes)}
+    tpath = os.path.join(work, 'timing_truth.txt')
+    write_truth(tpath, truth, lanes)
+    flags = {'rxsynchs': 'dl{n}_rxsynchs', 'errsoths': 'dl{n}_errsoths', 'errsotsynchs': 'dl{n}_errsotsynchs'}
+
+    def capture(name, faults=frozenset(), delay=None, sync_at=0):
+        cols = synth_bursts(truth, lanes, rnd, set(faults), slot, sync_at)
+        if delay:
+            delay_lane(cols, *delay, rnd)
+        path = os.path.join(work, f'timing_{name}.csv')
+        ila_csv(path, cols, {c: 'HEX' if 'data' in c else 'BIN' for c in cols})
+        return decode_bursts(Capture(path), lanes, 'dl{n}_rxdatahs', 'dl{n}_rxvalidhs', 'dl{n}_rxactivehs',
+                             flags, 'sim_time_ps')
+
+    def errors(name, runs_stray, **kw):
+        return check_bursts(f"  timing {name}", *runs_stray, read_truth(tpath), lanes, show=2, **kw)
+
+    on = {'sync_at': 0, 'max_spread': 6}
+    clean = capture('clean')
+    sync3 = capture('sync3', {('sync3', 0, 1)})
+    late = capture('synclate', {('synclate', 1, 1)})
+    shifted = capture('lane3_8', delay=(3, 8))
+    amd = capture('amd', sync_at=-1)
+    n_bursts = len(lens)
+    check(errors('clean', clean, **on) == 0, "bursts timing: a clean 4-lane capture passes --sync-at 0"
+                                             " --max-lane-spread 6")
+    check(errors('sync3', sync3, **on) == 1, "bursts timing: rxsynchs High for three cycles is one error (C6)")
+    check(errors('synclate', late, **on) == 1, "bursts timing: rxsynchs with the third byte is one error (C6)")
+    e6, e8 = errors('lane3_8', shifted, **on), errors('lane3_8 at most 8', shifted, sync_at=0, max_spread=8)
+    check(e6 == n_bursts and e8 == 0, f"bursts timing: lane 3 eight cycles later is one error per burst at most 6"
+                                      f" ({e6} for {n_bursts} bursts) and none at most 8 ({e8}) (C10)")
+    old = sum(errors(n, c) for n, c in (('sync3 unchecked', sync3), ('synclate unchecked', late),
+                                        ('lane3_8 unchecked', shifted)))
+    check(old == 0, f"bursts timing: without the two options the three faults pass ({old} errors), as the tester"
+                    f" found")
+    ea, e0 = errors('amd at -1', amd, sync_at=-1, max_spread=6), errors('amd at 0', amd, sync_at=0)
+    check(ea == 0 and e0 == lanes * n_bursts, f"bursts timing: rxsynchs one cycle before the first byte passes"
+                                              f" --sync-at -1 and fails at 0 on each lane burst ({e0})")
+    check(trailer_limits('-1,0', 2, '--sync-at') == [-1, 0], "bursts timing: --sync-at list ('-1,0')")
+
+    # PPI mode: the bursts of a capture as decode_ppi cuts them
+    cols, firsts = synth_ppi_timing(lanes, rnd)
+
+    def ppi(name, cols, **kw):
+        path = os.path.join(work, f'timing_ppi_{name}.csv')
+        ila_csv(path, cols, {c: 'HEX' if 'data' in c else 'BIN' for c in cols})
+        return ppi_timing(Capture(path), lanes, 'dl{n}_rxvalidhs', 'dl{n}_rxactivehs', 'dl{n}_rxsynchs', **kw)
+
+    msgs, offs, sps = ppi('clean', cols, sync_at=0, max_spread=6)
+    check(not msgs and len(sps) == len(firsts) and offs == [0] * (lanes * len(firsts)),
+          f"ppi timing: a clean capture passes; the {len(firsts)} whole bursts are checked, the two cut by the"
+          f" capture are left out ({len(sps)} spreads, {len(offs)} sync offsets)")
+    bad = {name: {k: list(v) for k, v in cols.items()} for name in ('sync3', 'synclate', 'lane3_8')}
+    b0, b1 = firsts[1][0], firsts[2][1]
+    for s in (b0, b0 + 1, b0 + 2):
+        bad['sync3']['u_ppi/dl0_rxsynchs'][s] = 1
+    bad['synclate']['u_ppi/dl1_rxsynchs'][b1] = 0
+    bad['synclate']['u_ppi/dl1_rxsynchs'][b1 + 2] = 1
+    delay_lane(bad['lane3_8'], 3, 8, rnd)
+    got = {name: ppi(name, c, sync_at=0, max_spread=6)[0] for name, c in bad.items()}
+    check(len(got['sync3']) == 1 and len(got['synclate']) == 1,
+          "ppi timing: rxsynchs High for three cycles and rxsynchs with the third byte are one error each (C6)")
+    check(len(got['lane3_8']) == len(firsts), f"ppi timing: lane 3 eight cycles later is one error per whole burst"
+                                              f" ({len(got['lane3_8'])} for {len(firsts)}) (C10)")
+    old = [ppi(name, c)[0] for name, c in bad.items()]
+    check(old == [[], [], []], "ppi timing: without the two options nothing is checked")
+
+
 def tx_model_check(work, rnd):
     """ECC and CRC of random vectors against csi2_ecc and csi2_crc_byte of the repo Tx model (XSIM)."""
     rtl = os.path.join(REPO, 'ref', 'mipi_tx_dphy_model', 'rtl')
@@ -887,10 +1113,19 @@ def main():
         p.add_argument('--ppc', type=int, default=4)
         p.add_argument('--bpp', type=int, default=10)
 
+    def timing_opts(p, per_capture):
+        p.add_argument('--sync-at', default=None,
+                       help='samples from the first byte to rxsynchs (C6): 0, -1, or "-" for no check'
+                            + (', or a comma list per capture' if per_capture else ''))
+        p.add_argument('--max-lane-spread', type=int, default=None,
+                       help='samples a byte may reach the PPI apart on the lanes (C10)')
+
     p = sub.add_parser('ppi')
     p.add_argument('csv')
     ppi_opts(p)
     p.add_argument('--pgm')
+    p.add_argument('--sync', default='dl{n}_rxsynchs')
+    timing_opts(p, False)
     p = sub.add_parser('axis')
     p.add_argument('csv')
     axis_opts(p)
@@ -915,6 +1150,7 @@ def main():
     p.add_argument('--time', default='sim_time_ps')
     p.add_argument('--max-trailer', default=None,
                    help='trailer bytes allowed per burst: one value, or a comma list per capture ("-": no limit)')
+    timing_opts(p, True)
     p = sub.add_parser('selftest')
     p.add_argument('--tx-model', action='store_true', help='also check against the Tx model with XSIM')
     a = ap.parse_args()
@@ -924,8 +1160,18 @@ def main():
     if a.cmd == 'bursts':
         return run_bursts(a)
     if a.cmd == 'ppi':
-        pk = decode_ppi(Capture(a.csv), a.lanes, a.data, a.valid, a.active)
+        cap = Capture(a.csv)
+        pk = decode_ppi(cap, a.lanes, a.data, a.valid, a.active)
         bad = report_ppi(pk, a.dt)
+        if a.sync_at is not None or a.max_lane_spread is not None:
+            sync_at = trailer_limits(a.sync_at, 1, '--sync-at')[0]
+            msgs, offsets, spreads = ppi_timing(cap, a.lanes, a.valid, a.active, a.sync, sync_at, a.max_lane_spread)
+            print(f"timing: rxsynchs {span(offsets, '+d')} samples from the first byte (expected"
+                  f" {'-' if sync_at is None else f'{sync_at:+d}'}), lane spread {span(spreads)} (at most"
+                  f" {'-' if a.max_lane_spread is None else a.max_lane_spread}), errors {len(msgs)}")
+            for m in msgs[:8]:
+                print(f"  {m}")
+            bad += len(msgs)
         if a.pgm and ppi_lines(pk, a.dt):
             write_pgm(a.pgm, ppi_lines(pk, a.dt), 1023)
         return int(bad > 0)

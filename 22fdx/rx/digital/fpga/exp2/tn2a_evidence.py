@@ -51,7 +51,10 @@ tbcheck prints one line per item, then the verdict line TBRESULT:
 evidence prints one line per check, then the verdict line EVIDENCE:
   checker   fpga/tools/csi2_dump.py selftest passes: planted faults are found, a clean capture passes
   decode    every PPI capture is decoded again by the decoder of exp1/tn1_evidence.py (written apart from
-            csi2_dump.py) against truth.txt, with the same result as check.txt; that decoder's selftest passes
+            csi2_dump.py) against truth.txt, with the timing at the PPI of the HAS (rxsynchs in one sample, one
+            cycle before the first byte for AMD's D-PHY and in its cycle for ftel_dphy_rx, C6; the bytes of a burst
+            at most 6 byte clocks apart on the lanes, C10), with the same result as check.txt; that decoder's
+            selftest passes
   runs      every scenario of PLAN_TN2A.md §5 was run, also behind afe_model (M_*), and both negative tests;
             every run ended with TB DONE OK with one truth line per burst and lane; every scenario passed
             check.txt and tbcheck.txt
@@ -328,12 +331,19 @@ def neg_tx(run, args, tb, check, items):
                 f' {"agree with the pads" if rx_ok else "do not pass"}')
 
 
+def tn1_module():
+    """exp1/tn1_evidence.py: its decoder, written apart from csi2_dump.py, and its faults of a capture; it loads the
+    configuration model."""
+    if EXP1 not in sys.path:
+        sys.path.insert(0, EXP1)
+    import tn1_evidence
+    return tn1_evidence
+
+
 def evidence(w, tb2=None):
     """The checks of the evidence over the runs E2a-*, M_E2a-* and NEG-* in w ({check: passed}); tb2 replaces
     tb_exp2a.sv in the check copy."""
-    if EXP1 not in sys.path:
-        sys.path.insert(0, EXP1)
-    import tn1_evidence as tn1   # its decoder, written apart from csi2_dump.py; it loads the configuration model
+    tn1 = tn1_module()
     with open(tn1.vc.YAML_DEFAULT, 'rb') as f:
         model = tn1.vc.Model(tn1.vc.yaml.safe_load(f.read()))
     names = sorted(os.path.basename(os.path.dirname(c)) for c in glob.glob(os.path.join(w, '*', 'check.txt')))
@@ -375,7 +385,8 @@ def evidence(w, tb2=None):
         if len(refs) != 2 or len(limits) != 2:
             bad['decode'].append(f'{name}: {len(refs)} capture lines in check.txt, trailer limits {limits}')
         for cap, limit, ref in zip(('xil_ppi.csv', 'ftel_ppi.csv'), limits, refs):
-            n_ok, n_all, span, errs = tn1.decode(os.path.join(run, cap), truth, lanes, limit)
+            n_ok, n_all, span, errs = tn1.decode_cached(os.path.join(run, cap), truth, lanes, limit,
+                                                        tn1.SYNC_AT[cap], tn1.LANE_SPREAD)
             n_cap += 1
             if (n_ok, n_all, span, errs == 0) == (int(ref[0]), int(ref[1]), ref[2], ref[3] == '0'):
                 n_same += 1
@@ -519,6 +530,11 @@ WRAP_LINE = '.i_dphy_rx_core_clk              (core_clk),'   # a line of the cop
 EV_FAULTS = (   # (fault, run (None: tb_exp2a.sv), file, change of its text, checks that must fail)
     ('none', None, None, None, []),
     ('a payload bit of a capture', 'E2a-1', 'ftel_ppi.csv', flip_capture, ['decode']),
+    # the faults a tester of the FPGA team planted in copies of captures (2026-10-26)
+    ('rxsynchs High for three cycles', 'E2a-1', 'ftel_ppi.csv', lambda s: tn1_module().sync_wide(s), ['decode']),
+    ('rxsynchs with the third payload byte', 'E2a-1', 'ftel_ppi.csv', lambda s: tn1_module().sync_late(s),
+     ['decode']),
+    ('lane 3 eight cycles later', 'E2a-1', 'ftel_ppi.csv', lambda s: tn1_module().lane_late(s), ['decode']),
     ('another byte planted in NEG-tx', 'NEG-tx', 'args.txt',
      lambda s: s.replace('+TX_CORRUPT=1,3,0', '+TX_CORRUPT=1,3,1'), ['tx']),
     ('a byte of the generator truth', 'E2a-0a', 'truth_gen.txt', flip_truth, ['padtruth', 'runs']),

@@ -29,12 +29,13 @@
 #   fpga/exp2b/run_exp2b.sh E2b-1|E2b-2|E2b-3               # scenarios at 1440 Mb/s
 #   fpga/exp2b/run_exp2b.sh E2b-4 [a b c]                   # 260, 800, 1500 Mb/s
 #   fpga/exp2b/run_exp2b.sh E2b-5|E2b-6|E2b-7|E2b-8         # active lanes, late receivers, ppm, stream off/on
-#   fpga/exp2b/run_exp2b.sh all                             # E2b-1 to E2b-8, then summary
+#   fpga/exp2b/run_exp2b.sh E2b-9                           # a burst with a SoT sync error on lane 0 (with shim)
+#   fpga/exp2b/run_exp2b.sh all                             # E2b-1 to E2b-9, then summary
 #   fpga/exp2b/run_exp2b.sh model [<command> [arg ...]]     # the same with ftel_dphy_rx behind afe_model
 #                                                           # (runs M_*; default all but E2b-8)
 #   fpga/exp2b/run_exp2b.sh NEG-ecc|NEG-crc|NEG-front|neg   # negative tests (neg: all three)
-#   fpga/exp2b/run_exp2b.sh shim [<command> [arg ...]]      # the same with the PPI into R-F re-timed, mode 3
-#                                                           # (runs SH_*; default all, model and neg)
+#   fpga/exp2b/run_exp2b.sh shim [<command> [arg ...]]      # the same with rxactivehs into R-F through the gate
+#                                                           # of fpga/rtl/ (runs SH_*; default all, model, neg)
 #   fpga/exp2b/run_exp2b.sh finding                         # not re-timed: E2b-1, E2b-4, E2b-6, and the diagnosis
 #                                                           # runs DBG-E2b-1-xfill, DBG-E2b-1-amd1..3
 #   fpga/exp2b/run_exp2b.sh summary                         # verdict lines of every run so far
@@ -53,7 +54,8 @@
 # unless the arguments set them. rss.txt has the memory of the simulation every 10 s.
 # EXP2B_DEBUG=typical keeps the signals for waveforms and +VCD=1; VIVADO overrides the Vivado binary.
 # EXP2B_ARGS adds plusargs to every run and EXP2B_TAG puts a prefix before every run name; shim sets them to
-# +PPI_AMD_TIMING=3 and SH_ (tb_exp2b.sv: rxactivehs into R-F held until rxsynchs).
+# +PPI_ADAPTER=1 and SH_ (tb_exp2b.sv: rxactivehs into R-F from fpga/rtl/m_ftel_ppi_act_gate.sv, held Low until
+# rxsynchs, fpga/PLAN_TN2B_GATE.md).
 set -uo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
 FPGA=$(dirname "$HERE")
@@ -67,7 +69,7 @@ DEBUG=${EXP2B_DEBUG:-off}
 
 sources() {
   sed -n 's#^${FTEL_DPHY_RX_PATH}#'"$REPO"'#p' "$REPO/logical/filelist.f"
-  ls "$EXP1/afe_model.sv" "$EXP1/ppi_csv_mon.sv" "$HERE"/*.sv
+  ls "$EXP1/afe_model.sv" "$EXP1/ppi_csv_mon.sv" "$FPGA/rtl/m_ftel_ppi_act_gate.sv" "$HERE"/*.sv
 }
 
 bdir() {   # bdir <rate>
@@ -200,9 +202,14 @@ check() {   # check <run dir>
   }
   cmp_item pixels-xil axis "$tx" "$xa" --tready tready --tuser sof
   cmp_item pixels-ftel axis "$tx" "$fa" --tready tready --tuser sof
+  # timing at the PPI of the receivers (HAS Table A-2): rxsynchs one cycle before the first byte for AMD's D-PHY, in
+  # its cycle for ftel_dphy_rx (C6), except where +PPI_AMD_TIMING=1|2 moved it; the bytes of a burst at most 6 byte
+  # clocks apart on the lanes (C10). The PPI inside the TX has no rxsynchs.
+  local fsync=0
+  grep -qE '\+PPI_AMD_TIMING=[12]' "$out/args.txt" && fsync=-1
   item ppi-tx "${D[@]}" ppi "$out/tx_ppi.csv" --lanes "$lanes"
-  item ppi-xil "${D[@]}" ppi "$out/xil_ppi.csv" --lanes "$lanes"
-  item ppi-ftel "${D[@]}" ppi "$out/ftel_ppi.csv" --lanes "$lanes"
+  item ppi-xil "${D[@]}" ppi "$out/xil_ppi.csv" --lanes "$lanes" --sync-at=-1 --max-lane-spread=6
+  item ppi-ftel "${D[@]}" ppi "$out/ftel_ppi.csv" --lanes "$lanes" --sync-at="$fsync" --max-lane-spread=6
   if [ "$tx" = "$out/tx_axis.csv" ]; then
     cmp_item packets-tx-xil ppi "$out/tx_ppi.csv" "$out/xil_ppi.csv" --lanes "$lanes"
   fi
@@ -243,6 +250,10 @@ e2b_7() {
   run 1440 E2b-7b +FRAMES=8 +WIDTH=64 +HEIGHT=4 +CORE_HALF=2.499
 }
 e2b_8() { run 1440 E2b-8 +FRAMES=4 +STREAM_TOGGLE=1; }
+# A SoT sync error on lane 0 of packet 5 (line 4 of frame 0), as ftel_dphy_rx gives it (HAS C8): no rxsynchs and no
+# rxvalidhs in that burst, errsotsynchs instead. The gate keeps rxactivehs of the burst Low; R-F must give the later
+# frames (fpga/PLAN_TN2B_GATE.md §4). Meant with shim.
+e2b_9() { run 1440 E2b-9 +FRAMES=3 +PPI_SOTSYNCERR=0,5; }
 
 # Not re-timed, AMD's controller without PHY takes no packet of ftel_dphy_rx; the diagnosis runs give 0 to the X of
 # rxdatahs, or re-time the PPI in the three ways of tb_exp2b.sv (+PPI_AMD_TIMING).
@@ -282,7 +293,8 @@ case "${1:-}" in
   E2b-6)   e2b_6 ;;
   E2b-7)   e2b_7 ;;
   E2b-8)   e2b_8 ;;
-  all)     e2b_1; e2b_2; e2b_3; e2b_4; e2b_5; e2b_6; e2b_7; e2b_8; summary ;;
+  E2b-9)   e2b_9 ;;
+  all)     e2b_1; e2b_2; e2b_3; e2b_4; e2b_5; e2b_6; e2b_7; e2b_8; e2b_9; summary ;;
   model)   shift
            if [ $# -eq 0 ]; then
              for s in E2b-1 E2b-2 E2b-3 E2b-4 E2b-5 E2b-6 E2b-7; do TN2B_PRE=M_ TN2B_ARGS=+AFE=model "$0" "$s"; done
@@ -297,13 +309,13 @@ case "${1:-}" in
   neg)     "$0" NEG-ecc; "$0" NEG-crc; "$0" NEG-front ;;
   shim)    shift
            if [ $# -eq 0 ]; then
-             for s in all model neg; do EXP2B_TAG=SH_ EXP2B_ARGS=+PPI_AMD_TIMING=3 "$0" "$s"; done
+             for s in all model neg; do EXP2B_TAG=SH_ EXP2B_ARGS=+PPI_ADAPTER=1 "$0" "$s"; done
            else
-             EXP2B_TAG=SH_ EXP2B_ARGS=+PPI_AMD_TIMING=3 "$0" "$@"
+             EXP2B_TAG=SH_ EXP2B_ARGS=+PPI_ADAPTER=1 "$0" "$@"
            fi ;;
   finding) finding ;;
   summary) summary ;;
   recheck) recheck; summary ;;
   evidence|evselftest) python3 "$HERE/tn2b_evidence.py" "$1" "$W" ;;
-  *)       sed -n '23,56p' "$0"; exit 2 ;;
+  *)       sed -n '23,58p' "$0"; exit 2 ;;
 esac

@@ -36,6 +36,8 @@
 #   fpga/exp1/run_exp1.sh model [E1-1|...|E1-5 [<rate> ...]]   # the same scenarios (default: all) with ftel_dphy_rx
 #                                                              # behind afe_model, outputs in M_<name>
 #   fpga/exp1/run_exp1.sh report                               # 80 Mb/s, outside the guaranteed range
+#   fpga/exp1/run_exp1.sh skew                                 # lane 3 skewed by 2.5, 5.5, 7.5 byte times (the
+#                                                              # last one, NEG-skew, must fail at the lane spread)
 #   fpga/exp1/run_exp1.sh summary                              # result line of every scenario run so far
 #   fpga/exp1/run_exp1.sh recheck                              # check every run again (new csi2_dump.py), no sim
 # A build lives in fpga/work/exp1/build_<rate>_<lanes>l (build_stub for the stub); it is compiled and
@@ -43,7 +45,9 @@
 # check.txt (fpga/tools/csi2_dump.py bursts). ftel_dphy_rx gets the run-time fields of its configuration
 # model at the rate (cfg_for_rate.py) unless the arguments set them. Trailer bytes: AMD's receiver keeps
 # them (no limit); ftel_dphy_rx removes them: more than MAXTR in a burst is an error (default 0; the
-# scenarios at the limits of HAS v0.16 Table 4-7 take it from that table, tmax).
+# scenarios at the limits of HAS v0.16 Table 4-7 take it from that table, tmax). Timing at the PPI (HAS
+# Table A-2): rxsynchs one cycle, in the cycle of the first byte for ftel_dphy_rx (C6) and one cycle before it
+# for AMD's D-PHY; the bytes of a burst at most LANE_SPREAD byte clocks apart on the lanes (C10).
 # EXP1_DEBUG=typical keeps the signals for waveforms (new build); VIVADO overrides the Vivado binary.
 set -uo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -54,6 +58,7 @@ VIVADO=${VIVADO:-/opt/xilinx/2025.2/Vivado/bin/vivado}
 XBIN=$(dirname "$VIVADO")
 export PATH="$XBIN:$PATH"     # the XSIM scripts Vivado writes call xvlog, xelab and xsim by name
 DEBUG=${EXP1_DEBUG:-off}
+LANE_SPREAD=6                 # C10 of the HAS: inter-lane byte divergence budget of the CSI-2 Rx controller
 
 sources() {
   sed -n 's#^${FTEL_DPHY_RX_PATH}#'"$REPO"'#p' "$REPO/logical/filelist.f"
@@ -137,11 +142,14 @@ run() {
   (cd "$sim" && "$XBIN/xsim" "$snap" -R -log "$out/xsim.log" "${args[@]}" > /dev/null 2>&1)
   grep -E '^(TB |AFE )' "$out/xsim.log" > "$out/tb.txt"
   [ -f "$out/ftel_ppi.csv" ] && csv+=("$out/ftel_ppi.csv")
-  local lim="${MAXTR:-0}"
-  [ "${#csv[@]}" -eq 2 ] && lim="-,$lim"
+  local lim="${MAXTR:-0}" sat=0
+  if [ "${#csv[@]}" -eq 2 ]; then
+    lim="-,$lim"
+    sat="-1,0"
+  fi
   echo "trailer limit (AMD, ftel_dphy_rx or ftel_dphy_rx alone): $lim" >> "$out/args.txt"
   python3 "$FPGA/tools/csi2_dump.py" bursts --truth "$out/truth.txt" --lanes "$nl" --max-trailer="$lim" \
-    "${csv[@]}" > "$out/check.txt" 2>&1
+    --sync-at="$sat" --max-lane-spread="$LANE_SPREAD" "${csv[@]}" > "$out/check.txt" 2>&1
   local rc=$?
   echo "$name ($(( $(date +%s) - t0 )) s): $(grep -m1 '^TB DONE' "$out/tb.txt" | cut -c1-60)..."
   grep -E '^(RESULT|[AB] )' "$out/check.txt"
@@ -230,20 +238,34 @@ window() {
 report() {
   MAXTR=1 run 80 stub R-80 +LENS=1,2,3,4,5,8,16,64,256 +THS_EXIT=400 +TIMEOUT_US=2500
 }
+# Lane skew at the pads (fpga/PLAN_CHECK_C6_C10.md): lane 3 later than the others by 2.5, 5.5 and 7.5 byte times
+# at 1440 Mb/s (byte time 5.556 ns), as a transport delay of its two lines. Neither receiver aligns the lanes, so
+# the skew reaches the PPI: E1-6a and E1-6b stay within LANE_SPREAD, NEG-skew does not and must fail at the lane
+# spread only (tn1_evidence.py).
+skew() {
+  local l=+LENS=1,4,64,256
+  run 1440 4 E1-6a $l +SKEW3=13889
+  run 1440 4 E1-6b $l +SKEW3=30556
+  run 1440 4 NEG-skew $l +SKEW3=41667
+}
 
 # The check of every run so far again, with the current csi2_dump.py: same truth, captures, lane count and
 # trailer limits as recorded by run (tb.txt, args.txt); the window runs too. No simulation.
 recheck() {
-  local c out nl lim
+  local c out nl lim sat
   local -a csv
   for c in "$W"/*/check.txt "$W"/window/*/check.txt; do
     out=$(dirname "$c")
     nl=$(sed -n 's/^TB START: NL \([0-9]*\),.*/\1/p' "$out/tb.txt")
     lim=$(sed -n 's/^trailer limit .*: //p' "$out/args.txt")
     csv=("$out/ftel_ppi.csv")
-    grep -q ' stub lane(s)' "$out/args.txt" || csv=("$out/xil_ppi.csv" "$out/ftel_ppi.csv")
+    sat=0
+    if ! grep -q ' stub lane(s)' "$out/args.txt"; then
+      csv=("$out/xil_ppi.csv" "$out/ftel_ppi.csv")
+      sat="-1,0"
+    fi
     python3 "$FPGA/tools/csi2_dump.py" bursts --truth "$out/truth.txt" --lanes "$nl" --max-trailer="$lim" \
-      "${csv[@]}" > "$c" 2>&1
+      --sync-at="$sat" --max-lane-spread="$LANE_SPREAD" "${csv[@]}" > "$c" 2>&1
   done
 }
 
@@ -267,7 +289,8 @@ case "${1:-}" in
   # receiver unchanged; the scenario arguments still win over +AFE=model.
   model)   shift; TN1_PRE=M_ TN1_ARGS=+AFE=model "$0" "${@:-all}" ;;
   report)  report ;;
+  skew)    skew ;;
   summary) summary ;;
   recheck) recheck; summary ;;
-  *)       sed -n '2,25p' "$0"; exit 2 ;;
+  *)       sed -n '24,51p' "$0"; exit 2 ;;
 esac

@@ -9,7 +9,7 @@ board) are kept by the team and are not in this repository. This folder holds wh
 them: the simulation experiments, the specification of TN3 for the FPGA team, the Vivado probes of AMD's
 IP and of the device, and the tools that check the captures.
 
-> Status (2026-10-23): the work is split into three experiments ([`PLAN_TN1_TN3.md`](PLAN_TN1_TN3.md)).
+> Status (2026-10-26): the work is split into three experiments ([`PLAN_TN1_TN3.md`](PLAN_TN1_TN3.md)).
 > TN1 and TN2 run in Vivado simulation; TN3 (TX on a second FPGA board, test board, RX on the VP1902
 > board) is specified for the FPGA team in [`exp3/TN3_SPEC.md`](exp3/TN3_SPEC.md) (part 1; the VEK280
 > cannot be the TX, its FMC banks are fixed at 1.5 V). TN1 is in `exp1/`. Its first run found two faults
@@ -33,6 +33,16 @@ IP and of the device, and the tools that check the captures.
 >   equal those of the run before the change byte for byte.
 > - Details are in [`exp1/README.md`](exp1/README.md); `exp1/tn1_evidence.py` re-checks all of it.
 >
+> On 2026-10-26 a tester of the FPGA team found two gaps in the checkers: neither the width and place of `rxsynchs`
+> nor the skew between lanes at the PPI was checked ([`PLAN_CHECK_C6_C10.md`](PLAN_CHECK_C6_C10.md)).
+> - The checkers and the evidence scripts of TN1 and TN2 now check both: `rxsynchs` High for one sample at its place
+>   from the first byte, and the bytes of a burst at most 6 byte clocks apart on the lanes. The faults the tester
+>   planted are now among the planted faults of the self-tests.
+> - TN1 was run again in this repository: the same results, with the outputs byte for byte those of the first run.
+>   ftel_dphy_rx meets both checks in every run.
+> - Three new runs skew lane 3 by 2.5, 5.5 and 7.5 byte times. Neither receiver aligns the lanes, so the skew reaches
+>   the PPI. The first two pass; the third fails at the lane skew only.
+>
 > TN2a (`exp2/`, [`PLAN_TN2A.md`](PLAN_TN2A.md)) drives both receivers with AMD's own D-PHY TX (`mipi_dphy` 4.3
 > MASTER, driven at its PPI) instead of the line generator.
 > - Both receivers pass all 29 scenarios, at eight rates from 260 to 1500 Mb/s and with 1, 2 and 4 lanes. The same
@@ -50,10 +60,16 @@ IP and of the device, and the tools that check the captures.
 >   ftel_dphy_rx, although they are the same packets: ftel_dphy_rx raises `rxactivehs` some byte clocks before
 >   `rxsynchs` (as its HAS allows), AMD's D-PHY raises both together, and AMD's controller needs `rxactivehs` not to
 >   rise before `rxsynchs`. This is a mismatch of the PPI contract with AMD's controller, not a fault against the
->   HAS; how to resolve it is open.
-> - With the testbench holding `rxactivehs` until `rxsynchs` (no added delay), all 27 runs pass for both receive
->   paths: four rates from 260 to 1500 Mb/s, 2 and 1 active lanes without a new build, ±400 ppm, receivers set up
->   late, stream off and on, and behind `afe_model`. The three negative tests fail where planted.
+>   HAS.
+> - It is resolved in the FPGA only, with the RTL of ftel_dphy_rx unchanged ([`PLAN_TN2B_GATE.md`](PLAN_TN2B_GATE.md)).
+>   [`rtl/m_ftel_ppi_act_gate.sv`](rtl/m_ftel_ppi_act_gate.sv) holds `rxactivehs` of each lane Low until `rxsynchs`:
+>   6 flip-flops for 4 lanes, no added delay.
+>   - Through it, all 27 runs pass for both receive paths: four rates from 260 to 1500 Mb/s, 2 and 1 active lanes
+>     without a new build, ±400 ppm, receivers set up late, stream off and on, and behind `afe_model`. Their
+>     captures are byte for byte those of the earlier runs, where the testbench held `rxactivehs` instead.
+>   - The three negative tests fail where planted.
+> - With a SoT sync error on one lane (E2b-9), AMD's controller recovers: the next frames are right pixel for pixel.
+>   The frame with the error loses two lines; one of them still comes out wrong, with only a CRC flag in the ISR.
 > - Details are in [`exp2b/README.md`](exp2b/README.md); `exp2b/tn2b_evidence.py evidence` re-checks all of it.
 
 ```
@@ -63,6 +79,10 @@ fpga/
 ├── PLAN_TN1_FAIR.md     ← plan of the fair TN1: both receivers behind IBUFDS_DPHY, E1-5 for both
 ├── PLAN_TN2A.md         ← plan of TN2a: AMD's D-PHY TX into both receivers, its findings and results
 ├── PLAN_TN2B.md         ← plan of TN2b: CSI-2 frames from AMD's TX Subsystem into both receive paths, its findings
+├── PLAN_CHECK_C6_C10.md ← plan and results of the checks of rxsynchs and lane skew at the PPI (gaps found by a
+│                          tester of the FPGA team), TN1 run again with them
+├── PLAN_TN2B_GATE.md    ← plan and results of the rxactivehs gate between ftel_dphy_rx and AMD's controller
+│                          (option A), TN2b run again through it, E2b-9 (SoT sync error on one lane)
 ├── exp1/                ← TN1: D-PHY line generator, AFE model, PPI monitor, testbench, run_exp1.sh (XSIM),
 │                          eot_window.py (table of the eot_skip_bytes window); README.md describes the tests;
 │                          TN1_DESCRIPTION.md and TN1_REPORT.md: description and report for the FPGA team;
@@ -76,6 +96,9 @@ fpga/
 │                          and re-checks all of them (decode, registers, front end, sources, copy, negative tests)
 ├── exp3/                ← TN3: TN3_SPEC.md, the experiment specification for the FPGA team
 ├── probe/               ← Vivado batch probes of AMD's D-PHY and CSI-2 IP and of the device (run_probe.sh)
+├── rtl/                 ← FPGA-only RTL: m_ftel_ppi_act_gate.sv (holds rxactivehs of each lane Low until rxsynchs,
+│                          for AMD's controller), its unit testbench, run_rtl.sh (lint, rules, sim, synth) and
+│                          synth_rtl.tcl (out-of-context synthesis for the part of the board)
 ├── tools/               ← csi2_dump.py: checks the CSI-2 traffic in ILA captures (PPI or AXI4-Stream) and
 │                          the per-lane bursts of TN1 against the truth of the line generator;
 │                          bd_summary.py: lists a block design (.bd JSON) without opening it in Vivado;
@@ -93,7 +116,10 @@ fpga/exp1/run_exp1.sh E1-1                 # TN1 at 1440 Mb/s: AMD's D-PHY RX an
 fpga/exp1/run_exp1.sh all                  # TN1 scenarios E1-1..E1-5 (one Vivado build per rate and lane count;
                                            #     E1-5: EoT stress of both receivers, HAS v0.16 Table 4-7; ~23 min)
 fpga/exp1/run_exp1.sh model                # the same with ftel_dphy_rx behind afe_model, outputs in M_<name>
-python3 fpga/exp1/tn1_evidence.py          # re-checks all TN1 outputs (decode, front end, sources, margin, ...)
+python3 fpga/exp1/tn1_evidence.py          # re-checks all TN1 outputs: checker, decode, runs, front end, AFE,
+                                           #     configuration, sources, margin
+python3 fpga/exp1/tn1_evidence.py evselftest   # the same with one planted fault at a time: each must fail its check
+fpga/exp1/run_exp1.sh skew                 # lane 3 skewed by 2.5, 5.5 and 7.5 byte times (the last must fail)
 fpga/exp1/run_exp1.sh window               # eot_skip_bytes from its model value - 1 to + 2, LP-11 at every phase
                                            #     (ftel_dphy_rx alone, ~7 min; table by exp1/eot_window.py)
 fpga/exp1/run_exp1.sh report               # 80 Mb/s, outside the guaranteed range (AMD's IP needs 260..3200 Mb/s)
@@ -103,12 +129,16 @@ fpga/exp2/run_exp2.sh E2a-1                # TN2a at 1440 Mb/s: AMD's D-PHY TX i
 fpga/exp2/run_exp2.sh all                  # TN2a scenarios E2a-0..E2a-5 (one Vivado build per rate and lane count)
 fpga/exp2/run_exp2.sh model                # the same with ftel_dphy_rx behind afe_model, outputs in M_<name>
 fpga/exp2/run_exp2.sh neg                  # negative tests: a byte sent inverted, pull strength at the buffers
-fpga/exp2/run_exp2.sh evidence             # re-checks all TN2a outputs (decode, pads, front end, sources, copy, ...)
+fpga/exp2/run_exp2.sh evidence             # re-checks all TN2a outputs: checker, decode, runs, TX bytes at the
+                                           #     pads, pad truth, front end, AFE, configuration, sources, copy
 fpga/exp2/run_exp2.sh txtiming             # timing of AMD's D-PHY TX at the pads per rate, against D-PHY v1.1
 fpga/exp2b/run_exp2b.sh E2b-1              # TN2b at 1440 Mb/s: AMD's CSI-2 TX Subsystem into both receive paths
-fpga/exp2b/run_exp2b.sh shim               # all TN2b scenarios with the PPI into AMD's controller re-timed (SH_*)
+fpga/exp2b/run_exp2b.sh shim               # all TN2b scenarios with rxactivehs into AMD's controller through
+                                           #     fpga/rtl/m_ftel_ppi_act_gate.sv (SH_*, E2b-9 included)
 fpga/exp2b/run_exp2b.sh finding            # the runs of the finding: not re-timed, and the diagnosis runs
-fpga/exp2b/run_exp2b.sh evidence           # re-checks all TN2b outputs (decode, registers, front end, sources, ...)
+fpga/exp2b/run_exp2b.sh evidence           # re-checks all TN2b outputs: checker, decode, runs, registers, front
+                                           #     end, AFE, configuration, sources, copy, negative tests, finding, gate
+fpga/rtl/run_rtl.sh all                    # the gate: VCS lint, rule check, unit testbench (VCS), Vivado OOC synthesis
 fpga/probe/run_probe.sh tn3_pins           # pins and package delays behind exp3/TN3_SPEC.md §3-4
 ```
 

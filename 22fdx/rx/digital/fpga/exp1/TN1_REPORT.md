@@ -4,7 +4,9 @@
 > [`TN1_DESCRIPTION.md`](TN1_DESCRIPTION.md).
 > Lần chạy: 2026-10-20, RTL `ftel_dphy_rx` theo HAS v0.16, giống RTL trên nhánh `dev` của repo fu3_dphy từ commit
 > `66f9f39`. Output được kiểm lại ngày 2026-10-22: 227/227 run PASS, kiểm chứng 8/8.
-> Phiên bản 1.0, ngày 2026-10-22. Nhóm D-PHY RX viết.
+> Chạy lại toàn bộ ngày 2026-10-26 trong repo fu3_dphy, cùng RTL, với bộ so có thêm hai luật timing ở PPI (§5): 227
+> run cho kết quả như cũ, output trùng từng byte với lần chạy 2026-10-20; thêm 3 run lệch lane (§3.4); kiểm chứng 8/8.
+> Phiên bản 1.1, ngày 2026-10-26 (1.0: 2026-10-22). Nhóm D-PHY RX viết.
 
 ## 1. Tóm tắt
 
@@ -25,6 +27,11 @@
 - **Lỗi tìm ra:** ở lần chạy đầu, RX mình có hai lỗi RTL. Cả hai đã được sửa trong HAS v0.16 và không còn xuất hiện
   (§4).
 - **Giới hạn chính:** cả hai front end đều là mô hình, nên kết luận cho silicon còn cần thí nghiệm trên board (TN3).
+- **Cập nhật 2026-10-26:**
+  - Team FPGA tìm ra hai lỗ hổng của bộ so: độ rộng và vị trí của `rxsynchs`, và lệch giữa các lane. Cả hai đã được sửa.
+  - Toàn bộ TN1 chạy lại: không kết luận nào đổi, và RX mình đạt cả hai luật mới ở mọi run (§5).
+  - Ba run mới cho lane lệch lớn: hai run trong giới hạn 6 byte clock đạt; run vượt giới hạn hỏng đúng ở luật lệch
+    lane (§3.4).
 
 ## 2. Thí nghiệm
 
@@ -99,7 +106,24 @@ IP AMD không build được dưới 260 Mb/s, nên ở 80 Mb/s chỉ chạy RX 
 
 Kết quả này chỉ để báo cáo, không tính đạt hay hỏng.
 
-### 3.4 Đọc kết quả
+### 3.4 Lệch lớn giữa các lane (E1-6a, E1-6b, NEG-skew; thêm ngày 2026-10-26)
+
+Ở 1440 Mb/s (một byte time là 5,556 ns), cặp dây của lane 3 được làm trễ so với ba lane kia. Không RX nào căn lại các
+lane, nên độ lệch tới thẳng PPI. Bộ so kiểm rằng trong mỗi burst, byte thứ k tới PPI trên các lane lệch nhau tối đa 6
+byte clock (HAS, bảng A-2).
+
+| Run | Lane 3 trễ | Lệch đo ở PPI: AMD | Lệch đo ở PPI: RX mình | Payload, mỗi RX | Kết quả |
+|---|---|---|---|---|---|
+| E1-6a | 13 889 ps (2,5 byte time) | 3 byte clock | 2–3 byte clock | 16/16 burst-lane | PASS |
+| E1-6b | 30 556 ps (5,5 byte time) | 6 | 5–6 | 16/16 | PASS |
+| NEG-skew | 41 667 ps (7,5 byte time) | 8 | 7–8 | 16/16 | FAIL, đúng như định: chỉ luật lệch lane hỏng, 4 lỗi ở mỗi RX (mỗi burst một lỗi) |
+
+- Lệch đo ở PPI bằng độ trễ của lane tính theo byte, làm tròn theo byte clock. RX AMD luôn cho số làm tròn lên; RX
+  mình cho số làm tròn lên hoặc xuống, tuỳ burst.
+- Khi vượt 6 byte clock, payload của từng lane vẫn đúng. Việc ghép các lane lại là của controller CSI-2 phía sau. HAS
+  hiện chỉ đặt giới hạn ở PPI, chưa ghi rõ điều gì xảy ra khi vượt.
+
+### 3.5 Đọc kết quả
 
 - **Payload:** ở cả 8 rate, phần digital của RX mình nhận đúng mọi payload như phần digital của RX AMD.
 - **Trailer:**
@@ -167,28 +191,51 @@ RX AMD đạt, nên tín hiệu phát ra là đúng và lỗi nằm ở RX mình
 ## 5. Vì sao tin được kết quả
 
 [`tn1_evidence.py`](tn1_evidence.py) kiểm lại toàn bộ output bằng code riêng, không dùng chung với bộ so. Ngày
-2026-10-22, trên output của lần chạy 2026-10-20, kết quả là **EVIDENCE: PASS (8/8 checks)**.
+2026-10-22, trên output của lần chạy 2026-10-20, kết quả là **EVIDENCE: PASS (8/8 checks)**. Ngày 2026-10-26, trên
+lần chạy lại, với cả hai luật timing ở PPI: vẫn **PASS (8/8 checks)**. Bảng ghi số của lần chạy lại.
 
-| Check | Kiểm gì | Kết quả |
+| Check | Kiểm gì | Kết quả 2026-10-26 |
 |---|---|---|
-| `checker` | Selftest của bộ so: tìm được các lỗi cài sẵn, kể cả ca chỉ sai thời gian; capture sạch thì đạt | PASS |
-| `decode` | Giải mã lại mọi capture bằng code riêng; kết quả phải trùng `check.txt` | 453/453 capture của 227 run |
-| `runs` | Mọi run kết thúc bình thường; file truth có đủ dòng cho mỗi burst và lane | 227/227 run |
-| `front` | Đầu ra LP của hai bộ buffer trùng nhau ở mọi lần đổi | 226/226 run, 4 854 302 lần đổi, 0 khác |
-| `afe` | Mô hình AFE không báo lỗi trạng thái; tín hiệu bật terminal không trễ, không thiếu | 227/227 run |
-| `config` | Cấu hình RX mình đúng giá trị model cho rate đó, hoặc giá trị kịch bản đặt | 227 run |
+| `checker` | Selftest của bộ so: tìm được các lỗi cài sẵn, kể cả ca chỉ sai thời gian và ba lỗi tester đã cài; capture sạch thì đạt | PASS |
+| `decode` | Giải mã lại mọi capture bằng code riêng, kể cả vị trí `rxsynchs` và lệch giữa các lane; kết quả phải trùng `check.txt` | 459/459 capture của 230 run |
+| `runs` | Mọi run kết thúc bình thường; file truth có đủ dòng cho mỗi burst và lane; mọi kịch bản đạt, riêng NEG-skew hỏng và chỉ hỏng ở luật lệch lane | 230/230 run |
+| `front` | Đầu ra LP của hai bộ buffer trùng nhau ở mọi lần đổi | 229/229 run, 4 893 764 lần đổi, 0 khác |
+| `afe` | Mô hình AFE không báo lỗi trạng thái; tín hiệu bật terminal không trễ, không thiếu | 230/230 run |
+| `config` | Cấu hình RX mình đúng giá trị model cho rate đó, hoặc giá trị kịch bản đặt | 230 run |
 | `sources` | Mã băm nguồn của mọi build bằng mã băm nguồn hiện tại | 11/11 build |
 | `margin` | Với trail min, `eot_skip_bytes` model + 1 không mất payload, model + 2 có mất | 8/8 rate |
 
 Các bộ kiểm cũng được thử xem có biết báo FAIL không:
 - Bộ so bắt đủ 4 lỗi cài sẵn: đảo một byte, mất một burst, cờ lỗi SoT, sync hai lần. Luật thời gian bắt được ca mất một
-  burst rồi thừa một burst cùng payload.
+  burst rồi thừa một burst cùng payload. Từ 2026-10-26, bộ so bắt thêm ba lỗi tester đã cài, mỗi lỗi đúng luật của nó.
+- `tn1_evidence.py evselftest` (từ 2026-10-26) cài lần lượt 15 lỗi vào bản copy của output thật, trong đó có ba lỗi
+  của tester. Mỗi lỗi làm hỏng đúng check của nó, không thừa, không thiếu; khi không cài lỗi thì mọi check đạt.
 - Check `front` báo FAIL khi buffer của RX mình bị lái khác đi. Phép thử âm [`neg_front.sh`](neg_front.sh) cho 21 574
   trong 30 450 lần đổi khác nhau.
 - Đổi 1 bit payload trong một capture thì check `decode` báo FAIL.
 - Đặt `eot_skip_bytes` bằng model + 2 thì mất payload ở mọi rate, ví dụ 711 burst ở 260 Mb/s.
 - Lần chạy đầu với RTL cũ hỏng như ở §4. PASS chỉ xuất hiện sau khi sửa code, và các chỗ sửa giải thích được các lỗi
   đã thấy.
+
+**Hai lỗ hổng của bộ so, do team FPGA tìm ra (2026-10-26).** Một kỹ sư kiểm thử của team FPGA cài lỗi vào bản copy
+của capture rồi đưa cho bộ so:
+- `rxsynchs` High 3 chu kỳ, hoặc trễ tới byte payload thứ ba: bộ so cũ vẫn đạt, vì nó chỉ đếm cạnh lên của
+  `rxsynchs`;
+- cả lane 3 trễ 8 chu kỳ: bộ so cũ vẫn đạt, vì mỗi lane chỉ được so với truth của chính nó, không có phép so giữa các
+  lane.
+
+Cả hai là lỗ hổng của bộ so, không phải lỗi RTL. Cách sửa:
+- bộ so `csi2_dump.py` và script kiểm chứng `tn1_evidence.py` (code riêng) đều kiểm hai luật mới ở
+  [`TN1_DESCRIPTION.md`](TN1_DESCRIPTION.md) §6: `rxsynchs` đúng một mẫu và đúng vị trí so với byte đầu; lệch giữa các
+  lane tối đa 6 byte clock;
+- chính ba lỗi tester đã cài trở thành ca tự thử của cả hai, và mỗi lỗi phải bị bắt;
+- NEG-skew là phép thử âm thật cho luật lệch lane (§3.4).
+
+Toàn bộ TN1 được chạy lại với luật mới, và không kết luận nào đổi:
+- ở mọi lane burst, RX mình đưa `rxsynchs` đúng một mẫu, cùng chu kỳ với byte đầu; RX AMD đưa trước byte đầu một chu
+  kỳ;
+- lệch giữa các lane bằng 0 ở mọi run có nhiều lane, trừ E1-6a, E1-6b và NEG-skew, ba run lệch có chủ ý. E1-3d/e/f,
+  với skew 139 ps, cũng cho 0.
 
 ## 6. Giới hạn
 
@@ -220,8 +267,9 @@ TN1 đã xong. Các bước sau chưa lên lịch:
 
 ## 8. Số liệu gốc
 
-- Output của lần chạy nằm ở `fpga/work/exp1/` trên máy của nhóm D-PHY RX. Thư mục này không có trong repo (git bỏ qua)
-  và nặng khoảng 1,7 GB, gồm cả bản lưu của lần chạy đầu.
+- Output của lần chạy nằm ở `fpga/work/exp1/` trên máy của nhóm D-PHY RX. Thư mục này không có trong repo (git bỏ qua).
+  Lần chạy 2026-10-20, kèm bản lưu của lần chạy đầu, nặng khoảng 1,7 GB. Lần chạy lại 2026-10-26 trong repo fu3_dphy
+  nặng khoảng 0,8 GB.
 - Có hai cách lấy số liệu:
   - chạy lại theo [`TN1_DESCRIPTION.md`](TN1_DESCRIPTION.md);
   - xin nhóm một bản copy.

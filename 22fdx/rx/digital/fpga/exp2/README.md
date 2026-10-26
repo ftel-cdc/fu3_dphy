@@ -166,7 +166,10 @@ Mô phỏng chạy trong XSIM của Vivado 2025.2, part xcvp1902.
 - `check.txt` (`csi2_dump.py bursts`):
   - cả hai capture 0 lỗi;
   - RX AMD không giới hạn trailer;
-  - RX mình tối đa `tmax` của HAS Table 4-7 không nhiễu: 4 byte ở 260 Mb/s, 6 ở 400, 0 từ 600.
+  - RX mình tối đa `tmax` của HAS Table 4-7 không nhiễu: 4 byte ở 260 Mb/s, 6 ở 400, 0 từ 600;
+  - timing ở PPI theo HAS Table A-2 (thêm ngày 2026-10-26): ở mỗi lane burst `rxsynchs` High đúng một sample,
+    cùng cycle với byte payload đầu ở RX mình (C6) và trước byte đầu một cycle ở RX AMD; trong mỗi burst, byte thứ
+    k tới trên các lane lệch nhau tối đa 6 byte clock (C10, ngân sách của controller CSI).
 - `tbcheck.txt` (`tn2a_evidence.py tbcheck`), mỗi mục một dòng:
 
   | Mục | Đạt khi |
@@ -216,6 +219,9 @@ E1-5 của TN1.
 - Bộ phụ `M_*`: 29/29 PASS.
 - Hai phép thử âm FAIL đúng chỗ đã cài.
 - `tn2a_evidence.py evidence`: **PASS (10/10 checks)** (§7).
+- **2026-10-26, kiểm lại không mô phỏng** (`run_exp2.sh recheck`) với timing ở PPI (§4): 60/60 run giữ nguyên kết
+  quả. Ở mọi lane burst, `rxsynchs` rộng một sample, cùng cycle với byte đầu ở RX mình, trước một cycle ở RX AMD;
+  lệch giữa các lane 0 byte clock. Riêng NEG-front không có số đo, vì PPI của RX mình ở đó hỏng có chủ ý.
 
 Kết quả chạy trên RTL của commit `5fa890b` (HAS v0.16). `logical/` và `config/` không đổi so với commit đó.
 
@@ -291,12 +297,13 @@ python3 fpga/exp2/tn2a_evidence.py evidence      # mỗi check một dòng PASS/
 python3 fpga/exp2/tn2a_evidence.py evselftest    # script kiểm chứng tự thử trên lỗi cài sẵn (§7.7)
 ```
 
-Kết quả ngày 2026-10-22: **EVIDENCE: PASS (10/10 checks)**.
+Kết quả ngày 2026-10-22: **EVIDENCE: PASS (10/10 checks)**. Ngày 2026-10-26, sau khi thêm timing ở PPI vào cả
+`csi2_dump.py` lẫn bộ giải mã của `tn1_evidence.py`: vẫn **PASS (10/10 checks)**.
 
 | Check | Kiểm gì | Kết quả 2026-10-22 |
 |---|---|---|
 | `checker` | Selftest của `csi2_dump.py`: tìm được các lỗi cài sẵn; capture sạch thì đạt | PASS |
-| `decode` | Giải mã lại mọi capture bằng bộ giải mã của `tn1_evidence.py` (viết riêng, không chung code với `csi2_dump.py`), so với `truth.txt`; kết quả phải trùng `check.txt`. Bộ giải mã tự thử trên capture giả trước | 120/120 capture |
+| `decode` | Giải mã lại mọi capture bằng bộ giải mã của `tn1_evidence.py` (viết riêng, không chung code với `csi2_dump.py`), so với `truth.txt`, kể cả timing ở PPI (§4); kết quả phải trùng `check.txt`. Bộ giải mã tự thử trên capture giả trước | 120/120 capture |
 | `runs` | Đủ 60 run (29 kịch bản, 29 `M_*`, 2 phép thử âm); mọi run kết thúc `TB DONE OK` với một dòng truth cho mỗi burst và lane; mọi kịch bản PASS cả `check.txt` lẫn `tbcheck.txt` | 60/60 run |
 | `tx` | Ở mọi run từ TX, byte trên pad bằng byte đã giao cho TX. NEG-tx: đúng một mismatch, đúng chỗ đã cài, và là mục duy nhất của `tbcheck` hỏng; hai RX vẫn khớp pad | 54 run + NEG-tx |
 | `padtruth` | Mọi run từ generator: `truth.txt` trùng `truth_gen.txt`; selftest của `tbcheck` và `padtruth` (13 ca) | 6 run, lệch 0 ps |
@@ -396,6 +403,9 @@ Mỗi lỗi phải làm hỏng đúng các check ghi dưới đây, không thừ
 |---|---|---|
 | Không lỗi | không check nào | đúng |
 | Đảo 1 bit payload trong `ftel_ppi.csv` của E2a-1 | `decode` | đúng |
+| `rxsynchs` High 3 cycle trong `ftel_ppi.csv` của E2a-1 (lỗi tester team FPGA cài, thêm 2026-10-26) | `decode` | đúng (2026-10-26) |
+| `rxsynchs` dời tới byte payload thứ ba (như trên) | `decode` | đúng (2026-10-26) |
+| Cả lane 3 trễ 8 cycle (như trên) | `decode` | đúng (2026-10-26) |
 | Đổi chỗ cài của NEG-tx trong `args.txt` | `tx` | đúng |
 | Đảo 1 bit trong `truth_gen.txt` của E2a-0a | `padtruth`, `runs` | đúng |
 | Một khác biệt front end trong `tb.txt` của E2a-1 | `front`, `runs` | đúng |
@@ -405,7 +415,9 @@ Mỗi lỗi phải làm hỏng đúng các check ghi dưới đây, không thừ
 | Thiếu run E2a-3 | `runs` | đúng |
 | Sửa một dòng của instance wrap trong bản copy `tb_exp2a.sv` | `copy` | đúng |
 
-Kết quả: `evselftest: PASS`, 11 s. Riêng `checker` không có ca cài lỗi, vì bản thân nó là selftest của `csi2_dump.py`.
+Kết quả: `evselftest: PASS`, 11 s (2026-10-22, 10 lỗi); 2026-10-26, 13 lỗi: PASS, 3 s (kết quả giải mã của mỗi
+capture được giữ lại giữa các lần cài lỗi). Riêng `checker` không có ca cài lỗi, vì bản thân nó là selftest của
+`csi2_dump.py`.
 
 ### 7.8 Giới hạn của phần kiểm chứng
 

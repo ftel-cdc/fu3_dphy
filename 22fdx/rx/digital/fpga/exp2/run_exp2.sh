@@ -137,16 +137,21 @@ run() {
 # The checks of one run: csi2_dump.py bursts of both captures against truth.txt (the trailer limit of ftel_dphy_rx
 # from MAXTR), and the testbench-level verdict. Also used by recheck.
 check() {   # check <run dir> <lanes>
-  local out=$1 lanes=$2 lim csv=("$1/xil_ppi.csv")
+  local out=$1 lanes=$2 lim sat=-1 csv=("$1/xil_ppi.csv")
   lim=$(sed -n 's/^trailer limit .*: //p' "$out/args.txt")
   if [ -z "$lim" ]; then
     lim="-,${MAXTR:-0}"
     [ -f "$out/ftel_ppi.csv" ] || lim="-"
     echo "trailer limit (AMD, ftel_dphy_rx): $lim" >> "$out/args.txt"
   fi
-  [ -f "$out/ftel_ppi.csv" ] && csv+=("$out/ftel_ppi.csv")
+  if [ -f "$out/ftel_ppi.csv" ]; then
+    csv+=("$out/ftel_ppi.csv")
+    sat="-1,0"
+  fi
+  # timing at the PPI (HAS Table A-2): rxsynchs one cycle before the first byte for AMD's D-PHY, in its cycle for
+  # ftel_dphy_rx (C6); the bytes of a burst at most 6 byte clocks apart on the lanes (C10)
   python3 "$FPGA/tools/csi2_dump.py" bursts --truth "$out/truth.txt" --lanes "$lanes" --max-trailer="$lim" \
-    "${csv[@]}" > "$out/check.txt" 2>&1
+    --sync-at="$sat" --max-lane-spread=6 "${csv[@]}" > "$out/check.txt" 2>&1
   python3 "$HERE/tn2a_evidence.py" tbcheck "$out" > "$out/tbcheck.txt" 2>&1
 }
 

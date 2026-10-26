@@ -40,8 +40,8 @@
 // of the receivers 250 MHz and lite_aclk 50 MHz (as the build of the board).
 // Files in +OUTDIR: frames.txt (frames sent), tx_axis.csv (s_axis of the TX), xil_axis.csv / ftel_axis.csv
 // (video_out of R-X / R-F), xil_ppi.csv (PPI monitor port of R-X), ftel_ppi.csv (the PPI into xrxss_np, after
-// +PPI_CORRUPT, +PPI_XFILL and +PPI_AMD_TIMING), tx_ppi.csv (the PPI inside xtxss, from its controller to its
-// D-PHY), tn2b.vcd with +VCD=1.
+// +PPI_CORRUPT, +PPI_XFILL, +PPI_SOTSYNCERR and +PPI_AMD_TIMING or the gate of +PPI_ADAPTER), tx_ppi.csv (the PPI
+// inside xtxss, from its controller to its D-PHY), tn2b.vcd with +VCD=1.
 // Plusargs, all optional:
 //   +OUTDIR=<dir> +RATE=<Mb/s>         the rate of the build (default 1440)
 //   +FRAMES=<n> +WIDTH=<px> +HEIGHT=<lines> +PATTERN=counter|prbs|synclike +LINE_GAP=<clk> +FRAME_GAP=<clk>
@@ -57,6 +57,13 @@
 //                                      D-PHY (1: rxsynchs before the first byte and rxactivehs from rxsynchs, as
 //                                      AMD's D-PHY; 2: rxsynchs before the first byte only; 3: rxactivehs from
 //                                      rxsynchs only, rxsynchs still with the first byte)
+//   +PPI_ADAPTER=1                     rxactivehs into xrxss_np from m_ftel_ppi_act_gate (fpga/rtl/), the gate of
+//                                      the FPGA prototype (fpga/PLAN_TN2B_GATE.md), checked against a model here
+//                                      at every byte clock; not with +PPI_AMD_TIMING
+//   +PPI_SOTSYNCERR=<lane>,<packet>    in that burst of that lane (counted as for +PPI_CORRUPT), no rxsynchs and no
+//                                      rxvalidhs, errsotsynchs instead in the cycle of rxsynchs: the PPI of
+//                                      ftel_dphy_rx after a SoT sync error (HAS C8); the run then ends when no
+//                                      receiver has given a line for 30 us
 //   +NEG_FRONT=1                       during HS the buffers of ftel_dphy_rx see pull strength (negative test)
 //   +AFE=xil|model +HS_SETTLE= +CLK_SETTLE= +EOT_SKIP= +TINIT=   as in tb_exp1.sv
 //   +VCD=1 (needs a build with debug typical)  +TIMEOUT_US=<us> (default 4000)
@@ -425,40 +432,90 @@ module tb_exp2b;
       c_act_q[l] <= f_active[l];
     end
 
+  // +PPI_SOTSYNCERR: the burst it names keeps rxactivehs, loses rxsynchs and rxvalidhs, and gets errsotsynchs in the
+  // cycle of rxsynchs, as ftel_dphy_rx gives a burst after a SoT sync error (HAS C8). Without it p_* are f_*.
+  int            s_lane = -1, s_pkt = -1, s_events = 0;
+  logic [NL-1:0] p_valid, p_sync, p_errsotsync;
+
+  function automatic bit s_hit(input int l);
+    bit first = f_active[l] && !c_act_q[l];
+    int burst = first ? c_bursts[l] : c_bursts[l] - 1;
+    return l == s_lane && f_active[l] === 1'b1 && burst == s_pkt;
+  endfunction
+
+  // always_comb, not assign: s_hit reads the counts, which are not its arguments
+  always_comb
+    for (int l = 0; l < NL; l++) begin
+      p_valid[l]      = f_valid[l] && !s_hit(l);
+      p_sync[l]       = f_sync[l] && !s_hit(l);
+      p_errsotsync[l] = f_errsotsync[l] || (s_hit(l) && f_sync[l] === 1'b1);
+    end
+
+  always @(posedge f_byteclk)
+    for (int l = 0; l < NL; l++) s_events += s_hit(l) && f_sync[l] === 1'b1;
+
   // +PPI_AMD_TIMING (diagnosis only) moves the start of each burst into xrxss_np toward AMD's D-PHY: ftel_dphy_rx
   // pulses rxsynchs in the cycle of the first payload byte (HAS C6) and raises rxactivehs some cycles earlier, AMD's
   // D-PHY pulses rxsynchs one cycle before the first byte, with rxactivehs. With 1 and 2, data, rxvalidhs and
   // rxactivehs go one byte clock later while rxsynchs and errsoths stay in place; 1 also raises rxactivehs only with
   // rxsynchs (a burst without sync then has no rxactivehs), 2 keeps it as ftel_dphy_rx drives it. 3 only raises
-  // rxactivehs with rxsynchs and delays nothing.
+  // rxactivehs with rxsynchs and delays nothing. +PPI_ADAPTER takes rxactivehs from the gate of fpga/rtl/ instead.
   int                 amd_timing = 0;
+  bit                 adapter = 1'b0;
   logic [NL-1:0][7:0] a_data, d_data;
   logic [NL-1:0]      a_valid, a_active, d_valid = '0, d_active = '0, a_seen = '0;
+  wire  [NL-1:0]      g_active;
 
   always @(posedge f_byteclk) begin
     d_data   <= c_data;
-    d_valid  <= f_valid;
+    d_valid  <= p_valid;
     d_active <= f_active;
     for (int l = 0; l < NL; l++)
       if (!(f_active[l] || d_active[l])) a_seen[l] <= 1'b0;
-      else if (f_sync[l])                a_seen[l] <= 1'b1;
+      else if (p_sync[l])                a_seen[l] <= 1'b1;
   end
 
   always_comb
     for (int l = 0; l < NL; l++)
       if (amd_timing == 0) begin
         a_data[l]   = c_data[l];
-        a_valid[l]  = f_valid[l];
-        a_active[l] = f_active[l];
+        a_valid[l]  = p_valid[l];
+        a_active[l] = adapter ? g_active[l] : f_active[l];
       end else if (amd_timing == 3) begin
         a_data[l]   = c_data[l];
-        a_valid[l]  = f_valid[l];
-        a_active[l] = f_active[l] && (a_seen[l] || f_sync[l]);
+        a_valid[l]  = p_valid[l];
+        a_active[l] = f_active[l] && (a_seen[l] || p_sync[l]);
       end else begin
         a_data[l]   = d_data[l];
         a_valid[l]  = d_valid[l];
-        a_active[l] = (f_active[l] || d_active[l]) && (amd_timing == 2 || a_seen[l] || f_sync[l]);
+        a_active[l] = (f_active[l] || d_active[l]) && (amd_timing == 2 || a_seen[l] || p_sync[l]);
       end
+
+  // The gate of the FPGA prototype on the PPI of ftel_dphy_rx, reset with it; checked at every byte clock against a
+  // model of its rule: rxactivehs from the first rxsynchs of a burst to the end of the burst. The model clears with
+  // the reset of ftel_dphy_rx, the gate two byte clocks later (its reset synchronizer), before any burst.
+  m_ftel_ppi_act_gate #(.PARA_NUM_LANES(NL)) u_act_gate (
+    .i_byte_clk   (f_byteclk),
+    .i_byte_rst_n (f_rst_n),
+    .i_rxactivehs (f_active),
+    .i_rxsynchs   (p_sync),
+    .o_rxactivehs (g_active)
+  );
+
+  logic [NL-1:0] r_seen = '0;
+  int            g_cmp = 0, g_diff = 0;
+  always @(posedge f_byteclk or negedge f_rst_n)
+    if (!f_rst_n) r_seen <= '0;
+    else          r_seen <= f_active & (p_sync | r_seen);
+  always @(posedge f_byteclk)
+    if (adapter && f_rst_n) begin
+      g_cmp++;
+      if (g_active !== (f_active & (p_sync | r_seen))) begin
+        g_diff++;
+        if (g_diff <= 5) $display("TB ADAPTER DIFF at %.3f ns: gate %b, model %b", $realtime, g_active,
+                                  f_active & (p_sync | r_seen));
+      end
+    end
 
   // ------------------------------------------------------------------ R-F: AMD's CSI-2 receiver without PHY
   logic [7:0]  n_araddr, n_awaddr;
@@ -475,8 +532,8 @@ module tb_exp2b;
   `define TN2B_NP(n) \
       .mipi_ppi_if_dl``n``_enable (np_dl_enable[n]), .mipi_ppi_if_dl``n``_errcontrol (f_errcontrol[n]), \
       .mipi_ppi_if_dl``n``_erresc (f_erresc[n]), .mipi_ppi_if_dl``n``_errsoths (f_errsot[n]), \
-      .mipi_ppi_if_dl``n``_errsotsynchs (f_errsotsync[n]), .mipi_ppi_if_dl``n``_rxactivehs (a_active[n]), \
-      .mipi_ppi_if_dl``n``_rxdatahs (a_data[n]), .mipi_ppi_if_dl``n``_rxsynchs (f_sync[n]), \
+      .mipi_ppi_if_dl``n``_errsotsynchs (p_errsotsync[n]), .mipi_ppi_if_dl``n``_rxactivehs (a_active[n]), \
+      .mipi_ppi_if_dl``n``_rxdatahs (a_data[n]), .mipi_ppi_if_dl``n``_rxsynchs (p_sync[n]), \
       .mipi_ppi_if_dl``n``_rxulpsesc (f_rxulpsesc[n]), .mipi_ppi_if_dl``n``_rxvalidhs (a_valid[n]), \
       .mipi_ppi_if_dl``n``_stopstate (f_stop[n]),
   xrxss_np u_xrxss_np (
@@ -522,8 +579,8 @@ module tb_exp2b;
     .errsot (x_errsot), .errsotsync (x_errsotsync), .stop (x_stop), .cl_stop (x_cl_stop)
   );
   ppi_csv_mon #(.NL(NL)) u_mon_f (
-    .clk (f_byteclk), .en (mon_en), .data (a_data), .valid (a_valid), .active (a_active), .sync (f_sync),
-    .errsot (f_errsot), .errsotsync (f_errsotsync), .stop (f_stop), .cl_stop (f_cl_stop)
+    .clk (f_byteclk), .en (mon_en), .data (a_data), .valid (a_valid), .active (a_active), .sync (p_sync),
+    .errsot (f_errsot), .errsotsync (p_errsotsync), .stop (f_stop), .cl_stop (f_cl_stop)
   );
   // TX side: a byte moves when txrequesths and txreadyhs are High at the edge; a burst is a run of txrequesths.
   ppi_csv_mon #(.NL(NL)) u_mon_t (
@@ -677,6 +734,10 @@ module tb_exp2b;
              t_rx_cfg[0] / 1000.0, rx_reset_ok[0] ? string'("reached") : string'("NOT reached"),
              t_rx_cfg[1] / 1000.0, rx_reset_ok[1] ? string'("reached") : string'("NOT reached"));
     if (c_lane >= 0) $display("TB CORRUPT: %0d bytes flipped", c_events);
+    if (adapter) $display("TB ADAPTER CHECK: comparisons %0d, differences %0d", g_cmp, g_diff);
+    if (s_lane >= 0)
+      $display("TB SOTSYNCERR: lane %0d packet %0d: rxsynchs and rxvalidhs removed, errsotsynchs in place of rxsynchs, %0d events",
+               s_lane, s_pkt, s_events);
     if (c_xfill) $display("TB XFILL: %0d bytes with X or Z given 0 at the byte clock edges", c_xfills);
     $display("TB AXIL: errors TX %0d, R-X %0d, R-F %0d", u_bus_t.errors, u_bus_x.errors, u_bus_f.errors);
     $display("TB DONE %s: NL %0d, rate %.2f Mb/s (UI %.3f ns), %0d frames of %0dx%0d sent, TX init_done %.3f us, ftel init_done %.3f us",
@@ -729,6 +790,15 @@ module tb_exp2b;
     if ($value$plusargs("PPI_XFILL=%d", v_i)) c_xfill = (v_i != 0);
     v_ok = $value$plusargs("PPI_AMD_TIMING=%d", amd_timing);
     if (amd_timing < 0 || amd_timing > 3) $fatal(1, "TB: +PPI_AMD_TIMING=%0d, expected 0 to 3", amd_timing);
+    if ($value$plusargs("PPI_ADAPTER=%d", v_i)) adapter = (v_i != 0);
+    if (adapter && amd_timing != 0) $fatal(1, "TB: +PPI_ADAPTER=1 with +PPI_AMD_TIMING=%0d", amd_timing);
+    if ($value$plusargs("PPI_SOTSYNCERR=%s", sel)) begin
+      parse_list(sel, corrupt);
+      if (corrupt.size() != 2) $fatal(1, "TB: +PPI_SOTSYNCERR=%s, expected <lane>,<packet>", sel);
+      s_lane = corrupt[0];
+      s_pkt  = corrupt[1];
+      corrupt = {};
+    end
     if ($value$plusargs("PPI_CORRUPT=%s", sel)) begin
       parse_list(sel, corrupt);
       if (corrupt.size() != 4) $fatal(1, "TB: +PPI_CORRUPT=%s, expected <lane>,<packet>,<byte>,<bit>", sel);
@@ -774,6 +844,7 @@ module tb_exp2b;
     if (c_xfill || amd_timing != 0)
       $display("TB DIAG: on the PPI into xrxss_np, X fill %0d, AMD timing mode %0d (diagnosis only)", c_xfill,
                amd_timing);
+    if (adapter) $display("TB ADAPTER: rxactivehs into xrxss_np from m_ftel_ppi_act_gate (fpga/rtl/)");
     $display("TB FRONT END: ftel_dphy_rx behind %s%s",
              afe_xil ? string'("IBUFDS_DPHY (SIM_DEVICE VERSAL_PREMIUM), the input buffer of AMD's receiver") :
                        string'("afe_model"),
@@ -836,8 +907,8 @@ module tb_exp2b;
         end
       end
     join
-    if (rx_late) drain_quiet(400.0);
-    else         drain(frames * height, 200.0);
+    if (rx_late || s_lane >= 0) drain_quiet(400.0);   // R-F gives less than the frames sent
+    else                        drain(frames * height, 200.0);
     report_regs();
     finish_run(1'b0);
   end

@@ -122,7 +122,8 @@ Mô phỏng chạy trong XSIM của Vivado 2025.2, part xcvp1902.
 | Số burst | Mỗi lane đủ đúng số burst của truth: không thiếu, không thừa, không burst nào còn mở lúc kết thúc |
 | Payload | N byte đầu của burst thứ k phải bằng đúng payload của burst k trong truth, đúng thứ tự |
 | Ghép đúng cả về thời gian | Byte cuối của burst (trong N byte đầu) phải tới PPI sau khi nó rời pad, và trễ xấp xỉ trung vị của capture: lệch không quá nửa khoảng cách nhỏ nhất giữa hai burst của một lane. Luật này cần vì payload có thể lặp lại: nếu một lane mất một burst rồi thừa một burst khác, số burst và payload vẫn có thể khớp theo thứ tự, chỉ có thời gian lộ ra |
-| Cờ trong burst | `rxsynchs` lên đúng 1 lần; `errsoths` và `errsotsynchs` không lên |
+| Cờ trong burst | `rxsynchs` High đúng một sample (đếm sample, không đếm cạnh), cùng cycle với byte payload đầu ở RX mình (HAS C6) và trước byte đầu một cycle ở RX AMD; `errsoths` và `errsotsynchs` không lên. Đến 2026-10-26 luật này chỉ đếm cạnh lên, nên sync rộng hay trễ vẫn lọt (lỗ hổng do tester team FPGA tìm ra, [`../PLAN_CHECK_C6_C10.md`](../PLAN_CHECK_C6_C10.md)) |
+| Lệch giữa các lane (thêm 2026-10-26) | Các lane được ghép theo id burst của truth. Trong mỗi burst, byte thứ k tới PPI trên các lane lệch nhau tối đa 6 byte clock (HAS C10: ngân sách lệch lane của controller CSI) |
 | Ngoài burst | Không có `rxvalidhs` hay cờ nào, không có giá trị X |
 | Byte trailer (sau payload) | RX AMD: không giới hạn, vì IP này không cắt trailer. RX mình: tối đa theo HAS Table 4-7 (0 nếu không nhiễu, từ 600 Mb/s) |
 
@@ -157,6 +158,8 @@ Kịch bản chỉ PASS khi cả hai RX đều 0 lỗi.
 | E1-4d/e | 1440, 2 / 1 | Số lane | 1, 2 lane | Cả hai |
 | E1-5 (96 run) | 260–1500, 4 | 8 rate × trail min/mặc định/max × có/không jitter trail (0–7 bit) × nhiễu 0/40 ns trước LP-11; `core_clk` lệch 400 ppm | Stress EoT | Cả hai |
 | `M_*` (113 run) | như trên | Đúng các kịch bản trên, RX mình đứng sau `afe_model` (LP-00 trong HS như silicon) | Bộ phụ: RX mình với front end giống AFE thật hơn | Cả hai |
+| E1-6a/b (thêm 2026-10-26, `run_exp1.sh skew`) | 1440, 4 | Burst 1, 4, 64, 256 byte; cặp dây của lane 3 trễ 13 889 / 30 556 ps (2,5 / 5,5 byte time) | Lệch lane lớn mà vẫn trong ngân sách 6 byte clock (HAS C10). Không RX nào căn lại các lane, nên lệch tới thẳng PPI | Cả hai |
+| NEG-skew (như trên) | 1440, 4 | Như E1-6, lane 3 trễ 41 667 ps (7,5 byte time) | Thử âm thật cho luật lệch lane: payload vẫn đúng, chỉ luật lệch lane được phép hỏng | Cả hai |
 | R-80 | 80, 4 | Ngoài phạm vi bảo đảm | Chỉ báo cáo, không tính PASS/FAIL | Chỉ RX mình (stub) |
 
 **E1-5 chạy cả hai RX.**
@@ -170,13 +173,29 @@ Ngoài các test trên còn có `run_exp1.sh window`. Đây là phép đo, khôn
   của HAS Table 4-7;
 - nó chạy với `+AFE=model`, như lúc đo Table 4-7. HS output về 0 từ LP-11 là trường hợp xấu hơn (§6).
 
-## 6. Kết quả lần chạy 2026-10-20
+## 6. Kết quả lần chạy 2026-10-20 và lần chạy lại 2026-10-26
 
 **Chế độ công bằng: 113/113 kịch bản PASS cho cả hai RX. Bộ phụ `M_*`: 113/113 PASS. R-80: payload nguyên
 36/36 burst, dư 0–1 byte trailer ở 10 burst.**
 
 Lần chạy đầu, RX mình hỏng hai lỗi: mất byte cuối burst, và có `rxvalidhs` nằm ngoài `rxactivehs`. Cả hai đã
 sửa theo `PLAN_TN1_FIX.md` (HAS v0.16).
+
+**Chạy lại toàn bộ ngày 2026-10-26 trong repo fu3_dphy** ([`../PLAN_CHECK_C6_C10.md`](../PLAN_CHECK_C6_C10.md)): cùng
+RTL; bench chỉ khác header và đường dẫn IP; bộ so có thêm timing ở PPI (§4).
+- **227 run cũ:** kết luận như cũ. `truth.txt` và hai CSV trùng từng byte với lần chạy 2026-10-20 ở repo DPHY (681/681
+  file). 128 run `window` cũng trùng (256/256 file); bảng của `eot_window.py` (Table 4-7) giống hệt.
+- **Timing ở PPI:**
+  - `rxsynchs` của RX mình đúng một sample, cùng byte đầu, ở mọi lane burst của 230 run;
+  - của RX AMD đúng một sample, trước byte đầu một cycle, ở 229 run có RX AMD;
+  - lệch giữa các lane bằng 0 ở mọi run nhiều lane, trừ E1-6a/b và NEG-skew; E1-3d/e/f (139 ps) cũng cho 0.
+- **E1-6a / E1-6b PASS.** Lệch đo ở PPI: AMD 3 / 6, RX mình 2–3 / 5–6 byte clock.
+- **NEG-skew FAIL đúng chỗ.** Lệch đo ở PPI: AMD 8, RX mình 7–8. Payload 16/16 ở mỗi RX; mỗi RX 4 lỗi, đều là lỗi
+  lệch lane, mỗi burst một lỗi.
+- **`window`:** hai run vốn FAIL ở model + 2 (`W_1000_min_n40_s11`, `W_260_min_n40_s3`; lane 1 mất trọn một burst, §7.3)
+  có thêm lỗi lệch lane ở các burst ghép lệch sau burst mất. Kết luận và bảng không đổi.
+- **Thời gian máy** (nice 10, chạy cùng TN2b): `all` 28 phút, `model` 23 phút, `report` 3 s, `skew` 33 s, `window`
+  7,5 phút.
 
 **E1-1…E1-4** (byte trailer mỗi burst; độ trễ byte payload cuối):
 
@@ -234,22 +253,24 @@ Kết quả chỉ đáng tin khi trả lời được sáu câu hỏi dưới đ
 python3 fpga/exp1/tn1_evidence.py          # mỗi check một dòng PASS/FAIL, rồi EVIDENCE: PASS/FAIL
 ```
 
-Kết quả ngày 2026-10-20: **EVIDENCE: PASS (8/8 checks)**.
+Kết quả ngày 2026-10-20: **EVIDENCE: PASS (8/8 checks)**. Ngày 2026-10-26, trên lần chạy lại trong fu3_dphy với
+timing ở PPI: **EVIDENCE: PASS (8/8 checks)**.
 
-| Check | Kiểm gì | Kết quả 2026-10-20 |
-|---|---|---|
-| `checker` | Selftest của `csi2_dump.py`: tìm được các lỗi cài sẵn, kể cả ca chỉ sai thời gian; capture sạch thì đạt | PASS |
-| `decode` | Giải mã lại mọi capture bằng code riêng, theo thứ tự và theo thời gian; kết quả phải trùng `check.txt`. Bộ giải mã tự thử trên capture giả trước | 453/453 capture |
-| `runs` | Mọi run kết thúc `TB DONE OK`; file truth có một dòng cho mỗi burst và lane | 227/227 run |
-| `front` | Mỗi run có hai RX: đầu ra LP của buffer AMD và của buffer trước RX mình trùng nhau ở mọi lần đổi; RX mình đứng sau `IBUFDS_DPHY` trừ khi kịch bản đặt `+AFE=model` | 226/226 run, 4 854 302 lần đổi, 0 khác |
-| `afe` | Mô hình AFE không lỗi trạng thái; `term_en` không trễ, không thiếu | 227/227 run |
-| `config` | Cấu hình RX mình đúng giá trị model HAS cho rate đó, hoặc giá trị kịch bản đặt | 227/227 run |
-| `sources` | Mã băm nguồn của mọi build bằng mã băm nguồn hiện tại | 11/11 build |
-| `margin` | Trail min: `eot_skip_bytes` model + 1 không mất payload, model + 2 mất, ở mọi rate | 8/8 rate |
+| Check | Kiểm gì | 2026-10-20 | 2026-10-26 |
+|---|---|---|---|
+| `checker` | Selftest của `csi2_dump.py`: tìm được các lỗi cài sẵn, kể cả ca chỉ sai thời gian và, từ 2026-10-26, ba lỗi timing PPI của tester; capture sạch thì đạt | PASS | PASS |
+| `decode` | Giải mã lại mọi capture bằng code riêng, theo thứ tự và theo thời gian, từ 2026-10-26 cả timing ở PPI (vị trí `rxsynchs`, lệch lane); kết quả phải trùng `check.txt`. Bộ giải mã tự thử trên capture giả trước | 453/453 capture | 459/459 capture |
+| `runs` | Mọi run kết thúc `TB DONE OK`; file truth có một dòng cho mỗi burst và lane; từ 2026-10-26 mọi kịch bản PASS trong `check.txt`, NEG-skew FAIL chỉ vì lệch lane | 227/227 run | 230/230 run |
+| `front` | Mỗi run có hai RX: đầu ra LP của buffer AMD và của buffer trước RX mình trùng nhau ở mọi lần đổi; RX mình đứng sau `IBUFDS_DPHY` trừ khi kịch bản đặt `+AFE=model` | 226/226 run, 4 854 302 lần đổi, 0 khác | 229/229 run, 4 893 764 lần đổi, 0 khác |
+| `afe` | Mô hình AFE không lỗi trạng thái; `term_en` không trễ, không thiếu | 227/227 run | 230/230 run |
+| `config` | Cấu hình RX mình đúng giá trị model HAS cho rate đó, hoặc giá trị kịch bản đặt | 227/227 run | 230/230 run |
+| `sources` | Mã băm nguồn của mọi build bằng mã băm nguồn hiện tại | 11/11 build | 11/11 build |
+| `margin` | Trail min: `eot_skip_bytes` model + 1 không mất payload, model + 2 mất, ở mọi rate | 8/8 rate | 8/8 rate |
 
 Các con số trong bảng:
-- 227 run = 113 kịch bản ở chế độ công bằng + 113 kịch bản của bộ phụ `M_*` + R-80.
-- 453 capture = 226 run có hai RX × 2 + 1 capture của R-80.
+- 227 run = 113 kịch bản ở chế độ công bằng + 113 kịch bản của bộ phụ `M_*` + R-80; 230 = 227 + E1-6a, E1-6b,
+  NEG-skew.
+- 453 capture = 226 run có hai RX × 2 + 1 capture của R-80; 459 = 453 + 3 run × 2.
 
 ### 7.1 Lớp 1: tín hiệu phát vào có đúng không?
 
@@ -267,6 +288,7 @@ Các con số trong bảng:
 |---|---|
 | Selftest của `csi2_dump.py`: capture giả có cài sẵn 4 lỗi (đảo một byte, mất một burst, `errsoths`, `rxsynchs` hai lần) | Bắt đủ 4 lỗi; capture sạch thì 0 lỗi |
 | Selftest của `csi2_dump.py`: một lane có 8 burst cùng payload, mất burst 5 rồi phát lại burst 7. Số burst và payload vẫn khớp theo thứ tự | Luật thời gian bắt đúng 3 burst lệch, bắt đầu từ burst 5 |
+| Selftest của `csi2_dump.py` (thêm 2026-10-26), ở mode `bursts` và `ppi`: đúng ba lỗi tester team FPGA đã cài: `rxsynchs` High 3 cycle, `rxsynchs` ở byte payload thứ ba, cả lane 3 trễ 8 cycle; thêm `rxsynchs` trước byte đầu một cycle (kiểu RX AMD) | Mỗi lỗi ra đúng một lỗi C6, hoặc một lỗi C10 ở mỗi burst; không bật hai tuỳ chọn mới thì cả ba lọt, đúng như tester thấy; sync kiểu AMD đạt với `--sync-at -1`, hỏng với `0` |
 | Lần chạy đầu (2026-10-19, RTL v0.15), cùng line, cùng bộ kiểm | AMD 40/40 burst đúng ở E1-1; RX mình chỉ 20/40 (E1-1), 0/16 (E1-3c), 0/40 (E1-4b). Nguyên nhân tìm được trong code RTL (F1, F2) |
 | Cố tình đặt `eot_skip_bytes` model + 2 (`run_exp1.sh window`) | Báo mất payload ở mọi rate, ví dụ 711 / 2240 burst ở 260 Mb/s với trail min |
 | Lần chạy thứ hai (RTL v0.16 bản đầu) | Bắt được 2 run E1-5 vượt Table 4-7 bản cũ, dẫn tới việc đo lại |
@@ -285,6 +307,7 @@ Trước đó, bộ giải mã tự thử trên capture giả: capture sạch ph
 lộ ra 3 burst lệch thời gian.
 
 Ngày 2026-10-20: 453/453 capture trùng, và 128/128 capture của `window` (chạy `tn1_evidence.py fpga/work/exp1/window`).
+Ngày 2026-10-26: 459/459 và 128/128 của `window`, kể cả timing ở PPI; bộ giải mã tự thử thêm ba lỗi của tester.
 
 **Ghép theo thứ tự có đúng không?** Payload có thể lặp lại: 128 run `window` (REPEAT=40) có payload trùng nhau trên
 cùng một lane, vì mẫu `counter` quay vòng sau 16 burst. Luật thời gian (§4) loại trừ việc ghép nhầm:
@@ -360,6 +383,29 @@ Script kiểm chứng cũng phải biết báo FAIL. Các phép thử ngày 2026
 - **Hai front end khác nhau** ([`neg_front.sh`](neg_front.sh), §7.6): `front` FAIL.
 - **Gỡ luật thời gian khỏi bộ giải mã** (bản copy tạm): selftest của bộ giải mã FAIL, nên `decode` FAIL.
 
+**Từ 2026-10-26, `tn1_evidence.py evselftest`** làm việc này tự động, theo mẫu của TN2a và TN2b:
+- các run được link vào một thư mục tạm, riêng run bị sửa được chép sang rồi mới sửa; output thật không bị đụng;
+- mỗi lỗi phải làm hỏng đúng các check ghi dưới đây, không thừa, không thiếu.
+
+| Lỗi cài | Check phải hỏng | 2026-10-26 |
+|---|---|---|
+| Không lỗi | không check nào | đúng |
+| `rxsynchs` High 3 cycle trong `ftel_ppi.csv` của E1-1 (lỗi tester team FPGA cài) | `decode` | đúng |
+| `rxsynchs` dời tới byte payload thứ ba (như trên) | `decode` | đúng |
+| Cả lane 3 trễ 8 cycle (như trên) | `decode` | đúng |
+| Ba lỗi trên, rồi `check.txt` làm lại bằng `csi2_dump.py` | `runs` | đúng, cả ba |
+| Đảo 1 bit payload trong một capture | `decode` | đúng |
+| Mất một burst trong `xil_ppi.csv` | `decode` | đúng |
+| Một kịch bản FAIL trong `check.txt` | `runs` | đúng |
+| NEG-skew PASS trong `check.txt` | `runs` | đúng |
+| Thiếu run E1-3a | `runs` | đúng |
+| Một khác biệt front end trong `tb.txt` | `front` | đúng |
+| Một `term_en` trễ | `afe` | đúng |
+| `eot_skip_bytes` khác model | `config` | đúng |
+| Hash nguồn của một build khác | `sources` | đúng |
+
+Kết quả: `evselftest: PASS` (1 ca sạch, 15 lỗi), 3 s.
+
 ### 7.8 Giới hạn của phần kiểm chứng
 
 1. `run_exp1.sh` chưa tự tính timeout là FAIL. `tn1_evidence.py` kiểm điều này (check `runs`).
@@ -381,7 +427,8 @@ Script kiểm chứng cũng phải biết báo FAIL. Các phép thử ngày 2026
 ## 8. TN1 không kiểm những gì
 
 - **ULPS, escape mode, deskew, non-continuous clock.** Plan gốc có E1-5 (ULPS, tuỳ chọn) và E1-6
-  (non-continuous clock, chỉ báo cáo), nhưng hai mục này chưa chạy. Mã E1-5 đã được dùng lại cho stress EoT.
+  (non-continuous clock, chỉ báo cáo), nhưng hai mục này chưa chạy. Mã E1-5 đã được dùng lại cho stress EoT, mã E1-6
+  cho lệch lane lớn (2026-10-26).
 - **Deserializer chung.** RX AMD dùng XPHY, RX mình dùng Block No. 1. Đặt cả hai sau cùng một deserializer là TN2c.
 - **Packet CSI-2.** Dữ liệu là dummy, không có cấu trúc packet. Phần này thuộc TN2 và TN3.
 - **Hiệu ứng analog.** Pad chỉ là mức logic, front end là model, không có jitter hay ISI. Hành vi AFE thật ở EoT
@@ -406,9 +453,11 @@ fpga/exp1/run_exp1.sh run 1440 4 <tên> +AFE=model                    # RX mình
 fpga/exp1/run_exp1.sh run 600 stub <tên> +TRAIL=min +EOT_JUNK=40     # chỉ RX mình, rate bất kỳ
 fpga/exp1/run_exp1.sh window               # đo cửa sổ eot_skip_bytes (~7 phút)
 fpga/exp1/run_exp1.sh report               # R-80
+fpga/exp1/run_exp1.sh skew                 # E1-6a, E1-6b, NEG-skew: lane 3 lệch 2,5 / 5,5 / 7,5 byte time (~35 s)
 fpga/exp1/run_exp1.sh summary              # dòng kết quả của mọi kịch bản đã chạy
 fpga/exp1/run_exp1.sh recheck              # kiểm lại mọi output bằng csi2_dump.py hiện tại (~25 s, không mô phỏng)
 python3 fpga/exp1/tn1_evidence.py          # kiểm chứng kết quả (§7)
+python3 fpga/exp1/tn1_evidence.py evselftest   # script kiểm chứng tự thử trên lỗi cài sẵn (§7.7)
 fpga/exp1/neg_front.sh                     # phép thử âm của check front end (§7.6, ~1 phút)
 ```
 

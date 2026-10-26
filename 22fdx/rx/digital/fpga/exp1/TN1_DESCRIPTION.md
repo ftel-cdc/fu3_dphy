@@ -1,8 +1,9 @@
 # TN1 — Mô tả thí nghiệm: so RX D-PHY `ftel_dphy_rx` với RX D-PHY của AMD trong mô phỏng XSIM
 
 > Tài liệu cho team FPGA: lấy RTL và testbench ở đâu, bench gồm những gì, so theo luật nào, chạy và đọc kết quả ra
-> sao. Kết quả lần chạy ngày 2026-10-20 nằm ở [`TN1_REPORT.md`](TN1_REPORT.md).
-> Phiên bản 1.0, ngày 2026-10-22. Nhóm D-PHY RX viết.
+> sao. Kết quả lần chạy ngày 2026-10-20 và lần chạy lại ngày 2026-10-26 nằm ở [`TN1_REPORT.md`](TN1_REPORT.md).
+> Phiên bản 1.1, ngày 2026-10-26: thêm hai luật timing ở PPI (§6), ba kịch bản lệch lane (§7), lệnh `skew` và
+> `evselftest` (§8). Phiên bản 1.0: 2026-10-22. Nhóm D-PHY RX viết.
 
 ## 1. Thí nghiệm làm gì
 
@@ -188,7 +189,8 @@ Hai RX không được so trực tiếp từng chu kỳ với nhau, vì mỗi RX
 | Số burst | Mỗi lane có đúng số burst của truth: không thiếu, không thừa, không burst nào còn mở lúc kết thúc |
 | Payload | N byte đầu của burst thứ k bằng đúng payload của burst k trong truth, đúng thứ tự |
 | Thời gian | Byte payload cuối phải tới PPI sau khi nó rời pad, và độ trễ của nó lệch khỏi trung vị của capture không quá nửa khoảng cách nhỏ nhất giữa hai burst. Luật này cần vì payload có thể lặp lại: nếu một lane mất một burst rồi thừa một burst khác, số burst và payload vẫn khớp theo thứ tự, chỉ thời gian lộ ra |
-| Cờ trong burst | `rxsynchs` lên đúng một lần; `errsoths` và `errsotsynchs` không lên |
+| Cờ trong burst | `rxsynchs` High đúng một mẫu (đếm mẫu, không đếm cạnh lên): cùng chu kỳ với byte payload đầu ở RX mình, trước byte đầu một chu kỳ ở RX AMD (HAS, bảng A-2). `errsoths` và `errsotsynchs` không lên |
+| Lệch giữa các lane | Các lane được ghép theo burst của truth. Trong mỗi burst, byte thứ k tới PPI trên các lane lệch nhau tối đa 6 byte clock, mức HAS cho phép ở PPI cho controller CSI-2 phía sau (HAS, bảng A-2) |
 | Ngoài burst | Không có `rxvalidhs` hay cờ nào, không có giá trị X |
 | Byte trailer (sau payload) | RX AMD: không giới hạn, vì IP này không cắt trailer. RX mình: tối đa theo bảng dưới |
 
@@ -234,6 +236,9 @@ Rate và số lane là tham số build. Cột plusarg chỉ ghi những gì khá
 | E1-5 (96 run) | 260, 400, 600, 800, 1000, 1200, 1440, 1500; 4 | `+LENS=1,2,3,4,5,8,16,64,256 +REPEAT=2`, trail min/mặc định/max × `+TRAIL_JITTER=0/1` × `+EOT_JUNK=0/40`, `+CORE_HALF=2.501` | Stress cuối burst: jitter trail 0–7 bit, nhiễu cuối trail, `core_clk` lệch 400 ppm để LP-11 rơi vào mọi pha |
 | `M_*` (113 run) | Như trên | Mọi kịch bản trên, thêm `+AFE=model` | Bộ phụ: RX mình sau front end giống AFE thật hơn (LP-00 trong HS) |
 | R-80 | 80, 4 (`stub`) | `+LENS=1,2,3,4,5,8,16,64,256 +THS_EXIT=400` | Ngoài dải bảo đảm; chỉ báo cáo, không tính đạt hay hỏng |
+| E1-6a | 1440, 4 | `+LENS=1,4,64,256 +SKEW3=13889` | Lane 3 trễ 2,5 byte time. Không RX nào căn lại các lane, nên lệch tới thẳng PPI; vẫn trong mức 6 byte clock |
+| E1-6b | 1440, 4 | `+LENS=1,4,64,256 +SKEW3=30556` | Lane 3 trễ 5,5 byte time, sát mức 6 byte clock |
+| NEG-skew | 1440, 4 | `+LENS=1,4,64,256 +SKEW3=41667` | Phép thử âm: lane 3 trễ 7,5 byte time. Payload phải đúng, và chỉ luật lệch lane được báo hỏng, ở cả hai RX |
 
 Ngoài ra, `window` là một phép đo, không phải test đạt hay hỏng. Nó quét `eot_skip_bytes` từ giá trị model trừ 1 tới
 cộng 2 ở 8 rate, với trail min và max, nhiễu 0 và 40 ns, 1120 burst mỗi ô, rồi [`eot_window.py`](eot_window.py) in
@@ -250,17 +255,20 @@ fpga/exp1/run_exp1.sh E1-3                 # một nhóm kịch bản
 fpga/exp1/run_exp1.sh E1-5 400 600         # E1-5 ở một số rate (mỗi rate ~2,5 phút)
 fpga/exp1/run_exp1.sh model                # bộ phụ M_*: mọi kịch bản, RX mình sau afe_model (~23 phút)
 fpga/exp1/run_exp1.sh report               # R-80
+fpga/exp1/run_exp1.sh skew                 # E1-6a, E1-6b, NEG-skew (~35 s)
 fpga/exp1/run_exp1.sh window               # đo cửa sổ eot_skip_bytes (~7 phút)
 fpga/exp1/run_exp1.sh summary              # dòng kết quả của mọi kịch bản đã chạy
 python3 fpga/exp1/tn1_evidence.py          # kiểm chứng toàn bộ output (§9)
+python3 fpga/exp1/tn1_evidence.py evselftest   # thử chính script kiểm chứng trên các lỗi cài sẵn (§9)
 fpga/exp1/neg_front.sh                     # phép thử âm của check front end (~1 phút)
 ```
 
-Muốn có đủ bộ output như lần chạy 2026-10-20 thì chạy `all`, `model`, `report` và `window`: 227 run (113 kịch bản,
-113 run của bộ `M_*` và R-80), cộng 128 run của `window`. Lần chạy đó chia thành hai pha song song và xong trong 13
-phút:
-- pha 1: E1-1…E1-3, E1-4, R-80 với `window`, và E1-5 ở 400/600/1000/1200 Mb/s, mỗi nhóm một tiến trình;
-- pha 2: E1-5 ở 260/800/1440/1500 Mb/s.
+Muốn có đủ bộ output thì chạy `all`, `model`, `report`, `skew` và `window`: 230 run (113 kịch bản, 113 run của bộ
+`M_*`, R-80, E1-6a, E1-6b và NEG-skew), cộng 128 run của `window`.
+- Lần chạy 2026-10-20 (chưa có `skew`) chia thành hai pha song song và xong trong 13 phút:
+  - pha 1: E1-1…E1-3, E1-4, R-80 với `window`, và E1-5 ở 400/600/1000/1200 Mb/s, mỗi nhóm một tiến trình;
+  - pha 2: E1-5 ở 260/800/1440/1500 Mb/s.
+- Lần chạy lại 2026-10-26 chạy năm lệnh nối tiếp, ở mức ưu tiên thấp và cùng lúc với việc khác, trong 59 phút.
 
 ## 9. Đọc kết quả
 
@@ -275,11 +283,11 @@ phút:
 | `xsim.log` | Log của XSIM |
 | `args.txt` | Tham số của lần chạy, gồm giới hạn trailer |
 
-**`check.txt` của E1-1 trong lần chạy 2026-10-20:**
+**`check.txt` của E1-1 trong lần chạy lại 2026-10-26:**
 
 ```
-A xil_ppi.csv: 4 lane(s), 40/40 bursts carry the payload sent, trailer bytes 16..17 (in 40 bursts), latency of the last payload byte 27.5..32.4 ns, errors 0
-B ftel_ppi.csv: 4 lane(s), 40/40 bursts carry the payload sent, trailer bytes 0..0 (in 0 bursts), latency of the last payload byte 200.9..205.8 ns, errors 0
+A xil_ppi.csv: 4 lane(s), 40/40 bursts carry the payload sent, trailer bytes 16..17 (in 40 bursts), latency of the last payload byte 27.5..32.4 ns, rxsynchs -1..-1 samples from the first byte, lane spread 0..0, errors 0
+B ftel_ppi.csv: 4 lane(s), 40/40 bursts carry the payload sent, trailer bytes 0..0 (in 0 bursts), latency of the last payload byte 200.9..205.8 ns, rxsynchs +0..+0 samples from the first byte, lane spread 0..0, errors 0
 RESULT: PASS (A 0 errors, B 0 errors)
 ```
 
@@ -287,6 +295,9 @@ RESULT: PASS (A 0 errors, B 0 errors)
 - "40/40 bursts carry the payload sent": số burst-lane có payload đúng trên tổng số. E1-1 có 10 burst × 4 lane.
 - "trailer bytes 16..17 (in 40 bursts)": khoảng số byte thừa sau payload, và số burst có byte thừa.
 - "latency": độ trễ từ lúc byte payload cuối rời pad tới lúc nó ra PPI.
+- "rxsynchs -1..-1 samples from the first byte": vị trí mẫu `rxsynchs` so với byte payload đầu, ở mọi lane burst
+  (RX AMD: trước một chu kỳ; RX mình: cùng chu kỳ).
+- "lane spread 0..0": khoảng độ lệch giữa các lane, tính bằng byte clock, qua mọi burst (§6). Ở chế độ 1 lane là `-`.
 - "errors": tổng số lỗi theo các luật ở §6. Khi có lỗi, các dòng thụt vào ngay dưới dòng `A` hoặc `B` ghi lỗi gì, ở
   lane và burst nào, ví dụ `lane 0 burst 1: 1 bytes for 2 sent, first difference at byte 1`.
 
@@ -301,7 +312,10 @@ RESULT: PASS (A 0 errors, B 0 errors)
 **Tổng hợp:**
 - `run_exp1.sh summary` in một dòng `RESULT` cho mỗi kịch bản.
 - `tn1_evidence.py` kiểm lại toàn bộ output bằng code riêng (8 check) và in `EVIDENCE: PASS (8/8 checks)` khi mọi
-  check đạt. Check `margin` cần output của `window`; các check khác cần đủ bộ `all`, `model` và `report`.
+  check đạt. Check `margin` cần output của `window`; các check khác cần đủ bộ `all`, `model`, `report` và `skew`.
+- `tn1_evidence.py evselftest` thử chính script đó: cài lần lượt 15 lỗi vào bản copy của output thật và đòi mỗi lỗi
+  làm hỏng đúng check của nó. Trong 15 lỗi có ba lỗi tester team FPGA đã cài; danh sách đầy đủ nằm trong
+  `EV_FAULTS` của script. Output thật không bị đụng.
 - `run_exp1.sh recheck` chạy lại phần so cho mọi output mà không mô phỏng lại. Lệnh này ghi đè `check.txt`.
 
 Kết quả mong đợi và cách hiểu các con số nằm ở [`TN1_REPORT.md`](TN1_REPORT.md).

@@ -37,9 +37,10 @@
                                       chosen by the TX controller, latency from the TX input to video_out, memory
                                       and length of the simulations
 
-The runs (run_exp2b.sh): SH_* re-time the PPI into R-F (+PPI_AMD_TIMING=3, tb_exp2b.sv) and are the scenarios of
-PLAN_TN2B.md §6, their afe_model runs (SH_M_*) and the negative tests (SH_NEG-*); E2b-* without SH_ and DBG-* are
-the runs of the finding: AMD's controller without PHY takes no packet of ftel_dphy_rx unless rxactivehs rises
+The runs (run_exp2b.sh): SH_* take rxactivehs into R-F through the gate of fpga/rtl/m_ftel_ppi_act_gate.sv
+(+PPI_ADAPTER=1, tb_exp2b.sv, fpga/PLAN_TN2B_GATE.md) and are the scenarios of PLAN_TN2B.md §6 with E2b-9 of
+PLAN_TN2B_GATE.md §4, their afe_model runs (SH_M_*) and the negative tests (SH_NEG-*); E2b-* without SH_ and DBG-*
+are the runs of the finding: AMD's controller without PHY takes no packet of ftel_dphy_rx unless rxactivehs rises
 with rxsynchs.
 
 tbcheck prints one line per item, then the verdict line TBRESULT:
@@ -55,15 +56,20 @@ tbcheck prints one line per item, then the verdict line TBRESULT:
             R-X, and that information gives the word count and the data type (RAW10) of the frames sent. Stop
             state and the short packet FIFO bits, and the lane information, are shown, not judged. A register digit
             printed as X or Z is unknown: unknown frame-received or error bits fail, as does an unknown bit of the
-            packet count or of the image information; other unknown ISR bits are shown. With +RX_LATE=1 and
-            +STREAM_TOGGLE=1 the item is shown, not judged (PLAN_TN2B.md §6)
+            packet count or of the image information; other unknown ISR bits are shown. With +RX_LATE=1,
+            +STREAM_TOGGLE=1 and +PPI_SOTSYNCERR the item is shown, not judged (PLAN_TN2B.md §6; the registers of
+            R-X after +PPI_SOTSYNCERR are judged by the evidence, check gate)
   axis      the TX took the frames given; video_out of R-X and of R-F gave as many frames and lines (with
-            +RX_LATE=1 at least the frames after the first)
+            +RX_LATE=1 at least the frames after the first; with +PPI_SOTSYNCERR the lines of R-F are shown, not
+            judged: check gate)
   front     the LP outputs of AMD's buffers (inside R-X) and of the buffers of ftel_dphy_rx were equal at every
             change after 2.5 ps (as in TN2a)
   afe       term_en of the data lanes and of the clock lane was never late or missing (afe_model). TN2b has no
             truth of the line state (no line generator, no pad decoder), so there is no line-state comparison
   corrupt   (+PPI_CORRUPT only) exactly one byte was flipped on the PPI into R-F
+  adapter   (+PPI_ADAPTER=1 only) rxactivehs into R-F came from the gate of fpga/rtl/ (TB ADAPTER) and was equal
+            to the model of the testbench at every byte clock: comparisons, and no difference
+  sotsync   (+PPI_SOTSYNCERR only) exactly the burst named was given the SoT sync error: one event
 
 decode prints one line per item, then the verdict line DECODERESULT:
   frames            frames.txt holds the frames of the formula (plan §2.1)
@@ -74,7 +80,11 @@ decode prints one line per item, then the verdict line DECODERESULT:
                     +RX_LATE=1 from frame 1
   ppi-tx, ppi-xil, ppi-ftel
                     no packet of the PPI capture has an error: a short burst, a header with two or more bits wrong
-                    (one is corrected, as a receiver does), a truncated payload or a CRC error
+                    (one is corrected, as a receiver does), a truncated payload or a CRC error; for R-X and R-F also
+                    the timing at the PPI of the HAS (Table A-2): rxsynchs High in one sample of each lane burst, one
+                    cycle before the first byte for AMD's D-PHY and in its cycle for ftel_dphy_rx (C6; one cycle
+                    before where +PPI_AMD_TIMING=1|2 moved it), and each byte of a packet on all lanes within
+                    LANE_SPREAD samples (C10)
   golden-ppi        the RAW10 lines after each frame start on the PPI of the TX and of R-X are the frames of the
                     formula
   packets-tx-xil, packets-xil-ftel
@@ -86,12 +96,13 @@ evidence prints one line per check, then the verdict line EVIDENCE:
   checker   fpga/tools/csi2_dump.py selftest passes: planted faults are found, a clean capture passes
   decode    every run is decoded again (decode above): each item of its check.txt gets the same verdict, and frames,
             tx-axis and golden-ppi pass; the selftest of the decoder passes
-  runs      every scenario of PLAN_TN2B.md §6 was run re-timed (SH_), also behind afe_model (SH_M_, all but E2b-8),
-            the three negative tests (SH_NEG-*) and the runs of the finding (E2b-1, E2b-4a/b/c, E2b-6, DBG-*);
-            every run ended with TB DONE OK; every SH_ scenario passed check.txt and tbcheck
+  runs      every scenario of PLAN_TN2B.md §6 and E2b-9 was run through the gate (SH_), also behind afe_model
+            (SH_M_, all but E2b-8 and E2b-9), the three negative tests (SH_NEG-*) and the runs of the finding
+            (E2b-1, E2b-4a/b/c, E2b-6, DBG-*); every run ended with TB DONE OK; every SH_ scenario passed check.txt
+            and tbcheck, SH_E2b-9 tbcheck (its check.txt fails on R-F by design: check gate)
   regs      in every SH_ scenario where they are judged, the registers of both receivers show frame received and
             no error bit, and R-F has the packet count and the image information of R-X; the runs where they are
-            only shown (+RX_LATE, +STREAM_TOGGLE) and the unknown bits of the ISRs are listed
+            only shown (+RX_LATE, +STREAM_TOGGLE, +PPI_SOTSYNCERR) and the unknown bits of the ISRs are listed
   front     the two front ends were equal at every change in every run (NEG-front apart, see neg); ftel_dphy_rx
             behind IBUFDS_DPHY unless the scenario set +AFE=model
   afe       term_en was never late or missing (NEG-front apart, see neg)
@@ -100,7 +111,7 @@ evidence prints one line per check, then the verdict line EVIDENCE:
             exp2b.tcl in each build used (EXP2B lines of build_<rate>/vivado.out) are those of PLAN_TN2B.md §4.2
             (BUILD_PARAMS)
   sources   every run was made from the current sources (RTL filelist, exp1/afe_model.sv, exp1/ppi_csv_mon.sv,
-            exp2b/*.sv): the hash in its args.txt
+            rtl/m_ftel_ppi_act_gate.sv, exp2b/*.sv): the hash in its args.txt
   copy      the blocks of tb_exp2b.sv taken from exp1/tb_exp1.sv (front end of ftel_dphy_rx, front-end check,
             instance of the wrap) differ from it in exactly the lines of PLAN_TN2B.md §4.3 (COPY_ALLOWED),
             comments, blank lines and runs of white space aside
@@ -115,6 +126,13 @@ evidence prints one line per check, then the verdict line EVIDENCE:
             rxsynchs and AMD's D-PHY raises both together; the diagnosis runs: R-F passes with the re-timings 1 and 3
             (rxactivehs from rxsynchs) and not with 2 (rxactivehs before rxsynchs) nor with the X of rxdatahs given 0;
             in every SH_ run rxactivehs into R-F rises with rxsynchs (NEG-front apart)
+  gate      every SH_ run took rxactivehs into R-F from the gate, equal to the model of the testbench at every byte
+            clock (tbcheck adapter). SH_E2b-9, a SoT sync error on lane 0 in packet 5 (PLAN_TN2B_GATE.md §4): only
+            that burst was changed (tbcheck sotsync), and in ftel_ppi.csv that lane has one burst fewer than the
+            others and errsotsynchs once, inside packet 5 of the other lanes, with its rxactivehs Low; R-X passes (its
+            items of check.txt, frame received and no error bit); R-F gives every frame after the one with the error
+            as the formula, word count and RAW10 in every line (it recovers), and the run ends with TB DONE OK. The
+            frame with the error as R-F gives it, the ISR and the packet count of R-F are reported, not judged
 Exit status 1 when the verdict is FAIL.
 """
 import contextlib
@@ -148,12 +166,14 @@ DT_RAW10 = 0x2B
 
 # the runs, as run_exp2b.sh names them
 SCENARIOS = ('E2b-1', 'E2b-2a', 'E2b-2b', 'E2b-2c', 'E2b-3', 'E2b-4a', 'E2b-4b', 'E2b-4c', 'E2b-5a', 'E2b-5b',
-             'E2b-6', 'E2b-7a', 'E2b-7b', 'E2b-8')
-MODEL = tuple(s for s in SCENARIOS if s != 'E2b-8')
+             'E2b-6', 'E2b-7a', 'E2b-7b', 'E2b-8', 'E2b-9')
+SOTSYNC = 'E2b-9'   # a SoT sync error on the PPI into R-F (fpga/PLAN_TN2B_GATE.md §4), judged in check gate
+MODEL = tuple(s for s in SCENARIOS if s not in ('E2b-8', SOTSYNC))
 NEGATIVE = ('NEG-ecc', 'NEG-crc', 'NEG-front')
 SHIM = 'SH_'
 FINDING = ('E2b-1', 'E2b-4a', 'E2b-4b', 'E2b-4c', 'E2b-6')
 DIAG = {'DBG-E2b-1-xfill': False, 'DBG-E2b-1-amd1': True, 'DBG-E2b-1-amd2': False, 'DBG-E2b-1-amd3': True}  # R-F passes
+LANE_SPREAD = 6   # C10 of the HAS: inter-lane byte divergence budget of the CSI-2 Rx controller, byte clocks
 
 # (block, first line, last line) of the code tb_exp2b.sv takes from exp1/tb_exp1.sv, as tn2a_evidence.py
 COPY_BLOCKS = tn2a.COPY_BLOCKS
@@ -229,6 +249,7 @@ def tbcheck(run):
     height = int(plus(args, 'HEIGHT', '16'))
     late = plus(args, 'RX_LATE', '0') != '0'
     toggle = plus(args, 'STREAM_TOGGLE', '0') != '0'
+    sotsync = plus(args, 'PPI_SOTSYNCERR') is not None
     items = []
 
     done = re.search(r'^TB DONE\s+OK: ', tb, re.M)
@@ -271,7 +292,7 @@ def tbcheck(run):
     lanes = [f"{ss} " + ' '.join(f'{r.get((ss, a), 0):x}' for a in (0x3C, 0x40, 0x44, 0x48, 0x4C))
              for ss in ('R-X', 'R-F')]
     texts.append('clock/lane info ' + '; '.join(lanes))
-    shown = late or toggle
+    shown = late or toggle or sotsync
     items.append(('regs', ok or shown, ('shown, not judged: ' if shown else '') + '; '.join(texts)))
 
     ax = {k: (int(b), int(li), int(f)) for k, b, li, f in
@@ -282,9 +303,10 @@ def tbcheck(run):
         for k in ('xil', 'ftel'):
             if late:
                 ok &= ax[k][1] >= want_f * height and ax[k][2] >= want_f
-            else:
+            elif not (sotsync and k == 'ftel'):
                 ok &= ax[k][1:] == (frames * height, frames)
-        items.append(('axis', ok, ', '.join(f'{k} {v[1]} lines {v[2]} frames' for k, v in ax.items())))
+        items.append(('axis', ok, ', '.join(f'{k} {v[1]} lines {v[2]} frames' for k, v in ax.items())
+                      + ('; ftel shown, not judged' if sotsync else '')))
     else:
         items.append(('axis', False, 'TB AXIS lines missing'))
 
@@ -303,6 +325,17 @@ def tbcheck(run):
     if plus(args, 'PPI_CORRUPT'):
         m = re.search(r'^TB CORRUPT: (\d+) bytes flipped', tb, re.M)
         items.append(('corrupt', bool(m) and m[1] == '1', f'{m[1]} bytes flipped' if m else 'no TB CORRUPT line'))
+    if plus(args, 'PPI_ADAPTER', '0') != '0':
+        g = re.search(r'^TB ADAPTER: rxactivehs into xrxss_np from m_ftel_ppi_act_gate', tb, re.M)
+        m = re.search(r'^TB ADAPTER CHECK: comparisons (\d+), differences (\d+)', tb, re.M)
+        items.append(('adapter', bool(g and m) and int(m[1]) > 0 and m[2] == '0',
+                      (f'the gate against the model of the testbench: {m[1]} comparisons, {m[2]} differences'
+                       if m else 'no TB ADAPTER CHECK line') + ('' if g else '; no TB ADAPTER line')))
+    if sotsync:
+        m = re.search(r'^TB SOTSYNCERR: lane (\d+) packet (\d+): .*, (\d+) events', tb, re.M)
+        ok = bool(m) and f'{m[1]},{m[2]}' == plus(args, 'PPI_SOTSYNCERR') and m[3] == '1'
+        items.append(('sotsync', ok, f'lane {m[1]} packet {m[2]}: {m[3]} bursts given the SoT sync error' if m
+                      else 'no TB SOTSYNCERR line'))
     return items
 
 
@@ -521,6 +554,68 @@ def burst_starts(cap, lanes):
     return out
 
 
+def ppi_timing(cap, lanes, sync_at, max_spread):
+    """C6 and C10 of the HAS (Table A-2) in a PPI capture (names, rows), burst k of every lane making packet k as
+    in ppi_packets: in each lane burst with a byte, rxsynchs High in one sample, sync_at samples from the first
+    byte; in each packet, every byte on all lanes within max_spread samples. Returns (errors, sync offsets, widest
+    spread of each packet)."""
+    names, rows = cap
+    col = {n.split('[')[0]: i for i, n in enumerate(names)}
+    per = []
+    for lane in range(lanes):
+        ca, cv, cs = (col[f'dl{lane}_{s}'] for s in ('rxactivehs', 'rxvalidhs', 'rxsynchs'))
+        out, cur = [], None
+        for k, r in enumerate(rows + [None]):
+            a = r is not None and r[ca] == '1'
+            if cur is not None and not a:
+                out.append(cur)
+                cur = None
+            if a:
+                cur = cur or ([], [])
+                if r[cv] == '1':
+                    cur[0].append(k)
+                if r[cs] == '1':
+                    cur[1].append(k)
+        per.append(out)
+    errs, offsets, widest = 0, [], []
+    for byts, syncs in (b for lane_bursts in per for b in lane_bursts if b[0]):
+        off = syncs[0] - byts[0] if len(syncs) == 1 else None
+        if off is not None:
+            offsets.append(off)
+        errs += off != sync_at
+    for k in range(min(len(b) for b in per)) if lanes > 1 else []:
+        rws = [per[lane][k][0] for lane in range(lanes)]
+        n = min(len(x) for x in rws)
+        if n:
+            widest.append(max(max(x[j] for x in rws) - min(x[j] for x in rws) for j in range(n)))
+            errs += widest[-1] > max_spread
+    return errs, offsets, widest
+
+
+def lane_events(cap, lanes):
+    """([[(first, last sample) of each run of rxactivehs] per lane], [(lane, sample, rxactivehs)] of the samples
+    with errsotsynchs) of a PPI capture (names, rows)."""
+    names, rows = cap
+    col = {n.split('[')[0]: i for i, n in enumerate(names)}
+    runs, errs = [], []
+    for lane in range(lanes):
+        ca, ce = col[f'dl{lane}_rxactivehs'], col[f'dl{lane}_errsotsynchs']
+        out, start = [], None
+        for k, r in enumerate(rows):
+            a = r[ca] == '1'
+            if a and start is None:
+                start = k
+            elif not a and start is not None:
+                out.append((start, k - 1))
+                start = None
+            if r[ce] == '1':
+                errs.append((lane, k, a))
+        if start is not None:
+            out.append((start, len(rows) - 1))
+        runs.append(out)
+    return runs, errs
+
+
 def span(values):
     """'a..b' (or 'a') of the values, 'none' when there are none or one is None."""
     if not values or None in values:
@@ -535,8 +630,10 @@ _RUNS = {}   # decode_run results by the real path of the run folder (evselftest
 def decode_run(run):
     """The decode of one run: {'items': [(item, ok, text)] (decode), 'ftel_diffs': [(frame, line, x, got, want)]
     of the pixels of R-F that differ in the lines it gave, 'ftel_odd': lines of R-F missing, extra or of another
-    length, 'ftel_lines', 'corrected': {capture: headers corrected}, 'shape': [(data type, word count, error)] of
-    the packets of R-X, 'starts': {'xil', 'ftel': burst_starts}}."""
+    length, 'ftel_lines', 'ftel_frames': [[pixels per line] per frame] of R-F, 'ftel_shape': [word count and RAW10
+    in every line] per frame of R-F, 'gold': the frames of the formula, 'corrected': {capture: headers corrected},
+    'shape': [(data type, word count, error)] of the packets of R-X, 'starts': {'xil', 'ftel': burst_starts}, and
+    with +PPI_SOTSYNCERR 'sotsync': lane_events of ftel_ppi.csv}."""
     key = os.path.realpath(run)
     if key in _RUNS:
         return _RUNS[key]
@@ -586,21 +683,32 @@ def decode_run(run):
                     odd += 1
                 else:
                     diffs += [(f, y, x, a, b) for x, (a, b) in enumerate(zip(g, w)) if a != b]
-            res.update(ftel_diffs=diffs, ftel_odd=odd, ftel_lines=len(lines_got))
+            res.update(ftel_diffs=diffs, ftel_odd=odd, ftel_lines=len(lines_got),
+                       ftel_frames=[[px for px, *_ in fr] for fr in got],
+                       ftel_shape=[all(w == wc and d == DT_RAW10 for _, w, d in fr) for fr in got])
 
     pk = {}
     for k in ('tx', 'xil', 'ftel'):
         cap = read_csv(os.path.join(run, f'{k}_ppi.csv'))
         pk[k] = ppi_packets(cap, lanes)
+        n_late, timing = 0, ''
         if k != 'tx':
             res.setdefault('starts', {})[k] = burst_starts(cap, lanes)
+            # rxsynchs of AMD's D-PHY one cycle before the first byte; of ftel_dphy_rx in its cycle, unless the
+            # testbench moved it (+PPI_AMD_TIMING=1|2)
+            want = -1 if k == 'xil' or plus(args, 'PPI_AMD_TIMING', '0') in ('1', '2') else 0
+            n_late, offsets, widest = ppi_timing(cap, lanes, want, LANE_SPREAD)
+            timing = (f', rxsynchs {span(sorted(set(offsets)))} samples from the first byte (expected {want}), lane'
+                      f' spread {span(widest)} (at most {LANE_SPREAD}), {n_late} timing errors')
+            if k == 'ftel' and plus(args, 'PPI_SOTSYNCERR'):
+                res['sotsync'] = lane_events(cap, lanes)
         bad = sorted({p['error'] for p in pk[k] if 'error' in p})
         n_bad = sum(1 for p in pk[k] if 'error' in p)
         res['corrected'][k] = sum(1 for p in pk[k] if p.get('ecc') == 'corrected')
         trail = [p['trailer'] for p in pk[k] if 'trailer' in p]
-        items.append((f'ppi-{k}', not bad, f'{k}_ppi.csv: {len(pk[k])} packets, {n_bad} with an error'
-                                           f'{" " + str(bad) if bad else ""}, {res["corrected"][k]} headers'
-                                           f' corrected, trailer bytes {span(trail)}'))
+        items.append((f'ppi-{k}', not bad and not n_late, f'{k}_ppi.csv: {len(pk[k])} packets, {n_bad} with an error'
+                                                          f'{" " + str(bad) if bad else ""}, {res["corrected"][k]}'
+                                                          f' headers corrected, trailer bytes {span(trail)}{timing}'))
     golden = [(k, ppi_frames(pk[k])) for k in ('tx', 'xil')]
     items.append(('golden-ppi', all(g == gold for _, g in golden),
                   '; '.join(f'{k}_ppi.csv: {len(g)} frames {"equal to" if g == gold else "NOT equal to"} the formula'
@@ -612,6 +720,7 @@ def decode_run(run):
                                                               f' start, {b}_ppi.csv {len(y)}, {n_same} equal in'
                                                               ' order'))
     res['shape'] = [(p.get('dt'), p.get('wc'), 'error' in p) for p in pk['xil']]
+    res['gold'] = gold
     res['items'] = items
     _RUNS[key] = res
     return res
@@ -713,11 +822,11 @@ def selftest():
 
 def sources_hash():
     """The hash run_exp2b.sh keeps in build_*/src.sha and in args.txt: sha256sum of the RTL filelist sources,
-    exp1/afe_model.sv, exp1/ppi_csv_mon.sv and exp2b/*.sv, in the order of ls."""
+    exp1/afe_model.sv, exp1/ppi_csv_mon.sv, rtl/m_ftel_ppi_act_gate.sv and exp2b/*.sv, in the order of ls."""
     files = [IP + line.rstrip('\n')[len('${FTEL_DPHY_RX_PATH}'):]
              for line in open(os.path.join(IP, 'logical', 'filelist.f')) if line.startswith('${FTEL_DPHY_RX_PATH}')]
     files += sorted([os.path.join(EXP1, f) for f in ('afe_model.sv', 'ppi_csv_mon.sv')]
-                    + glob.glob(os.path.join(HERE, '*.sv')))
+                    + [os.path.join(FPGA, 'rtl', 'm_ftel_ppi_act_gate.sv')] + glob.glob(os.path.join(HERE, '*.sv')))
     text = ''.join(f'{hashlib.sha256(open(f, "rb").read()).hexdigest()}  {f}\n' for f in files)
     return hashlib.sha256(text.encode()).hexdigest()[:16]
 
@@ -894,8 +1003,92 @@ def finding_checks(info, names):
                       for r, p in sorted(per_rate.items()))
     text = (f'not re-timed ({len(plain)} runs): R-X passes, R-F gets the packets of R-X and gives no line, counts no'
             f' packet; rxsynchs - rxactivehs at the start of every burst: {rates or "no run"}; diagnosis'
-            f' {len(diag)} runs; re-timed ({len(shim)} runs): rxactivehs into R-F with rxsynchs in every burst')
+            f' {len(diag)} runs; through the gate ({len(shim)} runs): rxactivehs into R-F with rxsynchs in every'
+            ' burst')
     return ok and bool(plain), text, details
+
+
+def gate_checks(info, names):
+    """(ok, text, details) of the gate (check gate), from info as neg_checks."""
+    details, ok, n_cmp = [], True, 0
+    shim = [n for n in names if n.startswith(SHIM)]
+    for name in shim:
+        items, tb = info[name][0], info[name][4]
+        m = re.search(r'^TB ADAPTER CHECK: comparisons (\d+), differences (\d+)', tb, re.M)
+        if 'adapter' in items and items['adapter'][0]:
+            n_cmp += int(m[1])
+        else:
+            ok = False
+            details.append(f'{name}: {items["adapter"][1] if "adapter" in items else "no gate (+PPI_ADAPTER=1)"}')
+    text = f'rxactivehs into R-F from the gate in {len(shim)} SH_ runs, {n_cmp} byte clocks equal to the model'
+    name = SHIM + SOTSYNC
+    if name not in info or info[name][2] is None:
+        return False, f'{text}; {name} not run or not decoded', details
+    items, cits, dec, args, tb = info[name]
+    sel = re.fullmatch(r'(\d+),(\d+)', plus(args, 'PPI_SOTSYNCERR', ''))
+    if not sel or plus(args, 'PPI_ADAPTER', '0') == '0':
+        return False, f'{text}; {name} without +PPI_SOTSYNCERR=<lane>,<packet> or the gate', details
+    lane, pkt = int(sel[1]), int(sel[2])
+    lanes = int(plus(args, 'LANES_ACTIVE', '4'))
+    for it in ('done', 'sotsync'):
+        if not items[it][0]:
+            ok = False
+            details.append(f'{name}: {it} {items[it][1]}')
+    # where the error is: frame and line of packet pkt, from the packets of R-X (as planted() for +PPI_CORRUPT)
+    shape = dec['shape']
+    f_err = sum(1 for s in shape[:pkt + 1] if s[0] == 0x00) - 1
+    y_err = 0
+    for s in shape[:pkt]:
+        if s[0] == 0x00:
+            y_err = 0
+        elif s[0] == DT_RAW10:
+            y_err += 1
+    where = (f'packet {pkt} ({"line " + str(y_err) + " of frame " + str(f_err) if pkt < len(shape) and
+                                shape[pkt][0] == DT_RAW10 else "not a line"})')
+    # the PPI into R-F: the lane one burst fewer than the others, errsotsynchs once, inside packet pkt of the other
+    # lanes (LANE_SPREAD samples before its start at most), with rxactivehs of the lane Low
+    runs, errs = dec.get('sotsync', ([], []))
+    n_b = [len(b) for b in runs]
+    others = [x for x in range(lanes) if x != lane]
+    inside = len(errs) == 1 and all(pkt < n_b[x] and runs[x][pkt][0] - LANE_SPREAD <= errs[0][1] <= runs[x][pkt][1]
+                                    for x in others)
+    ppi_ok = (len(n_b) == lanes and lane < lanes and all(n_b[x] == n_b[lane] + 1 for x in others) and inside
+              and errs[0][0] == lane and not errs[0][2])
+    if not ppi_ok:
+        ok = False
+        details.append(f'{name}: ftel_ppi.csv bursts per lane {n_b}, errsotsynchs (lane, sample, rxactivehs)'
+                       f' {errs[:4]}')
+    # R-X: its items of check.txt and its registers
+    rx_fail = [n for n in ('pixels-xil', 'ppi-tx', 'ppi-xil', 'packets-tx-xil') if cits.get(n) != 'PASS']
+    r, x = regs(tb), unknown(tb)
+    rx, rxm = r.get(('R-X', 0x24), 0), x.get(('R-X', 0x24), 0)
+    rx_ok = not rx_fail and bool(rx & ISR_FR) and not rxm & ISR_FR and not any((rx | rxm) & m for m in ISR_ERR.values())
+    if not rx_ok:
+        ok = False
+        details.append(f'{name}: R-X check.txt failing {rx_fail}, ISR {isr_text(rx, rxm)}')
+    # R-F: the frames after the one with the error as the formula, each line with the word count and RAW10
+    got, gold, sh = dec['ftel_frames'], dec['gold'], dec['ftel_shape']
+    after = gold[f_err + 1:]
+    k0 = len(got) - len(after)
+    rec = bool(after) and k0 >= 0 and got[k0:] == after and all(sh[k0:])
+    if not rec:
+        ok = False
+        same = k0 >= 0 and got[k0:] == after
+        details.append(f'{name}: R-F gives {len(got)} frames, the last {len(after)}'
+                       f' {"equal to" if same else "NOT equal to"} frames {f_err + 1} to {len(gold) - 1} of the formula'
+                       + ('' if all(sh[max(k0, 0):]) else ', word count or data type wrong'))
+    before = '; '.join(f'{len(fr)} lines, {sum(1 for ln in fr if ln in gold[f_err])} of them lines of frame {f_err},'
+                       f' its lines {[y for y, ln in enumerate(gold[f_err]) if ln not in fr]} missing'
+                       for fr in got[:max(k0, 0)]) or 'none'
+    rf, rfm = r.get(('R-F', 0x24), 0), x.get(('R-F', 0x24), 0)
+    pk = [r.get((ss, 0x10), 0) >> 16 for ss in ('R-X', 'R-F')]
+    text += (f'; {name}: SoT sync error on lane {lane} in {where}: ftel_ppi.csv bursts per lane {n_b}, errsotsynchs at'
+             f' sample {errs[0][1] if errs else "?"} with rxactivehs {"Low" if errs and not errs[0][2] else "High"}'
+             f' ({"as planted" if ppi_ok else "NOT as planted"}); R-X {"passes" if rx_ok else "fails"}; R-F gives'
+             f' frames {f_err + 1} to {len(gold) - 1} as the formula: {"yes, it recovers" if rec else "NO"}, TB DONE'
+             f' {"OK" if items["done"][0] else "missing"}; reported: before them R-F gives {before}; R-F ISR'
+             f' {isr_text(rf, rfm)}; packet count R-X {pk[0]}, R-F {pk[1]}')
+    return ok, text, details
 
 
 _SELF = {}   # results that do not change while evselftest plants faults: the two selftests
@@ -967,7 +1160,8 @@ def evidence(w, tb2=None):
         if name in judged:
             failing = [n for n, (ok, _) in items.items() if not ok]
             result = re.search(r'^RESULT: .*', check, re.M)
-            if failing or not result or not result[0].startswith('RESULT: PASS'):
+            # SH_E2b-9: check.txt fails on R-F by design; check gate judges the run
+            if failing or not result or not (result[0].startswith('RESULT: PASS') or name == SHIM + SOTSYNC):
                 bad['runs'].append(f'{name}: {result[0] if result else "no RESULT"}; tbcheck failing {failing}')
             if items['regs'][1].startswith('shown, not judged'):
                 r = regs(tb)
@@ -1025,10 +1219,11 @@ def evidence(w, tb2=None):
            f' tx-axis and golden-ppi pass in every run; decoder selftest {"PASS" if _SELF["decoder"] else "FAIL"}',
            bad['decode'])
     report('runs', not missing and not bad['runs'],
-           f'{len(known)} runs: {len(SCENARIOS)} scenarios re-timed, {len(MODEL)} behind afe_model,'
+           f'{len(known)} runs: {len(SCENARIOS)} scenarios through the gate, {len(MODEL)} behind afe_model,'
            f' {len(NEGATIVE)} negative tests, {len(FINDING) + len(DIAG)} of the finding'
            f' {"all there" if not missing else "missing " + str(missing)}; TB DONE OK in every run; every SH_'
-           f' scenario PASS in check.txt and tbcheck' + (f'; not judged: {other}' if other else ''), bad['runs'])
+           f' scenario PASS in check.txt and tbcheck ({SHIM + SOTSYNC}: tbcheck, its check.txt in check gate)'
+           + (f'; not judged: {other}' if other else ''), bad['runs'])
     unk_text = '; '.join(f'{k} in {len(v)} runs' for k, v in sorted(unk.items())) or 'none'
     report('regs', bool(judged) and not bad['regs'],
            f'{len(judged) - len(shown)} SH_ scenarios: frame received and no error bit in both receivers, R-F with'
@@ -1062,22 +1257,27 @@ def evidence(w, tb2=None):
            [f'{n}: {t}' for n, (_, t) in neg.items()])
     f_ok, f_text, f_details = finding_checks(info, known)
     report('finding', f_ok, f_text, f_details)
+    g_ok, g_text, g_details = gate_checks(info, known)
+    report('gate', g_ok, g_text, g_details)
     ok = all(results.values())
     print(f"EVIDENCE: {'PASS' if ok else 'FAIL'} ({sum(results.values())}/{len(results)} checks)")
     return results
 
 
-def flip_pixel(text):
-    """The AXI4-Stream capture with the lowest bit of the first pixel at the first start of frame inverted."""
+def flip_pixel(text, frame=0):
+    """The AXI4-Stream capture with the lowest bit of the first pixel of a frame inverted: at the start of frame
+    number frame (0: the first) among the beats with sof, tvalid and tready."""
     lines = text.split('\n')
     head = lines[0].split(',')
-    d, s = head.index('tdata[39:0]'), head.index('sof')
+    d, s, v, r = (head.index(n) for n in ('tdata[39:0]', 'sof', 'tvalid', 'tready'))
     for i in range(2, len(lines)):
         f = lines[i].split(',')
-        if len(f) > s and f[s] == '1':
-            f[d] = f'{int(f[d], 16) ^ 1:010x}'
-            lines[i] = ','.join(f)
-            break
+        if len(f) > max(d, s, v, r) and f[s] == f[v] == f[r] == '1':
+            if frame == 0:
+                f[d] = f'{int(f[d], 16) ^ 1:010x}'
+                lines[i] = ','.join(f)
+                break
+            frame -= 1
     return '\n'.join(lines)
 
 
@@ -1124,12 +1324,38 @@ def flip_ppi(text):
     return '\n'.join(lines)
 
 
+def raise_active(text):
+    """The PPI capture with rxactivehs of lane 0 High from its errsotsynchs to the end of the burst of lane 1: the
+    burst with the SoT sync error let through, as without the gate."""
+    lines = text.split('\n')
+    head = lines[0].split(',')
+    a0, e0, a1 = head.index('dl0_rxactivehs'), head.index('dl0_errsotsynchs'), head.index('dl1_rxactivehs')
+    on = False
+    for i in range(2, len(lines)):
+        f = lines[i].split(',')
+        if len(f) <= max(a0, e0, a1):
+            continue
+        on = (on or f[e0] == '1') and f[a1] == '1'
+        if on:
+            f[a0] = '1'
+            lines[i] = ','.join(f)
+    return '\n'.join(lines)
+
+
 WRAP_LINE = '.i_dphy_rx_core_clk              (core_clk),'   # a line of the copied instance of the wrap
 EV_FAULTS = (   # (fault, entry of the folder (None: tb_exp2b.sv), file, change of its text, checks that must fail)
     ('none', None, None, None, []),
     ('a pixel of video_out', 'SH_E2b-1', 'ftel_axis.csv', flip_pixel, ['decode']),
     ('a line missing from video_out', 'SH_E2b-1', 'xil_axis.csv', drop_line, ['decode']),
     ('a payload bit on the PPI', 'SH_E2b-1', 'ftel_ppi.csv', flip_ppi, ['decode']),
+    # the faults a tester of the FPGA team planted in copies of captures (2026-10-26); rxsynchs two bytes late also
+    # opens a gap from rxactivehs, which the check of the finding sees in the re-timed runs
+    ('rxsynchs High for three cycles', 'SH_E2b-1', 'ftel_ppi.csv', lambda s: tn2a.tn1_module().sync_wide(s),
+     ['decode']),
+    ('rxsynchs with the third payload byte', 'SH_E2b-1', 'ftel_ppi.csv', lambda s: tn2a.tn1_module().sync_late(s),
+     ['decode', 'finding']),
+    ('lane 3 eight cycles later', 'SH_E2b-1', 'ftel_ppi.csv', lambda s: tn2a.tn1_module().lane_late(s),
+     ['decode']),
     ('an error bit in a register', 'SH_E2b-1', 'tb.txt',
      lambda s: re.sub(r'^TB REG R-F 0x24 0x\S+$', 'TB REG R-F 0x24 0x80020200', s, flags=re.M), ['regs', 'runs']),
     ('a front-end difference', 'SH_E2b-1', 'tb.txt', lambda s: s.replace('differ at 0 of', 'differ at 1 of'),
@@ -1149,6 +1375,14 @@ EV_FAULTS = (   # (fault, entry of the folder (None: tb_exp2b.sv), file, change 
      lambda s: re.sub(r'^TB REG R-F 0x10 0x\S+$', 'TB REG R-F 0x10 0x00200000', s, flags=re.M), ['finding']),
     ('a changed line of the copied code', None, 'tb_exp2b.sv',
      lambda s: s.replace(WRAP_LINE, WRAP_LINE.replace('(core_clk)', '(tx_core_clk)')), ['copy']),
+    # the gate (fpga/PLAN_TN2B_GATE.md §4)
+    ('a difference of the gate from its model', 'SH_E2b-1', 'tb.txt',
+     lambda s: re.sub(r'^(TB ADAPTER CHECK: comparisons \d+), differences 0$', r'\1, differences 1', s, flags=re.M),
+     ['gate', 'runs']),
+    ('a pixel of R-F after the SoT sync error', SHIM + SOTSYNC, 'ftel_axis.csv', lambda s: flip_pixel(s, 1),
+     ['gate']),
+    ('rxactivehs in the burst with the SoT sync error', SHIM + SOTSYNC, 'ftel_ppi.csv', raise_active,
+     ['finding', 'gate']),
 )
 
 
@@ -1242,10 +1476,10 @@ REPORT_TX = ('init_done', 'enabled', 'first beat', 'HS clock requested', 'HS at 
 
 def report(w):
     """Markdown tables per rate over the SH_ runs of w with the frames of E2b-1 (2 frames of 640x16, 4 lanes, not
-    +RX_LATE, +STREAM_TOGGLE, negative tests): start of the TX (TB TX, us), trailer bytes of a packet on the PPI
-    of each receiver (all lanes), bursts of the TX controller (txrequesths of lane 0) for a line and for a short
-    packet and the gaps between bursts, latency from the TX input to video_out (first start of frame, every end of
-    line; ns); then memory and length of every run (rss.txt, sampled every 10 s). Returns 0."""
+    +RX_LATE, +STREAM_TOGGLE, +PPI_SOTSYNCERR, negative tests): start of the TX (TB TX, us), trailer bytes of a
+    packet on the PPI of each receiver (all lanes), bursts of the TX controller (txrequesths of lane 0) for a line
+    and for a short packet and the gaps between bursts, latency from the TX input to video_out (first start of
+    frame, every end of line; ns); then memory and length of every run (rss.txt, sampled every 10 s). Returns 0."""
     per, rows = {}, []
     for c in sorted(glob.glob(os.path.join(w, '*', 'check.txt'))):
         run = os.path.dirname(c)
@@ -1255,8 +1489,8 @@ def report(w):
             if os.path.exists(os.path.join(run, 'rss.txt')) else []
         rows.append((name, max((int(m) for _, m in rss), default=0), max((int(s) for s, _ in rss), default=0)))
         if not name.startswith(SHIM) or any(plus(args, k) for k in ('RX_LATE', 'STREAM_TOGGLE', 'LANES_ACTIVE',
-                                                                     'PPI_CORRUPT', 'NEG_FRONT', 'FRAMES', 'WIDTH',
-                                                                     'HEIGHT')):
+                                                                     'PPI_CORRUPT', 'PPI_SOTSYNCERR', 'NEG_FRONT',
+                                                                     'FRAMES', 'WIDTH', 'HEIGHT')):
             continue
         tb = open(os.path.join(run, 'tb.txt')).read()
         p = per.setdefault(int(re.search(r'^\S+: (\d+) Mb/s', args, re.M)[1]), {'runs': []})

@@ -28,7 +28,8 @@
 # Prints one "EXP2B <ip>:" line with the parameters of each IP, one "EXP2B port" line per port, the parameters of
 # the D-PHY cores inside the subsystems (from their block designs, by fpga/tools/bd_summary.py into <work>), and
 # the paths inside the subsystems that tb_exp2b.sv reaches ("EXP2B path"). Unless "ips" is given, it then adds the
-# RTL of ftel_dphy_rx, the blocks of exp1/ and exp2b/*.sv and writes the XSIM scripts.
+# RTL of ftel_dphy_rx, the blocks of exp1/, the gate of the PPI of fpga/rtl/ (PLAN_TN2B_GATE.md) and exp2b/*.sv and
+# writes the XSIM scripts.
 # Usage: vivado -mode batch -source exp2b.tcl -tclargs <work> <rate> [debug level] [ips]
 
 set work     [lindex $argv 0]
@@ -139,6 +140,7 @@ close $f
 foreach n {afe_model.sv ppi_csv_mon.sv} {
   lappend files [file join $exp1 $n]
 }
+lappend files [file join $fpga rtl m_ftel_ppi_act_gate.sv]
 foreach n [lsort [glob [file join $here *.sv]]] {
   lappend files $n
 }
