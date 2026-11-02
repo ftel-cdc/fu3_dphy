@@ -2,7 +2,7 @@
  "metadata": {
   "ip_name": "ftel_dphy_rx",
   "spec_path": "doc/spec.md",
-  "spec_sha256": "9e6ec588dd17ef237b08aadfd2634622cf7239c62dac65a5aa8392de858eab04",
+  "spec_sha256": "92a36c2a3c916b0e6de4b3b40d71b6666b38f68f5be7fab23522df308f589ebf",
   "spec_revision": "v0.16 (draft)",
   "mode": "review",
   "generated_by": "dphy_spec_parse (assembled by assemble_req.py)",
@@ -143,7 +143,7 @@
    "clock_domain": "async",
    "release": "both",
    "spec_status": "verified",
-   "source_section": "1.1 System context — physical signal path",
+   "source_section": "1.1 System context: physical signal path",
    "source_line": 84,
    "source_quote": "plus the termination, switched on request; outputs the HS bits unsampled, one wire per data lane, and the DDR clock of the clock lane",
    "source_ids": [
@@ -300,7 +300,7 @@
    "spec_status": "open",
    "source_section": "1.4 Baselines, release plan and features",
    "source_line": 137,
-   "source_quote": "Table 1-3 — Release plan (proposed, OPEN K1)",
+   "source_quote": "Table 1-3: Release plan (proposed, OPEN K1)",
    "source_ids": [
     "Q1",
     "C4",
@@ -326,7 +326,7 @@
    "spec_status": "open",
    "source_section": "1.4 Baselines, release plan and features",
    "source_line": 141,
-   "source_quote": "| R1 | 80–1500 Mb/s | Deskew burst **detected** and flagged on `rxskewcalhs_x`; no calibration |",
+   "source_quote": "| R1 | 80-1500 Mb/s | Deskew burst **detected** and flagged on `rxskewcalhs_x`; no calibration |",
    "source_ids": [
     "C4",
     "Q1",
@@ -352,7 +352,7 @@
    "spec_status": "open",
    "source_section": "1.4 Baselines, release plan and features",
    "source_line": 142,
-   "source_quote": "| R2 | 80–1792 Mb/s | Calibration active (Block No. 5) | 4K staggered HDR RAW12 **[CSI]** C4 |",
+   "source_quote": "| R2 | 80-1792 Mb/s | Calibration active (Block No. 5) | 4K staggered HDR RAW12 **[CSI]** C4 |",
    "source_ids": [
     "C4",
     "Q1",
@@ -1096,7 +1096,7 @@
   },
   {
    "req_id": "REQ-042",
-   "text": "clk_settle_cyc shall default to 33 core_clk cycles (assumption), the length of CL_HS_TERM: the centre of TCLK-SETTLE (197.5 ns) minus the entry into CL_HS_TERM, 30–35 ns after the start of LP-00.",
+   "text": "clk_settle_cyc shall default to 33 core_clk cycles (assumption), the length of CL_HS_TERM: the centre of TCLK-SETTLE (197.5 ns) minus the entry into CL_HS_TERM, 30-35 ns after the start of LP-00.",
    "category": "parameter",
    "block": "all",
    "clock_domain": "core_clk",
@@ -1104,7 +1104,7 @@
    "spec_status": "assumed",
    "source_section": "3. Parameters",
    "source_line": 282,
-   "source_quote": "| `clk_settle_cyc` | 33 ⚠️ | Length of CL_HS_TERM in cycles: the centre of TCLK-SETTLE (95–300 ns → 197.5 ns) minus the entry into CL_HS_TERM, 30–35 ns after the start of LP-00 (Appendix B) |",
+   "source_quote": "| `clk_settle_cyc` | 33 ⚠️ | Length of CL_HS_TERM in cycles: the centre of TCLK-SETTLE (95-300 ns → 197.5 ns) minus the entry into CL_HS_TERM, 30-35 ns after the start of LP-00 (Appendix B) |",
    "source_ids": [
     "D-PHY [1]"
    ],
@@ -1657,7 +1657,7 @@
    "spec_status": "assumed",
    "source_section": "4.2 Reset",
    "source_line": 340,
-   "source_quote": "| `cl_enable`, `dl_enable_x` | Input, level | One lane | Low: the lane is shut down — AFE enables off, lane FSM held in reset, PPI outputs of the lane at their inactive values (Enable of the PPI, D-PHY [1] ✅).",
+   "source_quote": "| `cl_enable`, `dl_enable_x` | Input, level | One lane | Low: the lane is shut down - AFE enables off, lane FSM held in reset, PPI outputs of the lane at their inactive values (Enable of the PPI, D-PHY [1] ✅).",
    "source_ids": [
     "Q6",
     "C14",
@@ -1868,7 +1868,7 @@
   },
   {
    "req_id": "REQ-072",
-   "text": "The LP state of Block No. 1 shall follow a change at the LP-RX output after (PARA_LP_SYNC_STAGES + PARA_LP_FILTER_CYC) core_clk cycles plus a sampling delay of 0 to 1 cycle (the LP detection latency, 20–25 ns with the defaults), one cycle more when the first synchronizer flip-flop resolves late.",
+   "text": "The LP state of Block No. 1 shall follow a change at the LP-RX output after (PARA_LP_SYNC_STAGES + PARA_LP_FILTER_CYC) core_clk cycles plus a sampling delay of 0 to 1 cycle (the LP detection latency, 20-25 ns with the defaults), one cycle more when the first synchronizer flip-flop resolves late.",
    "category": "timing",
    "block": "No.1",
    "clock_domain": "core_clk",
@@ -1876,7 +1876,7 @@
    "spec_status": "assumed",
    "source_section": "4.3 AFE Adapter (Block No. 1)",
    "source_line": 370,
-   "source_quote": "The LP state follows a change at the LP-RX output after (`PARA_LP_SYNC_STAGES` + `PARA_LP_FILTER_CYC`) cycles plus a sampling delay of 0 to 1 cycle: the LP detection latency, 20–25 ns with the defaults",
+   "source_quote": "The LP state follows a change at the LP-RX output after (`PARA_LP_SYNC_STAGES` + `PARA_LP_FILTER_CYC`) cycles plus a sampling delay of 0 to 1 cycle: the LP detection latency, 20-25 ns with the defaults",
    "source_ids": [],
    "parameters_affected": [
     "PARA_LP_SYNC_STAGES",
@@ -2057,7 +2057,7 @@
   },
   {
    "req_id": "REQ-346",
-   "text": "The loss of the clock shall be seen 45–55 ns after the last toggle change that core_clk sees (the last rising edge of the DDR clock, or up to three DDR clock periods earlier where the toggle of every edge aliases), and cl_rxclkactivehs shall fall one core_clk cycle later, at most 60 ns after the last clock edge, within TCLK-MISS (60 ns) at every rate.",
+   "text": "The loss of the clock shall be seen 45-55 ns after the last toggle change that core_clk sees (the last rising edge of the DDR clock, or up to three DDR clock periods earlier where the toggle of every edge aliases), and cl_rxclkactivehs shall fall one core_clk cycle later, at most 60 ns after the last clock edge, within TCLK-MISS (60 ns) at every rate.",
    "category": "timing",
    "block": "No.1",
    "clock_domain": "multi",
@@ -2065,7 +2065,7 @@
    "spec_status": "assumed",
    "source_section": "4.3 AFE Adapter (Block No. 1)",
    "source_line": 405,
-   "source_quote": "The loss of the clock is seen 45–55 ns after the last toggle change that `core_clk` sees: the",
+   "source_quote": "The loss of the clock is seen 45-55 ns after the last toggle change that `core_clk` sees: the",
    "source_ids": [],
    "parameters_affected": [],
    "ambiguity_score": 0.1,
@@ -2261,7 +2261,7 @@
   },
   {
    "req_id": "REQ-083",
-   "text": "The termination enable shall be issued without an extra timer, by the register of the FSM state entered on LP-00, 25–30 ns after the LP-RX output changes with the defaults; the AFE then has 5–10 ns + 4 UI on a data lane and 8–13 ns on the clock lane to meet TD-TERM-EN (<= 35 ns + 4 UI) and TCLK-TERM-EN (<= 38 ns), and if it cannot, PARA_LP_FILTER_CYC is reduced.",
+   "text": "The termination enable shall be issued without an extra timer, by the register of the FSM state entered on LP-00, 25-30 ns after the LP-RX output changes with the defaults; the AFE then has 5-10 ns + 4 UI on a data lane and 8-13 ns on the clock lane to meet TD-TERM-EN (<= 35 ns + 4 UI) and TCLK-TERM-EN (<= 38 ns), and if it cannot, PARA_LP_FILTER_CYC is reduced.",
    "category": "timing",
    "block": "No.1",
    "clock_domain": "core_clk",
@@ -2330,7 +2330,7 @@
   },
   {
    "req_id": "REQ-350",
-   "text": "With the 22 nm standard cells assumed for this IP (core supply 0.8 V), the aperture of a D flip-flop is about 20 ps in the fast corner (0.88 V, −40 °C) and 35 ps in the slow corner (0.72 V, 125 °C), and one clock buffer takes about 15–20 ps in the fast corner and 25–30 ps in the slow one.",
+   "text": "With the 22 nm standard cells assumed for this IP (core supply 0.8 V), the aperture of a D flip-flop is about 20 ps in the fast corner (0.88 V, −40 °C) and 35 ps in the slow corner (0.72 V, 125 °C), and one clock buffer takes about 15-20 ps in the fast corner and 25-30 ps in the slow one.",
    "category": "constraint",
    "block": "No.1",
    "clock_domain": "multi",
@@ -2350,7 +2350,7 @@
   },
   {
    "req_id": "REQ-351",
-   "text": "The samplers, the buffers of the DDR clock that drive them and their data inputs shall be placed by hand next to the AFE, with the clock and data paths built from the same cells so that their delays track, because a clock tree of three buffer levels built by the usual flow varies by about 30 ps over the corners and its whole delay, 45–90 ps, falls on one side of the window unless the data inputs are delayed to match; the rest of the IP uses the usual flow.",
+   "text": "The samplers, the buffers of the DDR clock that drive them and their data inputs shall be placed by hand next to the AFE, with the clock and data paths built from the same cells so that their delays track, because a clock tree of three buffer levels built by the usual flow varies by about 30 ps over the corners and its whole delay, 45-90 ps, falls on one side of the window unless the data inputs are delayed to match; the rest of the IP uses the usual flow.",
    "category": "constraint",
    "block": "No.1",
    "clock_domain": "multi",
@@ -2465,7 +2465,7 @@
    "spec_status": "design",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
    "source_line": 476,
-   "source_quote": "| CL_INIT | any | LP-11 held for `tinit_cyc` → CL_STOP | — |",
+   "source_quote": "| CL_INIT | any | LP-11 held for `tinit_cyc` → CL_STOP | - |",
    "source_ids": [
     "Q2"
    ],
@@ -2699,7 +2699,7 @@
    "spec_status": "design",
    "source_section": "4.4 Clock Lane Control (Block No. 2)",
    "source_line": 486,
-   "source_quote": "| CL_WAIT | any | LP-11 → CL_STOP | — |",
+   "source_quote": "| CL_WAIT | any | LP-11 → CL_STOP | - |",
    "source_ids": [
     "Q2",
     "D-PHY [1]"
@@ -2928,7 +2928,7 @@
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
    "source_line": 518,
-   "source_quote": "| DL_INIT | any | LP-11 held for `tinit_cyc` → DL_STOP | — |",
+   "source_quote": "| DL_INIT | any | LP-11 held for `tinit_cyc` → DL_STOP | - |",
    "source_ids": [
     "Q2"
    ],
@@ -2975,7 +2975,7 @@
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
    "source_line": 520,
-   "source_quote": "| DL_HS_RQST | LP-01 | LP-00 → DL_HS_PRPR; other → DL_ERR | — |",
+   "source_quote": "| DL_HS_RQST | LP-01 | LP-00 → DL_HS_PRPR; other → DL_ERR | - |",
    "source_ids": [
     "Q2",
     "Q8",
@@ -3072,7 +3072,7 @@
    "spec_status": "assumed",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
    "source_line": 524,
-   "source_quote": "| DL_HS_EOT | LP-11 | Block No. 4 reports EoT done → DL_STOP; EoT done after the line has shown LP-00 in this state → DL_HS_WAIT ⚠️ | — (EoT requested by the fall of the sync-search start) |",
+   "source_quote": "| DL_HS_EOT | LP-11 | Block No. 4 reports EoT done → DL_STOP; EoT done after the line has shown LP-00 in this state → DL_HS_WAIT ⚠️ | - (EoT requested by the fall of the sync-search start) |",
    "source_ids": [
     "Q7",
     "D-PHY [1]"
@@ -3095,7 +3095,7 @@
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
    "source_line": 525,
-   "source_quote": "| DL_HS_WAIT | any | LP-11 → DL_STOP | — |",
+   "source_quote": "| DL_HS_WAIT | any | LP-11 → DL_STOP | - |",
    "source_ids": [
     "Q2"
    ],
@@ -3117,7 +3117,7 @@
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
    "source_line": 526,
-   "source_quote": "| DL_LP_RQST | LP-10 | LP-00 → DL_LP_YIELD; LP-11 → DL_ERR | — |",
+   "source_quote": "| DL_LP_RQST | LP-10 | LP-00 → DL_LP_YIELD; LP-11 → DL_ERR | - |",
    "source_ids": [
     "Q4",
     "Q8",
@@ -3141,7 +3141,7 @@
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
    "source_line": 527,
-   "source_quote": "| DL_LP_YIELD | LP-00 | LP-01 → DL_ESC_RQST; LP-10 → turnaround request, not supported → DL_ERR | — |",
+   "source_quote": "| DL_LP_YIELD | LP-00 | LP-01 → DL_ESC_RQST; LP-10 → turnaround request, not supported → DL_ERR | - |",
    "source_ids": [
     "Q2",
     "Q4",
@@ -3165,7 +3165,7 @@
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
    "source_line": 528,
-   "source_quote": "| DL_ESC_RQST | LP-01 | LP-00 → DL_ESC_GO; other → DL_ERR | — |",
+   "source_quote": "| DL_ESC_RQST | LP-01 | LP-00 → DL_ESC_GO; other → DL_ERR | - |",
    "source_ids": [
     "Q4",
     "Q8",
@@ -3189,7 +3189,7 @@
    "spec_status": "design",
    "source_section": "4.5 Data Lane Control (Block No. 3)",
    "source_line": 529,
-   "source_quote": "| DL_ESC_GO | LP-00 | first Mark → DL_ESC_CMD | — |",
+   "source_quote": "| DL_ESC_GO | LP-00 | first Mark → DL_ESC_CMD | - |",
    "source_ids": [
     "Q4",
     "D-PHY [1]"
@@ -5500,7 +5500,7 @@
   },
   {
    "req_id": "REQ-354",
-   "text": "Deskew calibration (R2) shall need a delay line in front of the samplers, which the AFE does not provide; one built from standard cells would have steps of one buffer, about 15–30 ps depending on the corner, against a UI of 558 ps at 1792 Mb/s, so its range and resolution drift by a factor of about 2.",
+   "text": "Deskew calibration (R2) shall need a delay line in front of the samplers, which the AFE does not provide; one built from standard cells would have steps of one buffer, about 15-30 ps depending on the corner, against a UI of 558 ps at 1792 Mb/s, so its range and resolution drift by a factor of about 2.",
    "category": "constraint",
    "block": "No.5",
    "clock_domain": "none",
@@ -5909,7 +5909,7 @@
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
    "source_line": 874,
-   "source_quote": "| `cl_enable` | In | 1 | level | — | — | Yes |",
+   "source_quote": "| `cl_enable` | In | 1 | level | - | - | Yes |",
    "source_ids": [],
    "parameters_affected": [],
    "ambiguity_score": 0.05,
@@ -5929,7 +5929,7 @@
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
    "source_line": 875,
-   "source_quote": "| `dl_enable_x` | In | 1 | level | — | — | Yes |",
+   "source_quote": "| `dl_enable_x` | In | 1 | level | - | - | Yes |",
    "source_ids": [
     "C2"
    ],
@@ -5953,7 +5953,7 @@
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
    "source_line": 876,
-   "source_quote": "| `forcerxmode_x` | In | 1 | level | — | — | Yes |",
+   "source_quote": "| `forcerxmode_x` | In | 1 | level | - | - | Yes |",
    "source_ids": [],
    "parameters_affected": [],
    "ambiguity_score": 0.05,
@@ -5973,7 +5973,7 @@
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
    "source_line": 877,
-   "source_quote": "| `phy_core_rst` | In | 1 | async | — | — | Yes |",
+   "source_quote": "| `phy_core_rst` | In | 1 | async | - | - | Yes |",
    "source_ids": [],
    "parameters_affected": [],
    "ambiguity_score": 0.2,
@@ -5995,7 +5995,7 @@
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
    "source_line": 878,
-   "source_quote": "| `core_clk` | In | 1 | — | system | — | Yes |",
+   "source_quote": "| `core_clk` | In | 1 | - | system | - | Yes |",
    "source_ids": [],
    "parameters_affected": [
     "PARA_CORE_CLK_MHZ"
@@ -6124,7 +6124,7 @@
    "spec_status": "contract",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
    "source_line": 884,
-   "source_quote": "| `rxbyteclkhs` | Out | 1 | clock | No.1 | — | Yes |",
+   "source_quote": "| `rxbyteclkhs` | Out | 1 | clock | No.1 | - | Yes |",
    "source_ids": [
     "C3"
    ],
@@ -6323,7 +6323,7 @@
    "spec_status": "open",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
    "source_line": 893,
-   "source_quote": "| `rxlpdtesc_x` | Out | 1 | `core_clk` | — | 0 | Tied 0 (K2) |",
+   "source_quote": "| `rxlpdtesc_x` | Out | 1 | `core_clk` | - | 0 | Tied 0 (K2) |",
    "source_ids": [
     "K2"
    ],
@@ -6395,7 +6395,7 @@
    "spec_status": "open",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
    "source_line": 896,
-   "source_quote": "| `rxdataesc_x` | Out | 8 | `core_clk` | — | 0 | Tied 0 (K2) |",
+   "source_quote": "| `rxdataesc_x` | Out | 8 | `core_clk` | - | 0 | Tied 0 (K2) |",
    "source_ids": [
     "K2"
    ],
@@ -6421,7 +6421,7 @@
    "spec_status": "open",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
    "source_line": 897,
-   "source_quote": "| `rxvalidesc_x` | Out | 1 | `core_clk` | — | 0 | Tied 0 (K2) |",
+   "source_quote": "| `rxvalidesc_x` | Out | 1 | `core_clk` | - | 0 | Tied 0 (K2) |",
    "source_ids": [
     "K2"
    ],
@@ -6514,7 +6514,7 @@
    "spec_status": "open",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
    "source_line": 901,
-   "source_quote": "| `errsyncesc_x` | Out | 1 | async | — | 0 | Tied 0 (no LPDT, K2) |",
+   "source_quote": "| `errsyncesc_x` | Out | 1 | async | - | 0 | Tied 0 (no LPDT, K2) |",
    "source_ids": [
     "Q8",
     "C13"
@@ -6684,7 +6684,7 @@
   },
   {
    "req_id": "REQ-253",
-   "text": "stopstate_x, the escape outputs and the clock-lane outputs shall be core_clk registers that follow the line state one cycle after the LP detection latency, 25–30 ns with the defaults.",
+   "text": "stopstate_x, the escape outputs and the clock-lane outputs shall be core_clk registers that follow the line state one cycle after the LP detection latency, 25-30 ns with the defaults.",
    "category": "timing",
    "block": "all",
    "clock_domain": "core_clk",
@@ -6692,7 +6692,7 @@
    "spec_status": "design",
    "source_section": "5.1 PPI (to the CSI-2 Rx controller)",
    "source_line": 923,
-   "source_quote": "`stopstate_x`, the escape outputs and the clock-lane outputs are registers in `core_clk`. They follow the line state one cycle after the LP detection latency, 25–30 ns with the defaults (§4.3, Appendix B).",
+   "source_quote": "`stopstate_x`, the escape outputs and the clock-lane outputs are registers in `core_clk`. They follow the line state one cycle after the LP detection latency, 25-30 ns with the defaults (§4.3, Appendix B).",
    "source_ids": [],
    "parameters_affected": [],
    "ambiguity_score": 0.15,
@@ -6945,7 +6945,7 @@
   },
   {
    "req_id": "REQ-265",
-   "text": "afe_term_en_x shall rise in DL_HS_PRPR 25–30 ns after the start of LP-00 at the LP-RX output, within TD-TERM-EN when the AFE adds at most 5–10 ns + 4 UI; afe_hs_en_x follows in DL_HS_TERM 30–35 ns after it, and DL_HS_RX starts hs_settle_cyc cycles later with the sync-search start.",
+   "text": "afe_term_en_x shall rise in DL_HS_PRPR 25-30 ns after the start of LP-00 at the LP-RX output, within TD-TERM-EN when the AFE adds at most 5-10 ns + 4 UI; afe_hs_en_x follows in DL_HS_TERM 30-35 ns after it, and DL_HS_RX starts hs_settle_cyc cycles later with the sync-search start.",
    "category": "timing",
    "block": "No.3",
    "clock_domain": "core_clk",
@@ -6953,7 +6953,7 @@
    "spec_status": "open",
    "source_section": "5.2 AFE interface (proposed, OPEN ADR-001)",
    "source_line": 974,
-   "source_quote": "SoT. `afe_term_en_x` rises in DL_HS_PRPR, 25–30 ns after the start of LP-00 at the LP-RX output, within TD-TERM-EN (35 ns + 4·UI) when the AFE adds at most 5–10 ns + 4·UI (§4.3).",
+   "source_quote": "SoT. `afe_term_en_x` rises in DL_HS_PRPR, 25-30 ns after the start of LP-00 at the LP-RX output, within TD-TERM-EN (35 ns + 4·UI) when the AFE adds at most 5-10 ns + 4·UI (§4.3).",
    "source_ids": [
     "ADR-001"
    ],
@@ -7054,7 +7054,7 @@
    "clock_domain": "multi",
    "release": "both",
    "spec_status": "design",
-   "source_section": "ADR-001 — AFE boundary and interface (boundary A, announced by the AFE team)",
+   "source_section": "ADR-001: AFE boundary and interface (boundary A, announced by the AFE team)",
    "source_line": 1022,
    "source_quote": "Boundary: option A, announced by the AFE team on 2026-10-06.",
    "source_ids": [
@@ -7076,7 +7076,7 @@
    "clock_domain": "multi",
    "release": "both",
    "spec_status": "design",
-   "source_section": "ADR-001 — AFE boundary and interface (boundary A, announced by the AFE team)",
+   "source_section": "ADR-001: AFE boundary and interface (boundary A, announced by the AFE team)",
    "source_line": 1028,
    "source_quote": "A is chosen although its score is the lowest:",
    "source_ids": [
@@ -7098,7 +7098,7 @@
    "clock_domain": "multi",
    "release": "both",
    "spec_status": "verified",
-   "source_section": "ADR-001 — AFE boundary and interface (boundary A, announced by the AFE team)",
+   "source_section": "ADR-001: AFE boundary and interface (boundary A, announced by the AFE team)",
    "source_line": 1033,
    "source_quote": "Basis of the timing score of A: when the maximum rate is above 1 Gb/s, the receiver setup and hold",
    "source_ids": [
@@ -7121,7 +7121,7 @@
    "clock_domain": "multi",
    "release": "both",
    "spec_status": "open",
-   "source_section": "ADR-001 — AFE boundary and interface (boundary A, announced by the AFE team)",
+   "source_section": "ADR-001: AFE boundary and interface (boundary A, announced by the AFE team)",
    "source_line": 1042,
    "source_quote": "Still OPEN with the AFE team: the maximum line rate of the HS-RX;",
    "source_ids": [
@@ -7145,7 +7145,7 @@
    "clock_domain": "core_clk",
    "release": "both",
    "spec_status": "design",
-   "source_section": "ADR-002 — LP and escape reception (decided in this draft: A)",
+   "source_section": "ADR-002: LP and escape reception (decided in this draft: A)",
    "source_line": 1053,
    "source_quote": "oversample LP lines in `core_clk`",
    "source_ids": [
@@ -7170,7 +7170,7 @@
    "clock_domain": "core_clk",
    "release": "both",
    "spec_status": "verified",
-   "source_section": "ADR-002 — LP and escape reception (decided in this draft: A)",
+   "source_section": "ADR-002: LP and escape reception (decided in this draft: A)",
    "source_line": 1062,
    "source_quote": "Basis: every LP state lasts at least TLPX = 50 ns (D-PHY [1] ✅), i.e. ≥ 10 samples at 200 MHz.",
    "source_ids": [
@@ -7196,7 +7196,7 @@
    "clock_domain": "none",
    "release": "both",
    "spec_status": "open",
-   "source_section": "ADR-003 — Release staging",
+   "source_section": "ADR-003: Release staging",
    "source_line": 1066,
    "source_quote": "R1 without deskew calibration, R2 with it (Table 1-3). OPEN K1.",
    "source_ids": [
@@ -7223,7 +7223,7 @@
    "clock_domain": "none",
    "release": "R2",
    "spec_status": "open",
-   "source_section": "ADR-004 — Deskew algorithm (R2)",
+   "source_section": "ADR-004: Deskew algorithm (R2)",
    "source_line": 1070,
    "source_quote": "Deferred: depends on a delay line in front of the samplers, which the AFE does not have (ADR-001,",
    "source_ids": [
@@ -7251,7 +7251,7 @@
    "clock_domain": "rxbyteclkhs",
    "release": "both",
    "spec_status": "design",
-   "source_section": "ADR-004 — Deskew algorithm (R2)",
+   "source_section": "ADR-004: Deskew algorithm (R2)",
    "source_line": 1072,
    "source_quote": "fixed now: the R1 datapath already detects deskew bursts, so R2 only adds Block No. 5.",
    "source_ids": [
@@ -7273,7 +7273,7 @@
    "clock_domain": "rxbyteclkhs",
    "release": "both",
    "spec_status": "open",
-   "source_section": "ADR-006 — Trailer removal (decided: delay line + last transition)",
+   "source_section": "ADR-006: Trailer removal (decided: delay line + last transition)",
    "source_line": 1089,
    "source_quote": "D-PHY [1] ✅ is to buffer the tail of the burst and cut it at the last transition before the THS-SKIP interval.",
    "source_ids": [
@@ -7300,7 +7300,7 @@
    "clock_domain": "multi",
    "release": "both",
    "spec_status": "open",
-   "source_section": "ADR-006 — Trailer removal (decided: delay line + last transition, wait for EoT done, hold of the EoT request; OPEN: order at the PPI)",
+   "source_section": "ADR-006: Trailer removal (decided: delay line + last transition, wait for EoT done, hold of the EoT request; OPEN: order at the PPI)",
    "source_line": 1092,
    "source_quote": "Decided: DL_HS_EOT keeps waiting for EoT done; §4.5 states the resulting rate limit and keeps not waiting as the faster option.",
    "source_ids": [
@@ -7324,7 +7324,7 @@
    "clock_domain": "rxbyteclkhs",
    "release": "both",
    "spec_status": "open",
-   "source_section": "ADR-006 — Trailer removal (decided: delay line + last transition, wait for EoT done, hold of the EoT request; OPEN: order at the PPI)",
+   "source_section": "ADR-006: Trailer removal (decided: delay line + last transition, wait for EoT done, hold of the EoT request; OPEN: order at the PPI)",
    "source_line": 1094,
    "source_quote": "Decided in v0.16 after the simulation of the whole receiver: Block No. 4 holds the EoT request for three byte clocks so that the tail is stored before the cut",
    "source_ids": [
@@ -7350,7 +7350,7 @@
    "clock_domain": "multi",
    "release": "both",
    "spec_status": "open",
-   "source_section": "ADR-006 — Trailer removal (decided: delay line + last transition, wait for EoT done, hold of the EoT request; OPEN: order at the PPI)",
+   "source_section": "ADR-006: Trailer removal (decided: delay line + last transition, wait for EoT done, hold of the EoT request; OPEN: order at the PPI)",
    "source_line": 1096,
    "source_quote": "Still open: the order of `stopstate_x` and `rxactivehs_x` at the PPI, and whether the CSI-2 Rx controller ignores trailer bytes after the packet footer (CSI team).",
    "source_ids": [
@@ -7374,7 +7374,7 @@
    "clock_domain": "rxbyteclkhs",
    "release": "both",
    "spec_status": "design",
-   "source_section": "ADR-007 — Start of the sync search (decided: D)",
+   "source_section": "ADR-007: Start of the sync search (decided: D)",
    "source_line": 1110,
    "source_quote": "**D: the search starts with the sync-search start (DL_HS_RX), and the words before it are ignored",
    "source_ids": [
@@ -7460,7 +7460,7 @@
    "spec_status": "design",
    "source_section": "8. Verification Requirement",
    "source_line": 1196,
-   "source_quote": "Rate sweep 80–1500 Mb/s (R1).",
+   "source_quote": "Rate sweep 80-1500 Mb/s (R1).",
    "source_ids": [],
    "parameters_affected": [],
    "ambiguity_score": 0.1,
@@ -7652,7 +7652,7 @@
    "spec_status": "design",
    "source_section": "8. Verification Requirement",
    "source_line": 1220,
-   "source_quote": "- EoT over the guaranteed range: 260–1500 Mb/s, THS-TRAIL from its minimum to TEOT,max, LP-11 at",
+   "source_quote": "- EoT over the guaranteed range: 260-1500 Mb/s, THS-TRAIL from its minimum to TEOT,max, LP-11 at",
    "source_ids": [],
    "parameters_affected": [
     "eot_skip_bytes"
@@ -7973,7 +7973,7 @@
    "spec_status": "open",
    "source_section": "9. Open Items",
    "source_line": 1252,
-   "source_quote": "| K5 | Register map of the CSI-2 Rx controller (PHY_CONFIG, PHY_STATUS, LANE_STATUS) | — | CSI team |",
+   "source_quote": "| K5 | Register map of the CSI-2 Rx controller (PHY_CONFIG, PHY_STATUS, LANE_STATUS) | - | CSI team |",
    "source_ids": [
     "K5"
    ],
@@ -8265,7 +8265,7 @@
   },
   {
    "req_id": "REQ-313",
-   "text": "The LP detection latency shall be (PARA_LP_SYNC_STAGES + PARA_LP_FILTER_CYC) x 5 ns plus a sampling delay of 0–5 ns, 20–25 ns with the defaults; each FSM state adds 5 ns, so a lane enters its HS_PRPR state 25–30 ns and its HS_TERM state 30–35 ns after the start of LP-00 at the LP-RX output.",
+   "text": "The LP detection latency shall be (PARA_LP_SYNC_STAGES + PARA_LP_FILTER_CYC) x 5 ns plus a sampling delay of 0-5 ns, 20-25 ns with the defaults; each FSM state adds 5 ns, so a lane enters its HS_PRPR state 25-30 ns and its HS_TERM state 30-35 ns after the start of LP-00 at the LP-RX output.",
    "category": "timing",
    "block": "No.1",
    "clock_domain": "core_clk",
@@ -8273,7 +8273,7 @@
    "spec_status": "verified",
    "source_section": "Appendix B. Receiver Timing Parameters",
    "source_line": 1311,
-   "source_quote": "The LP detection latency is (`PARA_LP_SYNC_STAGES` + `PARA_LP_FILTER_CYC`) × 5 ns plus a sampling delay of 0–5 ns, 20–25 ns with the defaults (§4.3);",
+   "source_quote": "The LP detection latency is (`PARA_LP_SYNC_STAGES` + `PARA_LP_FILTER_CYC`) × 5 ns plus a sampling delay of 0-5 ns, 20-25 ns with the defaults (§4.3);",
    "source_ids": [
     "D-PHY [1]"
    ],
@@ -8315,7 +8315,7 @@
   },
   {
    "req_id": "REQ-315",
-   "text": "TCLK-SETTLE (95 to 300 ns) shall be implemented as clk_settle_cyc = (197.5 - 32.5) / 5 = 33: CL_HS_TERM, entered 30–35 ns after the start of LP-00, lasts 33 cycles and ends 195–200 ns after it.",
+   "text": "TCLK-SETTLE (95 to 300 ns) shall be implemented as clk_settle_cyc = (197.5 - 32.5) / 5 = 33: CL_HS_TERM, entered 30-35 ns after the start of LP-00, lasts 33 cycles and ends 195-200 ns after it.",
    "category": "timing",
    "block": "all",
    "clock_domain": "core_clk",
@@ -8323,7 +8323,7 @@
    "spec_status": "verified",
    "source_section": "Appendix B. Receiver Timing Parameters",
    "source_line": 1321,
-   "source_quote": "| TCLK-SETTLE | 95 … 300 ns | `clk_settle_cyc` = (197.5 − 32.5) / 5 = 33: CL_HS_TERM is entered 30–35 ns after the start of LP-00 and lasts 33 cycles, so it ends 195–200 ns after it, at the centre of TCLK-SETTLE |",
+   "source_quote": "| TCLK-SETTLE | 95 … 300 ns | `clk_settle_cyc` = (197.5 − 32.5) / 5 = 33: CL_HS_TERM is entered 30-35 ns after the start of LP-00 and lasts 33 cycles, so it ends 195-200 ns after it, at the centre of TCLK-SETTLE |",
    "source_ids": [
     "D-PHY [1]"
    ],
@@ -8339,7 +8339,7 @@
   },
   {
    "req_id": "REQ-316",
-   "text": "TD-TERM-EN (<= 35 ns + 4 UI) shall be met with afe_term_en_x issued 25–30 ns after the start of LP-00, leaving the AFE 5–10 ns + 4 UI for its LP-RX delay and the termination switch.",
+   "text": "TD-TERM-EN (<= 35 ns + 4 UI) shall be met with afe_term_en_x issued 25-30 ns after the start of LP-00, leaving the AFE 5-10 ns + 4 UI for its LP-RX delay and the termination switch.",
    "category": "timing",
    "block": "all",
    "clock_domain": "core_clk",
@@ -8347,7 +8347,7 @@
    "spec_status": "assumed",
    "source_section": "Appendix B. Receiver Timing Parameters",
    "source_line": 1322,
-   "source_quote": "| TD-TERM-EN | ≤ 35 ns + 4·UI | `afe_term_en_x` 25–30 ns after the start of LP-00; the AFE has the remaining 5–10 ns + 4·UI for its LP-RX delay and the termination switch (§4.3) ⚠️ |",
+   "source_quote": "| TD-TERM-EN | ≤ 35 ns + 4·UI | `afe_term_en_x` 25-30 ns after the start of LP-00; the AFE has the remaining 5-10 ns + 4·UI for its LP-RX delay and the termination switch (§4.3) ⚠️ |",
    "source_ids": [
     "D-PHY [1]"
    ],
@@ -8365,7 +8365,7 @@
   },
   {
    "req_id": "REQ-317",
-   "text": "TCLK-TERM-EN (<= 38 ns) shall be met with afe_cl_term_en issued 25–30 ns after the start of LP-00, leaving the AFE 8–13 ns.",
+   "text": "TCLK-TERM-EN (<= 38 ns) shall be met with afe_cl_term_en issued 25-30 ns after the start of LP-00, leaving the AFE 8-13 ns.",
    "category": "timing",
    "block": "all",
    "clock_domain": "core_clk",
@@ -8373,7 +8373,7 @@
    "spec_status": "assumed",
    "source_section": "Appendix B. Receiver Timing Parameters",
    "source_line": 1323,
-   "source_quote": "| TCLK-TERM-EN | ≤ 38 ns | `afe_cl_term_en` 25–30 ns after the start of LP-00; the AFE has the remaining 8–13 ns (§4.3) ⚠️ |",
+   "source_quote": "| TCLK-TERM-EN | ≤ 38 ns | `afe_cl_term_en` 25-30 ns after the start of LP-00; the AFE has the remaining 8-13 ns (§4.3) ⚠️ |",
    "source_ids": [
     "D-PHY [1]"
    ],
@@ -8572,7 +8572,7 @@
    "type": "missing",
    "text": "Table 4-7 (trailer removal per line rate) has a header that spec_inventory.py does not recognise, so its rows are not graded for coverage; they were traced as prose (one REQ per row).",
    "source_line": 742,
-   "source_quote": "**Table 4-7 — Trailer removal with the Table 3-2 value of",
+   "source_quote": "**Table 4-7: Trailer removal with the Table 3-2 value of",
    "proposed_default": "Add the header signature (Line rate (Mb/s), eot_skip_bytes, Smallest value that lost payload, Bursts with trailer bytes, no junk, Bursts with trailer bytes, 40 ns of junk, Trailer bytes in a burst, at most) as a graded kind with the next spec revision that changes the table.",
    "owner": "internal"
   },

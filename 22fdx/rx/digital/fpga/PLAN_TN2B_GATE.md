@@ -1,4 +1,4 @@
-# Plan: phương án A — khối chỉnh PPI ở FPGA cho controller CSI-2 của AMD (2026-10-26)
+# Plan: phương án A - khối chỉnh PPI ở FPGA cho controller CSI-2 của AMD (2026-10-26)
 
 > Repo `fu3_dphy`, branch `dev`, sau commit `e456f21`; thư mục `22fdx/rx/digital/fpga/`.
 > Ký hiệu: ✅ đã kiểm · ⚠️ ước lượng hoặc giả định · 🔍 kiểm khi làm.
@@ -6,8 +6,8 @@
 
 ## 0. Context
 
-- **Vấn đề** (TN2b, [`PLAN_TN2B.md`](PLAN_TN2B.md) §14–15): controller CSI-2 RX SS 6.0 của AMD, bản không PHY, không nhận packet nào từ `ftel_dphy_rx`.
-  - `ftel_dphy_rx` nâng `rxactivehs` 7–20 byte clock trước `rxsynchs`.
+- **Vấn đề** (TN2b, [`PLAN_TN2B.md`](PLAN_TN2B.md) §14-15): controller CSI-2 RX SS 6.0 của AMD, bản không PHY, không nhận packet nào từ `ftel_dphy_rx`.
+  - `ftel_dphy_rx` nâng `rxactivehs` 7-20 byte clock trước `rxsynchs`.
   - Controller của AMD cần hai tín hiệu này lên cùng lúc.
   - Khi testbench giữ `rxactivehs` tới `rxsynchs` (`+PPI_AMD_TIMING=3`), cả 27 run dương đều PASS.
 - **Quyết định (2026-10-23):** chọn **phương án A**: một khối chỉ ở FPGA, đặt giữa `ftel_dphy_rx` và RX SS không PHY. RTL ASIC (`logical/`, `config/`), HAS và hợp đồng với controller CSI-2 giữ nguyên.
@@ -25,8 +25,8 @@
 
 | # | Dữ kiện | Nguồn |
 |---|---|---|
-| F1 | Controller AMD cần khoảng `rxactivehs` → `rxsynchs` = 0. Khoảng 0 thì PASS; 7, 12, 19–20 thì ra 0 packet; 1–6 chưa thử | ✅ TN2b, các run DBG |
-| F2 | Khoảng của ftel ≥ 3 ở mọi capture đã lưu: 3–4 ở 80 Mb/s, 8–9 ở 1440 với THS-PREPARE/ZERO min, 19–20 với TX của AMD. D-PHY AMD luôn bằng 0 | ✅ capture TN1, TN2a |
+| F1 | Controller AMD cần khoảng `rxactivehs` → `rxsynchs` = 0. Khoảng 0 thì PASS; 7, 12, 19-20 thì ra 0 packet; 1-6 chưa thử | ✅ TN2b, các run DBG |
+| F2 | Khoảng của ftel ≥ 3 ở mọi capture đã lưu: 3-4 ở 80 Mb/s, 8-9 ở 1440 với THS-PREPARE/ZERO min, 19-20 với TX của AMD. D-PHY AMD luôn bằng 0 | ✅ capture TN1, TN2a |
 | F3 | Ví dụ PPI (phần informative) của spec D-PHY vẽ `RxActiveHS` lên cùng `RxSyncHS`, byte đầu ở cycle sau, tức là kiểu AMD | ✅ |
 | F4 | Controller CSI-2 của team CSI, theo bảng Burst FSM và quy tắc cờ trong HAS của họ, cần `rxactivehs` lên trước `rxsynchs` ít nhất 1 byte clock. Hình ví dụ trong chính HAS đó lại vẽ hai tín hiệu lên cùng lúc, nên cần team CSI xác nhận | ⚠️ suy từ văn bản, chưa có RTL của họ |
 | F5 | Suy ra: không có một hành vi duy nhất nào của ftel hợp với cả hai controller. Hành vi hiện tại hợp với controller CSI | từ F1, F2, F4 |
@@ -39,7 +39,7 @@
 
 **Kết quả chấm điểm:**
 - **Cổng loại:** chỉ A và B qua đủ. C0 bắt team CSI phải sửa; C1 cần một thí nghiệm chưa làm.
-- **Ma trận** (cách chấm của HAS §7: điểm 1–5 × trọng số, tối đa 120): **A 102**, B 88, C1 74, C0 64.
+- **Ma trận** (cách chấm của HAS §7: điểm 1-5 × trọng số, tối đa 120): **A 102**, B 88, C1 74, C0 64.
 - **Thứ tự giữ nguyên** ở profile "ưu tiên dùng lại IP" (A 108 / B 101 / C1 83 / C0 77 trên 135) và "ưu tiên prototype sớm" (121 / 102 / 87 / 73 trên 140).
 - **Khi gộp các tiêu chí tương quan:** vẫn A > B > C1 > C0.
 - **B chỉ vượt A** khi giá trị lâu dài nặng gấp hơn ~2,4 lần chi phí và rủi ro.
@@ -52,7 +52,7 @@
 **Chức năng, từng lane:**
 - `o_rxactivehs = i_rxactivehs & (i_rxsynchs | reg_seen)`.
 - `reg_seen` = 1 khi có `i_rxsynchs` trong lúc `i_rxactivehs` = 1, và về 0 khi `i_rxactivehs` = 0.
-- Không thêm trễ. Mỗi lane 1 flop và 1–2 cổng, thêm 2 flop của reset sync.
+- Không thêm trễ. Mỗi lane 1 flop và 1-2 cổng, thêm 2 flop của reset sync.
 - Các tín hiệu PPI khác đi thẳng từ ftel vào RX SS, không qua khối.
 
 **Port** (rtl_rule N2, N5, N11, F5):
@@ -221,13 +221,13 @@ Build 1440 Mb/s làm lại (49 s), compile sạch.
 **SH_E2b-9** (lỗi SoT sync ở lane 0 của packet 5, tức line 4 của frame 0), 152 s:
 - **Không treo:** `TB DONE OK`; `tbcheck` 9/9 (`sotsync`: đúng 1 burst bị đổi); khối trùng model ở 20 802 byte clock.
 - **PPI vào R-F:**
-  - lane 0 có 52 burst, lane 1–3 có 53;
+  - lane 0 có 52 burst, lane 1-3 có 53;
   - `errsotsynchs` một lần (sample 1330), nằm trong packet 5 của các lane khác, và lúc đó `rxactivehs` của lane 0 = 0.
 - **R-X:** 48/48 line; ISR sạch (frame received, stop state).
 - **R-F phục hồi:** frame 1 và 2 trùng golden từng pixel, đúng WC và RAW10 ở mọi line.
 - **Frame 0 của R-F** (chỉ báo cáo):
-  - R-F ra 15 line: 14 line đúng (line 0–3 và 6–15), không có line 4 và 5;
-  - thay vào đó là 1 line lẫn: byte của lane 0 là của line 5; byte của lane 1–3 là 17 byte đầu của line 4, rồi phần
+  - R-F ra 15 line: 14 line đúng (line 0-3 và 6-15), không có line 4 và 5;
+  - thay vào đó là 1 line lẫn: byte của lane 0 là của line 5; byte của lane 1-3 là 17 byte đầu của line 4, rồi phần
     còn lại của line 5, kể từ byte thứ 3 của lane;
   - ISR của R-F: frame received, VC0 frame level (bit 0), CRC (bit 9). Không có bit SoT sync (bit 12), dù PPI có
     `errsotsynchs`;
@@ -238,7 +238,7 @@ Build 1440 Mb/s làm lại (49 s), compile sạch.
 - Cái giá của một lỗi sync ở một lane là **hai line của frame đó, trong đó một line sai vẫn được đưa ra `video_out`**.
   ISR có cờ CRC, nhưng `video_out` không đánh dấu line đó, vì `tuser[1]` luôn bằng 0 (`exp2b/README.md` §6.4).
 - ⚠️ Cách đọc, chưa kiểm: FIFO của mỗi lane trong controller AMD sâu khoảng 18 phần tử.
-  - Khi lane 0 thiếu burst, FIFO của lane 1–3 đầy. Phần còn lại của packet 5 bị mất, cùng vài byte đầu của packet 6.
+  - Khi lane 0 thiếu burst, FIFO của lane 1-3 đầy. Phần còn lại của packet 5 bị mất, cùng vài byte đầu của packet 6.
   - Khi lane 0 bắt đầu packet 6, controller ghép hai packet lại thành line lẫn.
   - Controller căn lại ở packet 7.
 - 🔍 Chưa biết D-PHY AMD (R-X) xử lý lỗi sync ra sao. TN2b không có cách cài lỗi sync vào line của TX AMD.
@@ -250,7 +250,7 @@ Build 1440 Mb/s làm lại (49 s), compile sạch.
 Cổng 2c đạt.
 - **Build:** 4 build làm lại, vì `exp2b.tcl` thêm file của khối; khoảng 49 s mỗi build.
 - **Run:** 38 run (29 run `SH_*` còn lại và 9 run `finding`), 3 luồng, 34 phút. Tính cả hai run của 2b: 40 run, tổng
-  6 275 s; mỗi run 121–253 s; tối đa 5,1 GB (E2b-8).
+  6 275 s; mỗi run 121-253 s; tối đa 5,1 GB (E2b-8).
 - **`evidence`: PASS (12/12 checks).**
   - 277/277 mục của `check.txt` giải mã lại cùng kết luận;
   - `gate`: 31 run `SH_*`, 436 865 byte clock trùng model, 0 khác; SH_E2b-9 như §9.2;

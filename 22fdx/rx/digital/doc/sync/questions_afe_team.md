@@ -1,4 +1,4 @@
-# ftel_dphy_rx — Câu hỏi cho team AFE
+# ftel_dphy_rx - Câu hỏi cho team AFE
 
 | Mục | Nội dung |
 |---|---|
@@ -44,10 +44,10 @@ Vì sao chọn A dù điểm thấp nhất:
 - **Cái giá của A** là timing của sampler. Cửa sổ setup/hold của receiver là 0.3 UI khi tốc độ tối
   đa ≤ 1 Gb/s (300 ps ở 1 Gb/s) và 0.4 UI khi trên 1 Gb/s (267 ps ở 1500 Mb/s). Cửa sổ này phải chứa
   độ mở của flip-flop lấy mẫu và mọi chênh lệch trễ giữa clock và data, từ đầu vào AFE tới sampler.
-  Clock tree tổng hợp theo flow thường dồn toàn bộ trễ của nó (45–90 ps với cell 22 nm) về một phía
+  Clock tree tổng hợp theo flow thường dồn toàn bộ trễ của nó (45-90 ps với cell 22 nm) về một phía
   cửa sổ. Vì thế sampler và buffer DDR clock được đặt tay sát AFE, đường clock và đường data dùng
   cùng loại cell. Ước lượng ⚠️ với thư viện cell 22 nm: đạt ở corner chậm 0.72 V/125 °C, còn khoảng
-  ±95 ps ở 1792 Mb/s cho chênh lệch trễ clock–data của AFE và phần digital (A8). Thư viện, body bias
+  ±95 ps ở 1792 Mb/s cho chênh lệch trễ clock-data của AFE và phần digital (A8). Thư viện, body bias
   và corner sign-off chưa chốt (OPEN với physical design).
 
 **Vì sao termination vẫn do phần digital bật.** Team AFE cho biết AFE có một mạch đơn giản phát
@@ -74,14 +74,14 @@ A6 và A11 không chặn cấu trúc RTL:
 
 | ID | Chủ đề | Ưu tiên | Liên quan | Trạng thái |
 |---|---|---|---|---|
-| A1 | Ranh giới AFE / digital | — | ADR-001 | Đã trả lời 2026-10-06: phương án A |
-| A2 | Bộ phát hiện clock activity cho TCLK-MISS | — | ADR-001 | Bỏ 2026-10-06: nay nằm trong Block No. 1 |
+| A1 | Ranh giới AFE / digital | - | ADR-001 | Đã trả lời 2026-10-06: phương án A |
+| A2 | Bộ phát hiện clock activity cho TCLK-MISS | - | ADR-001 | Bỏ 2026-10-06: nay nằm trong Block No. 1 |
 | A3 | Termination: ai bật, và ngân sách thời gian | **Cao** | ADR-001 | Chờ |
 | A4 | Delay line cho deskew (R2) | Trung bình | ADR-001, ADR-004 | Chờ |
 | A5 | Độ rộng glitch tối đa ở đầu ra LP-RX | Trung bình | ADR-001 | Chờ |
 | A6 | Đầu ra HS-RX của data lane trong THS-PREPARE | Trung bình | ADR-001, ADR-007 | Chờ; độ trễ word Λ không còn hỏi |
 | A7 | Tốc độ tối đa của HS-RX | **Cao** | ADR-001, K1 | Chờ (mới) |
-| A8 | Chênh lệch trễ clock–data và duty cycle của DDR clock | **Cao** | ADR-001 | Chờ (mới) |
+| A8 | Chênh lệch trễ clock-data và duty cycle của DDR clock | **Cao** | ADR-001 | Chờ (mới) |
 | A9 | Đầu ra HS-RX khi tắt, khi khởi động và khi dừng | **Cao** | ADR-001 | Chờ (mới) |
 | A10 | Một hay hai enable cho mỗi lane | **Cao** | ADR-001 | Chờ (mới) |
 | A11 | Đảo cực P/N và map lane trong AFE | Trung bình | ADR-001 | Chờ (trước là A1 ý 5) |
@@ -100,7 +100,7 @@ Chiều tín hiệu nhìn từ `ftel_dphy_rx`. Hậu tố `_x` nghĩa là mỗi 
 | `afe_lp_dp_x`, `afe_lp_dn_x` | In | 1 mỗi tín hiệu | async | Đầu ra LP-RX của data lane x |
 | `afe_cl_lp_dp`, `afe_cl_lp_dn` | In | 1 mỗi tín hiệu | async | Đầu ra LP-RX của clock lane |
 | `afe_cl_hs_clk` | In | 1 | clock | Đầu ra HS-RX của clock lane: DDR clock (line rate / 2), mức CMOS; Low khi HS-RX tắt (A9) |
-| `afe_hs_bit_x` | In | 1 | `afe_cl_hs_clk`, cả hai cạnh | Đầu ra HS-RX của data lane x: chuỗi bit mức CMOS, chưa lấy mẫu. Tx đặt mỗi cạnh DDR clock vào giữa một bit. Chênh lệch trễ clock–data và duty cycle nằm trong ngân sách của A8 |
+| `afe_hs_bit_x` | In | 1 | `afe_cl_hs_clk`, cả hai cạnh | Đầu ra HS-RX của data lane x: chuỗi bit mức CMOS, chưa lấy mẫu. Tx đặt mỗi cạnh DDR clock vào giữa một bit. Chênh lệch trễ clock-data và duty cycle nằm trong ngân sách của A8 |
 | `afe_hs_en_x`, `afe_cl_hs_en` | Out | 1 mỗi tín hiệu | `core_clk` | Bật HS-RX |
 | `afe_term_en_x`, `afe_cl_term_en` | Out | 1 mỗi tín hiệu | `core_clk` | Bật HS termination. AFE chỉ có một enable mỗi lane thì dùng tín hiệu này (A10) |
 | `afe_dly_tap_x` | Out | `PARA_DLY_TAP_WIDTH` | `rxbyteclkhs` | Giá trị delay line (R2), chỉ khi AFE có delay line (A4) |
@@ -109,7 +109,7 @@ Chiều tín hiệu nhìn từ `ftel_dphy_rx`. Hậu tố `_x` nghĩa là mỗi 
 
 ---
 
-## A1 — Ranh giới AFE / digital (đã trả lời)
+## A1: Ranh giới AFE / digital (đã trả lời)
 
 - **2026-10-03.** Team AFE thông báo "AFE chỉ cắt tín hiệu ở mức byte". Bản trước của file này đọc
   thành phương án B.
@@ -125,7 +125,7 @@ Các ý còn mở của A1 bản trước:
 - **Ý 4** (byte clock dừng và chạy lại, glitch khi `afe_cl_hs_en` đổi): thay bằng A9.
 - **Ý 5** (đảo cực, map lane): chuyển thành A11.
 
-## A2 — Bộ phát hiện clock activity cho TCLK-MISS (bỏ ngày 2026-10-06)
+## A2: Bộ phát hiện clock activity cho TCLK-MISS (bỏ ngày 2026-10-06)
 
 AFE không cần cung cấp `afe_cl_clk_active` nữa. Phần digital tự phát hiện trong Block No. 1 (HAS
 §4.3):
@@ -136,23 +136,23 @@ AFE không cần cung cấp `afe_cl_clk_active` nữa. Phần digital tự phát
 
 Điều kiện còn lại từ phía AFE nằm ở A9: DDR clock ở mức Low khi HS-RX tắt.
 
-## A3 — Termination: ai bật, và ngân sách thời gian
+## A3: Termination: ai bật, và ngân sách thời gian
 
 **Câu hỏi.**
 1. Mạch phát hiện LP/HS của AFE dựa vào tín hiệu nào, ví dụ đầu ra LP-RX hay mức common mode? Mạch
    này có đầu vào enable từ phần digital không?
 2. Phần digital phát `afe_term_en_x` / `afe_cl_term_en` bằng thanh ghi của trạng thái FSM vào khi
    thấy LP-00 sau HS request, không thêm timer. Từ lúc đầu ra LP-RX đổi tới lúc enable lên mất
-   25–30 ns:
-   - phát hiện LP-00 mất 20–25 ns tùy pha lấy mẫu: 2 chu kỳ đồng bộ và bộ lọc glitch 2 chu kỳ ở
+   25-30 ns:
+   - phát hiện LP-00 mất 20-25 ns tùy pha lấy mẫu: 2 chu kỳ đồng bộ và bộ lọc glitch 2 chu kỳ ở
      200 MHz;
    - thanh ghi của FSM thêm 1 chu kỳ;
    - thêm 5 ns nữa nếu flip-flop đồng bộ đầu tiên resolve trễ một chu kỳ.
 
    AFE bật được termination trong phần thời gian còn lại không?
-   - Data lane: TD-TERM-EN ≤ 35 ns + 4·UI, tính từ lúc Dn qua VIL,MAX. AFE còn 5–10 ns + 4·UI cho độ
+   - Data lane: TD-TERM-EN ≤ 35 ns + 4·UI, tính từ lúc Dn qua VIL,MAX. AFE còn 5-10 ns + 4·UI cho độ
      trễ của LP-RX và việc bật termination.
-   - Clock lane: TCLK-TERM-EN ≤ 38 ns. AFE còn 8–13 ns.
+   - Clock lane: TCLK-TERM-EN ≤ 38 ns. AFE còn 8-13 ns.
 3. Nếu không kịp: AFE có tự bật termination khi thấy LP-00 được không, với điều kiện phần digital
    cho phép (arm) trước? Phần digital chỉ arm khi FSM đã thấy HS request (LP-11 → LP-01). Escape
    entry và ULPS không arm, nên termination không bật sai.
@@ -171,7 +171,7 @@ của FSM.
 
 **Tham chiếu.** D-PHY v1.1 Table 14. HAS D-PHY §4.3 (design note), Appendix B.
 
-## A4 — Delay line cho deskew (chỉ R2)
+## A4: Delay line cho deskew (chỉ R2)
 
 Theo thông báo ngày 2026-10-06, AFE không có delay line. Deskew calibration của R2 (trên 1.5 Gb/s,
 theo D-PHY v1.2) cần một delay line trước sampler của mỗi data lane.
@@ -183,7 +183,7 @@ theo D-PHY v1.2) cần một delay line trước sampler của mỗi data lane.
      thì có glitch không?
    - delay line nằm trên đường data, trên đường clock, hay cả hai?
 2. Nếu không: delay line phải làm bằng cell chuẩn trong phần digital. Mỗi bước là một buffer, khoảng
-   15–30 ps tùy corner với cell 22 nm, so với UI 558 ps ở 1792 Mb/s. Dải chỉnh và độ phân giải vì thế
+   15-30 ps tùy corner với cell 22 nm, so với UI 558 ps ở 1792 Mb/s. Dải chỉnh và độ phân giải vì thế
    trôi khoảng 2 lần giữa các corner ⚠️ (HAS §4.8). Team có ý kiến không?
 
 **Vì sao cần.**
@@ -195,7 +195,7 @@ theo D-PHY v1.2) cần một delay line trước sampler của mỗi data lane.
 reset. R2 chờ câu trả lời này. Thuật toán mặc định: quét mọi tap trong một deskew burst, rồi chọn
 tap giữa cửa sổ bắt đúng; chỉ calibrate lúc đầu (initial), không calibrate định kỳ.
 
-## A5 — Độ rộng glitch tối đa ở đầu ra LP-RX
+## A5: Độ rộng glitch tối đa ở đầu ra LP-RX
 
 **Câu hỏi.**
 1. Đầu ra LP-RX có thể để lọt glitch (xung ngắn) rộng tối đa bao nhiêu vào phần digital?
@@ -209,7 +209,7 @@ dài thì càng chống glitch tốt, nhưng càng ăn vào ngân sách terminat
 **Giả định hiện tại.** Bộ lọc 2 chu kỳ `core_clk` (10 ns), tức glitch dài hơn 10 ns không lọt qua
 LP-RX.
 
-## A6 — Đầu ra HS-RX của data lane trong THS-PREPARE
+## A6: Đầu ra HS-RX của data lane trong THS-PREPARE
 
 **Đổi ngày 2026-10-06.** Độ trễ word Λ nay do deserializer của Block No. 1 đặt: Λ = 2, xác nhận khi
 có RTL của block. Vì thế bản này không còn hỏi Λ. Trễ của HS-RX nằm trong Λ, nhưng nhỏ so với một
@@ -231,23 +231,23 @@ byte clock (4.46 ns ở 1792 Mb/s) ⚠️.
 **Giả định hiện tại.** Đầu ra có thể là rác, kể cả luôn là 1, cho tới THS-SETTLE,min. Trễ của HS-RX
 dưới 1 ns ⚠️.
 
-## A7 — Tốc độ tối đa của HS-RX (mới)
+## A7: Tốc độ tối đa của HS-RX (mới)
 
 **Câu hỏi.**
 1. HS-RX của data lane và của clock lane chạy tới tốc độ nào, ở mọi corner? Sơ đồ tham khảo ghi
-   khối HS ở 80–1000 Mb/s.
+   khối HS ở 80-1000 Mb/s.
 2. Theo đó, receiver theo cửa sổ setup/hold 0.3 UI (tốc độ tối đa ≤ 1 Gb/s) hay 0.4 UI (trên
    1 Gb/s) của D-PHY Table 27?
 
 **Vì sao cần.**
-- HAS đề xuất R1 ở 80–1500 Mb/s và R2 ở 80–1792 Mb/s (OPEN K1, do CSI team chốt). Nếu HS-RX chỉ
+- HAS đề xuất R1 ở 80-1500 Mb/s và R2 ở 80-1792 Mb/s (OPEN K1, do CSI team chốt). Nếu HS-RX chỉ
   tới 1 Gb/s thì tốc độ của R1 phải xem lại. Đó là quyết định của CSI team và dự án, không phải của
   nhóm digital.
 - Tốc độ tối đa quyết định cửa sổ lấy mẫu, nên quyết định cả ngân sách timing của sampler (A8).
 
 **Giả định hiện tại.** HS-RX chạy tới 1500 Mb/s ⚠️.
 
-## A8 — Chênh lệch trễ clock–data và duty cycle của DDR clock (mới)
+## A8: Chênh lệch trễ clock-data và duty cycle của DDR clock (mới)
 
 **Câu hỏi.**
 1. Tại đầu ra AFE, trễ của HS-RX clock lane và trễ của HS-RX mỗi data lane chênh nhau bao nhiêu? Cần
@@ -257,7 +257,7 @@ dưới 1 ns ⚠️.
    lỗi duty cycle ăn trực tiếp vào cửa sổ.
 3. Đầu ra HS-RX nằm ở đâu trên die? Sampler sẽ được đặt tay ngay cạnh đó.
 
-**Vì sao cần.** Cửa sổ setup/hold (A7) phải chứa độ mở của sampler và mọi chênh lệch trễ clock–data,
+**Vì sao cần.** Cửa sổ setup/hold (A7) phải chứa độ mở của sampler và mọi chênh lệch trễ clock-data,
 từ đầu vào AFE tới sampler. Ước lượng của nhóm digital, với thư viện cell 22 nm và sampler đặt tay ⚠️:
 - Ở corner chậm (0.72 V, 125 °C) còn khoảng ±115 ps ở 1500 Mb/s, ±95 ps ở 1792 Mb/s và ±130 ps ở
   1 Gb/s cho AFE và phần digital cộng lại, kể cả lỗi duty cycle.
@@ -267,7 +267,7 @@ từ đầu vào AFE tới sampler. Ước lượng của nhóm digital, với t
 **Giả định hiện tại.** Chưa chia ngân sách giữa AFE và phần digital: HAS chỉ ghi tổng. Việc chia sẽ
 chốt cùng team AFE và physical design, sau khi có số của AFE.
 
-## A9 — Đầu ra HS-RX khi tắt, khi khởi động và khi dừng (mới)
+## A9: Đầu ra HS-RX khi tắt, khi khởi động và khi dừng (mới)
 
 **Câu hỏi.**
 1. Khi HS-RX tắt, `afe_cl_hs_clk` và `afe_hs_bit_x` ở mức nào? Trong sơ đồ HS-RX tham khảo, output
@@ -291,7 +291,7 @@ chốt cùng team AFE và physical design, sau khi có số của AFE.
 - Xung lúc khởi động và lúc dừng được bỏ qua.
 - Clock sạch từ khi FSM của clock lane vào CL_HS_CLK.
 
-## A10 — Một hay hai enable cho mỗi lane (mới)
+## A10: Một hay hai enable cho mỗi lane (mới)
 
 **Câu hỏi.**
 1. Sơ đồ HS-RX tham khảo dùng một chân `ven_hr` cho cả termination, power switch của HS-RX và output
@@ -301,15 +301,15 @@ chốt cùng team AFE và physical design, sau khi có số của AFE.
 
 **Vì sao cần.**
 - Phần digital có hai enable mỗi lane. `afe_term_en_x` lên ở DL_HS_PRPR, khi thấy LP-00.
-  `afe_hs_en_x` lên ở DL_HS_TERM, 30–35 ns sau.
-- Nếu AFE chỉ có một enable, nó dùng `afe_term_en_x` (HAS Table 5-2), nên HS-RX bật sớm hơn 30–35 ns.
+  `afe_hs_en_x` lên ở DL_HS_TERM, 30-35 ns sau.
+- Nếu AFE chỉ có một enable, nó dùng `afe_term_en_x` (HAS Table 5-2), nên HS-RX bật sớm hơn 30-35 ns.
   Đầu ra trước THS-SETTLE,min đằng nào cũng bị bỏ qua (A6), nên chức năng không đổi.
 - Thời gian khởi động của HS-RX vẫn cần biết, để kiểm rằng đầu ra đúng trước khi phần digital bắt đầu
   tìm sync.
 
 **Giả định hiện tại.** AFE có hai enable. Nếu chỉ có một thì nối với `afe_term_en_x`.
 
-## A11 — Đảo cực P/N và map lane trong AFE (trước là A1 ý 5)
+## A11: Đảo cực P/N và map lane trong AFE (trước là A1 ý 5)
 
 **Câu hỏi.** Phần digital tự làm đảo cực P/N và map lane logic ↔ vật lý, cho cả đường HS lẫn đường
 LP. AFE có tự đảo hay map lại tín hiệu nào không? Nếu cả hai bên cùng đảo thì cực tính sẽ bị đảo hai
@@ -325,7 +325,7 @@ lần.
 |---|---|---|---|
 | A1 | Một phần: "AFE chỉ cắt tín hiệu ở mức byte". Bản trước của file này đọc thành phương án B; câu trả lời ngày 2026-10-06 thay cách đọc đó | Team AFE | 2026-10-03 |
 | A1 | AFE chỉ có HS-RX, LP-RX và termination, cùng một mạch đơn giản phát hiện lane ở LP hay HS để bật termination; không có sampler, không deserialize: phương án A | Team AFE | 2026-10-06 |
-| A2 | Không cần trả lời: clock activity nay nằm trong Block No. 1 (HAS v0.13 §4.3) | — | 2026-10-06 |
+| A2 | Không cần trả lời: clock activity nay nằm trong Block No. 1 (HAS v0.13 §4.3) | - | 2026-10-06 |
 | A3 | | | |
 | A4 | | | |
 | A5 | | | |

@@ -1,0 +1,19 @@
+# Settings of this document folder for the ftel_doc_kit scripts (md2docx.py, check_spec.py,
+# figures/check_figures.py). The project keeps this file; "kit.py vendor" never changes it.
+ip: ftel_dphy_rx
+kind: HAS                       # HAS: architecture draft (v0.x); HDS: design release (v1.0, template order)
+doc_id: FTEL_IP_MIPI_D-PHY_RX_HAS
+cover_name: MIPI D-PHY RECEIVER
+title: ftel_dphy_rx - MIPI D-PHY Receiver High-Level Architecture Specification
+spec: spec.md
+commit_docx: false              # the .docx is built locally (.gitignore of this IP)
+template_env: [FTEL_DPHY_RX_HAS_TEMPLATE]
+
+# check_spec.py
+standalone: true
+forbidden: ['HAS-CSI', '[Rr]esearch plan', '\bref/', '\bAnnex [A-Z]\b', '\bTable 14\b', 'D-PHY §', 'CSI-2 §']
+ids: ['\bADR-\d{3}\b', '\b[KSTQCA]\d+\b', '\bR\d\b']
+open_items: Open Items
+
+# figures/check_figures.py: names in figures that must occur in spec.md (rule B6), as since v0.5
+figure_names: '^(afe_\w+|PARA_\w+|rx\w+|err\w+|cl_\w+|dl_\w+|\w+_x|\w+_cyc|[a-z_]+_bytes|init_done|phy_core_rst|core_clk|deskew_bypass)$'

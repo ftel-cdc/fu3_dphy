@@ -1,11 +1,11 @@
-# ftel_dphy_rx — Spec review (Stage A, P1)
+# ftel_dphy_rx - Spec review (Stage A, P1)
 
 | Mục | Giá trị |
 |---|---|
 | Spec | `hw/rtl/ip/ftel_dphy_rx/doc/spec.md`, **DRAFT v0.3**, sha256 `fe0d2645cb8e77edd4dd2d338de6ee3b5ddc7e1fc1bf05ef440f47ca06a7d343` |
 | Artifact | `req/structured_spec.json`, sha256 `2968f01250d23f593b502271a5346f1ebbc01bc51ba91d62954a3e91f954bd84` |
 | Cách tạo | `/dphy_autoflow --to P1 --mode review` → `dphy_spec_parse` (11 chunk) → `assemble_req.py` → `validate_req.py` → `flow_check.py` |
-| Gate 1 | `draft` — **chưa ký**, vì spec còn là bản nháp và còn 37 REQ cần quyết định |
+| Gate 1 | `draft` - **chưa ký**, vì spec còn là bản nháp và còn 37 REQ cần quyết định |
 | Ngày | 2026-09-26 |
 | Kế hoạch | `doc/RTL_FLOW_PLAN.md`, bước A7 |
 
@@ -67,9 +67,9 @@ Kiểm chứng bổ sung:
 
 | Chủ | Mục mở (số REQ) | Tổng REQ | Kênh sync hiện có |
 |---|---|---|---|
-| CSI team | K1 (5) · K2 (7) · K3 / ADR-005 (5) · K4 (1) · K5 (2) · K6 (2) | 22 | Research plan §5.2 (K1–K7) |
-| AFE team | ADR-001 (7, trong đó REQ-032 dính thêm ADR-004) | 7 | **Chưa có danh sách riêng** — xem đề xuất D2 ở §4 |
-| Tx side | S4 (3, trong đó REQ-101 dính thêm ADR-004) · S5 (2) | 5 | Research plan §5.1 (S1–S11) |
+| CSI team | K1 (5) · K2 (7) · K3 / ADR-005 (5) · K4 (1) · K5 (2) · K6 (2) | 22 | Research plan §5.2 (K1-K7) |
+| AFE team | ADR-001 (7, trong đó REQ-032 dính thêm ADR-004) | 7 | **Chưa có danh sách riêng** - xem đề xuất D2 ở §4 |
+| Tx side | S4 (3, trong đó REQ-101 dính thêm ADR-004) · S5 (2) | 5 | Research plan §5.1 (S1-S11) |
 | Nội bộ | T1 (2) · ADR-004 (1) | 3 | Kiểm lại D-PHY v1.1 Table 8 (T1); ADR-004 chờ AFE |
 | **Tổng** | | **37** | |
 
@@ -84,7 +84,7 @@ Quy tắc gán chủ: một REQ tham chiếu nhiều mục thì theo thứ tự 
 
 Tổng cộng bốn mục này giải quyết 24/37 REQ.
 
-### 2.2 CSI team — 22 REQ
+### 2.2 CSI team: 22 REQ
 
 | REQ | Dòng | Block | Mục mở | Nội dung |
 |---|---|---|---|---|
@@ -111,7 +111,7 @@ Tổng cộng bốn mục này giải quyết 24/37 REQ.
 | REQ-046 | 271 | all | K6 | phy_core_rst shall reset the whole IP (asynchronous assert, synchronous release per domain), be asserted for at least 40 core_clk cycles by the CSI-2 controller, and restart initialization of every lane on release; its polarity and synchronicity are pending K6 (draft: active High, asynchronous). |
 | REQ-176 | 578 | all | K6 | The polarity and synchronicity of phy_core_rst and the exact semantics of init_done and forcerxmode_x shall be agreed with the CSI team; default active High, asynchronous. |
 
-### 2.3 AFE team — 7 REQ
+### 2.3 AFE team: 7 REQ
 
 | REQ | Dòng | Block | Mục mở | Nội dung |
 |---|---|---|---|---|
@@ -123,7 +123,7 @@ Tổng cộng bốn mục này giải quyết 24/37 REQ.
 | REQ-177 | 579 | No.1 | ADR-001 | The AFE boundary, clock-activity detection, termination timing and delay taps shall be agreed with the AFE team; default option B. |
 | REQ-032 | 233 | No.5 | ADR-004, ADR-001 | PARA_DLY_TAP_WIDTH shall set the width of the AFE delay-tap control used by deskew calibration; its value is still to be determined with ADR-004. |
 
-### 2.4 Tx side — 5 REQ
+### 2.4 Tx side: 5 REQ
 
 | REQ | Dòng | Block | Mục mở | Nội dung |
 |---|---|---|---|---|
@@ -133,7 +133,7 @@ Tổng cộng bốn mục này giải quyết 24/37 REQ.
 | REQ-030 | 231 | No.4 | S5 | PARA_EOT_DELAY_BYTES (default 32, assumption) shall size the EoT delay line of Block No. 4 to cover THS-TRAIL + THS-SKIP + LP-11 detection latency at the highest line rate; the value depends on the Tx timing table (S5). |
 | REQ-179 | 581 | No.4 | S5 | The Tx timing table, in particular the maximum THS-TRAIL that sizes PARA_EOT_DELAY_BYTES, shall be obtained from the Tx side; default specification minimums. |
 
-### 2.5 Nội bộ — 3 REQ
+### 2.5 Nội bộ: 3 REQ
 
 | REQ | Dòng | Block | Mục mở | Nội dung |
 |---|---|---|---|---|
@@ -158,7 +158,7 @@ Mọi finding đều có trích dẫn nguyên văn đã được validator kiể
 | F-002 | 401 | Mơ hồ | §4.9 buộc mọi output của lane có enable = Low về giá trị inactive. Nhưng các output PPI thuộc domain `rxbyteclkhs` (`rxactivehs_x`, `rxvalidhs_x`, `rxsynchs_x`, `rxdatahs_x`) không thể được cập nhật bằng logic có clock khi byte clock đang dừng (clock lane ở ULPS, hoặc lane bị tắt trước khi vào HS). Trích: *"Forces the inactive value of every output of a lane whose enable is Low"* | Gate tổ hợp các output PPI domain `rxbyteclkhs` bằng enable đã đồng bộ, đặt ở tầng output, để giá trị inactive giữ được mà không cần byte clock chạy. Thêm một dòng CDC cho enable đi vào mạch gate này | Nội bộ |
 | F-003 | 408 | Không nhất quán | §4.10 liệt kê *"`PARA_DESKEW_EN` run-time bypass (R2)"* là trường cấu hình, trong khi §3 định nghĩa `PARA_DESKEW_EN` là tham số synthesis-time (quyết định có instantiate Block No. 5 hay không). Bypass lúc chạy cần một trường register riêng | Giữ `PARA_DESKEW_EN` là synthesis-time. Thêm trường run-time `deskew_bypass` trong Block No. 8 (R2); khi bật thì giữ tap ở giá trị reset | Nội bộ |
 | F-004 | 578 | Câu hỏi | K6 nay còn phụ thuộc thêm FX1 IP Wrapper Guideline: mọi port reset của wrapper là active-low `_n`, reset active-high thì đặt inverter trong wrapper. Spec chưa nói `phy_core_rst` (do CSR của CSI-2 controller lái, không phải CRM) là port loại RESET hay là input điều khiển. Trích: *"\| K6 \| \`phy_core_rst\` polarity and synchronicity;"* | Coi `phy_core_rst` là port loại RESET: port wrapper `<dir>_<ip>_core_rst_n` active-low, inverter đặt trong `m_ftel_dphy_rx_wrap`; logic bên trong không đổi. Hỏi team CSI cùng lúc với K6 | CSI team |
-| F-005 | 588 | Thiếu | Appendix A truy vết Q1–Q9 và C2–C16 nhưng thiếu C1 (baseline của HAS-CSI: CSI-2 v1.3 + D-PHY v1.2), dù §1.4 Baselines có hiện thực nó. Trích: *"IDs refer to \`DPHY_RX_RESEARCH_PLAN.md\` §2.1 (Q) and §2.4 (C)."* | Thêm dòng "C1 Baseline CSI-2 v1.3 + D-PHY v1.2 \| §1.4 Baselines" vào Appendix A | Nội bộ |
+| F-005 | 588 | Thiếu | Appendix A truy vết Q1-Q9 và C2-C16 nhưng thiếu C1 (baseline của HAS-CSI: CSI-2 v1.3 + D-PHY v1.2), dù §1.4 Baselines có hiện thực nó. Trích: *"IDs refer to \`DPHY_RX_RESEARCH_PLAN.md\` §2.1 (Q) and §2.4 (C)."* | Thêm dòng "C1 Baseline CSI-2 v1.3 + D-PHY v1.2 \| §1.4 Baselines" vào Appendix A | Nội bộ |
 
 ### 3.2 Từ lần trích độc lập A6
 
@@ -179,17 +179,17 @@ Cột "Mức":
 | A6/F-012 | 334, 344 | Luật chung "mọi trạng thái về DL_STOP khi gặp LP-11" mâu thuẫn với các dòng riêng: DL_LP_RQST ghi LP-11 → DL_ERR; DL_ESC_RQST ghi "other → DL_ERR", tức là gồm cả LP-11. Chưa rõ luật nào ưu tiên, trong khi điều này quyết định có phát `errcontrol_x` hay không | ✅ đọc dòng 334, 336, 344 | Dòng riêng ưu tiên: đi qua DL_ERR (phát `errcontrol_x`) rồi về DL_STOP | Cao | Nội bộ |
 | A6/F-008 | 243 | `esc_timeout_cyc` không nói áp dụng cho những trạng thái nào. ULPS có thể kéo dài vô hạn và Mark-1 kéo dài ≥ 1 ms, nên watchdog chạy trong DL_ULPS sẽ ngắt ULPS hợp lệ | ✅ dòng 243, 386; FSM không có lối ra timeout của escape | Chỉ áp dụng cho các trạng thái từ DL_LP_RQST đến DL_ESC_CMD | Cao | Nội bộ |
 | A6/F-015 | 386 | Khi watchdog escape hết hạn: FSM sang trạng thái nào, có cờ lỗi hay status không? Chưa định nghĩa | ✅ bảng FSM §4.5 không có | Chuyển sang trạng thái chờ LP-11, không phát lỗi PPI, bật một cờ sticky ở Block No. 8 | Cao | Nội bộ |
-| A6/F-010 | 283 | Đảo cực P/N và map lane chỉ áp dụng cho đường HS. Nếu board đảo P/N thì LP-01 và LP-10 cũng bị đảo | ✅ dòng 283–284 | Áp dụng cùng phép đảo cực và map lane cho đường LP trong Block No. 1 | Cao | Nội bộ |
+| A6/F-010 | 283 | Đảo cực P/N và map lane chỉ áp dụng cho đường HS. Nếu board đảo P/N thì LP-01 và LP-10 cũng bị đảo | ✅ dòng 283-284 | Áp dụng cùng phép đảo cực và map lane cho đường LP trong Block No. 1 | Cao | Nội bộ |
 | A6/F-011 | 303 | CL_HS_RQST chỉ có lối ra cho LP-00 và LP-11; phản ứng khi gặp LP-10 chưa định nghĩa. Clock lane cũng không có trạng thái lỗi | ✅ dòng 303 | Coi là yêu cầu bị hủy: chờ LP-11 rồi về CL_STOP, bật cờ status | Cao | Nội bộ |
-| A6/F-005 | 239 | `hs_settle_cyc` = 20 chỉ đúng cho 1500 Mb/s. Ở 80 Mb/s, cửa sổ THS-SETTLE là 160–270 ns, mà 20 × 5 ns + ~20 ns = 120 ns nằm ngoài cửa sổ. Công thức có ở Appendix B, nhưng spec không bắt buộc software lập trình lại khi đổi tốc độ | ✅ số học đúng; Appendix B dòng 617 có công thức | Công bố bảng giá trị theo tốc độ; software phải lập trình trước khi enable lane | Cao | CSI team (K3) |
-| A6/F-014 | 374–378 | Ghi chú thiết kế về việc qualify sync ở tốc độ thấp ("run of zeros") còn ghi "micro-architecture to confirm"; chưa định nghĩa độ dài chuỗi zero | ✅ dòng 377–378 | Chỉ chấp nhận leader sau ít nhất 1 byte toàn 0; thêm test 80 Mb/s với THS-ZERO min | Cao | Nội bộ |
-| A6/F-016 | 392 | ADR-004 (thuật toán deskew) bị hoãn tới R2 nhưng không có trong bảng Open Items §9 | ✅ §9 chỉ có K1–K6, ADR-001, S4, S5, T1 | Thêm ADR-004 vào §9 | Thấp | Nội bộ |
+| A6/F-005 | 239 | `hs_settle_cyc` = 20 chỉ đúng cho 1500 Mb/s. Ở 80 Mb/s, cửa sổ THS-SETTLE là 160-270 ns, mà 20 × 5 ns + ~20 ns = 120 ns nằm ngoài cửa sổ. Công thức có ở Appendix B, nhưng spec không bắt buộc software lập trình lại khi đổi tốc độ | ✅ số học đúng; Appendix B dòng 617 có công thức | Công bố bảng giá trị theo tốc độ; software phải lập trình trước khi enable lane | Cao | CSI team (K3) |
+| A6/F-014 | 374-378 | Ghi chú thiết kế về việc qualify sync ở tốc độ thấp ("run of zeros") còn ghi "micro-architecture to confirm"; chưa định nghĩa độ dài chuỗi zero | ✅ dòng 377-378 | Chỉ chấp nhận leader sau ít nhất 1 byte toàn 0; thêm test 80 Mb/s với THS-ZERO min | Cao | Nội bộ |
+| A6/F-016 | 392 | ADR-004 (thuật toán deskew) bị hoãn tới R2 nhưng không có trong bảng Open Items §9 | ✅ §9 chỉ có K1-K6, ADR-001, S4, S5, T1 | Thêm ADR-004 vào §9 | Thấp | Nội bộ |
 | A6/F-003 | 230 | `PARA_LP_FILTER_CYC` = 2 là giả định; spec không nêu độ rộng glitch LP tối đa mà AFE có thể để lọt | ✅ dòng 230 (có ⚠️) | Hỏi AFE về độ rộng glitch tối đa (A5 ở §4) | Thấp | AFE team |
 | A6/F-007 | 242 | Timeout HS RX 2^18 được tính từ dòng 5802 byte; giá trị đúng phụ thuộc độ dài burst lớn nhất theo sensor mode của controller | ✅ dòng 242 | Giữ default; CSI xác nhận độ dài burst tối đa mỗi lane | Thấp | CSI team |
 | A6/F-006 | 240 | Chưa nói rõ `clk_settle_cyc` bắt đầu đếm từ đâu và trừ độ trễ nào | ⚠️ một phần đã có câu trả lời: bảng FSM (dòng 305) cho thấy bộ đếm chạy trong CL_HS_TERM | Ghi rõ: đếm từ lúc vào CL_HS_TERM | Thấp | Nội bộ |
-| A6/F-009 | 261 | Tên tín hiệu lệch nhau: `lp_dp/dn_x`, `hs_en_x`, `term_en_x` ở §2, §4 so với `afe_*` ở §5.2 | ✅ dòng 261 và 459–468 | Dùng tên `afe_*` ở biên IP; tên không prefix là tên nội bộ | Thấp | Nội bộ |
-| A6/F-013 | 361, 580 | Ký hiệu 🌐 không có trong bảng Conventions | ✅ dòng 17–22 | Thêm 🌐 vào Conventions (nguồn thứ cấp, chưa kiểm với `ref/spec`) | Thấp | Nội bộ |
-| A6/F-019 | 197 vs 430 | Bảng PPI ghi nguồn của `init_done` là No.6, nhưng sơ đồ §2 vẽ `init_done` đi ra từ hộp Block No. 8 | ✅ dòng 196–197 | Sửa sơ đồ: `init_done` đi ra từ No.6 | Thấp | Nội bộ |
+| A6/F-009 | 261 | Tên tín hiệu lệch nhau: `lp_dp/dn_x`, `hs_en_x`, `term_en_x` ở §2, §4 so với `afe_*` ở §5.2 | ✅ dòng 261 và 459-468 | Dùng tên `afe_*` ở biên IP; tên không prefix là tên nội bộ | Thấp | Nội bộ |
+| A6/F-013 | 361, 580 | Ký hiệu 🌐 không có trong bảng Conventions | ✅ dòng 17-22 | Thêm 🌐 vào Conventions (nguồn thứ cấp, chưa kiểm với `ref/spec`) | Thấp | Nội bộ |
+| A6/F-019 | 197 vs 430 | Bảng PPI ghi nguồn của `init_done` là No.6, nhưng sơ đồ §2 vẽ `init_done` đi ra từ hộp Block No. 8 | ✅ dòng 196-197 | Sửa sơ đồ: `init_done` đi ra từ No.6 | Thấp | Nội bộ |
 
 Nhận xét:
 
@@ -210,11 +210,11 @@ Nhận xét:
 | # | Đề xuất | Bằng chứng | Chỗ sẽ sửa khi được duyệt |
 |---|---|---|---|
 | D1 | **Mở rộng K6**, thêm câu hỏi: "`phy_core_rst` là port loại RESET theo Wrapper Guideline (active-low `_n` ở wrapper) hay là input điều khiển? Cực tính CSR phía controller là gì?" | F-004. K6 hiện chỉ hỏi cực tính và tính đồng bộ, chưa gắn với quy ước wrapper của FX1 | Research plan §5.2 dòng K6 |
-| D2 | **Thêm §5.3 "Với team AFE"**, gồm 5 câu hỏi rút từ ADR-001, ADR-004 và A6/F-003 (bảng dưới) | 7 REQ có chủ là AFE team, nhưng research plan §5 mới có danh sách cho Tx (S) và CSI (K). Spec §9 đã ghi chủ của ADR-001 là "AFE team", nhưng chưa có kênh câu hỏi tương ứng | Research plan §5.3 (mới), §6 P1 thêm "và với team AFE (A1–A5)" |
+| D2 | **Thêm §5.3 "Với team AFE"**, gồm 5 câu hỏi rút từ ADR-001, ADR-004 và A6/F-003 (bảng dưới) | 7 REQ có chủ là AFE team, nhưng research plan §5 mới có danh sách cho Tx (S) và CSI (K). Spec §9 đã ghi chủ của ADR-001 là "AFE team", nhưng chưa có kênh câu hỏi tương ứng | Research plan §5.3 (mới), §6 P1 thêm "và với team AFE (A1-A5)" |
 | D3 | **Đưa các finding nội bộ ở §3.1 và §3.2 vào spec v0.4** dưới dạng làm rõ hoặc sửa câu chữ. Ưu tiên 8 finding mức "Cao". Không thêm vào K/S vì đây là quyết định nội bộ | §3 | `doc/spec.md` (cần duyệt riêng vì là thay đổi kỹ thuật) |
 | D4 | **Hỏi thêm Tx và CSI.** (i) Dòng S5 trong §9 của spec thêm "THS-ZERO max", vì giá trị này quyết định cửa sổ tìm sync. Research plan S5 đã hỏi THS-ZERO, chỉ riêng spec chưa ghi. (ii) Thêm **K8**: "Độ dài burst HS tối đa mỗi lane, cho mọi sensor mode và tổ hợp lane/tốc độ", vì nó quyết định `hs_rx_timeout_cyc` | A6/F-004, A6/F-007 | Spec §9 dòng S5; research plan §5.2 thêm K8 |
 | D5 | **Bổ sung answer key.** Thêm chữ ký header của bảng §1.3 (Path) và §1.4 (Release) vào `spec_inventory.py`, và cập nhật `EXPECTED` trong cùng commit. Thao tác này đổi answer key đã đăng ký trước, nên chỉ làm khi bạn đồng ý, và ghi lý do vào lịch sử của script | A6/F-001, A6/F-002: hai bảng này có yêu cầu `[CSI]` nhưng hiện chỉ được chấm như văn xuôi | `hw/utils/req_flow/spec_inventory.py` |
-| D6 | **Đổi quy trình review:** mỗi lần review spec chạy **hai lần trích độc lập**, rồi hợp nhất finding (loại trùng). Việc này tách khỏi việc sinh REQ chính thức | §3.2: hai lần trích chỉ trùng 2–3 finding; mỗi lần bỏ sót phần lớn finding của lần kia | `dphy_spec_parse.md`, `dphy_autoflow.md` (P1 ở chế độ review) |
+| D6 | **Đổi quy trình review:** mỗi lần review spec chạy **hai lần trích độc lập**, rồi hợp nhất finding (loại trùng). Việc này tách khỏi việc sinh REQ chính thức | §3.2: hai lần trích chỉ trùng 2-3 finding; mỗi lần bỏ sót phần lớn finding của lần kia | `dphy_spec_parse.md`, `dphy_autoflow.md` (P1 ở chế độ review) |
 
 Nội dung đề xuất cho D2:
 
@@ -273,7 +273,7 @@ Cả 22 neo lệch đều quy được về 4 luật mà prompt chưa định ng
 |---|---|---|---|---|
 | RC1 | Chữ OPEN nằm trên **heading hoặc caption**, hoặc dòng chỉ **dẫn ID của §9** mà không có chữ OPEN, thì có làm các dòng bên dưới thành `open` không? | 10 neo: 8 dòng AFE ở §5.2 (heading "(proposed, OPEN ADR-001)"), `errsyncesc_x` (K2), TCLK-MISS (ADR-001) | Chỉ tính tag trên chính dòng đó; 8 dòng AFE là `assumed` | Kế thừa tag; 8 dòng AFE là `open` + `needs_human_decision` |
 | RC2 | Giá trị "To be determined" mà không có chữ OPEN | 1 neo: `PARA_DLY_TAP_WIDTH` | `open` | `design`, ambiguity 0.7 |
-| RC3 | Gán `block` cho **port input ở biên IP** (cột Source ghi "—") và cho dòng **liên block** (CDC, K6, TWAKEUP): chọn `top`, `all` hay block tiêu thụ? Schema có sẵn giá trị `top` nhưng prompt không định nghĩa khi nào dùng | 10 neo | `all` hoặc block tiêu thụ | `top` hoặc block khác |
+| RC3 | Gán `block` cho **port input ở biên IP** (cột Source ghi "-") và cho dòng **liên block** (CDC, K6, TWAKEUP): chọn `top`, `all` hay block tiêu thụ? Schema có sẵn giá trị `top` nhưng prompt không định nghĩa khi nào dùng | 10 neo | `all` hoặc block tiêu thụ | `top` hoặc block khác |
 | RC4 | `category` của dòng bảng clock có chữ OPEN | 1 neo: configuration clock | `decision` | `clocking` |
 
 Đánh giá ⚠️: về RC1, cách đọc của A6 sát nghĩa hơn với §5.2, vì heading nói rõ cả giao diện AFE còn OPEN. Tuy vậy, ảnh hưởng thực tế lên P1 nhỏ: bảy REQ ở §2.3 vẫn giữ ADR-001 ở dạng `needs_human_decision`, nên không mất quyết định nào.
@@ -314,12 +314,12 @@ Lưu ý: bước 1 làm tập dòng OPEN thay đổi, nhưng các số trong `EX
 
 ## 7. Trạng thái xử lý (2026-09-26)
 
-D1–D6 đã được duyệt và đã áp dụng. Review này vẫn là review của **spec v0.3**.
+D1-D6 đã được duyệt và đã áp dụng. Review này vẫn là review của **spec v0.3**.
 
 | # | Đã làm | File |
 |---|---|---|
 | D1 | Mở rộng K6: phân loại port theo Wrapper Guideline, cực tính bit CSR | Research plan §5.2; spec §9 dòng K6 |
-| D2 | Thêm §5.3 "Với team AFE" (A1–A5); §6 P1 thêm team AFE | Research plan |
+| D2 | Thêm §5.3 "Với team AFE" (A1-A5); §6 P1 thêm team AFE | Research plan |
 | D3 | Spec **v0.4**. Làm rõ: P1 F-001…F-003, F-005; A6/F-004, F-005, F-006, F-008…F-016, F-019. Sơ đồ §2 vẽ lại mũi tên `init_done`; thêm 1 dòng CDC (gate output PPI); §8 thêm kịch bản test | `doc/spec.md` |
 | D4 | S5 thêm THS-ZERO max; thêm K8 vào spec §9 và research plan §5.2 | Spec §9; research plan |
 | D5 | Thêm hai loại bảng `path` (5 dòng) và `release` (2 dòng). `EXPECTED` tách theo revision; số của v0.4 được ghi trước khi sửa spec | `hw/utils/req_flow/spec_inventory.py` |
@@ -329,7 +329,7 @@ Kiểm chứng:
 
 - ✅ `spec_inventory.py --selftest`: PASS trên v0.2, v0.3 và v0.4. Các số của v0.4 là: cdc 6, open 12, c_ids 16, path 5, release 2.
 - ✅ `flow_check.py --phase P1 --no-state` trên artifact hiện có cho **exit 2, CF-SPEC**: artifact được dựng trên v0.3, còn spec đã là v0.4. Flow dừng đúng như thiết kế.
-- ⚠️ `req/structured_spec.json` và các con số ở §1–§2 là của v0.3. Chúng phải được đồng bộ lại với v0.4 trước khi dùng tiếp. Phân loại 195 trích dẫn (190 REQ + 5 finding) so với v0.4:
+- ⚠️ `req/structured_spec.json` và các con số ở §1-§2 là của v0.3. Chúng phải được đồng bộ lại với v0.4 trước khi dùng tiếp. Phân loại 195 trích dẫn (190 REQ + 5 finding) so với v0.4:
 
   | Trạng thái | Số lượng |
   |---|---|
@@ -339,12 +339,12 @@ Kiểm chứng:
 
 ### 7.1 Phương án 1 cho A6 (đã duyệt, đã làm)
 
-4 luật RC1–RC4 ở §5.3 nay do script tính (`hw/utils/req_flow/derive_rules.py`). `assemble_req.py` áp các luật này; validator kiểm lại bằng luật `DERIVE`, map sang CF-SCHEMA. Hai lần trích v0.3 **không phải sinh lại**: chúng được assemble lại từ chunk có sẵn, rồi chấm bằng cùng metric và cùng ngưỡng 90%.
+4 luật RC1-RC4 ở §5.3 nay do script tính (`hw/utils/req_flow/derive_rules.py`). `assemble_req.py` áp các luật này; validator kiểm lại bằng luật `DERIVE`, map sang CF-SCHEMA. Hai lần trích v0.3 **không phải sinh lại**: chúng được assemble lại từ chunk có sẵn, rồi chấm bằng cùng metric và cùng ngưỡng 90%.
 
 | Tập neo | Trước | Sau | Chỗ lệch còn lại |
 |---|---|---|---|
 | 108 neo của lần đo đầu | 79,6% | **99,1%** (107/108) | `errsyncesc_x`: `design` vs `contract`. Nguyên nhân là spec thiếu dẫn chiếu K2; v0.4 đã bổ sung |
-| 115 neo (thêm bảng Path, Release theo D5) | — | 94,8% (109/115) | Thêm 5 dòng Path mà P1 chưa có REQ, đã bổ sung khi đồng bộ v0.4 |
+| 115 neo (thêm bảng Path, Release theo D5) | - | 94,8% (109/115) | Thêm 5 dòng Path mà P1 chưa có REQ, đã bổ sung khi đồng bộ v0.4 |
 
 ⚠️ Cách đọc đúng cho con số này:
 - Ở các neo, `category`, `block` và phần `open` của `spec_status` giờ **khớp nhau vì luật tính ra**, không phải vì LLM ổn định hơn.
@@ -368,7 +368,7 @@ Kiểm chứng:
 - 8 dòng AFE nay thuộc phạm vi OPEN của heading §5.2;
 - 5 dòng Path có tag OPEN.
 
-Các con số ở §1–§2 là của v0.3 và được giữ nguyên làm hồ sơ review.
+Các con số ở §1-§2 là của v0.3 và được giữ nguyên làm hồ sơ review.
 
 ### 7.3 Đồng bộ P1 với spec v0.5 (hình vẽ, 2026-09-29)
 
@@ -389,7 +389,7 @@ ra khi vẽ Figure 2-4: spec chưa nói block nào đồng bộ input bất đ�
 theo: ADR-001 chặn 17 REQ, và A2 có thêm câu về glitch của `afe_cl_clk_active`.
 
 `req_id` được gán theo thứ tự dòng trong spec, nên hai REQ mới làm 161 ID phía sau dịch +1 hoặc +2
-(ví dụ REQ-048 cũ nay là REQ-049). Các ID nhắc trong §1–§7.2 là ID tại thời điểm viết mục đó.
+(ví dụ REQ-048 cũ nay là REQ-049). Các ID nhắc trong §1-§7.2 là ID tại thời điểm viết mục đó.
 
 ### 7.4 Đồng bộ P1 với spec v0.6 (hình chi tiết từng block, 2026-09-29)
 
@@ -540,7 +540,7 @@ Spec v0.10 làm HAS thành một tài liệu tự đứng được:
 - Hai chuẩn MIPI chỉ được nêu tên ở §1.5 References, không ghi số điều khoản. Nguồn công khai duy nhất
   là [3], tài liệu Lattice FPGA-IPUG-02081-2.1, dùng cho pattern deskew.
 - Nội dung trước đây phải tra ở nơi khác nay viết thẳng vào HAS: bảng mã escape (Table 4-6), định
-  nghĩa Q1–Q9 và C1–C16 (Appendix A), mô tả mô hình của ADR-007 (chương 7).
+  nghĩa Q1-Q9 và C1-C16 (Appendix A), mô tả mô hình của ADR-007 (chương 7).
 - Không đổi kỹ thuật. S9 vốn đã được dẫn ở §4.3 nhưng chưa có trong bảng Open Items, nay được thêm vào.
 
 | Bước | Kết quả |
@@ -576,7 +576,7 @@ dùng ngày 2026-10-02:
 - Điểm 8 (phát khi EoT): burst kết thúc trước khi lock có một xung `errsotsynchs_x` ở byte active cuối.
   Team CSI xác nhận dưới ADR-007.
 - Điểm 9 (xử lý nội bộ): tắt lane thì xóa Block No. 4 của lane; enable đổi lúc nào cũng được.
-- Điểm 10–14:
+- Điểm 10-14:
   - lane map: giá trị reset, và quy tắc OR khi map không phải hoán vị;
   - độ trễ LP và ngân sách termination ghi theo tham số;
   - `clk_settle_cyc` 33;
@@ -635,7 +635,7 @@ thông báo ngày 2026-10-03 thành phương án B ở v0.12 là sai. Spec v0.13
   - sampler trên cả hai cạnh của DDR clock `afe_cl_hs_clk`;
   - deserializer 1:8;
   - byte clock: chia 4, qua clock gate chỉ mở trong CL_HS_CLK;
-  - bộ phát hiện clock activity: hai toggle, `cl_rxclkactivehs` hạ 50–60 ns sau cạnh cuối.
+  - bộ phát hiện clock activity: hai toggle, `cl_rxclkactivehs` hạ 50-60 ns sau cạnh cuối.
 - Giao diện AFE (Table 5-2) bỏ `afe_byteclk`, `afe_hs_word_x`, `afe_cl_clk_active` và thêm
   `afe_cl_hs_clk`, `afe_hs_bit_x`. Độ trễ word Λ nay do Block No. 1 đặt.
 - Hai design note mới ở §4.3:
@@ -697,7 +697,7 @@ Khi thiết kế RTL của Block No. 1 theo v0.13, có một câu của spec kh�
   dở dang và sinh một cạnh lên lẻ. Ngoài ra enable của gate có thể đổi đúng cạnh DDR mà clock chia
   lên, gây race ở latch, kể cả trong mô phỏng RTL. Giữ reset thì `rxbyteclkhs` luôn ở Low khi gate
   đóng, và xung đầu tiên sau khi gate mở là xung đủ. Thời điểm bắt đầu vẫn trong khoảng một byte
-  clock sau `cl_rxclkactivehs` (REQ-343), cụ thể là 3–4 chu kỳ DDR, 5 nếu flop đầu của synchronizer
+  clock sau `cl_rxclkactivehs` (REQ-343), cụ thể là 3-4 chu kỳ DDR, 5 nếu flop đầu của synchronizer
   ra muộn.
 - **Clock activity (REQ-336, REQ-345, REQ-347).** Bộ chia nay bị giữ reset ngoài CL_HS_CLK, nhưng
   bộ phát hiện phải chạy từ trước CL_HS_CLK, nên toggle thứ hai không chạy bằng clock chia được nữa.
@@ -707,11 +707,11 @@ Khi thiết kế RTL của Block No. 1 theo v0.13, có một câu của spec kh�
   Appendix B, giá trị YAML và con số 288·UI của S12 giữ nguyên. Mô phỏng Block No. 1 đo được Λ là
   8.25 chu kỳ DDR, tức 2.0625 byte clock, ở cả 5 tốc độ (`sim/tb_afe_adapter`).
 - **Thời điểm mất clock (REQ-103, REQ-255, REQ-319, REQ-346): cận trên thay cho khoảng.** v0.13 ghi
-  `cl_rxclkactivehs` hạ 50–60 ns sau cạnh cuối của clock. Mô phỏng cho thấy cận dưới không đúng:
+  `cl_rxclkactivehs` hạ 50-60 ns sau cạnh cuối của clock. Mô phỏng cho thấy cận dưới không đúng:
   - Toggle chỉ đổi ở cạnh lên. Trail HS-0 kết thúc bằng một cạnh xuống, sau cạnh lên cuối nửa chu
-    kỳ. Vì vậy ở 80 Mb/s, `cl_rxclkactivehs` hạ 38.5–42.2 ns sau cạnh cuối.
+    kỳ. Vì vậy ở 80 Mb/s, `cl_rxclkactivehs` hạ 38.5-42.2 ns sau cạnh cuối.
   - Ở 800 Mb/s, toggle cạnh lên bị alias, nên lần đổi cuối mà `core_clk` thấy có thể là của toggle
-    chậm, sớm hơn tối đa 3 chu kỳ DDR. Khi đó `cl_rxclkactivehs` hạ 44.7–52.8 ns sau cạnh cuối.
+    chậm, sớm hơn tối đa 3 chu kỳ DDR. Khi đó `cl_rxclkactivehs` hạ 44.7-52.8 ns sau cạnh cuối.
 
   Yêu cầu thật là TCLK-MISS ≤ 60 ns, và RTL đạt ở mọi tốc độ: chậm nhất 54.7 ns sau cạnh lên cuối,
   60 ns nếu flop đầu của synchronizer ra muộn. v0.14 ghi cận trên "tối đa 60 ns sau cạnh cuối" ở
@@ -735,20 +735,20 @@ Synthesis thử ngày 2026-10-10 chạy trên thư viện 22 nm (`syn/`, `rtl_no
 D-PHY là 22 nm (thư viện có trên máy), trong khi HAS
 tới v0.14 tính mọi số timing bằng cell 130 nm. Spec v0.15 chuyển các số đó sang 22 nm theo plan người
 dùng duyệt cùng ngày, và giữ sampler đặt tay. Ranh giới AFE, chức năng, giao diện và hình không đổi.
-- **Sampler (REQ-349 đến REQ-352).** Số đọc từ `.lib` của thư viện (transition 7–40 ps, tải khoảng
+- **Sampler (REQ-349 đến REQ-352).** Số đọc từ `.lib` của thư viện (transition 7-40 ps, tải khoảng
   10 fF): aperture của DFF khoảng 20 ps ở corner nhanh (0.88 V, −40 °C) và 35 ps ở corner chậm
-  (0.72 V, 125 °C); một clock buffer 15–20 ps và 25–30 ps. Ở corner chậm, cửa sổ còn khoảng ±115 ps ở
-  1500 Mb/s, ±95 ps ở 1792 Mb/s và ±130 ps ở 1 Gb/s cho lệch clock–data (130 nm: ±90 ps và ±110 ps).
+  (0.72 V, 125 °C); một clock buffer 15-20 ps và 25-30 ps. Ở corner chậm, cửa sổ còn khoảng ±115 ps ở
+  1500 Mb/s, ±95 ps ở 1792 Mb/s và ±130 ps ở 1 Gb/s cho lệch clock-data (130 nm: ±90 ps và ±110 ps).
   Corner 1.2 V/175 °C của 130 nm BCD không còn áp dụng.
 - **Đặt tay (REQ-351, REQ-326).** Câu "cây clock theo flow thường không đạt cửa sổ" không còn đúng
   nguyên văn ở 22 nm: cây 3 tầng chỉ trôi khoảng 30 ps qua các corner. Nhưng toàn bộ trễ của cây,
-  45–90 ps, rơi về một phía cửa sổ nếu đường data không được làm trễ theo. Theo lựa chọn của người
+  45-90 ps, rơi về một phía cửa sổ nếu đường data không được làm trễ theo. Theo lựa chọn của người
   dùng, sampler vẫn đặt tay, và HAS ghi lý do mới. REQ-326 ghi thêm rằng điểm timing của ADR-001 được
   chấm với cell 130 nm; với 22 nm rủi ro thấp hơn, lựa chọn A không đổi.
 - **Đường nửa chu kỳ (REQ-365).** Số ước lượng 130 nm (khoảng 110 ps ở 1500 Mb/s, gần 0 ở 1792 Mb/s)
   thay bằng số synthesis thử ở corner chậm, chưa tính dây, clock lý tưởng: khoảng 470 ps và 360 ps.
   Đường này ra khỏi danh sách OPEN của R2.
-- **Delay line bằng cell chuẩn (REQ-354).** Bước khoảng 15–30 ps thay cho 65–180 ps; trôi khoảng 2 lần
+- **Delay line bằng cell chuẩn (REQ-354).** Bước khoảng 15-30 ps thay cho 65-180 ps; trôi khoảng 2 lần
   thay cho 2.5 lần.
 - **OPEN (REQ-353, REQ-269, REQ-304).** Thư viện cell và body bias thêm vào phần OPEN với physical
   design, cạnh corner sign-off và đặt tay. REQ-200 chỉ đổi số dòng.
@@ -777,7 +777,7 @@ time-stamp theo DDR clock.
   REQ-172 và REQ-179 viết lại theo đó.
 - **`eot_skip_bytes` (REQ-046, REQ-318 viết lại; REQ-369 mới).** Công thức cũ thiếu độ trễ đường dữ
   liệu: đây đúng là F-003, và TN1 xác nhận nó. Công thức mới lấy mép E = ⌊(THS-TRAIL,min + 27 ns) /
-  byte period⌋, nơi phép cắt chạm payload, rồi giữ 1 byte biên. Mép này đo được trên RTL ở 260–1500
+  byte period⌋, nơi phép cắt chạm payload, rồi giữ 1 byte biên. Mép này đo được trên RTL ở 260-1500
   Mb/s.
 - **Phạm vi bảo đảm (REQ-186 viết lại, REQ-370 đến REQ-378 mới).** Phạm vi đo trên RTL nằm ở Table 4-7:
   - không mất payload từ 260 Mb/s;
@@ -817,8 +817,8 @@ của `core_clk`. Bench được bổ sung hai thứ:
   280 burst × 4 lane, bảng in bằng `eot_window.py`.
 
 - **Hằng số 27 ns → 24 ns (REQ-046, REQ-318 viết lại).** Ở 600, 800 và 1440 Mb/s, giá trị cũ + 1 đã mất
-  payload: 1–7 trong 1120 burst. Như vậy biên 1 byte mà HAS ghi không còn ở ba rate này.
-  - Chỉ hằng số trong khoảng 24–25 ns khớp mép mất payload đo được ở cả 8 rate. Chọn 24 ns theo luật
+  payload: 1-7 trong 1120 burst. Như vậy biên 1 byte mà HAS ghi không còn ở ba rate này.
+  - Chỉ hằng số trong khoảng 24-25 ns khớp mép mất payload đo được ở cả 8 rate. Chọn 24 ns theo luật
     của plan (thiên về cắt muộn).
   - Giá trị đổi: 600 Mb/s 5 → 4, 800 Mb/s 7 → 6, 1440 Mb/s 14 → 13. Các rate khác và giá trị reset 14
     giữ nguyên.
@@ -831,8 +831,8 @@ của `core_clk`. Bench được bổ sung hai thứ:
 
   Kết quả:
   - không nhiễu: chính xác từ 600 Mb/s; 13 % burst còn trailer ở 260 Mb/s, 0,9 % ở 400 Mb/s;
-  - có 40 ns nhiễu: 99 % burst ở 260–400 Mb/s, còn 0,3–3 % từ 1000 Mb/s, 0 ở 1500 Mb/s;
-  - mỗi burst còn tối đa 4–12 byte trailer (trước ghi 0–8).
+  - có 40 ns nhiễu: 99 % burst ở 260-400 Mb/s, còn 0,3-3 % từ 1000 Mb/s, 0 ở 1500 Mb/s;
+  - mỗi burst còn tối đa 4-12 byte trailer (trước ghi 0-8).
 - **§8 (REQ-380) và Table 9-1 (REQ-311).** §8 kiểm thêm mọi pha của `core_clk` và giá trị + 1. Dòng
   ADR-006 bỏ chữ "below 1200 Mb/s".
 

@@ -32,7 +32,7 @@ Tóm tắt ngày 2026-10-23, trước khi có khối chỉnh:
 - **Phát hiện: controller CSI-2 của AMD (không PHY) không nhận PPI của `ftel_dphy_rx` như hiện nay** (§6.1).
   - R-X ra đúng từng pixel ở mọi run. PPI của `ftel_dphy_rx` mang đúng từng packet như PPI của D-PHY AMD, nhưng R-F
     không ra line nào và đếm 0 packet.
-  - Nguyên nhân nằm ở đầu mỗi burst. `ftel_dphy_rx` nâng `rxactivehs` trước `rxsynchs` 7–20 byte clock tuỳ rate,
+  - Nguyên nhân nằm ở đầu mỗi burst. `ftel_dphy_rx` nâng `rxactivehs` trước `rxsynchs` 7-20 byte clock tuỳ rate,
     và `rxsynchs` lên cùng byte đầu (HAS C6, cũng là yêu cầu của team CSI). D-PHY của AMD nâng hai tín hiệu cùng lúc,
     byte đầu ở cycle sau. Controller của AMD cần `rxactivehs` không lên trước `rxsynchs`.
   - Theo HAS thì đây không phải lỗi RTL, mà là lệch hợp đồng PPI với controller của AMD (FP-8 của plan prototype).
@@ -139,7 +139,7 @@ HS settle do IP tự chọn theo rate (`C_HS_SETTLE_NS`): 173 ns ở 260 Mb/s, 1
 
     | Mode | `rxsynchs` | `rxactivehs` | Dữ liệu, `rxvalidhs` |
     |---|---|---|---|
-    | 0 (mặc định) | cùng byte đầu (HAS C6) | sớm hơn `rxsynchs` (7 byte clock ở 260 Mb/s, 19–20 ở 1440) | như `ftel_dphy_rx` |
+    | 0 (mặc định) | cùng byte đầu (HAS C6) | sớm hơn `rxsynchs` (7 byte clock ở 260 Mb/s, 19-20 ở 1440) | như `ftel_dphy_rx` |
     | 1 | trước byte đầu 1 cycle | từ `rxsynchs` | trễ 1 cycle |
     | 2 | trước byte đầu 1 cycle | sớm như mode 0 | trễ 1 cycle |
     | 3 | cùng byte đầu (như mode 0) | từ `rxsynchs` | như mode 0 |
@@ -250,8 +250,8 @@ Mặc định: 2 frame 640 × 16 (WC 800 byte), `counter`, 1440 Mb/s, 4 lane.
 |---|---|---|---|---|---|
 | 260 | E2b-4a | 7 | 0 | 0 | 1 |
 | 800 | E2b-4b | 12 | 0 | 0 | 1 |
-| 1440 | E2b-1, E2b-6 | 19–20 | 0 | 0 | 1 |
-| 1500 | E2b-4c | 19–20 | 0 | 0 | 1 |
+| 1440 | E2b-1, E2b-6 | 19-20 | 0 | 0 | 1 |
+| 1500 | E2b-4c | 19-20 | 0 | 0 | 1 |
 
 Mỗi run có 140 burst (35 packet × 4 lane; E2b-6: 284), và giá trị đúng như bảng ở mọi burst.
 
@@ -259,9 +259,9 @@ Mỗi run có 140 burst (35 packet × 4 lane; E2b-6: 284), và giá trị đúng
 
 | Run | Thay đổi trên PPI vào R-F | `rxactivehs` → `rxsynchs` | R-F |
 |---|---|---|---|
-| `xfill` | bit X của `rxdatahs` (khi `rxvalidhs` = 0) thành 0 | 19–20 | 0 line |
+| `xfill` | bit X của `rxdatahs` (khi `rxvalidhs` = 0) thành 0 | 19-20 | 0 line |
 | `amd1` | như D-PHY AMD: `rxsynchs` trước byte đầu, `rxactivehs` từ `rxsynchs` | 0 | PASS |
-| `amd2` | chỉ dời `rxsynchs` lên trước byte đầu, `rxactivehs` vẫn sớm | 19–20 | 0 line |
+| `amd2` | chỉ dời `rxsynchs` lên trước byte đầu, `rxactivehs` vẫn sớm | 19-20 | 0 line |
 | `amd3` | chỉ giữ `rxactivehs` tới `rxsynchs`; `rxsynchs` vẫn cùng byte đầu | 0 | PASS |
 
 Kết luận: controller CSI-2 của AMD (không PHY) cần `rxactivehs` không lên trước `rxsynchs`. Vị trí `rxsynchs` (cùng
@@ -296,8 +296,8 @@ bạn chọn **A**. Khối đã làm và được kiểm từ 2026-10-26 (§6.6,
    cùng image info, cùng cờ lỗi.
    - Byte clock chưa chạy lúc cấu hình: R-F vẫn qua được vòng chờ reset của driver ("soft reset done reached" ở
      1,1 µs), và nhận đúng sau đó. Chỉ còn bit dự trữ 27:24 của ISR là X (§6.3).
-   - Trailer mỗi packet (tổng 4 lane): `ftel_dphy_rx` giữ 0 byte ở mọi rate sau `IBUFDS_DPHY`, và 0–8 byte ở
-     260 Mb/s sau `afe_model`; D-PHY của AMD giữ 8 byte ở 260 Mb/s, 40 ở 800, 72–74 ở 1440–1500 (§6.5). Controller
+   - Trailer mỗi packet (tổng 4 lane): `ftel_dphy_rx` giữ 0 byte ở mọi rate sau `IBUFDS_DPHY`, và 0-8 byte ở
+     260 Mb/s sau `afe_model`; D-PHY của AMD giữ 8 byte ở 260 Mb/s, 40 ở 800, 72-74 ở 1440-1500 (§6.5). Controller
      của AMD bỏ được cả hai.
 3. **Có.** RX cấu hình trước khi TX chạy (thứ tự của example camera) chạy cho cả hai RX. RX cấu hình muộn, giữa
    frame 0 (E2b-6), cũng chạy: từ SOF kế tiếp hai RX ra đúng frame. Đề xuất cho TN3: theo thứ tự của AMD, che ISR bằng
@@ -344,26 +344,26 @@ ISR hoặc bắt cả PPI.
 | Run | SH_E2b-4a, SH_M_E2b-4a | SH_E2b-4b, SH_M_E2b-4b | SH_E2b-1, -2a, -2b và M_ của chúng | SH_E2b-4c, SH_M_E2b-4c |
 | `init_done` của TX (µs) | 392,758 | 570,463 | 383,263 | 380,538 |
 | Controller TX xin HS clock (µs; sau beat đầu, ns) | 394,585 (677) | 571,880 (268) | 384,593 (180) | 381,861 (173) |
-| Trailer mỗi packet, PPI của R-X (byte, tổng 4 lane) | 8 | 40 | 72 | 72–74 |
-| Trailer mỗi packet, PPI vào R-F | 0 sau `IBUFDS_DPHY`, 0–8 sau `afe_model` | 0 | 0 | 0 |
-| Burst của một line trên PPI của TX (ns) | 6708 | 2300–2470 | 1400–1572 | 1349–1520 |
+| Trailer mỗi packet, PPI của R-X (byte, tổng 4 lane) | 8 | 40 | 72 | 72-74 |
+| Trailer mỗi packet, PPI vào R-F | 0 sau `IBUFDS_DPHY`, 0-8 sau `afe_model` | 0 | 0 | 0 |
+| Burst của một line trên PPI của TX (ns) | 6708 | 2300-2470 | 1400-1572 | 1349-1520 |
 | Độ trễ SOF, TX → `video_out` R-X / R-F (ns) | 2926 / 3874 | 1822 / 2138 | 1654 / 1834 | 1638 / 1810 |
 | R-F trễ hơn R-X (ns) | 948 | 316 | 180 | 172 |
 
-- R-F trễ hơn R-X khoảng 31–32 byte time ở mọi rate. Con số này bằng độ trễ thêm mà TN2a đo ở PPI (950, 313–316,
-  174–177, 169–172 ns), tức đến từ delay line của phần cắt trailer trong `ftel_dphy_rx`, không phải từ controller.
+- R-F trễ hơn R-X khoảng 31-32 byte time ở mọi rate. Con số này bằng độ trễ thêm mà TN2a đo ở PPI (950, 313-316,
+  174-177, 169-172 ns), tức đến từ delay line của phần cắt trailer trong `ftel_dphy_rx`, không phải từ controller.
 - Độ trễ của các line sau tăng dần (tới 26 µs ở 1440 Mb/s), vì TX nhận line ở AXI4-Stream nhanh hơn tốc độ dây và
   giữ chúng trong line buffer. Hai RX tăng như nhau.
 - Bảng đủ, kèm khoảng cách giữa các burst trên PPI của TX, nằm trong output của `report`.
 
-**Máy:** mỗi run 121–252 s, bộ nhớ `xsimk` 2,4–3,8 GB (E2b-8: 5,1 GB). Ngày 23/10, 4 build chỉ phải compile lại
+**Máy:** mỗi run 121-252 s, bộ nhớ `xsimk` 2,4-3,8 GB (E2b-8: 5,1 GB). Ngày 23/10, 4 build chỉ phải compile lại
 (khoảng 16 s, chạy song song), và 39 run chạy 3 luồng xong trong 35 phút (tổng thời gian các run 6 038 s).
 
 ### 6.6 Chạy lại qua khối chỉnh, và E2b-9 (2026-10-26)
 
 **Cách chạy:**
 - 4 build làm lại, vì `exp2b.tcl` thêm file của khối: mỗi build khoảng 50 s.
-- `shim` (31 run, có E2b-9) và `finding` (9 run), 3 luồng, 34 phút. Tổng thời gian các run 6 275 s; mỗi run 121–253 s;
+- `shim` (31 run, có E2b-9) và `finding` (9 run), 3 luồng, 34 phút. Tổng thời gian các run 6 275 s; mỗi run 121-253 s;
   tối đa 5,1 GB (E2b-8).
 - 39 run cũ được chép sang `work/exp2b/_pre_gate/` trước khi chạy.
 
@@ -379,15 +379,15 @@ TN2b không gặp trường hợp đó.
 
 | | Kết quả |
 |---|---|
-| PPI vào R-F | Lane 0 có 52 burst, lane 1–3 có 53. `errsotsynchs` một lần, trong packet 5 của các lane khác, lúc `rxactivehs` của lane 0 = 0 |
+| PPI vào R-F | Lane 0 có 52 burst, lane 1-3 có 53. `errsotsynchs` một lần, trong packet 5 của các lane khác, lúc `rxactivehs` của lane 0 = 0 |
 | R-X | 48/48 line, ISR sạch |
 | R-F, frame 1 và 2 | Trùng golden từng pixel, đúng WC và RAW10 ở mọi line: **controller phục hồi**, không treo |
-| R-F, frame 0 (chỉ báo cáo) | 15 line: 14 line đúng (0–3, 6–15); không có line 4 và 5; thay vào đó 1 line lẫn: byte của lane 0 là của line 5, byte của lane 1–3 là 17 byte đầu của line 4 rồi phần còn lại của line 5 |
+| R-F, frame 0 (chỉ báo cáo) | 15 line: 14 line đúng (0-3, 6-15); không có line 4 và 5; thay vào đó 1 line lẫn: byte của lane 0 là của line 5, byte của lane 1-3 là 17 byte đầu của line 4 rồi phần còn lại của line 5 |
 | ISR của R-F (chỉ báo cáo) | Frame received, VC0 frame level (bit 0), CRC (bit 9); không có bit SoT sync (bit 12), dù PPI có `errsotsynchs`. Packet count R-F 47, R-X 48 |
 
 - **Cái giá của một lỗi sync ở một lane là hai line,** và một trong hai line là line sai vẫn được đưa ra. Cờ CRC chỉ
   có ở ISR. `video_out` không đánh dấu line đó, vì `tuser[1]` luôn bằng 0 (§6.4).
-- ⚠️ Cách đọc, chưa kiểm: FIFO mỗi lane của controller sâu khoảng 18 phần tử. Lane 0 thiếu burst nên FIFO của lane 1–3
+- ⚠️ Cách đọc, chưa kiểm: FIFO mỗi lane của controller sâu khoảng 18 phần tử. Lane 0 thiếu burst nên FIFO của lane 1-3
   đầy, mất đuôi packet 5 và đầu packet 6, và hai packet bị ghép thành một.
 - 🔍 Chưa biết D-PHY của AMD xử lý lỗi sync ra sao (TN2b không cài được lỗi đó vào line của TX AMD).
 - Quy tắc khác cho burst lỗi sync (nâng `rxactivehs` cùng `errsotsynchs`) chưa thử: chờ bạn quyết có cần so không.
@@ -418,7 +418,7 @@ chỉnh: **EVIDENCE: PASS (12/12 checks)**, có thêm check `gate`.
 | `copy` | Ba khối lấy từ `tb_exp1.sv` khác đúng các dòng đã liệt kê (0, 1 và 6 dòng) | 29, 15, 59 dòng code | 29, 15, 59 dòng code |
 | `neg` | NEG-ecc: bit cài rơi vào header, được sửa; `check.txt` đạt; chỉ R-F báo ECC 1 bit; `regs` là mục duy nhất của `tbcheck` hỏng. NEG-crc: pixel sai duy nhất của R-F đúng là pixel mà bit cài thuộc về (frame 0, line 0, pixel 4: 0x024 thay cho 0x004), chỉ R-F báo CRC, `check.txt` hỏng đúng `pixels-ftel`, `ppi-ftel`, `packets-xil-ftel`. NEG-front: front check đếm ra khác biệt, R-X vẫn đạt | 3/3 đúng chỗ | 3/3 đúng chỗ |
 | `finding` | §6.1: 5 run không chỉnh đúng dấu hiệu (R-X đạt, PPI vào R-F = PPI R-X, R-F 0 line, 0 packet; `rxactivehs` sớm ở mọi burst; D-PHY AMD cùng lúc); 4 run chẩn đoán đúng quy luật; mọi run `SH_*` (trừ NEG-front) có `rxactivehs` cùng `rxsynchs` | đúng, 29 run `SH_*` | đúng, 30 run `SH_*` |
-| `gate` (từ 26/10) | Mọi run `SH_*` lấy `rxactivehs` từ khối, trùng model của TB ở mọi byte clock. SH_E2b-9: chỉ burst đã định bị đổi; trong `ftel_ppi.csv` lane 0 ít hơn một burst và có `errsotsynchs` lúc `rxactivehs` của nó = 0; R-X đạt; R-F ra đúng các frame sau frame lỗi và run kết thúc (§6.6) | — | 31 run, 436 865 byte clock, 0 khác; SH_E2b-9 đúng chỗ, R-F phục hồi |
+| `gate` (từ 26/10) | Mọi run `SH_*` lấy `rxactivehs` từ khối, trùng model của TB ở mọi byte clock. SH_E2b-9: chỉ burst đã định bị đổi; trong `ftel_ppi.csv` lane 0 ít hơn một burst và có `errsotsynchs` lúc `rxactivehs` của nó = 0; R-X đạt; R-F ra đúng các frame sau frame lỗi và run kết thúc (§6.6) | - | 31 run, 436 865 byte clock, 0 khác; SH_E2b-9 đúng chỗ, R-F phục hồi |
 
 ### 7.1 Theo các lớp của plan §7
 

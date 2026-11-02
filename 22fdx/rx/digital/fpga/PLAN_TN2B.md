@@ -1,4 +1,4 @@
-# Plan: TN2b — frame RAW10 qua CSI-2 TX Subsystem của AMD vào hai đường nhận CSI-2, mô phỏng XSIM (2026-10-22)
+# Plan: TN2b - frame RAW10 qua CSI-2 TX Subsystem của AMD vào hai đường nhận CSI-2, mô phỏng XSIM (2026-10-22)
 
 > Repo `fu3_dphy`, branch `dev`, sau commit `cd1f0b2` (TN2a, chưa push); thư mục `22fdx/rx/digital/fpga/`.
 > Ký hiệu: ✅ đã kiểm hôm nay (file IP, driver, dữ liệu đã lưu) · ⚠️ ước lượng hoặc giả định · 🔍 kiểm khi làm.
@@ -24,7 +24,7 @@
     vào `exp2/` sẽ đổi build TN2a và làm check `sources` FAIL trên cả 60 run đã lưu. Đây cũng là lý do `exp2/` ra đời bên
     cạnh `exp1/`.
   - **D5: 4 rate: 260, 800, 1440, 1500 Mb/s.** Ở mức CSI-2, đây là các ca khác nhau:
-    - 260: RX mình còn giữ 0–4 byte trailer, nên controller phải bỏ được chúng;
+    - 260: RX mình còn giữ 0-4 byte trailer, nên controller phải bỏ được chúng;
     - 800: rate bring-up của TN3;
     - 1440: rate mục tiêu;
     - 1500: rate cao nhất của R1.
@@ -74,7 +74,7 @@ camera. Có ba lý do:
 
 **Kích thước** theo kịch bản (§6):
 - 640 × 16 (WC 800 byte), 3840 × 8 (WC 4800), 64 × 4 (WC 80);
-- 2–8 frame mỗi run.
+- 2-8 frame mỗi run.
 
 Riêng probe S0 dùng example của AMD với pattern V-TPG của chính nó (YUV422). Checker của example đó chỉ đọc thanh ghi,
 không so pixel. Probe này chỉ chứng minh AMD tự chạy được và cho chuỗi thanh ghi của AMD; nó không thuộc phép so ở dưới.
@@ -107,8 +107,8 @@ generator lấy pixel từ file PGM 16 bit mà `csi2_dump.py --pgm` ghi từ cap
 
 **CSI-2 TX SS 2.2** (`component.xml`, xgui, changelog trong `mipi_csi2_tx_subsystem_v2_2`):
 - **Tham số:**
-  - `C_CSI_LANES` 1–4; `C_CSI_PIXEL_MODE` 1/2/4; `C_CSI_MAX_BPC` 8–20;
-  - `C_CSI_DATATYPE`: RAW8–RAW14, RGB888/565, YUV422 8 bit, Generic, UserByte; tham số này ẩn trong GUI;
+  - `C_CSI_LANES` 1-4; `C_CSI_PIXEL_MODE` 1/2/4; `C_CSI_MAX_BPC` 8-20;
+  - `C_CSI_DATATYPE`: RAW8-RAW14, RGB888/565, YUV422 8 bit, Generic, UserByte; tham số này ẩn trong GUI;
   - `C_CSI_VID_INTERFACE` AXI4S hoặc Native; `C_HS_LINE_RATE`;
   - `C_INC_PHY` (có từ 2024.2, mặc định true); `SupportLevel`; `DPHY_LPX_PERIOD` 50 ns;
   - `C_CSI_CRC_ENABLE`, `C_CSI_EN_ACTIVELANES`, `C_EN_REG_BASED_FE_GEN`: mặc định false;
@@ -132,7 +132,7 @@ generator lấy pixel từ file PGM 16 bit mà `csi2_dump.py --pgm` ghi từ cap
 - **TX:**
   - `CCR` 0x00: bit 0 enable, bit 1 soft reset, bit 2 core ready, bit 4 clock mode (0 = continuous, 1 = non-continuous);
   - `PCR` 0x04: active lanes, max lanes, pixel mode, line generation;
-  - `GIER` 0x20, `IER` 0x28, line count VC0–3 0x40–0x4C;
+  - `GIER` 0x20, `IER` 0x28, line count VC0-3 0x40-0x4C;
   - `ISR` 0x24: underrun pixel, wrong data type, line buffer full, ULPS, GSP FIFO full, wrong lane config.
 - **Driver TX:**
   - `Configure`: soft reset (set, chờ `CCR[2]`, xoá) → active lanes → khôi phục `IER`/`GIER`;
@@ -141,11 +141,11 @@ generator lấy pixel từ file PGM 16 bit mà `csi2_dump.py --pgm` ghi từ cap
   - `CCR` 0x00: bit 0 enable, bit 1 soft reset;
   - `CSR` 0x10: packet count ở [31:16]; bit 0 = đang reset hoặc core đang tắt;
   - `ISR` 0x24, bit 31 = frame received; các nhóm lỗi của driver:
-    - protocol: frame sync/level VC0–3, VCX;
+    - protocol: frame sync/level VC0-3, VCX;
     - packet: ECC 1 bit, ECC 2 bit, CRC, DT lạ;
     - D-PHY: SoT, SoT sync;
     - khác: WC, lane config, line buffer full, stop state;
-  - lane info 0x40–0x4C, image info VC0 0x60/0x64.
+  - lane info 0x40-0x4C, image info VC0 0x60/0x64.
 - **Driver RX:**
   - `Configure`: soft reset → chờ `CSR[0]` → active lanes → xoá soft reset;
   - `Activate`: `GIER` rồi enable.
@@ -174,7 +174,7 @@ generator lấy pixel từ file PGM 16 bit mà `csi2_dump.py --pgm` ghi từ cap
 
 **Bench TN2a** (`exp2/README.md` §9):
 - Build mất 3 phút cho Vivado và 4 phút compile.
-- Mỗi run từ TX mất 85–130 s ở 4 lane, vì TX khởi động 380–571 µs mô phỏng.
+- Mỗi run từ TX mất 85-130 s ở 4 lane, vì TX khởi động 380-571 µs mô phỏng.
 
 **Máy:** 61 GB RAM (28 GB trống lúc kiểm), 24 core, 205 GB đĩa trống.
 
@@ -220,7 +220,7 @@ Viết lại từ plan prototype, không nêu tên vendor:
 | `o_dphy_rx_rxdatahs[x]`, `rxvalidhs`, `rxactivehs`, `rxsynchs` | → | `dlx_*` cùng tên | miền `rxbyteclkhs` |
 | `o_dphy_rx_cl_stopstate`, `cl_ulpsclknot` | → | `cl_stopstate`, `cl_rxulpsclknot` | |
 | `o_dphy_rx_stopstate`, `rxulpsesc`, `errsoths`, `errsotsynchs`, `erresc`, `errcontrol` [x] | → | `dlx_*` cùng tên | phía mình không đồng bộ với `rxbyteclkhs` (FP-5) |
-| `i_dphy_rx_forcerxmode[x]` | — | không có | buộc 0 |
+| `i_dphy_rx_forcerxmode[x]` | - | không có | buộc 0 |
 | các ngõ ra còn lại | → | không dùng | để hở như TN1 |
 
 Instance wrap vì vậy khác TN1 đúng ở các dòng của bảng này. Check `copy` (§7) liệt kê các dòng được phép khác đó.
@@ -379,18 +379,18 @@ Ngoài ra còn các check `runs`, `config` (field run-time của RX mình bằng
 
 | Bước | Việc | Cổng: nếu sai thì dừng và báo bạn | Ước lượng |
 |---|---|---|---|
-| 1 | Lưu `fpga/PLAN_TN2B.md`; thêm ghi chú ngày vào đầu `PLAN_TN1_TN3.md` | — | 0,1 ngày |
+| 1 | Lưu `fpga/PLAN_TN2B.md`; thêm ghi chú ngày vào đầu `PLAN_TN1_TN3.md` | - | 0,1 ngày |
 | 2 = S0 | Probe `csi2_tx_exdes_sim`; `exp2b.tcl` bản đầu: sinh 3 IP ở 1440 × 4, in tham số và port | (a) example của AMD PASS trên part của board. Nếu không, ghi lý do và dùng driver cộng metadata; (b) có định dạng `tuser` và chuỗi thanh ghi; (c) D-PHY trong TX SS là `mipi_dphy` 4.3 MASTER; ghi lại `C_INIT`, LPX, continuous clock mặc định; (d) có đường dẫn tới buffer LP của R-X; (e) cổng theo dõi PPI đủ chân; (f) đo thời gian sinh IP và compile | 0,5 ngày |
 | 3 = S1 | `axil_bfm`, `axis_vid_gen`, `axis_csv_mon`, `tb_exp2b`, `run_exp2b` (build, run, check); E2b-1 | Golden ba bản trùng nhau; R-X PASS trước. Nếu chỉ R-F hỏng mà front check sạch: soát lại bảng nối §4.3, rồi dừng và báo kèm bằng chứng (phát hiện RTL hoặc lệch hợp đồng PPI) | 1 ngày |
 | 4 = S2 | E2b-2…8; build 260, 800, 1500; bộ `M_*`; NEG-* | Như trên. Mỗi NEG phải FAIL đúng chỗ đã cài | 0,75 ngày |
 | 5 = S3 | `tn2b_evidence.py` (`evidence`, `evselftest`); `recheck` | Evidence PASS mọi check; `evselftest` bắt đủ lỗi đã cài | 0,5 ngày |
-| 6 = S4 | `exp2b/README.md`; `fpga/README.md` (trạng thái, cây thư mục, lệnh); phần Kết quả của `PLAN_TN2B.md`; memory | — | 0,25 ngày |
+| 6 = S4 | `exp2b/README.md`; `fpga/README.md` (trạng thái, cây thư mục, lệnh); phần Kết quả của `PLAN_TN2B.md`; memory | - | 0,25 ngày |
 
-- **Tổng:** khoảng 3,1 ngày ⚠️, trong khoảng 3–4 ngày của plan gốc.
+- **Tổng:** khoảng 3,1 ngày ⚠️, trong khoảng 3-4 ngày của plan gốc.
 - **Thời gian máy:**
-  - mỗi build khoảng 10–15 phút ⚠️, vì có 3 subsystem, và TX SS 2025.2 có SmartConnect bên trong;
-  - mỗi run khoảng 2–4 phút ⚠️; 30 run chạy 3 luồng mất khoảng 40 phút;
-  - example của AMD khoảng 10–20 phút ⚠️.
+  - mỗi build khoảng 10-15 phút ⚠️, vì có 3 subsystem, và TX SS 2025.2 có SmartConnect bên trong;
+  - mỗi run khoảng 2-4 phút ⚠️; 30 run chạy 3 luồng mất khoảng 40 phút;
+  - example của AMD khoảng 10-20 phút ⚠️.
 - **Bước dài:** báo trước thời gian rồi chạy nền. Trước mỗi pha chạy song song, kiểm RAM trống: dưới 15 GB thì chỉ chạy 2
   luồng.
 
@@ -444,7 +444,7 @@ Ngoài ra còn các check `runs`, `config` (field run-time của RX mình bằng
 
 - **Bàn giao TN2** (D3): `TN2_DESCRIPTION.md` và `TN2_REPORT.md`, phủ cả 2a và 2b.
 - **TN3:**
-  - lấy cấu hình IP đã mô phỏng (dòng `EXP2B`) cho §5–6 của đặc tả;
+  - lấy cấu hình IP đã mô phỏng (dòng `EXP2B`) cho §5-6 của đặc tả;
   - dùng thứ tự cấu hình tìm được ở E2b-1 và E2b-6;
   - khi board bắt được frame camera, có thể chạy lại frame đó qua bench (`+IMAGE`, §2.3).
 - **TN2c:** để sau.
@@ -486,7 +486,7 @@ Ngoài ra còn các check `runs`, `config` (field run-time của RX mình bằng
    [`exp2b/README.md`](exp2b/README.md) §6.1.
    - R-X đạt từng pixel. PPI vào R-F mang đúng chuỗi packet của R-X, nhưng R-F ra 0 line, đếm 0 packet, ISR không cờ
      lỗi nào.
-   - Đầu burst: `ftel_dphy_rx` nâng `rxactivehs` trước `rxsynchs` (7 byte clock ở 260 Mb/s, 12 ở 800, 19–20 ở 1440
+   - Đầu burst: `ftel_dphy_rx` nâng `rxactivehs` trước `rxsynchs` (7 byte clock ở 260 Mb/s, 12 ở 800, 19-20 ở 1440
      và 1500),
      `rxsynchs` cùng byte đầu (HAS C6, dòng 909 "rises at or before"). D-PHY của AMD nâng hai tín hiệu cùng lúc, byte
      đầu ở cycle sau.
@@ -518,17 +518,17 @@ Ngoài ra còn các check `runs`, `config` (field run-time của RX mình bằng
 8. **RX SS bật ngay sau reset** (`CCR` = 1). Ở E2b-6 hai RX ra một phần frame 0 trước khi được cấu hình, và mỗi RX cắt
    ở một chỗ khác (R-X 63 line, R-F 64). Check vì vậy so từ SOF đầu tiên sau lúc mỗi RX được cấu hình (`TB RX CFG`),
    và TB chờ tới khi hai `video_out` yên 30 µs (`drain_quiet`) thay vì đếm line.
-9. **E2b-8 kiểm FP-6 thật:** lúc TX tắt, clock lane rời HS và byte clock của cả hai RX dừng (413,2–797 µs); R-F vẫn ra
+9. **E2b-8 kiểm FP-6 thật:** lúc TX tắt, clock lane rời HS và byte clock của cả hai RX dừng (413,2-797 µs); R-F vẫn ra
    đúng cả 4 frame.
 10. **Bench:**
     - hai run XSIM chung một thư mục sim thì run sau chạy với plusarg của run trước, nên mỗi run nay copy thư mục sim
       riêng (37 MB);
-    - bộ nhớ `xsimk` tăng khoảng 1,2–1,5 GB mỗi phút chạy; `rss.txt` ghi lại mỗi 10 s.
+    - bộ nhớ `xsimk` tăng khoảng 1,2-1,5 GB mỗi phút chạy; `rss.txt` ghi lại mỗi 10 s.
 
 ## 15. Kết quả (2026-10-23)
 
 **39/39 run ra đúng kỳ vọng. `tn2b_evidence.py evidence`: PASS (11/11 checks); `evselftest`: PASS (14 ca).** Chi
-tiết và bảng số nằm ở [`exp2b/README.md`](exp2b/README.md) §6–§7. RTL `logical/` và `config/` không đổi so với
+tiết và bảng số nằm ở [`exp2b/README.md`](exp2b/README.md) §6-§7. RTL `logical/` và `config/` không đổi so với
 `cd1f0b2`; mọi run cùng hash nguồn `1ac03101efd59a1a`.
 
 - **R-X:** PASS từng pixel ở mọi run.
@@ -546,19 +546,19 @@ tiết và bảng số nằm ở [`exp2b/README.md`](exp2b/README.md) §6–§7.
   1. R-X có. R-F có khi đầu burst được chỉnh. Thanh ghi sạch: ISR của TX = 0; ISR của R-F chỉ X ở bit dự trữ 27:24
      (§14 mục 5).
   2. Có, khi đầu burst được chỉnh: cùng chuỗi packet, cùng bộ đếm, cùng cờ lỗi. Cấu hình lúc chưa có byte clock chạy
-     được. Trailer của RX mình ở 260 Mb/s (0–8 byte sau `afe_model`) và của D-PHY AMD (8–74 byte) đều được controller
+     được. Trailer của RX mình ở 260 Mb/s (0-8 byte sau `afe_model`) và của D-PHY AMD (8-74 byte) đều được controller
      bỏ.
   3. Thứ tự của AMD (RX trước, rồi TX) chạy được; RX cấu hình muộn cũng chạy, từ SOF kế tiếp. Cho TN3: che ISR bằng
      mặt nạ của driver (0xF07FFFFF).
   4. Cấu hình ở `exp2b/README.md` §3: các dòng `EXP2B` của từng build, kiểm bằng check `config`.
-- **Số đo** (README §6.5): R-F trễ hơn R-X 172–948 ns tuỳ rate (khoảng 31–32 byte time), bằng độ trễ thêm TN2a đo ở
-  PPI; D-PHY AMD giữ 8–74 byte trailer mỗi packet, RX mình 0 sau `IBUFDS_DPHY`.
+- **Số đo** (README §6.5): R-F trễ hơn R-X 172-948 ns tuỳ rate (khoảng 31-32 byte time), bằng độ trễ thêm TN2a đo ở
+  PPI; D-PHY AMD giữ 8-74 byte trailer mỗi packet, RX mình 0 sau `IBUFDS_DPHY`.
 - **Kiểm chính script kiểm chứng:**
   - `evselftest`: 1 ca sạch và 13 lỗi cài; mỗi lỗi làm hỏng đúng các check của nó;
   - `run_exp2b.sh recheck`: 39 `check.txt` không đổi; 9 `tbcheck.txt` chỉ đổi chữ ở dòng `axis`, kết luận không đổi
     (README §7.1).
 - **Thời gian máy:** 4 build compile lại khoảng 16 s; 39 run chạy 3 luồng trong 35 phút (tổng 6 038 s), mỗi run
-  121–252 s và 2,4–5,1 GB.
+  121-252 s và 2,4-5,1 GB.
 
 **Khác với plan:**
 - **Không chờ clock lane trước khi phát video** (§4.5 bước 5), vì TX chỉ xin HS khi có video (§14 mục 2).
@@ -575,6 +575,6 @@ tiết và bảng số nằm ở [`exp2b/README.md`](exp2b/README.md) §6–§7.
 - `tx_ppi.csv` (tuỳ chọn 🔍 ở §4.4) làm được: PPI bên trong TX SS đọc được qua đường dẫn của block design. Không cần
   build debug: các chẩn đoán dùng capture CSV.
 - **Thời gian:**
-  - Plan ước 3,1 ngày công; thực tế làm trong ngày 22–23/10.
-  - Build nhanh hơn ước rất nhiều: Vivado khoảng 40 s, compile lại khoảng 16 s (plan ước 10–15 phút). Run 121–252 s
-    (plan ước 2–4 phút).
+  - Plan ước 3,1 ngày công; thực tế làm trong ngày 22-23/10.
+  - Build nhanh hơn ước rất nhiều: Vivado khoảng 40 s, compile lại khoảng 16 s (plan ước 10-15 phút). Run 121-252 s
+    (plan ước 2-4 phút).

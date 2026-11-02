@@ -1,4 +1,4 @@
-# TN1 — Mô tả thí nghiệm: so RX D-PHY `ftel_dphy_rx` với RX D-PHY của AMD trong mô phỏng XSIM
+# TN1 - Mô tả thí nghiệm: so RX D-PHY `ftel_dphy_rx` với RX D-PHY của AMD trong mô phỏng XSIM
 
 > Tài liệu cho team FPGA: lấy RTL và testbench ở đâu, bench gồm những gì, so theo luật nào, chạy và đọc kết quả ra
 > sao. Kết quả lần chạy ngày 2026-10-20 và lần chạy lại ngày 2026-10-26 nằm ở [`TN1_REPORT.md`](TN1_REPORT.md).
@@ -63,11 +63,11 @@ cd fu3_dphy/22fdx/rx/digital          # mọi lệnh trong tài liệu này ch�
 - **Linux, bash.**
 - **Thời gian:**
   - mỗi tổ hợp rate × số lane cần một build: khoảng 5 phút lần đầu, vài giây nếu chỉ testbench đổi;
-  - một kịch bản chạy khoảng 10–15 s với cả hai RX, vài giây ở chế độ `stub`;
+  - một kịch bản chạy khoảng 10-15 s với cả hai RX, vài giây ở chế độ `stub`;
   - `all` khoảng 23 phút, `model` khoảng 23 phút, `window` khoảng 7 phút, nếu chạy tuần tự.
 - **Chạy song song:** các lệnh dùng build khác nhau chạy song song được. Hai lệnh không được dùng chung một build cùng
   lúc.
-- **Đĩa:** output nằm ở `fpga/work/exp1/` (git bỏ qua), khoảng 1–2 GB cho một bộ đầy đủ.
+- **Đĩa:** output nằm ở `fpga/work/exp1/` (git bỏ qua), khoảng 1-2 GB cho một bộ đầy đủ.
 
 ## 4. Sơ đồ
 
@@ -96,7 +96,7 @@ Kiểm trong bench: đầu ra LP của buffer bên RX AMD và của buffer trư�
   - TLPX 75 ns, THS-PREPARE 66 ns;
   - PREPARE + ZERO bằng 1,2 lần mức min (182 ns so với 152 ns);
   - THS-TRAIL bằng 1,2 lần mức min (75 ns), THS-EXIT 150 ns.
-- **Payload:** mẫu `counter` theo lane (mặc định), `prbs9`, hoặc `synclike` (chứa 0xB8 và 0xB8 dịch 1–7 bit qua
+- **Payload:** mẫu `counter` theo lane (mặc định), `prbs9`, hoặc `synclike` (chứa 0xB8 và 0xB8 dịch 1-7 bit qua
   ranh giới byte). Độ dài mặc định mỗi burst là 1, 2, 3, 4, 5, 8, 16, 64, 256 rồi 1024 byte mỗi lane.
 - **File truth:** ghi cho từng lane và từng burst: số byte, thời điểm bit sync đầu tiên, thời điểm kết thúc payload,
   và payload.
@@ -122,7 +122,7 @@ RX mình nhận tín hiệu từ một front end (vai trò của AFE trên chip)
 
 - IP `mipi_dphy` 4.3, SLAVE, SupportLevel 1, `C_INIT` 99 µs. Các tham số khác để mặc định của IP theo rate.
 - Line rate cố định lúc build, nên mỗi tổ hợp rate × số lane là một build riêng.
-- Trên xcvp1902, IP này chỉ build được ở 260–3200 Mb/s. Rate thấp hơn thì chạy RX mình một mình (chế độ `stub`).
+- Trên xcvp1902, IP này chỉ build được ở 260-3200 Mb/s. Rate thấp hơn thì chạy RX mình một mình (chế độ `stub`).
 
 ### 5.4 RX mình
 
@@ -216,10 +216,10 @@ Rate và số lane là tham số build. Cột plusarg chỉ ghi những gì khá
 
 | ID | Rate (Mb/s), lane | Plusarg | Mục đích |
 |---|---|---|---|
-| E1-1 | 1440, 4 | (mặc định: burst 1–1024 byte, payload `counter`) | Cơ bản, ở rate của camera |
+| E1-1 | 1440, 4 | (mặc định: burst 1-1024 byte, payload `counter`) | Cơ bản, ở rate của camera |
 | E1-2a | 1440, 4 | `+PATTERN=prbs9 +LENS=1,2,3,8,64,256,1024 +REPEAT=2` | Dữ liệu ngẫu nhiên |
 | E1-2b | 1440, 4 | `+PATTERN=synclike +LENS=4,8,16,64,256,1024` | Sync chỉ khoá một lần, không khoá nhầm trong payload |
-| E1-2c | 1440, 4 | `+UNEVEN=1 +LENS=2,3,5,9,65,257` | Lane 2–3 ít hơn 1 byte, như packet có độ dài không chia hết cho 4 |
+| E1-2c | 1440, 4 | `+UNEVEN=1 +LENS=2,3,5,9,65,257` | Lane 2-3 ít hơn 1 byte, như packet có độ dài không chia hết cho 4 |
 | E1-3a | 1440, 4 | `+LENS=1,4,64,256 +PREP=min +ZERO=min` | Biên đầu burst |
 | E1-3b | 1440, 4 | `+LENS=1,4,64,256 +PREP=max +ZERO=min` | Biên đầu burst |
 | E1-3c | 1440, 4 | `+LENS=1,4,64,256 +TRAIL=min +EXIT=min +LPX=min` | Biên cuối burst, burst sát nhau |
@@ -229,11 +229,11 @@ Rate và số lane là tham số build. Cột plusarg chỉ ghi những gì khá
 | E1-3g | 1440, 4 | `+LENS=1,4,64,256 +AFE=model +AFE_NOISE=1` | Nhiễu trong LP-00 trước HS. Nhiễu do `afe_model` tạo, nên chỉ RX mình chịu |
 | E1-4a | 260, 4 | `+TIMEOUT_US=1500` | Rate thấp nhất mà IP AMD build được |
 | E1-4a_min | 260, 4 | `+TRAIL=min +EXIT=min +LPX=min +TIMEOUT_US=1500` | Như trên, timing min |
-| E1-4b | 800, 4 | — | Rate |
-| E1-4c | 1500, 4 | — | Rate |
-| E1-4d | 1440, 2 | — | Số lane |
-| E1-4e | 1440, 1 | — | Số lane |
-| E1-5 (96 run) | 260, 400, 600, 800, 1000, 1200, 1440, 1500; 4 | `+LENS=1,2,3,4,5,8,16,64,256 +REPEAT=2`, trail min/mặc định/max × `+TRAIL_JITTER=0/1` × `+EOT_JUNK=0/40`, `+CORE_HALF=2.501` | Stress cuối burst: jitter trail 0–7 bit, nhiễu cuối trail, `core_clk` lệch 400 ppm để LP-11 rơi vào mọi pha |
+| E1-4b | 800, 4 | - | Rate |
+| E1-4c | 1500, 4 | - | Rate |
+| E1-4d | 1440, 2 | - | Số lane |
+| E1-4e | 1440, 1 | - | Số lane |
+| E1-5 (96 run) | 260, 400, 600, 800, 1000, 1200, 1440, 1500; 4 | `+LENS=1,2,3,4,5,8,16,64,256 +REPEAT=2`, trail min/mặc định/max × `+TRAIL_JITTER=0/1` × `+EOT_JUNK=0/40`, `+CORE_HALF=2.501` | Stress cuối burst: jitter trail 0-7 bit, nhiễu cuối trail, `core_clk` lệch 400 ppm để LP-11 rơi vào mọi pha |
 | `M_*` (113 run) | Như trên | Mọi kịch bản trên, thêm `+AFE=model` | Bộ phụ: RX mình sau front end giống AFE thật hơn (LP-00 trong HS) |
 | R-80 | 80, 4 (`stub`) | `+LENS=1,2,3,4,5,8,16,64,256 +THS_EXIT=400` | Ngoài dải bảo đảm; chỉ báo cáo, không tính đạt hay hỏng |
 | E1-6a | 1440, 4 | `+LENS=1,4,64,256 +SKEW3=13889` | Lane 3 trễ 2,5 byte time. Không RX nào căn lại các lane, nên lệch tới thẳng PPI; vẫn trong mức 6 byte clock |

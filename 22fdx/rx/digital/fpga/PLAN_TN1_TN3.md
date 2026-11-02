@@ -1,4 +1,4 @@
-# Plan: ba thí nghiệm cho D-PHY RX — TN1, TN2 làm trong Vivado; TN3 viết đặc tả cho team FPGA (2026-10-19)
+# Plan: ba thí nghiệm cho D-PHY RX - TN1, TN2 làm trong Vivado; TN3 viết đặc tả cho team FPGA (2026-10-19)
 
 > Repo `/home/linhhk/Documents/DPHY`, branch `dev`, thư mục `fpga/`.
 > Ký hiệu: ✅ đã kiểm hôm nay · ⚠️ ước lượng hoặc giả định · 🔍 kiểm khi làm.
@@ -18,7 +18,7 @@
 > - E1-5 (stress EoT) nay chạy cả hai RX ở 8 rate.
 > - Kết quả: 113/113 kịch bản PASS cho cả hai RX. Bộ phụ, với RX mình sau `afe_model`, cũng 113/113 PASS và trùng
 >   từng byte với lần chạy trước.
-> - Chi tiết ở `fpga/exp1/README.md` §6–§7.
+> - Chi tiết ở `fpga/exp1/README.md` §6-§7.
 >
 > **Cập nhật 2026-10-22: bắt đầu TN2, làm ở repo `fu3_dphy`** (thư mục `22fdx/rx/digital/fpga/`).
 > - Plan chi tiết của TN2a: [`PLAN_TN2A.md`](PLAN_TN2A.md). TN2b và TN2c sẽ có plan riêng sau.
@@ -31,7 +31,7 @@
 
 **Vì sao đổi hướng.** Đường camera (S0 → S1 → S2) vướng ba chỗ:
 - phải ngồi board;
-- cổng USB của board hay rớt (log 15–19/10);
+- cổng USB của board hay rớt (log 15-19/10);
 - cần camera.
 
 Sếp đã hỏi "thử giả lập data từ TX đẩy vô chưa" (15/10), và giao thí nghiệm VEK280 (TX) → mạch test → VP1902 (RX).
@@ -51,10 +51,10 @@ Bạn chia lại thành ba thí nghiệm, theo nguyên tắc: việc nào làm �
   - `mipi_csi2_tx_subsystem` 2.2;
   - `mipi_csi2_rx_subsystem` 6.0.
 
-  Có board file VEK280 (`xcve2802-vsvh1760-2MP-e-S`, bản 1.0–1.2).
+  Có board file VEK280 (`xcve2802-vsvh1760-2MP-e-S`, bản 1.0-1.2).
 - **RTL `ftel_dphy_rx`:** đã có draft đủ các block, lint sạch. Nhưng mới chỉ mô phỏng Block No. 1 (TB B7, VCS). **Chuỗi pads → PPI chưa từng mô phỏng trọn**, nên TN1 cũng là lần mô phỏng end-to-end đầu tiên.
 - **Cấu hình R1:**
-  - dải 80–1500 Mb/s, 4 lane, `core_clk` 200 MHz, cần continuous clock;
+  - dải 80-1500 Mb/s, 4 lane, `core_clk` 200 MHz, cần continuous clock;
   - `hs_settle_cyc` và `eot_skip_bytes` đổi theo line rate. Model trong `config/validate_config.py` đã có hàm `hs_settle(rate)` và `eot_skip(rate)`.
 - **Chân camera trên VP1902** (FMC+ 01, bank 705, netlist sheet FMC01):
 
@@ -67,7 +67,7 @@ Bạn chia lại thành ba thí nghiệm, theo nguyên tắc: việc nào làm �
   | D3 | C10/C11 | `LA06` | DA60/DA59 |
 - **Cùng các chân FMC đó trên VEK280 (FMCP1):** `CLK0_M2C` nằm ở **bank 705**, bốn cặp còn lại ở **bank 706** (theo device DB của Vivado). Nếu mạch test nối thẳng chân trùng tên thì TX trên VEK280 sẽ bị chia sang hai bank.
 
-## 1. TN1 — dummy data vào hai RX (mô phỏng XSIM)
+## 1. TN1: dummy data vào hai RX (mô phỏng XSIM)
 
 **Câu hỏi cần trả lời:**
 - Cùng một tín hiệu D-PHY trên pad, RX của mình và RX của Xilinx có cho cùng dữ liệu ở PPI không?
@@ -120,14 +120,14 @@ TB line generator (dummy data, timing D-PHY chỉnh được) ──► file tru
   - số byte trailer ở cuối burst. Theo HAS thì RX mình cắt trailer, còn RX Xilinx có thể để lại;
   - thời điểm `stopstate`/`rxactivehs` (ADR-006).
 
-## 2. TN2 — TX → RX trong cùng một design VP1902 (mô phỏng XSIM)
+## 2. TN2: TX → RX trong cùng một design VP1902 (mô phỏng XSIM)
 
-**2a — dummy data qua TX thật:**
+**2a - dummy data qua TX thật:**
 - `mipi_dphy` 4.3 MASTER, continuous clock 🔍 (tên tham số kiểm khi làm).
 - Testbench lái PPI TX (`txrequesths`, `txdatahs`); tín hiệu ra pad đi vào hai RX như ở TN1.
 - Khác TN1 ở chỗ timing và trailer là của TX Xilinx thật. Tiêu chí như TN1.
 
-**2b — frame RAW, không cần camera:**
+**2b - frame RAW, không cần camera:**
 ```
 AXIS frame generator (TB, RAW10, pattern biết trước, frame nhỏ)
   → mipi_csi2_tx_subsystem 2.2 (4 lane, continuous clock) → pad
@@ -141,13 +141,13 @@ AXIS frame generator (TB, RAW10, pattern biết trước, frame nhỏ)
   - thanh ghi lỗi ECC/CRC/SoT của hai CSI-2 RX đều bằng 0.
 - Phần RX của 2b (cấu hình CSI-2 RX, ILA) dùng lại làm phía RX của TN3.
 
-**2c — bản FPGA của RX mình** (điều kiện để TN3 chạy được RX mình; đây là bước F3 cũ):
+**2c - bản FPGA của RX mình** (điều kiện để TN3 chạy được RX mình; đây là bước F3 cũ):
 - Block No. 1-F: XPHY của Advanced IO Wizard `MIPI_RX` thay sampler, deserializer và byte clock.
 - Biến thể FPGA sinh từ RTL ASIC bằng script, theo plan FPGA §3.1. Script kiểm rằng phần còn lại trùng bản ASIC.
 - Chạy lại 2b với biến thể này.
 - Pha mốc của TN3 không phụ thuộc bước này.
 
-## 3. TN3 — VEK280 (TX) → mạch test → VP1902 (RX): đặc tả cho team FPGA
+## 3. TN3: VEK280 (TX) → mạch test → VP1902 (RX): đặc tả cho team FPGA
 
 **Sản phẩm:**
 - `fpga/exp3/TN3_SPEC.md`, tiếng Việt, viết cho team FPGA, đủ để build lại từ đầu. Khi xong thì publish thành Artifact để chia sẻ; bản trong repo là bản gốc.
@@ -160,7 +160,7 @@ AXIS frame generator (TB, RAW10, pattern biết trước, frame nhỏ)
    - **VEK280:** VADJ của bank TX = 1.2 V (cách đặt lấy theo tài liệu VEK280 🔍); boot mode JTAG.
    - **VP1902:** SW192 = 1.2 V; SW1 = JTAG; FMC+ 01 chỉ cắm mạch test.
    - **Mạch test:**
-     - 5 cặp vi sai (CLK, D0–D3), 100 Ω ±10 %;
+     - 5 cặp vi sai (CLK, D0-D3), 100 Ω ±10 %;
      - độ lệch trong cặp và giữa các lane tính sẵn từ ngân sách skew của D-PHY ở rate cao nhất;
      - có chiều dài tối đa đề xuất;
      - nhiều chân GND giữa hai đầu, không stub.
@@ -209,7 +209,7 @@ AXIS frame generator (TB, RAW10, pattern biết trước, frame nhỏ)
 | `fpga/exp2/`: `tb_exp2a.sv`, `tb_exp2b.sv`, `axil_bfm.sv`, `exp2.tcl`, `run_exp2.sh` | TN2a, TN2b; 2c thêm script sinh biến thể FPGA |
 | `fpga/tools/csi2_dump.py` | Mode `bursts` (so với truth) và selftest cho mode này |
 | `fpga/exp3/`: `TN3_SPEC.md`, `tx_vek280/*.tcl`, `rx_vp1902/*.tcl`, `xsdb/*.tcl` | TN3 |
-| Plan nội bộ của prototype (lên v0.6), `fpga/README.md` | §6 chuyển sang TN1–TN3; S0 thành build mốc R-X; thêm rủi ro mới |
+| Plan nội bộ của prototype (lên v0.6), `fpga/README.md` | §6 chuyển sang TN1-TN3; S0 thành build mốc R-X; thêm rủi ro mới |
 | Output | `fpga/work/exp*/` (gitignored) |
 
 **Dùng lại, không viết mới:**
@@ -225,11 +225,11 @@ AXIS frame generator (TB, RAW10, pattern biết trước, frame nhỏ)
 
 | Việc | Ước lượng | Phụ thuộc |
 |---|---|---|
-| TN3 mục 3–4 (yêu cầu mạch test, bảng chân) | 0,5–1 ngày | không; gửi team FPGA sớm |
-| TN1 | 3–5 ngày, chưa tính thời gian sửa lỗi RTL | không |
-| TN2a | 1–2 ngày | TN1 |
-| TN2b | 3–4 ngày | TN2a |
-| TN3: đặc tả đầy đủ + build TX và R-X | 2–3 ngày | TN2b (cấu hình IP đã mô phỏng) |
+| TN3 mục 3-4 (yêu cầu mạch test, bảng chân) | 0,5-1 ngày | không; gửi team FPGA sớm |
+| TN1 | 3-5 ngày, chưa tính thời gian sửa lỗi RTL | không |
+| TN2a | 1-2 ngày | TN1 |
+| TN2b | 3-4 ngày | TN2a |
+| TN3: đặc tả đầy đủ + build TX và R-X | 2-3 ngày | TN2b (cấu hình IP đã mô phỏng) |
 | TN2c (bản FPGA của RX mình) + build R-F | khoảng 1 tuần | TN2b |
 
 Mỗi bước dài sẽ báo trước thời gian chạy. Build trên VP1902 chạy dưới một watchdog RAM.

@@ -1,4 +1,4 @@
-# ftel_dphy_rx — Câu hỏi cho team CSI-2 Rx controller
+# ftel_dphy_rx - Câu hỏi cho team CSI-2 Rx controller
 
 | Mục | Nội dung |
 |---|---|
@@ -11,7 +11,7 @@
 
 `ftel_dphy_rx` là khối "D-PHY macro" trong HAS-CSI. Khối này nhận các lane từ AFE (analog) và xuất
 dữ liệu cho CSI-2 Rx controller qua PPI theo HAS-CSI Table 4-3. Chúng tôi dùng HAS-CSI làm hợp đồng
-PPI. Phụ lục ở cuối file ghi lại cách chúng tôi hiểu HAS-CSI (C1–C16); nhờ team kiểm giúp. Waveform
+PPI. Phụ lục ở cuối file ghi lại cách chúng tôi hiểu HAS-CSI (C1-C16); nhờ team kiểm giúp. Waveform
 PPI theo cách hiểu đó nằm ở HAS D-PHY §5.1 (Figure 5-1…5-8); nhờ team xem cùng phụ lục.
 
 Mỗi câu hỏi kèm **giả định đang dùng**. Thiết kế sẽ đi theo giả định đó cho tới khi có câu trả lời.
@@ -29,19 +29,19 @@ Nếu team đồng ý với giả định, chỉ cần trả lời "Đồng ý".
 | K4 | Ngân sách lệch byte giữa các lane | Trung bình | 1 |
 | K5 | Register map v1.4 | Trung bình | 2 |
 | K6 | `phy_core_rst`, `init_done`, `forcerxmode_x` | **Cao** | 3 |
-| K7 | Sửa dẫn chiếu trong HAS-CSI (biên tập) | Thấp | — |
+| K7 | Sửa dẫn chiếu trong HAS-CSI (biên tập) | Thấp | - |
 | K8 | Burst HS dài nhất trên một lane | Trung bình | 2 |
 | F-001 | Thời gian giữ `errcontrol_x` khi lỗi do chính LP-11 gây ra | Trung bình | 1 |
 | ADR-006 | EoT: thứ tự `stopstate_x` / `rxactivehs_x`, byte trailer sau packet ở tốc độ thấp, độ trễ PPI | **Cao** | 7 |
 
 ---
 
-## K1 — Tốc độ lane, deskew và bản phát hành
+## K1: Tốc độ lane, deskew và bản phát hành
 
 **Câu hỏi.**
 1. Tốc độ tối đa mỗi lane mà D-PHY phải hỗ trợ là bao nhiêu? HAS-CSI §1 ghi "up to 1500 Mbps", còn
    Table 4-1 và §7.1 ghi 1792 Mb/s (`rxbyteclkhs` 224 MHz).
-2. Chế độ 4K staggered HDR RAW12 (1493–1528 Mb/s/lane chưa tính blanking, HAS-CSI §7.3) cần ngay
+2. Chế độ 4K staggered HDR RAW12 (1493-1528 Mb/s/lane chưa tính blanking, HAS-CSI §7.3) cần ngay
    trong bản đầu tiên, hay ở bản sau?
 3. Lane của IMX274 trên board FPGA chạy ở tốc độ bao nhiêu?
 4. Ở bản chưa có calibrate deskew, D-PHY vẫn nhận ra deskew burst (sync toàn bit 1). Khi đó D-PHY bật
@@ -57,12 +57,12 @@ Nếu team đồng ý với giả định, chỉ cần trả lời "Đồng ý".
   như một burst lỗi sync (`errsotsynchs_x`).
 
 **Giả định hiện tại.**
-- R1: 80–1500 Mb/s. D-PHY nhận ra và báo deskew burst trên `rxskewcalhs_x`, không calibrate.
-- R2: 80–1792 Mb/s, calibrate deskew.
+- R1: 80-1500 Mb/s. D-PHY nhận ra và báo deskew burst trên `rxskewcalhs_x`, không calibrate.
+- R2: 80-1792 Mb/s, calibrate deskew.
 
 **Tham chiếu.** HAS-CSI §1, §4.3.1, §7.1, §7.3, Table 4-1. HAS D-PHY §1.4, ADR-003.
 
-## K2 — Các cổng LPDT
+## K2: Các cổng LPDT
 
 **Câu hỏi.**
 1. D-PHY không làm Low-Power Data Transmission (LPDT) trong bản đầu. Các cổng `rxlpdtesc_x`,
@@ -79,7 +79,7 @@ Nếu team đồng ý với giả định, chỉ cần trả lời "Đồng ý".
 
 **Tham chiếu.** HAS-CSI Table 4-3. HAS D-PHY §3 (#5), §5.1.
 
-## K3 — Nơi cấu hình timer của D-PHY
+## K3: Nơi cấu hình timer của D-PHY
 
 **Câu hỏi.**
 1. Các giá trị cấu hình của D-PHY sẽ đặt ở đâu? Có hai lựa chọn:
@@ -128,7 +128,7 @@ cố định chỉ đúng cho một tốc độ.
 
 **Tham chiếu.** HAS D-PHY §3, §4.10, §5.3, ADR-005, Appendix B.
 
-## K4 — Ngân sách lệch byte giữa các lane
+## K4: Ngân sách lệch byte giữa các lane
 
 **Câu hỏi.**
 1. Xác nhận lệch tối đa giữa các lane tại PPI là `SKEW_DEPTH` − `FIFO_AF_MARGIN` = 6 chu kỳ
@@ -144,7 +144,7 @@ lệch tại PPI bằng lệch đầu vào (Tx, board, AFE), làm tròn theo byt
 
 **Tham chiếu.** HAS-CSI Table 3-1. HAS D-PHY §8 (Integration).
 
-## K5 — Register map v1.4
+## K5: Register map v1.4
 
 **Yêu cầu.** Nhờ team gửi file `FTEL_MEMORY_MAP_REGISTERS_v1_4.xlsx`, đặc biệt các trường
 PHY_CONFIG, PHY_STATUS, LANE_STATUS.
@@ -152,7 +152,7 @@ PHY_CONFIG, PHY_STATUS, LANE_STATUS.
 **Vì sao cần.** Để các trường status của D-PHY (xem K3) khớp với register của controller và không
 trùng chức năng. Mục Registers (§6) của HAS D-PHY đang hoãn cho tới khi có file này.
 
-## K6 — `phy_core_rst`, `init_done`, `forcerxmode_x`
+## K6: `phy_core_rst`, `init_done`, `forcerxmode_x`
 
 **Câu hỏi.**
 1. `phy_core_rst` là active High hay active Low? Đồng bộ hay bất đồng bộ? Nếu đồng bộ thì theo clock
@@ -174,9 +174,9 @@ cách khai port ở wrapper `m_ftel_dphy_rx_wrap`.
 - Ở wrapper: port active-low `_n`, inverter đặt trong `m_ftel_dphy_rx_wrap`.
 - Hành vi của `init_done` khi khởi tạo lại một lane chưa được định nghĩa trong bản nháp.
 
-**Tham chiếu.** HAS-CSI Table 4-3 (#1–#3, #28–#29), mục "Bring-up". HAS D-PHY §4.2, §4.7.
+**Tham chiếu.** HAS-CSI Table 4-3 (#1-#3, #28-#29), mục "Bring-up". HAS D-PHY §4.2, §4.7.
 
-## K7 — Sửa dẫn chiếu trong HAS-CSI (biên tập)
+## K7: Sửa dẫn chiếu trong HAS-CSI (biên tập)
 
 Không cần quyết định; nhờ team sửa trong bản HAS-CSI kế tiếp:
 - Bảng revision ghi V0.1, bìa ghi V1.2.
@@ -184,7 +184,7 @@ Không cần quyết định; nhờ team sửa trong bản HAS-CSI kế tiếp:
 - §5 dẫn "Table 4-1" cho PPI.
 - Các mục "4.3.4" và "4.2.4" được dẫn tới nhưng không tồn tại.
 
-## K8 — Burst HS dài nhất trên một lane
+## K8: Burst HS dài nhất trên một lane
 
 **Câu hỏi.** Xét mọi sensor mode và mọi tổ hợp số lane/tốc độ, burst HS dài nhất trên một lane dài
 bao nhiêu (tính bằng byte, hoặc µs)?
@@ -198,7 +198,7 @@ Timeout đặt 2^18 chu kỳ `core_clk`, khoảng 1.31 ms.
 
 **Tham chiếu.** HAS-CSI §4.4.5 ("Stuck state"). HAS D-PHY §3 (`hs_rx_timeout_cyc`), §4.6.
 
-## F-001 — `errcontrol_x` khi lỗi do chính LP-11
+## F-001: `errcontrol_x` khi lỗi do chính LP-11
 
 **Câu hỏi.**
 - Data lane có thể đang ở giữa một chuỗi request (sau LP-10 hoặc LP-01) thì gặp LP-11. Khi đó D-PHY
@@ -210,9 +210,9 @@ Timeout đặt 2^18 chu kỳ `core_clk`, khoảng 1.31 ms.
 **Giả định hiện tại.** Có. `errcontrol_x` hạ ở lần đổi trạng thái đường truyền đầu tiên sau LP-11
 đó.
 
-**Tham chiếu.** HAS-CSI Table 4-3 (#24–#26). HAS D-PHY §4.5 (luật thứ tự ưu tiên của FSM data lane).
+**Tham chiếu.** HAS-CSI Table 4-3 (#24-#26). HAS D-PHY §4.5 (luật thứ tự ưu tiên của FSM data lane).
 
-## ADR-006 — EoT ở tốc độ thấp
+## ADR-006: EoT ở tốc độ thấp
 
 **Câu hỏi.**
 1. HAS-CSI Figure 4-1 cho `stopstate_x` lên trong khoảng từ byte cuối trở đi. Sau EoT, D-PHY có thể bật
@@ -223,8 +223,8 @@ Timeout đặt 2^18 chu kỳ `core_clk`, khoảng 1.31 ms.
    trailer ra sau packet footer với `rxvalidhs_x` = 1 (HAS D-PHY v0.16, Table 4-7):
    - đường truyền sạch lúc chuyển sang LP-11: từ 600 Mb/s không burst nào sót; ở 260 Mb/s khoảng
      13 % số burst sót, ở 400 Mb/s khoảng 1 %;
-   - đường truyền nhiễu 40 ns trước LP-11 (trường hợp xấu nhất mà D-PHY cho phép): ở 260–800 Mb/s
-     phần lớn burst sót; từ 1000 Mb/s chỉ 0,3–3 % số burst, ở 1440 Mb/s của camera khoảng 1 %;
+   - đường truyền nhiễu 40 ns trước LP-11 (trường hợp xấu nhất mà D-PHY cho phép): ở 260-800 Mb/s
+     phần lớn burst sót; từ 1000 Mb/s chỉ 0,3-3 % số burst, ở 1440 Mb/s của camera khoảng 1 %;
    - mỗi burst sót tối đa ⌊(THS-TRAIL + 29 ns) / byte period⌋ − `eot_skip_bytes` byte: 4 byte ở
      260 Mb/s, 8 byte ở 800 Mb/s, 12 byte ở 1440 và 1500 Mb/s, luôn ít hơn số byte của trail.
 
@@ -262,7 +262,7 @@ Figure 4-1, Table 4-3, Table 4-6, Table 4-25, §4.4 (`err_wc` chỉ báo khi thi
 
 ---
 
-## Phụ lục — Cách chúng tôi hiểu HAS-CSI (nhờ xác nhận hoặc sửa)
+## Phụ lục: Cách chúng tôi hiểu HAS-CSI (nhờ xác nhận hoặc sửa)
 
 | # | Ràng buộc | Nguồn trong HAS-CSI |
 |---|---|---|
@@ -297,4 +297,4 @@ Figure 4-1, Table 4-3, Table 4-6, Table 4-25, §4.4 (`err_wc` chỉ báo khi thi
 | K8 | | | |
 | F-001 | | | |
 | ADR-006 | | | |
-| Phụ lục C1–C16 | | | |
+| Phụ lục C1-C16 | | | |

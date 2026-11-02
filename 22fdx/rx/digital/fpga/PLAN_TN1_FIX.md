@@ -9,19 +9,19 @@
 
 **Vì sao có plan này:**
 - TN1 (commit `7e26771`): RX Xilinx đạt mọi kịch bản, còn `ftel_dphy_rx` hỏng do hai lỗi.
-- Plan TN1–TN3 có quy định "sửa RTL cần plan riêng"; đây là plan đó.
+- Plan TN1-TN3 có quy định "sửa RTL cần plan riêng"; đây là plan đó.
 
 **Bạn đã quyết (19/10):**
 - Sửa trước. TN1 phải đạt hết rồi mới làm tiếp TN2 và TN3.
-- Mốc là **ngang IP Xilinx**. Trên xcvp1902, Vivado chỉ cho IP Xilinx chạy 260–3200 Mb/s. Vì vậy không làm time-stamp DDR hay cắt ở mức bit để cắt đúng tới 80 Mb/s.
+- Mốc là **ngang IP Xilinx**. Trên xcvp1902, Vivado chỉ cho IP Xilinx chạy 260-3200 Mb/s. Vì vậy không làm time-stamp DDR hay cắt ở mức bit để cắt đúng tới 80 Mb/s.
 
 ## 1. Nguyên nhân (đã kiểm)
 
 | ID | Hiện tượng | Nguyên nhân | Bằng chứng |
 |---|---|---|---|
 | F2 | Mỗi burst, trên mỗi lane, có đúng một `rxvalidhs` nằm ngoài `rxactivehs`, mang byte sau trail | Ở `m_ftel_dphy_rx_sync_search.sv:242-248`, `valid = reg_locked && !w_detect` còn `active = i_start`. Ở chu kỳ `i_start` rơi, entry có valid = 1 và active = 0. `m_ftel_dphy_rx_eot.sv:179-191` đưa entry mới vào line mà không qua phép cắt. Vi phạm REQ-249 | Bản copy có thêm `&& i_start` ở 3 dòng thì hết lỗi ✅ |
-| F1a | Cắt EoT lệch ở mọi rate khi dùng `eot_skip_bytes` của model | Công thức ở HAS Table 3-2, Appendix B và `Model.eot_skip` trong `config/validate_config.py` không trừ độ trễ đường dữ liệu: Λ + cửa sổ sync search + entry, khoảng 4–5 byte clock. Đây đúng là finding F-003 mà HAS đã ghi | Model cho 800/1440/1500 = 10/15/16. Cửa sổ đo được với trail min: ≤ 5 / ≤ 11 / ≤ 13 ✅ |
-| F1b | Dưới khoảng 800 Mb/s, mất byte cuối với mọi giá trị skip. Ở 80 Mb/s mất 5–6 byte; burst từ 5 byte trở xuống mất hết | Sườn xuống của sync-search start tới Block No. 4 sau khoảng 2–3 byte clock, **sớm hơn** dữ liệu của cùng thời điểm (4–5 byte clock). Sync search xoá cửa sổ và lock ngay lúc đó, nên các byte đang trên đường bị mất; phép quét cũng chưa thấy đủ entry | Không có hold, ở 260 Mb/s chỉ skip 0 đúng, nằm sát mép ✅ |
+| F1a | Cắt EoT lệch ở mọi rate khi dùng `eot_skip_bytes` của model | Công thức ở HAS Table 3-2, Appendix B và `Model.eot_skip` trong `config/validate_config.py` không trừ độ trễ đường dữ liệu: Λ + cửa sổ sync search + entry, khoảng 4-5 byte clock. Đây đúng là finding F-003 mà HAS đã ghi | Model cho 800/1440/1500 = 10/15/16. Cửa sổ đo được với trail min: ≤ 5 / ≤ 11 / ≤ 13 ✅ |
+| F1b | Dưới khoảng 800 Mb/s, mất byte cuối với mọi giá trị skip. Ở 80 Mb/s mất 5-6 byte; burst từ 5 byte trở xuống mất hết | Sườn xuống của sync-search start tới Block No. 4 sau khoảng 2-3 byte clock, **sớm hơn** dữ liệu của cùng thời điểm (4-5 byte clock). Sync search xoá cửa sổ và lock ngay lúc đó, nên các byte đang trên đường bị mất; phép quét cũng chưa thấy đủ entry | Không có hold, ở 260 Mb/s chỉ skip 0 đúng, nằm sát mép ✅ |
 
 **Không phải lỗi:** burst sát nhau ở 80 Mb/s.
 - RTL không lỡ burst khi THS-EXIT + TLPX ≥ 315 ns; ràng buộc S5 của HAS là 415 ns, nên vẫn còn dư.
@@ -48,9 +48,9 @@
 | Rate (Mb/s) | Không hold | Hold 2 | Hold 3 |
 |---|---|---|---|
 | 260 | skip {0}, sát mép | {1, 2} | {2, 3} |
-| 800 | — | — | {3 … 8} (chưa dò dưới 3) |
-| 1440 | — | — | {9 … 14} |
-| 80 (ngoài phạm vi) | — | — | skip 0: payload nguyên, dư tối đa 1 byte trailer |
+| 800 | - | - | {3 … 8} (chưa dò dưới 3) |
+| 1440 | - | - | {9 … 14} |
+| 80 (ngoài phạm vi) | - | - | skip 0: payload nguyên, dư tối đa 1 byte trailer |
 
 Với F2 đã sửa và skip nằm trong cửa sổ, E1-1…E1-3g, E1-4b và E1-4c đều cho 0 lỗi, 0 byte trailer ✅.
 
@@ -64,11 +64,11 @@ Với F2 đã sửa và skip nằm trong cửa sổ, E1-1…E1-3g, E1-4b và E1-
   - sinh lại `logical/ftel_dphy_rx_config_pkg.sv`.
 
 **HAS v0.16 (`doc/spec.md`):**
-- **R1 giữ nguyên 80–1500 Mb/s.** Dải này còn xuất hiện ở K1, K8 và trong file gửi team CSI, nên không thu hẹp.
+- **R1 giữ nguyên 80-1500 Mb/s.** Dải này còn xuất hiện ở K1, K8 và trong file gửi team CSI, nên không thu hẹp.
 - **Ghi phạm vi bảo đảm của phép cắt trailer:**
   - từ 260 Mb/s: bảo đảm, ngang IP Xilinx trên Versal;
   - từ khoảng 600 Mb/s: đúng tới từng byte với mọi Tx đúng chuẩn;
-  - 260–600 Mb/s: đúng với Tx thông thường; trường hợp xấu nhất (THS-TRAIL min + nhiễu) dư 1 byte trailer kèm EoT sync error, payload không mất;
+  - 260-600 Mb/s: đúng với Tx thông thường; trường hợp xấu nhất (THS-TRAIL min + nhiễu) dư 1 byte trailer kèm EoT sync error, payload không mất;
   - dưới 260 Mb/s: không bảo đảm, chỉ ghi kết quả đo.
 - **Các chỗ sửa:**
   - §4.6: thêm hold, mô tả lại thời điểm EoT done;
@@ -98,7 +98,7 @@ Với F2 đã sửa và skip nằm trong cửa sổ, E1-1…E1-3g, E1-4b và E1-
 
 - **`dphy_line_gen.sv` / `tb_exp1.sv`:**
   - `+EOT_JUNK=<ns>`: phần `<ns>` cuối của trail là bit ngẫu nhiên. Mô hình xấu nhất của HAS là 40 ns.
-  - `+TRAIL_JITTER=1`: mỗi burst cộng thêm ngẫu nhiên 0–7 UI vào THS-TRAIL, để pha của LP-11 so với byte clock thay đổi. Hiện TN1 gần như giữ pha cố định, nên chưa thử hết độ bất định 1 byte clock.
+  - `+TRAIL_JITTER=1`: mỗi burst cộng thêm ngẫu nhiên 0-7 UI vào THS-TRAIL, để pha của LP-11 so với byte clock thay đổi. Hiện TN1 gần như giữ pha cố định, nên chưa thử hết độ bất định 1 byte clock.
 - **`csi2_dump.py bursts`:** thêm `--max-trailer N` và báo lỗi khi vượt. RX mình dùng N = 0; riêng các hàng HAS cho phép thì N = 1. Selftest thêm ca vi phạm.
 - **`run_exp1.sh`:**
   - build ở 260 Mb/s;
@@ -121,11 +121,11 @@ Với F2 đã sửa và skip nằm trong cửa sổ, E1-1…E1-3g, E1-4b và E1-
 |---|---|---|
 | 1 | Lưu plan này vào `fpga/PLAN_TN1_FIX.md`; đăng ký EXPECTED v0.16 | 0,1 ngày |
 | 2 | Bổ sung TN1 (mục 3); đo cửa sổ có nhiễu và jitter bằng bản RTL thử trong scratchpad ở 260/400/600/800/1440/1500 Mb/s, lấy số cho công thức | 0,5 ngày |
-| 3 | HAS v0.16, resync P1, docx, file gửi team CSI | 0,5–1 ngày |
+| 3 | HAS v0.16, resync P1, docx, file gửi team CSI | 0,5-1 ngày |
 | 4 | Config, RTL, lint, P2/P3a, rtl_notes, B7 | 0,5 ngày |
 | 5 | Chạy lại toàn bộ TN1; báo cáo; ghi chú vào README và PLAN_TN1_TN3; cập nhật memory | 0,5 ngày |
 
-Tổng khoảng 2–2,5 ngày. Bước nào dài sẽ báo trước; build Vivado ở 260 Mb/s mất khoảng 5 phút.
+Tổng khoảng 2-2,5 ngày. Bước nào dài sẽ báo trước; build Vivado ở 260 Mb/s mất khoảng 5 phút.
 
 ## 5. Kiểm chứng
 
@@ -143,7 +143,7 @@ Tổng khoảng 2–2,5 ngày. Bước nào dài sẽ báo trước; build Vivad
 ## 6. Rủi ro và mục mở
 
 - **Mô hình nhiễu EoT và độ trễ LP-RX của AFE đều là giả định.** Mô hình nhiễu lấy 40 ns. 🔍 Kiểm xem `questions_afe_team.md` đã hỏi về độ trễ LP-RX chưa.
-- **Dư 1 byte trailer ở 260–600 Mb/s trong trường hợp xấu nhất.** Team CSI cần biết điều này; câu hỏi ADR-006 đã có sẵn.
+- **Dư 1 byte trailer ở 260-600 Mb/s trong trường hợp xấu nhất.** Team CSI cần biết điều này; câu hỏi ADR-006 đã có sẵn.
 - **Thứ tự `stopstate_x` / `rxactivehs_x`** (OPEN ADR-006): plan này không đổi.
 
 ## 7. Ngoài plan này
@@ -180,17 +180,17 @@ Chưa commit.
   - Bench thêm `+CORE_HALF=2.501` (`core_clk` chậm 400 ppm, trôi qua mọi pha) và target `run_exp1.sh window`. Target
     này quét `eot_skip_bytes` từ giá trị model − 1 tới + 2, mỗi ô 1120 burst, bảng in bằng `eot_window.py`.
   - Kết quả: hằng số cũ 27 ns không còn biên 1 byte ở 600, 800 và 1440 Mb/s, vì giá trị + 1 đã mất payload trong
-    1–7 / 1120 burst.
+    1-7 / 1120 burst.
   - Đổi sang 24 ns theo luật của mục 2 (thiên về cắt muộn). Giá trị: 600 → 4, 800 → 6, 1440 → 13. Các rate khác và
     giá trị reset (14) không đổi.
   - Đo lại: + 1 không mất payload ở rate nào; + 2 mất ở mọi rate.
 - **Phạm vi cắt trailer (HAS Table 4-7) kém hơn ước lượng "dư tối đa 1 byte":**
   - không nhiễu: chính xác từ 600 Mb/s; ở 260 Mb/s 13 % số burst còn trailer, ở 400 Mb/s 0,9 %;
-  - có 40 ns nhiễu: 99 % số burst ở 260–400 Mb/s; 0,3–3 % từ 1000 Mb/s; 1,2 % ở 1440 Mb/s; 0 ở 1500 Mb/s;
+  - có 40 ns nhiễu: 99 % số burst ở 260-400 Mb/s; 0,3-3 % từ 1000 Mb/s; 1,2 % ở 1440 Mb/s; 0 ở 1500 Mb/s;
   - mỗi burst còn tối đa ⌊(THS-TRAIL + 29 ns) / byte period⌋ − `eot_skip_bytes` byte, tính tại TEOT,max: 4 byte ở
     260 Mb/s, 12 byte ở 1440 và 1500 Mb/s.
 
-  Vẫn ngang hoặc hơn IP Xilinx: IP này giữ nguyên trailer ở mọi burst (2 byte ở 260 Mb/s, 9 ở 800, 16–18 ở 1440/1500).
+  Vẫn ngang hoặc hơn IP Xilinx: IP này giữ nguyên trailer ở mọi burst (2 byte ở 260 Mb/s, 9 ở 800, 16-18 ở 1440/1500).
 - **Tiêu chí của mục 3 sửa theo HAS:**
   - Không nhiễu: RX mình 0 byte trailer từ 600 Mb/s.
   - Các trường hợp còn lại: tối đa bằng cột cuối của Table 4-7 (hàm `tmax` trong `run_exp1.sh`).
@@ -199,11 +199,11 @@ Chưa commit.
 
 | Kịch bản | Byte trailer: RX Xilinx | Byte trailer: `ftel_dphy_rx` | Kết quả |
 |---|---|---|---|
-| E1-1, E1-2a–c, E1-3a–g, E1-4d/e (1440 Mb/s) | 14–17 | 0 | PASS |
-| E1-4a (260 Mb/s, timing mặc định / min) | 1–2 | 0 / 0–2 | PASS |
-| E1-4b, E1-4c (800, 1500 Mb/s) | 9, 17–18 | 0 | PASS |
-| E1-5 (96 run, chỉ RX mình) | — | trong Table 4-7; lớn nhất 12, ở 1440 Mb/s có nhiễu | PASS |
-| R-80 (ngoài phạm vi, chỉ báo cáo) | — | 0–1 ở 10/36 burst; payload nguyên | — |
+| E1-1, E1-2a-c, E1-3a-g, E1-4d/e (1440 Mb/s) | 14-17 | 0 | PASS |
+| E1-4a (260 Mb/s, timing mặc định / min) | 1-2 | 0 / 0-2 | PASS |
+| E1-4b, E1-4c (800, 1500 Mb/s) | 9, 17-18 | 0 | PASS |
+| E1-5 (96 run, chỉ RX mình) | - | trong Table 4-7; lớn nhất 12, ở 1440 Mb/s có nhiễu | PASS |
+| R-80 (ngoài phạm vi, chỉ báo cáo) | - | 0-1 ở 10/36 burst; payload nguyên | - |
 
 **Còn mở:**
 - ADR-006: thứ tự `stopstate_x` / `rxactivehs_x`, và việc controller CSI-2 có bỏ qua byte trailer sau footer không.

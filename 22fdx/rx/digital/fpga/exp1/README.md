@@ -82,7 +82,7 @@ Mô phỏng chạy trong XSIM của Vivado 2025.2, part xcvp1902.
 **RX AMD** ([`exp1.tcl`](exp1.tcl)):
 - IP `mipi_dphy` 4.3, SLAVE, SupportLevel 1, C_INIT 99 µs; các tham số khác để mặc định của IP theo rate.
 - Line rate cố định lúc build, nên mỗi tổ hợp rate × số lane là một build riêng.
-- Trên xcvp1902, IP này chỉ chạy 260–3200 Mb/s.
+- Trên xcvp1902, IP này chỉ chạy 260-3200 Mb/s.
 
 **RX mình:**
 - RTL lấy nguyên từ [`logical/filelist.f`](../../logical/filelist.f).
@@ -145,10 +145,10 @@ Kịch bản chỉ PASS khi cả hai RX đều 0 lỗi.
 
 | ID | Rate (Mb/s), lane | Nội dung | Mục đích | RX |
 |---|---|---|---|---|
-| E1-1 | 1440, 4 | Burst 1–1024 byte, payload counter | Cơ bản, ở rate của camera | Cả hai |
+| E1-1 | 1440, 4 | Burst 1-1024 byte, payload counter | Cơ bản, ở rate của camera | Cả hai |
 | E1-2a | 1440, 4 | Payload PRBS-9, mỗi độ dài 2 lần | Dữ liệu ngẫu nhiên | Cả hai |
-| E1-2b | 1440, 4 | Payload chứa 0xB8 và 0xB8 dịch 1–7 bit qua ranh giới byte | Sync chỉ khoá một lần, không khoá nhầm trong payload | Cả hai |
-| E1-2c | 1440, 4 | Lane 2–3 ít hơn 1 byte | Lane kết thúc lệch nhau, như packet có độ dài không chia hết 4 | Cả hai |
+| E1-2b | 1440, 4 | Payload chứa 0xB8 và 0xB8 dịch 1-7 bit qua ranh giới byte | Sync chỉ khoá một lần, không khoá nhầm trong payload | Cả hai |
+| E1-2c | 1440, 4 | Lane 2-3 ít hơn 1 byte | Lane kết thúc lệch nhau, như packet có độ dài không chia hết 4 | Cả hai |
 | E1-3a/b | 1440, 4 | THS-PREPARE min/max, PREPARE + ZERO ở mức min | Biên đầu burst | Cả hai |
 | E1-3c | 1440, 4 | THS-TRAIL, THS-EXIT, TLPX đều min | Biên cuối burst, burst sát nhau | Cả hai |
 | E1-3d/e/f | 1440, 4 | Clock lệch 139 ps (0,2 UI); mọi data lane lệch 139 ps; lane lệch nhau 0/46/93/139 ps | Skew | Cả hai |
@@ -156,7 +156,7 @@ Kịch bản chỉ PASS khi cả hai RX đều 0 lỗi.
 | E1-4a | 260, 4 | Timing mặc định và timing min | Rate thấp nhất mà IP AMD chạy được | Cả hai |
 | E1-4b/c | 800 / 1500, 4 | Rate | Phủ dải R1 | Cả hai |
 | E1-4d/e | 1440, 2 / 1 | Số lane | 1, 2 lane | Cả hai |
-| E1-5 (96 run) | 260–1500, 4 | 8 rate × trail min/mặc định/max × có/không jitter trail (0–7 bit) × nhiễu 0/40 ns trước LP-11; `core_clk` lệch 400 ppm | Stress EoT | Cả hai |
+| E1-5 (96 run) | 260-1500, 4 | 8 rate × trail min/mặc định/max × có/không jitter trail (0-7 bit) × nhiễu 0/40 ns trước LP-11; `core_clk` lệch 400 ppm | Stress EoT | Cả hai |
 | `M_*` (113 run) | như trên | Đúng các kịch bản trên, RX mình đứng sau `afe_model` (LP-00 trong HS như silicon) | Bộ phụ: RX mình với front end giống AFE thật hơn | Cả hai |
 | E1-6a/b (thêm 2026-10-26, `run_exp1.sh skew`) | 1440, 4 | Burst 1, 4, 64, 256 byte; cặp dây của lane 3 trễ 13 889 / 30 556 ps (2,5 / 5,5 byte time) | Lệch lane lớn mà vẫn trong ngân sách 6 byte clock (HAS C10). Không RX nào căn lại các lane, nên lệch tới thẳng PPI | Cả hai |
 | NEG-skew (như trên) | 1440, 4 | Như E1-6, lane 3 trễ 41 667 ps (7,5 byte time) | Thử âm thật cho luật lệch lane: payload vẫn đúng, chỉ luật lệch lane được phép hỏng | Cả hai |
@@ -176,7 +176,7 @@ Ngoài các test trên còn có `run_exp1.sh window`. Đây là phép đo, khôn
 ## 6. Kết quả lần chạy 2026-10-20 và lần chạy lại 2026-10-26
 
 **Chế độ công bằng: 113/113 kịch bản PASS cho cả hai RX. Bộ phụ `M_*`: 113/113 PASS. R-80: payload nguyên
-36/36 burst, dư 0–1 byte trailer ở 10 burst.**
+36/36 burst, dư 0-1 byte trailer ở 10 burst.**
 
 Lần chạy đầu, RX mình hỏng hai lỗi: mất byte cuối burst, và có `rxvalidhs` nằm ngoài `rxactivehs`. Cả hai đã
 sửa theo `PLAN_TN1_FIX.md` (HAS v0.16).
@@ -189,8 +189,8 @@ RTL; bench chỉ khác header và đường dẫn IP; bộ so có thêm timing �
   - `rxsynchs` của RX mình đúng một sample, cùng byte đầu, ở mọi lane burst của 230 run;
   - của RX AMD đúng một sample, trước byte đầu một cycle, ở 229 run có RX AMD;
   - lệch giữa các lane bằng 0 ở mọi run nhiều lane, trừ E1-6a/b và NEG-skew; E1-3d/e/f (139 ps) cũng cho 0.
-- **E1-6a / E1-6b PASS.** Lệch đo ở PPI: AMD 3 / 6, RX mình 2–3 / 5–6 byte clock.
-- **NEG-skew FAIL đúng chỗ.** Lệch đo ở PPI: AMD 8, RX mình 7–8. Payload 16/16 ở mỗi RX; mỗi RX 4 lỗi, đều là lỗi
+- **E1-6a / E1-6b PASS.** Lệch đo ở PPI: AMD 3 / 6, RX mình 2-3 / 5-6 byte clock.
+- **NEG-skew FAIL đúng chỗ.** Lệch đo ở PPI: AMD 8, RX mình 7-8. Payload 16/16 ở mỗi RX; mỗi RX 4 lỗi, đều là lỗi
   lệch lane, mỗi burst một lỗi.
 - **`window`:** hai run vốn FAIL ở model + 2 (`W_1000_min_n40_s11`, `W_260_min_n40_s3`; lane 1 mất trọn một burst, §7.3)
   có thêm lỗi lệch lane ở các burst ghép lệch sau burst mất. Kết luận và bảng không đổi.
@@ -201,10 +201,10 @@ RTL; bench chỉ khác header và đường dẫn IP; bộ so có thêm timing �
 
 | Rate (Mb/s) | Kịch bản | Trailer: AMD | Trailer: RX mình sau `IBUFDS_DPHY` | Trailer: RX mình sau `afe_model` | Độ trễ: AMD | Độ trễ: RX mình |
 |---|---|---|---|---|---|---|
-| 260 | E1-4a / E1-4a timing min | 2 / 1–2 | 0 / 0 | 0 / 0–2 (8 trong 40 burst) | 152–179 ns | 1113–1140 ns |
-| 800 | E1-4b | 9 | 0 | 0 | 50–58 ns | 362–371 ns |
-| 1440 | E1-1…E1-3, E1-4d/e | 14–17 | 0 | 0 | 27–32 ns | 201–206 ns |
-| 1500 | E1-4c | 17–18 | 0 | 0 | 26–31 ns | 193–198 ns |
+| 260 | E1-4a / E1-4a timing min | 2 / 1-2 | 0 / 0 | 0 / 0-2 (8 trong 40 burst) | 152-179 ns | 1113-1140 ns |
+| 800 | E1-4b | 9 | 0 | 0 | 50-58 ns | 362-371 ns |
+| 1440 | E1-1…E1-3, E1-4d/e | 14-17 | 0 | 0 | 27-32 ns | 201-206 ns |
+| 1500 | E1-4c | 17-18 | 0 | 0 | 26-31 ns | 193-198 ns |
 
 **E1-5** (stress EoT, 432 burst-lane mỗi ô):
 - Ở mọi ô, cả hai RX đều nhận đủ 432/432 payload.
@@ -213,20 +213,20 @@ RTL; bench chỉ khác header và đường dẫn IP; bộ so có thêm timing �
 
 | Rate (Mb/s) | Nhiễu | Trailer: AMD | Trailer: RX mình sau `IBUFDS_DPHY` | Trailer: RX mình sau `afe_model` | Giới hạn (Table 4-7) |
 |---|---|---|---|---|---|
-| 260 | không | 1–4 | 0 | 0–4 (67) | 4 |
-| 260 | 40 ns | 1–4 | 0–4 (429) | giống bên trái | 4 |
-| 400 | không | 3–7 | 0 | 0–4 (4) | 6 |
-| 400 | 40 ns | 2–7 | 0–5 (426) | giống bên trái | 6 |
-| 600 | không | 5–10 | 0 | 0 | 0 |
-| 600 | 40 ns | 5–10 | 0–7 (421) | giống bên trái | 7 |
-| 800 | không | 7–13 | 0 | 0 | 0 |
-| 800 | 40 ns | 6–13 | 0–8 (328) | giống bên trái | 8 |
-| 1000 | không | 9–17 | 0 | 0 | 0 |
-| 1000 | 40 ns | 8–16 | 0–8 (15) | giống bên trái | 9 |
-| 1200 | không / 40 ns | 11–20 | 0 | 0 | 0 / 10 |
-| 1440 | không | 14–24 | 0 | 0 | 0 |
-| 1440 | 40 ns | 13–24 | 0–12 (4) | giống bên trái | 12 |
-| 1500 | không / 40 ns | 14–25 | 0 | 0 | 0 / 12 |
+| 260 | không | 1-4 | 0 | 0-4 (67) | 4 |
+| 260 | 40 ns | 1-4 | 0-4 (429) | giống bên trái | 4 |
+| 400 | không | 3-7 | 0 | 0-4 (4) | 6 |
+| 400 | 40 ns | 2-7 | 0-5 (426) | giống bên trái | 6 |
+| 600 | không | 5-10 | 0 | 0 | 0 |
+| 600 | 40 ns | 5-10 | 0-7 (421) | giống bên trái | 7 |
+| 800 | không | 7-13 | 0 | 0 | 0 |
+| 800 | 40 ns | 6-13 | 0-8 (328) | giống bên trái | 8 |
+| 1000 | không | 9-17 | 0 | 0 | 0 |
+| 1000 | 40 ns | 8-16 | 0-8 (15) | giống bên trái | 9 |
+| 1200 | không / 40 ns | 11-20 | 0 | 0 | 0 / 10 |
+| 1440 | không | 14-24 | 0 | 0 | 0 |
+| 1440 | 40 ns | 13-24 | 0-12 (4) | giống bên trái | 12 |
+| 1500 | không / 40 ns | 14-25 | 0 | 0 | 0 / 12 |
 
 **Đọc kết quả:**
 - **Payload:** cùng front end và cùng kịch bản, phần digital của RX mình nhận đúng mọi payload như phần digital
@@ -235,7 +235,7 @@ RTL; bench chỉ khác header và đường dẫn IP; bộ so có thêm timing �
   - RX mình cắt trailer, RX AMD giữ (tới 25 byte ở 1500 Mb/s).
   - Sau `IBUFDS_DPHY`, RX mình còn ít hoặc bằng trailer so với khi đứng sau `afe_model`. Lý do: model AMD giữ bit
     trail sau LP-11, còn `afe_model` ép về 0. Table 4-7, đo sau `afe_model`, vẫn là trường hợp xấu hơn.
-- **Độ trễ:** RX mình trễ hơn khoảng 6–7 lần, vì delay line 32 byte cần cho phép cắt trailer. Độ trễ không phụ
+- **Độ trễ:** RX mình trễ hơn khoảng 6-7 lần, vì delay line 32 byte cần cho phép cắt trailer. Độ trễ không phụ
   thuộc front end.
 
 Chi tiết từng kịch bản nằm trong `fpga/work/exp1/<tên>/check.txt` (gitignored) và ở
@@ -334,7 +334,7 @@ mô phỏng lại): 355 run không đổi kết luận, bảng `window` (Table 4
 
 - **Lần đo đầu đã "may" thật.** `core_clk` chạy đúng tỉ lệ cố định với đường truyền, nên chỉ gặp vài pha. Lỗi
   này lộ ra vì E1-5 dùng seed khác và hỏng.
-- **Cách sửa:** cho `core_clk` lệch 400 ppm (`+CORE_HALF=2.501`), thêm jitter trail 0–7 bit, và chạy 1120 burst
+- **Cách sửa:** cho `core_clk` lệch 400 ppm (`+CORE_HALF=2.501`), thêm jitter trail 0-7 bit, và chạy 1120 burst
   mỗi ô.
 - **Biên được đo, không phải giả định:** với trail min, giá trị + 1 không bao giờ mất payload, còn + 2 mất ở mọi
   rate (check `margin`).
@@ -346,7 +346,7 @@ mô phỏng lại): 355 run không đổi kết luận, bảng `window` (Table 4
 - **Từ mã nguồn IP AMD:**
   - IP AMD đặt `IBUFDS_DPHY` ở mỗi cặp pin, với `SIM_DEVICE "VERSAL_PREMIUM"`.
   - LP receiver luôn bật (`lp_rx_disable_w` = 0 trong `xrx_support.v`).
-  - Pad đi qua `assign` thường (`xrx_core.v`, dòng 447–459), nên buffer luôn thấy strength strong.
+  - Pad đi qua `assign` thường (`xrx_core.v`, dòng 447-459), nên buffer luôn thấy strength strong.
 
   Bench đặt trước RX mình đúng primitive đó, cùng `SIM_DEVICE`, cùng strength, LP receiver cũng luôn bật.
 - **Kiểm ở mọi run** (check `front`): bench so đầu ra LP của hai bộ buffer 2 ps sau mỗi lần đổi. Kết quả: 226/226
@@ -462,7 +462,7 @@ fpga/exp1/neg_front.sh                     # phép thử âm của check front e
 ```
 
 - Mỗi tổ hợp rate × số lane cần một build Vivado: khoảng 5 phút lần đầu, vài giây khi chỉ testbench đổi.
-- Một kịch bản chạy khoảng 10–15 s với cả hai RX, vài giây ở chế độ `stub`.
+- Một kịch bản chạy khoảng 10-15 s với cả hai RX, vài giây ở chế độ `stub`.
 - Các lệnh trên các build khác nhau chạy song song được; hai lệnh không được dùng chung một build cùng lúc. Lần chạy
   2026-10-20 xong toàn bộ trong 13 phút:
   - pha 1: E1-1…E1-3, E1-4, R-80 với `window`, và E1-5 ở 400/600/1000/1200 Mb/s, mỗi nhóm một tiến trình;

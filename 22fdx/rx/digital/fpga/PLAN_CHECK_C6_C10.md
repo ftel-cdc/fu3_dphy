@@ -68,8 +68,8 @@ Anh ấy hỏi thêm: RTL có kiểm soát được lệch giữa các lane khô
 
 | Run | Skew | Kỳ vọng |
 |---|---|---|
-| E1-6a | 2,5 byte (13 889 ps) | Lệch 2–3; PASS |
-| E1-6b | 5,5 byte (30 556 ps) | Lệch 5–6; PASS |
+| E1-6a | 2,5 byte (13 889 ps) | Lệch 2-3; PASS |
+| E1-6b | 5,5 byte (30 556 ps) | Lệch 5-6; PASS |
 | NEG-skew | 7,5 byte (41 667 ps) | Payload PASS; **chỉ FAIL ở mục lệch lane**, cả hai receiver. Đây là thử âm thật, không phải capture bị sửa |
 
 ## 3. Chạy lại và kiểm
@@ -117,7 +117,7 @@ Commit chỉ khi được bảo.
 
 ## 7. Kết quả (2026-10-26)
 
-**Bước 1a–1d xong, mọi cổng đạt. 1e (HAS v0.17) chưa làm, chờ bạn quyết.**
+**Bước 1a-1d xong, mọi cổng đạt. 1e (HAS v0.17) chưa làm, chờ bạn quyết.**
 
 **1a, `tools/csi2_dump.py`:**
 - `--sync-at` và `--max-lane-spread` có ở mode `bursts` và `ppi`.
@@ -153,9 +153,9 @@ Commit chỉ khi được bảo.
 
   | Run | AMD | ftel | Kết quả |
   |---|---|---|---|
-  | E1-6a | 3 | 2–3 | PASS |
-  | E1-6b | 6 | 5–6 | PASS |
-  | NEG-skew | 8 | 7–8 | FAIL đúng chỗ: payload 16/16, 4 lỗi lệch lane ở mỗi RX |
+  | E1-6a | 3 | 2-3 | PASS |
+  | E1-6b | 6 | 5-6 | PASS |
+  | NEG-skew | 8 | 7-8 | FAIL đúng chỗ: payload 16/16, 4 lỗi lệch lane ở mỗi RX |
 
   Số đo đúng quan hệ "lệch ở PPI = skew theo byte" của §1, ở cả hai RX (rủi ro 2 không xảy ra).
 

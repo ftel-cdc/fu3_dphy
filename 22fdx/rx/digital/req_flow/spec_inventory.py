@@ -9,7 +9,7 @@
 # Author          : Ho Khanh Linh
 # Email           : linhhk26@fpt.com
 # Created Date    : 2026-09-26
-# Description     : Deterministic inventory of a HAS spec.md — the pre-registered answer key of the req
+# Description     : Deterministic inventory of a HAS spec.md - the pre-registered answer key of the req
 #                   flow.
 #
 # Evolution History:
@@ -21,7 +21,7 @@
 # A new version is strictly reserved for major architectural shifts
 # that require software modifications across different chip generations.
 #-------------------------------------------------------------------------------
-"""Deterministic inventory of a HAS spec.md — the pre-registered answer key of the req flow.
+"""Deterministic inventory of a HAS spec.md - the pre-registered answer key of the req flow.
 
 Every table of the spec is recognised by its HEADER SIGNATURE (the tuple of header cells), not by
 its section number, so the inventory survives a restructure of the document (e.g. the move to the
@@ -84,7 +84,7 @@ CAPTION_RE = re.compile(r"^\*\*[^|]*\*\*\s*$")
 # Pre-registered answer key per spec revision. Never edit a count to make a run pass: a count
 # changes only when the spec changes, and the new count is written here BEFORE the spec is edited.
 #  2026-09-26  v0.2/v0.3 counted by hand on v0.2 before any extraction prompt was written (the v0.3
-#              rename changed names only). C1 is not referenced; C7 is only reached through "C6–C9".
+#              rename changed names only). C1 is not referenced; C7 is only reached through "C6-C9".
 #  2026-09-26  path/release added (spec_review D5): the §1.3 and §1.4 tables carry [CSI] rows but were
 #              not graded. Counted by hand on v0.2 and v0.3 (5 and 2 rows). This also enlarges the
 #              anchor set of compare_req.py: the A6 result of 2026-09-26 (79.6 %) used 108 anchors.
@@ -119,25 +119,25 @@ CAPTION_RE = re.compile(r"^\*\*[^|]*\*\*\s*$")
 #              lane waits for LP-11), open +1 (S12, HS clock after the last burst), timing +1 (TCLK-POST
 #              row in Appendix B). The core_clk -> rxbyteclkhs crossing carries one signal instead of three
 #              and the enable-gating row adds the clear of Block No. 4, so cdc keeps 8 rows.
-#   v0.12 — registered before the spec edit of 2026-10-03 (AFE boundary stated explicitly: the AFE
+#   v0.12 - registered before the spec edit of 2026-10-03 (AFE boundary stated explicitly: the AFE
 #              cuts words at an arbitrary boundary, this IP aligns them). Wording only, no table gains or
 #              loses a row, so the counts equal v0.11.
-#   v0.13 — registered before the spec edit of 2026-10-06 (AFE boundary corrected to option A, as
+#   v0.13 - registered before the spec edit of 2026-10-06 (AFE boundary corrected to option A, as
 #              announced by the AFE team: the AFE has the line receivers and the termination only; this
 #              IP samples, deserializes and generates the byte clock in Block No. 1). clock +1 (DDR
 #              clock), cdc +3 (sampling of the HS bits, DDR clock -> rxbyteclkhs word transfer, clock
 #              gate enable; the clock-activity row is replaced by the toggles of Block No. 1), afe -1
 #              (afe_byteclk, afe_hs_word_x and afe_cl_clk_active replaced by afe_hs_bit_x and
 #              afe_cl_hs_clk), timing +1 (TSETUP[RX] / THOLD[RX] row in Appendix B).
-#   v0.14 — registered before the spec edit of 2026-10-07 (erratum found while planning the RTL: the
+#   v0.14 - registered before the spec edit of 2026-10-07 (erratum found while planning the RTL: the
 #              falling-edge parallel register takes its load phase through one falling-edge flip-flop,
 #              the only half-period path of the deserializer; the second clock-activity toggle runs in
 #              the DDR clock). Wording only, no table gains or loses a row, so the counts equal v0.13.
-#   v0.15 — registered before the spec edit of 2026-10-10 (timing figures of the samplers, of the
+#   v0.15 - registered before the spec edit of 2026-10-10 (timing figures of the samplers, of the
 #              half-period path and of a standard-cell delay line moved from the 130 nm cells to the
 #              22 nm cells of the target node). Wording only, no table gains or loses a row, so the
 #              counts equal v0.14.
-#   v0.16 — registered before the spec edit of 2026-10-19 (EoT fixes found by the TN1 simulation,
+#   v0.16 - registered before the spec edit of 2026-10-19 (EoT fixes found by the TN1 simulation,
 #              fpga/PLAN_TN1_FIX.md: Block No. 4 holds the burst open a fixed number of byte clocks
 #              after the synchronized fall of the sync-search start, eot_skip_bytes subtracts the data
 #              path latency, the guaranteed range of the trailer cut is stated). Rows of the runtime,
@@ -172,7 +172,7 @@ REVISION_RE = re.compile(r"\*\*DRAFT (v[0-9]+\.[0-9]+)\*\*")
 
 OPEN_RE = re.compile(r"\bOPEN\b")
 ASSUME_MARK = "⚠️"
-RANGE_RE = re.compile(r"\b([QCKSV])(\d+)\s*[–-]\s*\1?(\d+)\b")
+RANGE_RE = re.compile(r"\b([QCKSV])(\d+)\s*[\N{EN DASH}-]\s*\1?(\d+)\b")
 ID_RE = re.compile(r"\b([QC])(\d+)\b")
 
 
@@ -274,7 +274,7 @@ def open_scope(lines, open_table_lines, open_ids):
 
 
 def expand_ids(text):
-    """All Q and C ids of the text, with ranges like 'C6–C9' / 'C14–C16' expanded."""
+    """All Q and C ids of the text, with ranges like 'C6-C9' / 'C14-C16' expanded."""
     ids = set()
     for m in RANGE_RE.finditer(text):
         pfx, lo, hi = m.group(1), int(m.group(2)), int(m.group(3))

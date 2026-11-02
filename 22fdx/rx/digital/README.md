@@ -1,4 +1,4 @@
-# ftel_dphy_rx — Developer Guide
+# ftel_dphy_rx - Developer Guide
 
 MIPI D-PHY receiver controller: receives one clock lane and up to four data lanes and
 presents the received data on the PHY-Protocol Interface (PPI) toward a CSI-2 receiver.
@@ -9,7 +9,7 @@ It came with its history from the team's working repository on 2026-10-21; the H
 the planning notes and the reference specifications stayed there. Every command below runs from
 this folder.
 
-> Status (2026-10-19): architecture draft — [`doc/spec.md`](doc/spec.md) is HAS **draft v0.16**
+> Status (2026-10-19): architecture draft - [`doc/spec.md`](doc/spec.md) is HAS **draft v0.16**
 > (open items in its chapter 9).
 > - v0.13 moves the samplers, the 1:8 deserializer, the byte clock and the clock-activity detection
 >   from the AFE into Block No. 1 (ADR-001 option A, as announced by the AFE team).
@@ -57,7 +57,7 @@ Out of scope for now: the CSI-2 protocol layer (PPI → pixel stream).
 |---|---|
 | MIPI CSI-2 v1.3 | Source of truth for transmitter behaviour and Rx requirements (§7 Physical Layer) |
 | MIPI D-PHY v1.1 | SoT/EoT sequences (§6.4), timing parameters (Table 14), PPI (Annex A) |
-| Example Tx model (third party) | Illustrative stimulus only — not the real transmitter |
+| Example Tx model (third party) | Illustrative stimulus only - not the real transmitter |
 
 The MIPI specifications and the Tx model are not in this repository.
 
@@ -81,8 +81,11 @@ in v1.2 (data rates above 1.5 Gbps, the deskew calibration sequence) are defined
 ├── doc/
 │   ├── spec.md           ← architecture specification (HAS), draft v0.16 (source of the docx); standalone:
 │   │                       cites no other file or document, the MIPI standards by name only (§1.5)
+│   ├── doc_kit.yaml      ← settings of the document scripts: docx name, rule checks, figure names
 │   ├── md2docx.py        ← spec.md → FTEL_IP_MIPI_D-PHY_RX_HAS_v<x.y>.docx in the FTEL HAS format
 │   │                       (built locally, kept out of the repository by .gitignore)
+│   ├── check_spec.py     ← rule checks of spec.md
+│   ├── doc_kit.lock      ← version of the scripts of doc/ and doc/figures/, vendored from ftel_doc_kit
 │   ├── rtl_rule.md       ← RTL coding rule (naming, CDC, tags); [M] rules checked by check_rtl_rules.py
 │   ├── rtl_notes.md      ← HAS ↔ RTL mapping, RTL decisions D-n, lint log
 │   ├── sync/             ← question lists for the CSI team, the Tx side and the AFE team; figures/: the
@@ -162,7 +165,7 @@ project settings (`ip-dev/hw/utils/tool_flow/config/project.yaml`). The complete
 | Traceability | `// REQ-xxx` on every always block, assign group and instance; `// OPEN <id> REQ-xxx: <default>` at the single place of a provisional REQ (`req/rtl_scope.json`, `req/rtm.json`) |
 | Files | One module per file; file name = module name |
 | File header | FTEL copyright + Evolution History block (`FTEL_signature.md` at the repository root), in the form used by `ftel_intctl` |
-| Generated output | Never committed — see `.gitignore` of this folder |
+| Generated output | Never committed - see `.gitignore` of this folder |
 
 ---
 

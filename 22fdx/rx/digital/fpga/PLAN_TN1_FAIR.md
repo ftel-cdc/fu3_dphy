@@ -48,7 +48,7 @@
 - **F. Kiểm chứng và tài liệu.**
   - `tn1_evidence.py` thêm check `front`: mỗi run hai RX có hai front end trùng nhau, và RX mình đứng sau
     `IBUFDS_DPHY`, trừ các kịch bản tự chọn `+AFE=model`.
-  - `fpga/exp1/README.md` cập nhật §2–§9; `fpga/README.md`; ghi chú trong `PLAN_TN1_TN3.md` và
+  - `fpga/exp1/README.md` cập nhật §2-§9; `fpga/README.md`; ghi chú trong `PLAN_TN1_TN3.md` và
     `doc/rtl_notes.md` §9.
 
 ## 3. Vẫn khác sau khi sửa (do thiết kế, sẽ ghi rõ)
@@ -96,13 +96,13 @@
 
 - **Plan B ban đầu: lái HS bằng pull** để cả hai buffer thấy LP-00 trong HS như silicon. Probe XSIM cho thấy
   `IBUFDS_DPHY` ra LP-00 khi cả hai pin có strength pull.
-- **Nhưng IP AMD đưa pad qua `assign` thường** ✅ (`xrx_core.v`, dòng 447–459 của IP sinh ra: `assign dl_rxp[0] =
+- **Nhưng IP AMD đưa pad qua `assign` thường** ✅ (`xrx_core.v`, dòng 447-459 của IP sinh ra: `assign dl_rxp[0] =
   data_rxp[0]` ...). Theo chuẩn Verilog, `assign` không khai báo strength thì lái strong. Vì vậy buffer của AMD
   luôn thấy strong, dù testbench lái pad kiểu gì. Lái pull chỉ làm buffer của RX mình khác buffer của AMD.
 - **Probe (scratchpad, chỉ RX mình, build stub):** RX mình sau `IBUFDS_DPHY` lái strong đạt 110/110 kịch bản
   (E1-1…E1-4 và 96 run E1-5, giới hạn trailer theo Table 4-7), không sửa RTL.
   - So với `afe_model`: 103 run cho trailer và payload trùng hệt.
-  - 7 run ở 260/400 Mb/s không nhiễu cho ít trailer hơn (0 thay vì tối đa 2–4 byte). Lý do: model AMD giữ bit
+  - 7 run ở 260/400 Mb/s không nhiễu cho ít trailer hơn (0 thay vì tối đa 2-4 byte). Lý do: model AMD giữ bit
     trail sau LP-11, còn `afe_model` ép về 0.
 - **Bạn chọn strong cho cả hai** (20/10).
 
@@ -132,13 +132,13 @@
   RX).
   - RX mình: 0 byte trailer khi không nhiễu, ở mọi rate.
   - Có 40 ns nhiễu: trailer trong giới hạn Table 4-7, lớn nhất 4 ở 260 Mb/s và 12 ở 1440 Mb/s.
-  - RX AMD giữ trailer: 1–4 byte ở 260 Mb/s, tới 25 byte ở 1500 Mb/s.
+  - RX AMD giữ trailer: 1-4 byte ở 260 Mb/s, tới 25 byte ở 1500 Mb/s.
 - **Front end:** 226/226 run hai RX, 4 854 302 lần so đầu ra LP của hai bộ buffer, 0 khác.
   - Phép thử âm (buffer của RX mình thấy pull trong HS): 21 574 / 30 450 lần đổi khác, `front` FAIL.
 - **Bộ phụ `M_*`** (RX mình sau `afe_model`): 113/113 PASS. `truth.txt` và capture giống từng byte với lần chạy
   trước khi đổi bench (500/500 file, gồm 128 run `window`). Table 4-7 và check `margin` không đổi.
 - **RX mình sau `IBUFDS_DPHY` so với sau `afe_model`:** trailer bằng hoặc ít hơn. Ở 260 và 400 Mb/s không nhiễu
-  còn 0 byte, thay vì 0–4 byte ở 67 và 4 trong 432 burst. Lý do: model AMD giữ bit trail sau LP-11.
+  còn 0 byte, thay vì 0-4 byte ở 67 và 4 trong 432 burst. Lý do: model AMD giữ bit trail sau LP-11.
 - **Thời gian:** toàn bộ (113 + 113 kịch bản, R-80, `window`) chạy trong 13 phút, chia 2 pha song song. RAM trống
   thấp nhất 22,1 GB.
 
@@ -146,10 +146,10 @@
 - Bước B đổi thành strong cho cả hai, xem §8.
 - Ước lượng "build lại khoảng 15 phút":
   - 6 build cũ chỉ compile lại testbench, mất vài giây;
-  - 4 build mới mất khoảng 5–8 phút khi chạy song song.
+  - 4 build mới mất khoảng 5-8 phút khi chạy song song.
 - Thêm lệnh `model`, để cột phụ được sinh lại từ bench hiện tại chứ không chỉ là bản lưu.
 - Nhãn `TB FRONT END` của các run `afe_model` bị `%s` đệm khoảng trắng (toán tử `?:` giữa hai string literal ra
   giá trị integral). Đây chỉ là chữ in ra; regex của `tn1_evidence.py` đã chịu được khoảng trắng này. Bench
   không đổi nên không phải chạy lại.
 
-Chi tiết và bảng số: `fpga/exp1/README.md` §6–§7.
+Chi tiết và bảng số: `fpga/exp1/README.md` §6-§7.

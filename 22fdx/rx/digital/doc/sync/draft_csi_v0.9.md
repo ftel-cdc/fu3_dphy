@@ -6,7 +6,7 @@ controller, theo đúng khuôn của `questions_csi_team.md`. Duyệt xong thì 
 
 ---
 
-## Phần 1 — Ghi chú cho người duyệt (không gửi)
+## Phần 1: Ghi chú cho người duyệt (không gửi)
 
 **HAS v0.9 chạm tới team CSI ở đâu.** PPI không đổi gì. Điểm bắt đầu tìm sync (ADR-007, phương án D)
 là việc bên trong D-PHY; thời điểm `rxactivehs_x`, `rxsynchs_x`, `rxvalidhs_x` và `errsotsynchs_x`
@@ -30,7 +30,7 @@ lựa chọn của bạn ngày 2026-10-02:
 | 8 | **Enable đổi lúc nào cũng được.** Tắt lane giữa burst thì burst kết thúc ngay ở PPI, và phần còn lại không được giao sau khi bật lại | **Gửi một dòng** ở phần cập nhật đầu file | Không đặt yêu cầu nào lên controller; đúng với ngữ nghĩa Enable của D-PHY |
 | 9 | **`rxactivehs_x` chỉ lên từ cuối THS-SETTLE**, nên một HS entry bị hủy giữa chừng không còn tạo xung `rxactivehs_x` | **Gửi một dòng** | Thứ tự với `rxsynchs_x` không đổi. Burst FSM không còn gặp burst rỗng do HS entry bị hủy |
 | 10 | **HAS-CSI Table 4-3 ghi `rxbyteclkhs` = "HS DDR clock divided by eight"**. Đúng ra là line rate / 8 = DDR clock / 4; con số 224 MHz ở 1792 Mb/s của họ đã đúng | **Gửi dạng ghi chú** dưới phụ lục C3 | Chỉ sửa câu chữ trong tài liệu của họ. HAS D-PHY có cùng lỗi tới v0.10 |
-| 11 | `cl_rxclkactivehs` hạ tới khoảng 75 ns sau khi clock dừng (TCLK-MISS, đồng bộ, thanh ghi FSM). Từ v0.13: 50–60 ns sau cạnh cuối của DDR clock; v0.14 sửa thành chậm nhất 60 ns sau cạnh cuối, trong TCLK-MISS | **Không gửi** | Controller chỉ dùng tín hiệu này để chẩn đoán (C5) |
+| 11 | `cl_rxclkactivehs` hạ tới khoảng 75 ns sau khi clock dừng (TCLK-MISS, đồng bộ, thanh ghi FSM). Từ v0.13: 50-60 ns sau cạnh cuối của DDR clock; v0.14 sửa thành chậm nhất 60 ns sau cạnh cuối, trong TCLK-MISS | **Không gửi** | Controller chỉ dùng tín hiệu này để chẩn đoán (C5) |
 
 **HAS v0.12 và v0.13 chạm tới team CSI ở đâu.** v0.12 chỉ ghi rõ ranh giới AFE (đọc thành phương án
 B), không đổi kỹ thuật. v0.13 sửa ranh giới thành phương án A, theo thông báo của team AFE ngày
@@ -40,9 +40,9 @@ D-PHY Rx (Block No. 1). Tên, độ rộng và ngữ nghĩa các tín hiệu PPI
 | # | Nội dung | Đề xuất | Lý do |
 |---|---|---|---|
 | 12 | **PPI không đổi ở v0.12 và v0.13**; `rxbyteclkhs` nay do D-PHY Rx tạo (DDR clock chia 4, qua clock gate) | **Gửi một dòng** ở phần cập nhật đầu file | Giúp team biết không cần xem lại waveform |
-| 13 | **`rxbyteclkhs` bắt đầu chạy trong khoảng một byte clock sau khi `cl_rxclkactivehs` lên.** Clock gate của Block No. 1 chỉ mở khi clock lane đã vào CL_HS_CLK. HAS-CSI Table 4-3 lại ghi `cl_rxclkactivehs` nghĩa là "rxbyteclkhs is running" | **Gửi dạng ghi chú** dưới phụ lục C5 | Controller chỉ dùng tín hiệu này để chẩn đoán (C5), nên không phải đổi gì. Tuy vậy TB hoặc assertion của team CSI có thể dựa vào ngữ nghĩa đó. Cách khác, chỉ ảnh hưởng D-PHY: chỉ nâng `cl_rxclkactivehs` khi gate đã mở. Cách này thêm một crossing ngược về `core_clk`, và tín hiệu lên muộn hơn hiện nay khoảng một byte clock cộng 10–15 ns. Khi đó không cần gửi, nhưng phải sửa thêm HAS D-PHY §4.3 và §4.4 |
-| 14 | **Rủi ro K1: chưa biết tốc độ tối đa của HS-RX.** Sơ đồ AFE tham khảo ghi 80–1000 Mb/s, trong khi HAS D-PHY R1 cần 1500 Mb/s và HAS-CSI cần trên 1500 Mb/s (1792 Mb/s). Phần digital của D-PHY Rx không còn là rủi ro chính: HAS v0.15 tính timing với cell 22 nm, công nghệ đích, thay cho 130 nm. Sampler (đặt tay) còn khoảng ±95 ps ở 1792 Mb/s cho lệch clock–data của AFE và phần digital, ở corner chậm 0.72 V/125 °C. Synthesis thử ở corner chậm, trước khi tính dây, đạt timing ở 1792 Mb/s: đường nửa chu kỳ của deserializer còn khoảng 360 ps (ước lượng 130 nm trước đây là gần 0). Các con số vẫn là ước lượng trước layout; thư viện, body bias và corner sign-off chưa chốt | **Chờ** câu trả lời A7 của team AFE, rồi mới gửi dưới K1 | Con số 1000 Mb/s lấy từ sơ đồ tham khảo, chưa phải thông số của team AFE, nên gửi sớm dễ gây hiểu lầm. Cách khác: gửi ngay dạng rủi ro, không kèm câu hỏi (đoạn tùy chọn ở Phần 2) |
-| 15 | **Rủi ro C4 (R2): deskew cần delay line, mà AFE không có.** Delay line bằng cell chuẩn 22 nm có bước khoảng 15–30 ps tùy corner, trôi khoảng 2 lần, so với UI 558 ps ở 1792 Mb/s | **Chờ** câu trả lời A4 của team AFE, rồi mới gửi dưới K1 | R2 (1792 Mb/s, 4K staggered HDR) phụ thuộc A4. Cách khác: gửi ngay dạng rủi ro (đoạn tùy chọn ở Phần 2) |
+| 13 | **`rxbyteclkhs` bắt đầu chạy trong khoảng một byte clock sau khi `cl_rxclkactivehs` lên.** Clock gate của Block No. 1 chỉ mở khi clock lane đã vào CL_HS_CLK. HAS-CSI Table 4-3 lại ghi `cl_rxclkactivehs` nghĩa là "rxbyteclkhs is running" | **Gửi dạng ghi chú** dưới phụ lục C5 | Controller chỉ dùng tín hiệu này để chẩn đoán (C5), nên không phải đổi gì. Tuy vậy TB hoặc assertion của team CSI có thể dựa vào ngữ nghĩa đó. Cách khác, chỉ ảnh hưởng D-PHY: chỉ nâng `cl_rxclkactivehs` khi gate đã mở. Cách này thêm một crossing ngược về `core_clk`, và tín hiệu lên muộn hơn hiện nay khoảng một byte clock cộng 10-15 ns. Khi đó không cần gửi, nhưng phải sửa thêm HAS D-PHY §4.3 và §4.4 |
+| 14 | **Rủi ro K1: chưa biết tốc độ tối đa của HS-RX.** Sơ đồ AFE tham khảo ghi 80-1000 Mb/s, trong khi HAS D-PHY R1 cần 1500 Mb/s và HAS-CSI cần trên 1500 Mb/s (1792 Mb/s). Phần digital của D-PHY Rx không còn là rủi ro chính: HAS v0.15 tính timing với cell 22 nm, công nghệ đích, thay cho 130 nm. Sampler (đặt tay) còn khoảng ±95 ps ở 1792 Mb/s cho lệch clock-data của AFE và phần digital, ở corner chậm 0.72 V/125 °C. Synthesis thử ở corner chậm, trước khi tính dây, đạt timing ở 1792 Mb/s: đường nửa chu kỳ của deserializer còn khoảng 360 ps (ước lượng 130 nm trước đây là gần 0). Các con số vẫn là ước lượng trước layout; thư viện, body bias và corner sign-off chưa chốt | **Chờ** câu trả lời A7 của team AFE, rồi mới gửi dưới K1 | Con số 1000 Mb/s lấy từ sơ đồ tham khảo, chưa phải thông số của team AFE, nên gửi sớm dễ gây hiểu lầm. Cách khác: gửi ngay dạng rủi ro, không kèm câu hỏi (đoạn tùy chọn ở Phần 2) |
+| 15 | **Rủi ro C4 (R2): deskew cần delay line, mà AFE không có.** Delay line bằng cell chuẩn 22 nm có bước khoảng 15-30 ps tùy corner, trôi khoảng 2 lần, so với UI 558 ps ở 1792 Mb/s | **Chờ** câu trả lời A4 của team AFE, rồi mới gửi dưới K1 | R2 (1792 Mb/s, 4K staggered HDR) phụ thuộc A4. Cách khác: gửi ngay dạng rủi ro (đoạn tùy chọn ở Phần 2) |
 | 16 | **224 MHz không còn là rủi ro timing phía D-PHY Rx.** Phần "Vì sao cần" của K1 trong `questions_csi_team.md` ghi `rxbyteclkhs` 224 MHz là rủi ro trên GF 130 nm. Synthesis thử với cell 22 nm, corner chậm 0.72 V/125 °C, trước layout: TNS bằng 0 ở 1792 và 1500 Mb/s, đường xấu nhất của `rxbyteclkhs` còn khoảng 0.95 ns | **Gửi một dòng** cùng đoạn rủi ro K1 (Phần 2) | Sửa một nhận định đã gửi. Số trước layout nên ghi là ước lượng |
 
 **Những gì đã cập nhật trực tiếp** (theo kế hoạch đã duyệt, cũng chưa gửi):
@@ -52,7 +52,7 @@ D-PHY Rx (Block No. 1). Tên, độ rộng và ngữ nghĩa các tín hiệu PPI
   - `questions_tx_side.md`: căn cứ lên v0.9; S5 không còn cần THS-ZERO max.
 - v0.11:
   - `questions_afe_team.md`: căn cứ lên v0.11; byte clock = DDR clock chia 4; A3 sửa ngân sách
-    termination (AFE chỉ còn 5–10 ns + 4·UI); A1 câu 4 thêm trường hợp `afe_cl_hs_en` bật hoặc tắt.
+    termination (AFE chỉ còn 5-10 ns + 4·UI); A1 câu 4 thêm trường hợp `afe_cl_hs_en` bật hoặc tắt.
   - `questions_tx_side.md`: căn cứ lên v0.11; thêm S12; sửa câu "Rx chịu được toàn dải spec", vì nay
     có hai ngoại lệ (S5, S12).
 - v0.12: `questions_afe_team.md`: căn cứ lên v0.12; ghi câu trả lời A1 ngày 2026-10-03, đọc thành
@@ -60,7 +60,7 @@ D-PHY Rx (Block No. 1). Tên, độ rộng và ngữ nghĩa các tín hiệu PPI
 - v0.13: `questions_afe_team.md`:
   - căn cứ lên v0.13; ranh giới sửa thành phương án A (team AFE, 2026-10-06);
   - A2 bỏ; A6 không còn hỏi Λ;
-  - thêm A7–A11 (tốc độ HS-RX, chênh lệch trễ clock–data và duty cycle, đầu ra HS-RX khi tắt hoặc
+  - thêm A7-A11 (tốc độ HS-RX, chênh lệch trễ clock-data và duty cycle, đầu ra HS-RX khi tắt hoặc
     khởi động, số enable mỗi lane, đảo cực và map lane);
   - các ý còn mở của A1 chuyển sang A6, A8, A9 và A11. Ý 4 (trường hợp `afe_cl_hs_en` bật hoặc tắt)
     nay ở A9.
@@ -70,13 +70,13 @@ D-PHY Rx (Block No. 1). Tên, độ rộng và ngữ nghĩa các tín hiệu PPI
 **Đã sửa trong bản nháp này:** mục ADR-007 không còn dẫn tới `doc/analysis/adr007/results.md`, là đường
 dẫn team CSI không mở được. Mục này nay dẫn tới phần mô tả mô hình trong chương 7 của HAS D-PHY.
 
-**Cần bạn quyết:** gửi những mục nào trong 1–3, 5–10 và 12–15? Mục 13 còn có cách sửa phía D-PHY
+**Cần bạn quyết:** gửi những mục nào trong 1-3, 5-10 và 12-15? Mục 13 còn có cách sửa phía D-PHY
 thay cho việc gửi. Nếu đồng ý, tôi chép Phần 2 vào `questions_csi_team.md`, cập nhật ngày, căn cứ và
 bảng tóm tắt, rồi xóa file nháp này.
 
 ---
 
-## Phần 2 — Bản nháp gửi team CSI
+## Phần 2: Bản nháp gửi team CSI
 
 ### Dòng cập nhật đầu file (thay dòng Ngày và Căn cứ)
 
@@ -115,7 +115,7 @@ Thêm vào cuối mục Bối cảnh:
 > (trước là 39) và 1500 Mb/s là 19 (trước là 20). Số trường cấu hình không đổi.
 >
 > **Cập nhật v0.11.** `clk_settle_cyc` mặc định đổi từ 36 thành 33, để TCLK-SETTLE kết thúc giữa dải
-> 95–300 ns. Số trường cấu hình không đổi.
+> 95-300 ns. Số trường cấu hình không đổi.
 
 ### Ghi chú thêm vào cuối mục K6
 
@@ -138,15 +138,15 @@ Thêm vào cuối mục Bối cảnh:
 > clock gate chỉ mở khi clock lane đã ở HS. Vì vậy `rxbyteclkhs` bắt đầu chạy trong khoảng một chu kỳ
 > `rxbyteclkhs` sau khi `cl_rxclkactivehs` lên: khoảng 100 ns ở 80 Mb/s, 5.3 ns ở 1500 Mb/s.
 > `cl_rxclkactivehs` hạ chậm nhất 60 ns sau cạnh cuối của DDR clock (TCLK-MISS); HAS D-PHY v0.13 ghi
-> 50–60 ns, v0.14 sửa thành cận trên này. HAS-CSI Table 4-3 ghi tín hiệu này
+> 50-60 ns, v0.14 sửa thành cận trên này. HAS-CSI Table 4-3 ghi tín hiệu này
 > nghĩa là `rxbyteclkhs` đang chạy. Với cách controller dùng nó (chẩn đoán, C5), khoảng trễ này không
 > ảnh hưởng. Nhờ xác nhận.
 
-### (Tùy chọn, nếu chọn gửi ngay mục 14–16 ở Phần 1) Ghi chú thêm vào cuối mục K1
+### (Tùy chọn, nếu chọn gửi ngay mục 14-16 ở Phần 1) Ghi chú thêm vào cuối mục K1
 
 > **Rủi ro, cập nhật v0.13 và v0.15.** Theo thông báo của team AFE, AFE chỉ có HS-RX, LP-RX và termination;
 > D-PHY Rx nay tự lấy mẫu và deserialize. Hai điểm có thể ảnh hưởng tốc độ lane:
-> - Tốc độ tối đa của HS-RX đang được hỏi team AFE. Một sơ đồ AFE tham khảo ghi 80–1000 Mb/s; HAS
+> - Tốc độ tối đa của HS-RX đang được hỏi team AFE. Một sơ đồ AFE tham khảo ghi 80-1000 Mb/s; HAS
 >   D-PHY R1 giả định 1500 Mb/s.
 > - Deskew calibration (bắt buộc trên 1.5 Gb/s, C4) cần một delay line trước sampler. AFE hiện không
 >   có delay line; một delay line bằng cell chuẩn 22 nm trôi khoảng 2 lần giữa các corner. R2
@@ -160,7 +160,7 @@ Thêm vào cuối mục Bối cảnh:
 
 ### Mục mới (đặt trước Phụ lục)
 
-## ADR-007 — Sau một leader hỏng
+## ADR-007: Sau một leader hỏng
 
 **Câu hỏi.**
 1. HAS-CSI Figure 4-2 vẽ trường hợp leader hỏng: D-PHY báo `errsotsynchs_x`, và cả burst không có
@@ -206,7 +206,7 @@ có một xung `errsotsynchs_x` ở chu kỳ cuối.
 **Tham chiếu.** HAS D-PHY v0.11 §4.6, §5.1, ADR-007 (mô hình bit-level mô tả trong chương 7), §8.
 HAS-CSI Figure 4-2, Table 4-6 (Burst FSM), phần xử lý lỗi của Lane Management.
 
-## S12 — Clock sau byte cuối, trước khi clock lane rời HS
+## S12: Clock sau byte cuối, trước khi clock lane rời HS
 
 **Câu hỏi.** Khi clock lane rời HS (vào ULPS, hoặc khi sensor dừng stream), `rxbyteclkhs` dừng. Sau
 byte cuối của burst cuối ở PPI, Lane Management và các khối khác chạy trên `rxbyteclkhs` của controller

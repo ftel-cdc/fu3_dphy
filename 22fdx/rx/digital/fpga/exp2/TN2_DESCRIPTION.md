@@ -1,4 +1,4 @@
-# TN2 — Mô tả thí nghiệm: TX của AMD phát vào `ftel_dphy_rx` và vào RX của AMD, mô phỏng XSIM
+# TN2 - Mô tả thí nghiệm: TX của AMD phát vào `ftel_dphy_rx` và vào RX của AMD, mô phỏng XSIM
 
 > Tài liệu cho team FPGA: lấy RTL và testbench ở đâu, hai bench gồm những gì, so theo luật nào, chạy và đọc kết quả ra
 > sao. Kết quả nằm ở [`TN2_REPORT.md`](TN2_REPORT.md). TN2 có hai phần, mỗi phần một bench:
@@ -94,19 +94,19 @@ cd fu3_dphy/22fdx/rx/digital          # mọi lệnh trong tài liệu này ch�
 - **Thời gian, TN2a:**
   - mỗi tổ hợp rate × số lane cần một build: lần đầu khoảng 3 phút cho Vivado và 4 phút cho compile; khi chỉ
     testbench đổi thì compile lại trong vài chục giây;
-  - một run từ TX mất 85–130 s ở 4 lane và khoảng 55 s ở 1 hoặc 2 lane, vì TX cần 380–571 µs mô phỏng để khởi động;
-    một run `+SRC=gen` mất 12–15 s;
+  - một run từ TX mất 85-130 s ở 4 lane và khoảng 55 s ở 1 hoặc 2 lane, vì TX cần 380-571 µs mô phỏng để khởi động;
+    một run `+SRC=gen` mất 12-15 s;
   - bộ đầy đủ (60 run, 10 build) xong trong 40 phút với 3 tiến trình song song.
 - **Thời gian, TN2b:**
   - mỗi rate một build (4 lane), khoảng 1 phút: Vivado khoảng 35 s, compile và elaborate khoảng 15 s;
-  - một run mất 121–253 s;
+  - một run mất 121-253 s;
   - bộ đầy đủ (40 run, 4 build) xong trong 34 phút với 3 luồng.
 - **Chạy song song:**
   - TN2a: như TN1, các lệnh dùng build khác nhau chạy song song được; hai lệnh không được dùng chung một build cùng
     lúc.
   - TN2b: các run cùng build chạy song song được, vì mỗi run chép thư mục XSIM của build sang thư mục riêng. Build thì
     không được chạy cùng lúc với run trên chính build đó.
-- **Bộ nhớ:** một run TN2b dùng 2,4–3,8 GB (E2b-8: 5,1 GB). Trước khi chạy 3 luồng, kiểm còn trống khoảng 15 GB.
+- **Bộ nhớ:** một run TN2b dùng 2,4-3,8 GB (E2b-8: 5,1 GB). Trước khi chạy 3 luồng, kiểm còn trống khoảng 15 GB.
 - **Đĩa:** output nằm ở `fpga/work/exp2/` và `fpga/work/exp2b/` (git bỏ qua): khoảng 0,5 GB cho TN2a và 0,8 GB cho
   TN2b, kể cả build.
 
@@ -164,7 +164,7 @@ Kiểm trong bench: đầu ra LP của buffer trong D-PHY của R-X và của bu
 - Pad: `OBUFDS_DPHY` lái strong trong LP và supply trong HS. Cả hai đều là strength "S", nên `IBUFDS_DPHY` của hai RX
   vẫn thấy cùng loại front end như ở TN1.
 - Hai điều đo được khi dựng bench:
-  - TX báo `init_done` sau 380–571 µs tuỳ rate, dù `C_INIT` = 99 µs;
+  - TX báo `init_done` sau 380-571 µs tuỳ rate, dù `C_INIT` = 99 µs;
   - model clock của TX cho line đúng rate danh định, bất kể chu kỳ `core_clk` của TX. Vì vậy, muốn line lệch so với
     RX thì phải lệch `core_clk` của RX (`+CORE_HALF`), như TN1.
 
@@ -299,7 +299,7 @@ và `resp` được kiểm. Ba instance, cho TX, R-X và R-F. Mỗi truy cập i
 ### 5.3 Khối chỉnh `rxactivehs` ([`fpga/rtl/m_ftel_ppi_act_gate.sv`](../rtl/m_ftel_ppi_act_gate.sv))
 
 **Vì sao có khối này.** Ở đầu mỗi burst, `ftel_dphy_rx` nâng `rxactivehs` trước `rxsynchs` vài byte clock (7 ở
-260 Mb/s, 19–20 ở 1440 Mb/s), và đưa `rxsynchs` cùng chu kỳ với byte đầu. HAS cho phép như vậy. D-PHY của AMD nâng hai
+260 Mb/s, 19-20 ở 1440 Mb/s), và đưa `rxsynchs` cùng chu kỳ với byte đầu. HAS cho phép như vậy. D-PHY của AMD nâng hai
 tín hiệu cùng lúc, byte đầu ở chu kỳ sau. Controller CSI-2 của AMD không nhận packet nào khi `rxactivehs` lên trước
 `rxsynchs` ([`TN2_REPORT.md`](TN2_REPORT.md) §4.1). Khối này sửa điều đó ở FPGA, không đụng RTL ASIC và không đổi
 hợp đồng PPI của `ftel_dphy_rx` với controller CSI-2 của chip.
@@ -425,14 +425,14 @@ Rate và số lane là tham số build. Cột plusarg chỉ ghi những gì khá
 | E2a-0a | 1440, 4 | `+SRC=gen` | Kiểm `pad_truth` bằng line generator, với các độ dài của E1-1 |
 | E2a-0b | 1440, 4 | `+SRC=gen +LENS=1,4,64,256 +TRAIL=min +EXIT=min +LPX=min` | Như trên, ở góc timing của E1-3c |
 | E2a-0c | 1440, 4 | `+SRC=gen +UNEVEN=1 +LENS=2,3,5,9,65,257` | Như trên, các lane kết thúc lệch nhau |
-| E2a-1 | 1440, 4 | — | Cơ bản. RX AMD phải đạt trước, để chứng minh hookup TX và truth |
+| E2a-1 | 1440, 4 | - | Cơ bản. RX AMD phải đạt trước, để chứng minh hookup TX và truth |
 | E2a-2a | 1440, 4 | `+PATTERN=prbs9 +LENS=1,2,3,8,64,256,1024 +REPEAT=2` | Dữ liệu ngẫu nhiên |
 | E2a-2b | 1440, 4 | `+PATTERN=synclike +LENS=4,8,16,64,256,1024` | Payload có mẫu giống sync |
-| E2a-2c | 1440, 4 | `+UNEVEN=1 +LENS=2,3,5,9,65,257` | Lane 2–3 ít hơn 1 byte, lane 0 dài nhất |
+| E2a-2c | 1440, 4 | `+UNEVEN=1 +LENS=2,3,5,9,65,257` | Lane 2-3 ít hơn 1 byte, lane 0 dài nhất |
 | E2a-3 | 1440, 4 | `+GAP_NS=0 +LENS=1,4,64,256 +REPEAT=2` | Burst kế được request ngay khi về `stopstate`: THS-EXIT nhỏ nhất của TX |
 | E2a-4a | 260, 4 | `+TIMEOUT_US=3000`; trailer RX mình tối đa 4 | Rate thấp nhất của TX |
-| E2a-4b, E2a-4c | 800, 1500; 4 | — | Rate bring-up của TN3; rate cao nhất của dải bảo đảm |
-| E2a-4d, E2a-4e | 1440; 2, 1 | — | Số lane |
+| E2a-4b, E2a-4c | 800, 1500; 4 | - | Rate bring-up của TN3; rate cao nhất của dải bảo đảm |
+| E2a-4d, E2a-4e | 1440; 2, 1 | - | Số lane |
 | E2a-5 (16 run) | 260, 400, 600, 800, 1000, 1200, 1440, 1500; 4 | `+LENS=1,2,3,4,5,8,16,64,256 +REPEAT=6`; `+CORE_HALF=2.501` (run `_slow`) và `2.499` (run `_fast`); trailer RX mình theo bảng 4-7 | EoT với trail thật của TX; `core_clk` của hai RX lệch ±400 ppm để LP-11 rơi vào mọi pha |
 | `M_*` (29 run) | Như trên | Mọi kịch bản trên, thêm `+AFE=model` | Bộ phụ: RX mình sau `afe_model` (LP-00 trong HS, như silicon) |
 | NEG-tx | 1440, 4 | `+TX_CORRUPT=1,3,0` | Phép thử âm: check byte trên pad phải báo đúng 1 byte khác, run phải hỏng, trong khi hai RX vẫn khớp pad |
@@ -447,7 +447,7 @@ Mặc định: 2 frame 640 × 16 (word count 800 byte), mẫu `counter`, 1440 Mb
 
 | ID | Rate (Mb/s), lane | Plusarg | Mục đích |
 |---|---|---|---|
-| E2b-1 | 1440, 4 | — | Cơ bản |
+| E2b-1 | 1440, 4 | - | Cơ bản |
 | E2b-2a, E2b-2b | 1440, 4 | `+PATTERN=prbs`, `+PATTERN=synclike` | Payload ngẫu nhiên; payload có byte giống sync |
 | E2b-2c | 1440, 4 | `+WIDTH=3840 +HEIGHT=8` | Line dài cỡ sensor 4K (word count 4800) |
 | E2b-3 | 1440, 4 | `+FRAMES=8 +WIDTH=64 +HEIGHT=4` | FS và FE dày, packet sát nhau |

@@ -1,4 +1,4 @@
-# ftel_dphy_rx — Câu hỏi cho phía Tx
+# ftel_dphy_rx - Câu hỏi cho phía Tx
 
 | Mục | Nội dung |
 |---|---|
@@ -46,7 +46,7 @@ S1, S3, S9 và S10 cũng cần sớm, để chuẩn bị môi trường verify.
 
 ---
 
-## S1 — Dải tốc độ lane
+## S1: Dải tốc độ lane
 
 **Câu hỏi.**
 1. Mỗi sensor mode chạy ở tốc độ lane bao nhiêu? Tốc độ tối đa là bao nhiêu?
@@ -55,10 +55,10 @@ S1, S3, S9 và S10 cũng cần sớm, để chuẩn bị môi trường verify.
 **Đã biết từ HAS-CSI.** Giới hạn thiết kế là 1792 Mb/s/lane; OS04C10 chạy 750 Mb/s/lane. Chưa có
 tốc độ của IMX274.
 
-**Giả định hiện tại.** 80–1500 Mb/s ở bản R1, 80–1792 Mb/s ở bản R2. Chỉ đổi tốc độ khi mọi lane
+**Giả định hiện tại.** 80-1500 Mb/s ở bản R1, 80-1792 Mb/s ở bản R2. Chỉ đổi tốc độ khi mọi lane
 đang ở LP.
 
-## S2 — Số data lane
+## S2: Số data lane
 
 **Câu hỏi.** Mỗi sensor mode dùng 1, 2 hay 4 data lane? Có chế độ nào chạy ít lane hơn số lane được
 nối trên board không?
@@ -67,7 +67,7 @@ nối trên board không?
 
 **Giả định hiện tại.** Các lane không dùng giữ LP-11; Rx tắt chúng bằng `dl_enable_x`.
 
-## S3 — Continuous hay non-continuous clock
+## S3: Continuous hay non-continuous clock
 
 **Câu hỏi.** Clock lane chạy continuous (luôn ở HS khi truyền) hay non-continuous (về LP giữa các
 burst)? Có chuyển giữa hai chế độ khi đang chạy không?
@@ -80,7 +80,7 @@ non-continuous clock dừng TCLK-POST sau burst, sớm hơn lúc byte cuối ra 
 Nếu Tx cần non-continuous clock, nhờ báo sớm. Với continuous clock, việc này vẫn xảy ra một lần, ở burst
 cuối trước khi clock lane rời HS: xem S12.
 
-## S4 — Deskew
+## S4: Deskew
 
 **Câu hỏi.**
 1. Tx có gửi deskew burst không?
@@ -98,7 +98,7 @@ gốc; pattern đang lấy từ nguồn thứ cấp.
 
 Rx nhận ra deskew burst khi thấy ≥ 16 bit 1 sau HS-0.
 
-## S5 — Bảng timing thực tế của Tx
+## S5: Bảng timing thực tế của Tx
 
 **Câu hỏi.** Nhờ gửi giá trị thực tế (min/typ/max, theo từng tốc độ nếu có) và dải cấu hình được của:
 - TLPX
@@ -120,7 +120,7 @@ Rx nhận ra deskew burst khi thấy ≥ 16 bit 1 sau HS-0.
 **Giả định hiện tại.** Đúng min/max của D-PHY v1.1 Table 14. Ngoại lệ đã biết: ràng buộc THS-EXIT +
 TLPX ở trên, khi chạy dưới khoảng 240 Mb/s (HAS D-PHY §4.5).
 
-## S6 — ULPS
+## S6: ULPS
 
 **Câu hỏi.** Tx có dùng Ultra-Low Power State (ULPS) trên data lane và clock lane không? Trình tự
 vào/ra ULPS thế nào? Tx giữ Mark-1 bao lâu khi thoát ULPS (TWAKEUP)?
@@ -128,7 +128,7 @@ vào/ra ULPS thế nào? Tx giữ Mark-1 bao lâu khi thoát ULPS (TWAKEUP)?
 **Giả định hiện tại.** Có dùng ULPS, với TWAKEUP ≥ 1 ms. Rx không cần timer riêng cho TWAKEUP: nó
 thoát ULPS khi thấy Mark-1 rồi Stop.
 
-## S7 — Thời gian giữ LP-11 sau khi bật nguồn
+## S7: Thời gian giữ LP-11 sau khi bật nguồn
 
 **Câu hỏi.** Sau khi bật nguồn hoặc reset, Tx giữ LP-11 trên mọi lane bao lâu trước khi truyền
 (TINIT phía master)?
@@ -138,7 +138,7 @@ thoát ULPS khi thấy Mark-1 rồi Stop.
 
 **Giả định hiện tại.** ≥ 1 ms (ví dụ trong D-PHY §6.11).
 
-## S8 — Phiên bản CSI-2
+## S8: Phiên bản CSI-2
 
 **Câu hỏi.** Tx cố định theo CSI-2 v1.3, hay có dự định dùng tính năng của v2.0 trở lên (ví dụ LRTE,
 EPD, scrambling)?
@@ -147,7 +147,7 @@ EPD, scrambling)?
 
 **Giả định hiện tại.** Chỉ CSI-2 v1.3.
 
-## S9 — Map lane và cực tính P/N
+## S9: Map lane và cực tính P/N
 
 **Câu hỏi.**
 1. Trên board và package, lane logic của Tx nối tới lane vật lý nào của Rx? Có lane nào bị đảo P/N
@@ -161,7 +161,7 @@ EPD, scrambling)?
 
 **Giả định hiện tại.** Nối thẳng, không đảo, kể cả clock lane.
 
-## S10 — Model mô phỏng của Tx
+## S10: Model mô phỏng của Tx
 
 **Câu hỏi.**
 1. Phía Tx cung cấp model mô phỏng dạng nào: analog/AMS, hay digital ở mức pad (LP dp/dn + chuỗi bit
@@ -178,13 +178,13 @@ tôi sẽ chạy thêm model đó để bắt các khác biệt ngoài đời th
 
 **Giả định hiện tại.** Tx thật theo đúng spec; chưa có model của Tx.
 
-## S11 — Chế độ test cho bring-up
+## S11: Chế độ test cho bring-up
 
 **Câu hỏi.** Tx có chế độ test (PRBS, pattern cố định) để dùng khi bring-up không?
 
 **Giả định hiện tại.** Không giả định có.
 
-## S12 — HS clock sau burst cuối (TCLK-POST)
+## S12: HS clock sau burst cuối (TCLK-POST)
 
 **Câu hỏi.**
 1. Trước khi clock lane rời HS (vào ULPS hoặc khi dừng stream), Tx giữ HS clock bao lâu sau khi data

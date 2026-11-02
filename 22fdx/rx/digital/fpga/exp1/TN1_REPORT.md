@@ -1,4 +1,4 @@
-# TN1 — Báo cáo thí nghiệm: RX D-PHY `ftel_dphy_rx` so với RX D-PHY của AMD (mô phỏng XSIM)
+# TN1 - Báo cáo thí nghiệm: RX D-PHY `ftel_dphy_rx` so với RX D-PHY của AMD (mô phỏng XSIM)
 
 > Báo cáo kết quả TN1 cho team FPGA. Cách dựng bench và cách chạy lại nằm ở
 > [`TN1_DESCRIPTION.md`](TN1_DESCRIPTION.md).
@@ -22,7 +22,7 @@
   RX AMD.
 - **Hai điểm khác nhau, đều do thiết kế:**
   - Trailer: RX mình cắt bỏ byte thừa sau payload; RX AMD giữ lại, tới 25 byte mỗi burst ở 1500 Mb/s.
-  - Độ trễ: RX mình trễ hơn khoảng 6–7 lần (201–206 ns so với 27–32 ns ở 1440 Mb/s), vì delay line 32 byte dùng để
+  - Độ trễ: RX mình trễ hơn khoảng 6-7 lần (201-206 ns so với 27-32 ns ở 1440 Mb/s), vì delay line 32 byte dùng để
     cắt trailer.
 - **Lỗi tìm ra:** ở lần chạy đầu, RX mình có hai lỗi RTL. Cả hai đã được sửa trong HAS v0.16 và không còn xuất hiện
   (§4).
@@ -49,7 +49,7 @@ line generator ──► truth.txt
    └─► IBUFDS_DPHY (hoặc afe_model) ─► ftel_dphy_rx ─────► PPI ─► ftel_ppi.csv ─┴─► so với truth.txt
 ```
 
-Chi tiết bench, luật so và danh sách kịch bản nằm ở [`TN1_DESCRIPTION.md`](TN1_DESCRIPTION.md) §4–§7.
+Chi tiết bench, luật so và danh sách kịch bản nằm ở [`TN1_DESCRIPTION.md`](TN1_DESCRIPTION.md) §4-§7.
 
 ## 3. Kết quả
 
@@ -61,19 +61,19 @@ Bảng ghi số byte trailer mỗi burst và độ trễ của byte payload cu�
 
 | Rate (Mb/s) | Kịch bản | Trailer: AMD | Trailer: RX mình sau `IBUFDS_DPHY` | Trailer: RX mình sau `afe_model` | Độ trễ: AMD | Độ trễ: RX mình |
 |---|---|---|---|---|---|---|
-| 260 | E1-4a / E1-4a timing min | 2 / 1–2 | 0 / 0 | 0 / 0–2 (ở 8 trong 40 burst) | 152–179 ns | 1113–1140 ns |
-| 800 | E1-4b | 9 | 0 | 0 | 50–58 ns | 362–371 ns |
-| 1440 | E1-1…E1-3, E1-4d/e | 14–17 | 0 | 0 | 27–32 ns | 201–206 ns |
-| 1500 | E1-4c | 17–18 | 0 | 0 | 26–31 ns | 193–198 ns |
+| 260 | E1-4a / E1-4a timing min | 2 / 1-2 | 0 / 0 | 0 / 0-2 (ở 8 trong 40 burst) | 152-179 ns | 1113-1140 ns |
+| 800 | E1-4b | 9 | 0 | 0 | 50-58 ns | 362-371 ns |
+| 1440 | E1-1…E1-3, E1-4d/e | 14-17 | 0 | 0 | 27-32 ns | 201-206 ns |
+| 1500 | E1-4c | 17-18 | 0 | 0 | 26-31 ns | 193-198 ns |
 
-Ở 260 Mb/s, giới hạn trailer của RX mình là 4 byte, nên 0–2 byte vẫn đạt.
+Ở 260 Mb/s, giới hạn trailer của RX mình là 4 byte, nên 0-2 byte vẫn đạt.
 
 ### 3.2 Stress cuối burst (E1-5)
 
 E1-5 gồm 96 run, chạy cả hai RX:
 - 8 rate;
 - trail min, mặc định và max;
-- có hoặc không có jitter trail (0–7 bit);
+- có hoặc không có jitter trail (0-7 bit);
 - có hoặc không có 40 ns nhiễu ở cuối trail;
 - `core_clk` lệch 400 ppm, để LP-11 rơi vào mọi pha của `core_clk`.
 
@@ -82,27 +82,27 @@ payload.** Trailer ghi dạng "khoảng (số burst có trailer)". "Giống bên
 
 | Rate (Mb/s) | Nhiễu | Trailer: AMD | Trailer: RX mình sau `IBUFDS_DPHY` | Trailer: RX mình sau `afe_model` | Giới hạn của RX mình |
 |---|---|---|---|---|---|
-| 260 | không | 1–4 | 0 | 0–4 (67) | 4 |
-| 260 | 40 ns | 1–4 | 0–4 (429) | giống bên trái | 4 |
-| 400 | không | 3–7 | 0 | 0–4 (4) | 6 |
-| 400 | 40 ns | 2–7 | 0–5 (426) | giống bên trái | 6 |
-| 600 | không | 5–10 | 0 | 0 | 0 |
-| 600 | 40 ns | 5–10 | 0–7 (421) | giống bên trái | 7 |
-| 800 | không | 7–13 | 0 | 0 | 0 |
-| 800 | 40 ns | 6–13 | 0–8 (328) | giống bên trái | 8 |
-| 1000 | không | 9–17 | 0 | 0 | 0 |
-| 1000 | 40 ns | 8–16 | 0–8 (15) | giống bên trái | 9 |
-| 1200 | không / 40 ns | 11–20 | 0 | 0 | 0 / 10 |
-| 1440 | không | 14–24 | 0 | 0 | 0 |
-| 1440 | 40 ns | 13–24 | 0–12 (4) | giống bên trái | 12 |
-| 1500 | không / 40 ns | 14–25 | 0 | 0 | 0 / 12 |
+| 260 | không | 1-4 | 0 | 0-4 (67) | 4 |
+| 260 | 40 ns | 1-4 | 0-4 (429) | giống bên trái | 4 |
+| 400 | không | 3-7 | 0 | 0-4 (4) | 6 |
+| 400 | 40 ns | 2-7 | 0-5 (426) | giống bên trái | 6 |
+| 600 | không | 5-10 | 0 | 0 | 0 |
+| 600 | 40 ns | 5-10 | 0-7 (421) | giống bên trái | 7 |
+| 800 | không | 7-13 | 0 | 0 | 0 |
+| 800 | 40 ns | 6-13 | 0-8 (328) | giống bên trái | 8 |
+| 1000 | không | 9-17 | 0 | 0 | 0 |
+| 1000 | 40 ns | 8-16 | 0-8 (15) | giống bên trái | 9 |
+| 1200 | không / 40 ns | 11-20 | 0 | 0 | 0 / 10 |
+| 1440 | không | 14-24 | 0 | 0 | 0 |
+| 1440 | 40 ns | 13-24 | 0-12 (4) | giống bên trái | 12 |
+| 1500 | không / 40 ns | 14-25 | 0 | 0 | 0 / 12 |
 
 ### 3.3 80 Mb/s (R-80, ngoài dải bảo đảm)
 
 IP AMD không build được dưới 260 Mb/s, nên ở 80 Mb/s chỉ chạy RX mình:
 - payload nguyên ở 36/36 burst-lane;
-- 0–1 byte trailer, ở 10 burst;
-- độ trễ 3,6–3,7 µs.
+- 0-1 byte trailer, ở 10 burst;
+- độ trễ 3,6-3,7 µs.
 
 Kết quả này chỉ để báo cáo, không tính đạt hay hỏng.
 
@@ -114,9 +114,9 @@ byte clock (HAS, bảng A-2).
 
 | Run | Lane 3 trễ | Lệch đo ở PPI: AMD | Lệch đo ở PPI: RX mình | Payload, mỗi RX | Kết quả |
 |---|---|---|---|---|---|
-| E1-6a | 13 889 ps (2,5 byte time) | 3 byte clock | 2–3 byte clock | 16/16 burst-lane | PASS |
-| E1-6b | 30 556 ps (5,5 byte time) | 6 | 5–6 | 16/16 | PASS |
-| NEG-skew | 41 667 ps (7,5 byte time) | 8 | 7–8 | 16/16 | FAIL, đúng như định: chỉ luật lệch lane hỏng, 4 lỗi ở mỗi RX (mỗi burst một lỗi) |
+| E1-6a | 13 889 ps (2,5 byte time) | 3 byte clock | 2-3 byte clock | 16/16 burst-lane | PASS |
+| E1-6b | 30 556 ps (5,5 byte time) | 6 | 5-6 | 16/16 | PASS |
+| NEG-skew | 41 667 ps (7,5 byte time) | 8 | 7-8 | 16/16 | FAIL, đúng như định: chỉ luật lệch lane hỏng, 4 lỗi ở mỗi RX (mỗi burst một lỗi) |
 
 - Lệch đo ở PPI bằng độ trễ của lane tính theo byte, làm tròn theo byte clock. RX AMD luôn cho số làm tròn lên; RX
   mình cho số làm tròn lên hoặc xuống, tuỳ burst.
@@ -154,7 +154,7 @@ RX AMD đạt, nên tín hiệu phát ra là đúng và lỗi nằm ở RX mình
 - **Hiện tượng:** byte payload cuối của burst bị cắt mất. Dưới khoảng 800 Mb/s, không giá trị `eot_skip_bytes` nào
   cắt đúng.
 - **Nguyên nhân:** yêu cầu cắt sinh ra khi line về LP-11, và nó tới delay line sớm hơn dữ liệu của cùng thời điểm.
-  Công thức tính `eot_skip_bytes` đã bỏ sót độ trễ của đường dữ liệu, khoảng 4–5 byte clock. Ở rate thấp, yêu cầu còn
+  Công thức tính `eot_skip_bytes` đã bỏ sót độ trễ của đường dữ liệu, khoảng 4-5 byte clock. Ở rate thấp, yêu cầu còn
   tới trước cả khi byte payload cuối vào delay line.
 - **Sửa:**
   - giữ burst mở thêm 3 byte clock sau khi phát hiện LP-11, để dữ liệu kịp vào delay line trước khi cắt;
@@ -172,7 +172,7 @@ RX AMD đạt, nên tín hiệu phát ra là đúng và lỗi nằm ở RX mình
   LP-11 chỉ rơi vào vài pha của `core_clk`.
 - Một lần chạy lại với seed khác hỏng 2 run E1-5 và làm lộ ra điều này: hằng số 27 ns không còn biên ở 600, 800 và
   1440 Mb/s.
-- Đo lại với `core_clk` lệch 400 ppm, jitter trail 0–7 bit và 1120 burst mỗi ô thì ra hằng số 24 ns.
+- Đo lại với `core_clk` lệch 400 ppm, jitter trail 0-7 bit và 1120 burst mỗi ô thì ra hằng số 24 ns.
 - Biên đã được đo, không giả định: với trail min, giá trị model + 1 không bao giờ mất payload, còn model + 2 mất
   payload ở mọi rate.
 

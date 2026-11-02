@@ -1,0 +1,56 @@
+{
+ "kit": "ftel_doc_kit",
+ "version": "1.0.1",
+ "files": {
+  "md2docx.py": {
+   "source": "skills/ftel-spec/scripts/md2docx.py",
+   "source_sha256": "e0fa03b88ef3afb8877f3442470d54760c839ca2601424a80b54295a2ab4b14b",
+   "sha256": "f89dc1cc57a18225a163b13ed1b2b4857f0f6952bd5163e079f30cde11a304d8"
+  },
+  "check_spec.py": {
+   "source": "skills/ftel-spec/scripts/check_spec.py",
+   "source_sha256": "7245db2364adc52676b75860f4b2def46280c63e241e7c7670ca5da87bef82af",
+   "sha256": "6eba0ae31bf39159a960ccb5d9775d2872a4f6b6378ecf7c697dcbee0190f5e3"
+  },
+  "figures/render_drawio.py": {
+   "source": "skills/ftel-block-diagram/scripts/render_drawio.py",
+   "source_sha256": "3d67e521e9c62868307d4addbaff33ce9048a8eada7c19f0f5211d32d84b4b40",
+   "sha256": "7e11759c9014f96a16c34a71e533ecfb05acb77860db3b7ba1afc11f006a0c5f"
+  },
+  "figures/drawio_lock.json": {
+   "source": "skills/ftel-block-diagram/scripts/drawio_lock.json",
+   "source_sha256": "f35e70d207821a8a441d62e8c5462416408a17bd318f4b1db1412637089527f5",
+   "sha256": "f35e70d207821a8a441d62e8c5462416408a17bd318f4b1db1412637089527f5"
+  },
+  "figures/check_figures.py": {
+   "source": "skills/ftel-block-diagram/scripts/check_figures.py",
+   "source_sha256": "c2ed9aa344ea8711fe15bf05875a495c48a55228d5ed079debb80611ac3c9098",
+   "sha256": "87a22d6a54d1efabcf20739cd286e8502881a206aafc44b114488401a56c6649"
+  },
+  "figures/drawio_fig.py": {
+   "source": "skills/ftel-block-diagram/scripts/drawio_fig.py",
+   "source_sha256": "0cffc4e674c093a93be970e5632a444cc9d9ecf8f1096748e9201462824a8a1b",
+   "sha256": "94ac1ed43e946777c60464eda60248f6d44031e16b20eab666fb83df2bc22c8f"
+  },
+  "figures/selftest/build_glyph_sheet.py": {
+   "source": "skills/ftel-block-diagram/scripts/selftest/build_glyph_sheet.py",
+   "source_sha256": "3f26fa5c0445fd7ae68f51db6bc8ef420a7d6a81ec0c74f702d0f9e0bcf448ad",
+   "sha256": "4b3ed9d3c0d9029a8d1e0a08a1a6d0bdebcf66b8cde8b0509e28dd8422511f1b"
+  },
+  "figures/selftest/ftel_lib_glyphs.drawio": {
+   "source": "skills/ftel-block-diagram/scripts/selftest/ftel_lib_glyphs.drawio",
+   "source_sha256": "1adb36edc4114e8e1221addecaa59272cacef6906f7f4167cd921113ed5c5b2c",
+   "sha256": "1adb36edc4114e8e1221addecaa59272cacef6906f7f4167cd921113ed5c5b2c"
+  },
+  "figures/selftest/ftel_lib_glyphs.png": {
+   "source": "skills/ftel-block-diagram/scripts/selftest/ftel_lib_glyphs.png",
+   "source_sha256": "11347ac694832e495a4d22980f39449eabf022b666450d58c5c7fa7b0797a712",
+   "sha256": "11347ac694832e495a4d22980f39449eabf022b666450d58c5c7fa7b0797a712"
+  },
+  "figures/render_wave.py": {
+   "source": "skills/ftel-waveform/scripts/render_wave.py",
+   "source_sha256": "4a8c4ba96a782087480536df2cbf73248228a6a29abb1886686cb469f2cb9d93",
+   "sha256": "a1b894189d47305e8519cd816f1e4b19dd01145cedbe2b11c0b277922db19bf4"
+  }
+ }
+}

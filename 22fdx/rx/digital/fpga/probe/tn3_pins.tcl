@@ -8,7 +8,7 @@
 # Author          : Ho Khanh Linh
 # Email           : linhhk26@fpt.com
 # Created Date    : 2026-10-19
-# Description     : Probe: pin facts behind fpga/exp3/TN3_SPEC.md §3–4 (TN3: D-PHY TX on a second FPGA
+# Description     : Probe: pin facts behind fpga/exp3/TN3_SPEC.md §3-4 (TN3: D-PHY TX on a second FPGA
 #                   board -> test board -> RX on the VP1902 board).
 #
 # Evolution History:
@@ -20,7 +20,7 @@
 # A new version is strictly reserved for major architectural shifts
 # that require software modifications across different chip generations.
 #-------------------------------------------------------------------------------
-# Probe: pin facts behind fpga/exp3/TN3_SPEC.md §3–4 (TN3: D-PHY TX on a second FPGA board -> test board
+# Probe: pin facts behind fpga/exp3/TN3_SPEC.md §3-4 (TN3: D-PHY TX on a second FPGA board -> test board
 # -> RX on the VP1902 board).
 # - VEK280 (xcve2802-vsvh1760-2MP-e-S): the VCCO that the MIPI_DPHY standard needs, and the bank of every
 #   FMCP1 LA/CLK pin of the VEK280 board file (part0_pins.xml). With the fixed 1.5 V of banks 705/706

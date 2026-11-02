@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Vendored from ftel_doc_kit 1.0.1 (skills/ftel-spec/scripts/md2docx.py); edit the kit, then run kit.py vendor.
 #-------------------------------------------------------------------------------
 # Copyright (c) 2026 FPT Telecom. All rights reserved.
 #
@@ -9,29 +10,36 @@
 # Author          : Ho Khanh Linh
 # Email           : linhhk26@fpt.com
 # Created Date    : 2026-09-29
-# Description     : ftel_dphy_rx HAS: spec.md -> DOCX in the FTEL HAS format (as HAS-CSI v1.2).
+# Description     : spec.md -> DOCX in the FTEL HAS / HDS format, settings from doc_kit.yaml.
 #
 # Evolution History:
 # ------------------------------------------------------------------------------
 # Date         Version    Author        Description
-# 2026-09-29   0.1        Ho Khanh Linh Initial creation.
+# 2026-09-29   0.1        Ho Khanh Linh Initial creation (ftel_dphy_rx HAS).
+# 2026-11-02   1.0        Ho Khanh Linh Moved into ftel_doc_kit: settings from doc_kit.yaml, --doc,
+#                                       captions with a colon, Acronyms appendix found by name,
+#                                       loose page search of ftel_dbg, --validate.
 #
 # This section is not intended for routine updates or minor design changes.
 # A new version is strictly reserved for major architectural shifts
 # that require software modifications across different chip generations.
 #-------------------------------------------------------------------------------
 # ============================================================================
-# ftel_dphy_rx HAS: spec.md -> DOCX in the FTEL HAS format (as HAS-CSI v1.2).
+# spec.md -> DOCX in the FTEL HAS / HDS format (ftel_doc_kit, skill ftel-spec).
 #
-# Adapted from ip-dev/hw/rtl/ip/ftel_intctl/doc/md2docx.py, same strategy:
+# Settings come from doc_kit.yaml beside spec.md: doc_id, cover_name, title, kind (HAS: high-level
+# architecture specification, the draft; HDS: hardware design specification, the release),
+# optional spec (default spec.md) and template_env (older per-IP names of the template variable).
+#
+# Strategy, the same since the ftel_intctl build:
 #   * The FTEL HDS template is the base: cover and logo, front matter, headers and
 #     footers, section layout, theme and named styles come from it.
 #   * pandoc converts the Markdown with --reference-doc=<template>, so the body
 #     already uses the template's styles; the result is spliced in after the front
 #     matter and replaces the template's sample sections.
-#   * The conventions of HAS-CSI v1.2 (FTEL_IP_MIPI_CSI-2_CONTROLLER_HAS_v1.2.docx),
-#     which is built on the same template, are applied on top:
-#       - cover "<NAME> / HIGH-LEVEL ARCHITECTURE SPECIFICATION / V<x.y>", running
+#   * The conventions of the FTEL HAS documents (as the CSI-2 controller HAS v1.2), which
+#     are built on the same template, are applied on top:
+#       - cover "<NAME> / <KIND> SPECIFICATION / V<x.y>", running
 #         header "<DOC_ID>_V<x.y>", page number above the copyright line;
 #       - figure captions below the figure in Heading 4, table captions above the
 #         table in Heading 6 ("Figure 2-1. Title", "Table 3-1. Title"), centred
@@ -43,18 +51,26 @@
 #   * A figure wider than LANDSCAPE_MIN_PX (WAVE_LANDSCAPE_MIN_PX for a timing
 #     diagram, whose text is smaller) goes on a landscape page when that makes it
 #     at least LANDSCAPE_GAIN larger, so its labels stay readable in print.
-#   * Grounding markers of the Markdown: the warning sign becomes "(TBC)", which
-#     Appendix C defines; the check mark and the globe are dropped.
+#   * Grounding markers of a draft: the warning sign becomes "(TBC)", which the
+#     Acronyms appendix defines; the check mark and the globe are dropped.
+#   * Captions: "![Figure N-M: Title](figures/<stem>.svg)" and "**Table N-M: Title**"; the
+#     older form with an em dash instead of the colon is still read.
 #   * Contents, Table of Tables and Table of Figures are literal entries with page
 #     numbers measured on a LibreOffice PDF (LibreOffice does not refresh TOC
 #     fields), iterated until the page map stops moving.
-# Deps: pandoc, python-docx, libreoffice, pdftotext. Figures: figures/*.png from
+# Deps: pandoc, python-docx, PyYAML, libreoffice, pdftotext. Figures: figures/*.png from
 #   figures/render_drawio.py (block diagrams) and figures/render_wave.py (timing diagrams).
-# Usage: /home/linhhk/anaconda3/bin/python3 md2docx.py   (any python3 with python-docx)
-# Template: $FTEL_DPHY_RX_HAS_TEMPLATE, default
+# Usage: md2docx.py [--doc DIR] [--validate]   (a python3 with python-docx and PyYAML)
+#   --doc       folder of spec.md and doc_kit.yaml (default: the folder of this script)
+#   --validate  also run the XSD validator of the docx skill when it is installed
+#               ($FTEL_DOCX_VALIDATOR or ~/.claude/skills/**/docx/scripts/office/validate.py)
+# Template: $FTEL_DOC_TEMPLATE (or a name listed under template_env), default
 #   ~/Documents/FX1_ips/Common_Info/FTEL_CDC_IP_Hardware_Design_Specification.docx
 # ============================================================================
+import argparse
 import datetime
+import glob
+import hashlib
 import io
 import os
 import re
@@ -64,6 +80,7 @@ import sys
 from copy import deepcopy
 
 try:
+    import yaml
     from docx import Document
     from docx.enum.text import WD_ALIGN_PARAGRAPH
     from docx.oxml import OxmlElement
@@ -71,25 +88,21 @@ try:
     from docx.shared import Pt, Twips
     from docx.table import Table
     from docx.text.paragraph import Paragraph
-except ImportError:
-    sys.exit("[md2docx] ERROR: python-docx is missing; run with /home/linhhk/anaconda3/bin/python3 "
-             "or install python-docx")
+except ImportError as e:
+    sys.exit(f"[md2docx] ERROR: {e.name} is missing; run with a python3 that has python-docx and PyYAML "
+             "(kit.py uses $FTEL_DOC_PYTHON)")
 
 A_BLIP = "{http://schemas.openxmlformats.org/drawingml/2006/main}blip"
 R_EMBED = "{http://schemas.openxmlformats.org/officeDocument/2006/relationships}embed"
 WP_DOCPR = "{http://schemas.openxmlformats.org/drawingml/2006/wordprocessingDrawing}docPr"
 RT_IMAGE = "http://schemas.openxmlformats.org/officeDocument/2006/relationships/image"
 
-HERE = os.path.dirname(os.path.realpath(__file__))                  # <ip>/doc
-SPEC_MD = os.path.join(HERE, "spec.md")
-BUILD = os.path.join(HERE, "_docx_build")                           # gitignored
-TEMPLATE = os.environ.get("FTEL_DPHY_RX_HAS_TEMPLATE", os.path.expanduser(
-    "~/Documents/FX1_ips/Common_Info/FTEL_CDC_IP_Hardware_Design_Specification.docx"))
+DEFAULT_TEMPLATE = "~/Documents/FX1_ips/Common_Info/FTEL_CDC_IP_Hardware_Design_Specification.docx"
+COVER_KINDS = {"HAS": "HIGH-LEVEL ARCHITECTURE SPECIFICATION", "HDS": "HARDWARE DESIGN SPECIFICATION"}
 
-DOC_ID = "FTEL_IP_MIPI_D-PHY_RX_HAS"
-COVER_NAME = "MIPI D-PHY RECEIVER"
-COVER_KIND = "HIGH-LEVEL ARCHITECTURE SPECIFICATION"
-TITLE = "ftel_dphy_rx - MIPI D-PHY Receiver High-Level Architecture Specification"
+# Set by configure() from doc_kit.yaml and spec.md
+HERE = BUILD = TEMPLATE = DOC_ID = COVER_NAME = COVER_KIND = TITLE = SPEC = VERSION = OUT = None
+LINES = []
 
 NUM_OFFSET = 5000              # spliced list numIds stay clear of the template's
 PORTRAIT_W_IN = 6.3            # text width of a portrait page is 6.47 in
@@ -104,15 +117,41 @@ TABLE_FONT_PT = 9              # table text, as HAS-CSI
 EMBED_DPI = 250                # embedded pictures: resolution at their printed size
 FIGCAP, TBLCAP = "QQFIGCAPQQ", "QQTBLCAPQQ"   # plain letters: pandoc leaves them alone
 TEMPLATE_LEFTOVERS = ["<IP NAME>", "FU2 SOC", "(HDS)", "[Guideline]", "[Example]", "ftel_uart",
-                      "Design Review", "Quan Nguyen", "UART"]
-
-SPEC = open(SPEC_MD, encoding="utf-8").read()
-LINES = SPEC.splitlines()
+                      "Design Review", "UART"]
 FIGS, TABLES = [], []          # filled by preprocess_md(), in document order
 
 
 def sh(cmd, **kw):
     return subprocess.run(cmd, check=True, **kw)
+
+
+def sha256(path):
+    return hashlib.sha256(open(path, "rb").read()).hexdigest()
+
+
+# ---------------------------------------------------------------- settings
+def configure(doc_dir):
+    """Settings of the document in doc_dir: doc_kit.yaml, the template and the facts of spec.md."""
+    global HERE, BUILD, TEMPLATE, DOC_ID, COVER_NAME, COVER_KIND, TITLE, SPEC, LINES, VERSION, OUT
+    HERE = os.path.realpath(doc_dir)
+    cfg_path = os.path.join(HERE, "doc_kit.yaml")
+    if not os.path.isfile(cfg_path):
+        sys.exit(f"[md2docx] ERROR: {cfg_path} missing (doc_id, cover_name, title, kind)")
+    cfg = yaml.safe_load(open(cfg_path, encoding="utf-8")) or {}
+    missing = [k for k in ("doc_id", "cover_name", "title") if not cfg.get(k)]
+    if missing:
+        sys.exit(f"[md2docx] ERROR: {cfg_path} lacks {', '.join(missing)}")
+    kind = cfg.get("kind", "HAS")
+    if kind not in COVER_KINDS:
+        sys.exit(f"[md2docx] ERROR: kind must be one of {sorted(COVER_KINDS)}, not {kind}")
+    DOC_ID, COVER_NAME, TITLE, COVER_KIND = cfg["doc_id"], cfg["cover_name"], cfg["title"], COVER_KINDS[kind]
+    BUILD = os.path.join(HERE, "_docx_build")                       # gitignored
+    names = ["FTEL_DOC_TEMPLATE"] + list(cfg.get("template_env") or [])
+    TEMPLATE = next((os.environ[n] for n in names if os.environ.get(n)), os.path.expanduser(DEFAULT_TEMPLATE))
+    SPEC = open(os.path.join(HERE, cfg.get("spec", "spec.md")), encoding="utf-8").read()
+    LINES = SPEC.splitlines()
+    VERSION = spec_version()
+    OUT = os.path.join(HERE, f"{DOC_ID}_v{VERSION}.docx")
 
 
 # ---------------------------------------------------------------- spec facts
@@ -123,8 +162,18 @@ def spec_version():
     return m.group(1)
 
 
-VERSION = spec_version()
-OUT = os.path.join(HERE, f"{DOC_ID}_v{VERSION}.docx")
+def body_range():
+    """Line range of the body: from chapter 1 up to the Acronyms appendix, which must be the last
+    heading of level 2 (its table is filled into the template's acronym table)."""
+    start = next((i for i, l in enumerate(LINES) if re.match(r"##\s+1\.\s+\S", l)), None)
+    stop = next((i for i, l in enumerate(LINES) if re.match(r"##\s+Appendix [A-Z]\.\s+Acronyms\s*$", l)), None)
+    if start is None or stop is None:
+        sys.exit("[md2docx] ERROR: spec.md needs a '## 1. <title>' chapter and an "
+                 "'## Appendix <X>. Acronyms' appendix")
+    later = [l for l in LINES[stop + 1:] if re.match(r"##\s", l)]
+    if later:
+        sys.exit(f"[md2docx] ERROR: the Acronyms appendix must be the last one; found after it: {later[0]}")
+    return start, stop
 
 
 def split_row(line):
@@ -219,7 +268,8 @@ def figure(num, title, stem):
     aspect = w / h
     land_w = min(LANDSCAPE_W_IN, LANDSCAPE_H_IN * aspect)
     port_w = min(PORTRAIT_W_IN, PORTRAIT_H_IN * aspect)
-    min_px = WAVE_LANDSCAPE_MIN_PX if "_wave_" in os.path.basename(stem) else LANDSCAPE_MIN_PX
+    wave = os.path.isfile(os.path.join(HERE, stem + ".json5")) or "_wave_" in os.path.basename(stem)
+    min_px = WAVE_LANDSCAPE_MIN_PX if wave else LANDSCAPE_MIN_PX
     landscape = w >= min_px and land_w >= port_w * LANDSCAPE_GAIN
     width_in = land_w if landscape else port_w
     return {"num": num, "caption": f"Figure {num}. {sentence_case(title)}", "px": (w, h),
@@ -247,19 +297,18 @@ def embed_png(png, width_in):
 
 
 # ---------------------------------------------------------------- markdown -> pandoc input
-IMG_RE = re.compile(r"^!\[Figure (\d+-\d+) — (.+)\]\((figures/[^)]+)\.svg\)$")
-TCAP_RE = re.compile(r"^\*\*Table ([A-Z0-9]+-\d+) — (.+)\*\*$")
+IMG_RE = re.compile(r"^!\[Figure (\d+-\d+)(?::| \N{EM DASH}) (.+)\]\((figures/[^)]+)\.svg\)$")
+TCAP_RE = re.compile(r"^\*\*Table ([A-Z0-9]+-\d+)(?::| \N{EM DASH}) (.+)\*\*$")
 HEAD_RE = re.compile(r"^(#{2,4})\s+(?:\d+(?:\.\d+)*\.?\s+)?(.*)$")
 LINK_RE = re.compile(r"(?<!!)\[([^\]]+)\]\([^)]+\)")
 
 
 def preprocess_md():
-    """Chapters 1 to 9 and Appendices A and B (Appendix C is filled into the template's
-    acronym table). Heading numbers are stripped (the template numbers them), figures point
+    """The chapters and the appendices before the Acronyms appendix (which is filled into the
+    template's acronym table). Heading numbers are stripped (the template numbers them), figures point
     to their PNG with a caption paragraph, table captions become caption paragraphs, links
     become text, markers are converted, and chapter rules (---) are dropped."""
-    start = next(i for i, l in enumerate(LINES) if re.match(r"##\s+1\.\s+Overview", l))
-    stop = next(i for i, l in enumerate(LINES) if l.startswith("## Appendix C."))
+    start, stop = body_range()
     out = []
     for raw in LINES[start:stop]:
         line = raw.rstrip()
@@ -839,11 +888,11 @@ def assemble(body_docx):
         sys.exit(f"[md2docx] ERROR: {fig_i} figure captions spliced, {len(FIGS)} figures in the spec")
     print(f"[md2docx] tables : {n_tbl} body tables formatted")
 
-    # appendix section: acronyms from Appendix C, review table as HAS-CSI
+    # appendix section: acronyms from the Acronyms appendix, review table as HAS-CSI
     acr_tbl = acr_head.getnext()
     while acr_tbl.tag != qn("w:tbl"):
         acr_tbl = acr_tbl.getnext()
-    acr_rows = [[md_plain(a), md_plain(d)] for a, d in md_table_after("## Appendix C. Acronyms")[1:]]
+    acr_rows = [[md_plain(a), md_plain(d)] for a, d in md_table_after(LINES[body_range()[1]])[1:]]
     fill_simple_table(acr_tbl, acr_rows)
     format_table(acr_tbl, base, keep_header_align=True)
     rev_head = find_para(bbody, "Review", "BOSAppendix")
@@ -904,7 +953,7 @@ def toc_targets():
             continue
         title = re.sub(r"[`*]", "", m.group(2)).strip()
         if not started:
-            started = bool(re.match(r"^1\.\s+Overview$", title))
+            started = bool(re.match(r"^1\.\s+\S", title))
             if not started:
                 continue
         ma = re.match(r"^Appendix ([A-Z])\.\s+(.*)$", title)
@@ -930,7 +979,7 @@ def toc_targets():
             level = 2
         entry = f"{num}. {bare}"
         keys = [f"{num}. {bare}", f"{num}.{bare}", f"{num} {bare}"]
-        targets.append((level, smart_quotes(entry), [_norm(k.split(" — ")[0])[:60] for k in keys],
+        targets.append((level, smart_quotes(entry), [_norm(re.split(" \N{EM DASH} |: ", k)[0])[:60] for k in keys],
                         [_norm(bare)[:60]] if len(bare) >= 8 else []))
     targets.append((1, f"Appendix {chr(appx)}. First Review",
                     [f"Appendix {chr(appx)}. First Review", f"Appendix {chr(appx)}.First Review"],
@@ -947,9 +996,24 @@ def measure_pages(pdf):
     def find(keys, cur):
         return next((i for i in range(cur, len(pages) + 1) if any(k in pages[i - 1] for k in keys)), None)
 
+    def loose_hit(page, key):
+        # pdftotext may interleave the running header or a neighbouring run between the font-split
+        # fragments of a heading (code spans split the line): accept the page when every token of
+        # the key appears in order, gaps allowed (the ftel_dbg build).
+        pos = 0
+        for tok in key.split():
+            i = page.find(tok, pos)
+            if i < 0:
+                return False
+            pos = i + len(tok)
+        return True
+
+    def find_loose(keys, cur):
+        return next((i for i in range(cur, len(pages) + 1) if any(loose_hit(pages[i - 1], k) for k in keys)), None)
+
     toc, cur, missing = [], 1, []
     for level, entry, primary, fallback in toc_targets():
-        pg = find(primary, cur) or (find(fallback, cur) if fallback else None)
+        pg = find(primary, cur) or (find(fallback, cur) if fallback else None) or find_loose(primary, cur)
         if pg is None:
             missing.append(entry)
         else:
@@ -1080,8 +1144,7 @@ def verify_output(n_land, date_text):
     markers = re.findall("[\u2705\u26a0\U0001F310\U0001F50D\ufe0f]", text)
     if markers:
         errors.append(f"{len(markers)} grounding markers left in the text")
-    src = "\n".join(LINES[next(i for i, l in enumerate(LINES) if re.match(r"##\s+1\.\s+Overview", l)):
-                          next(i for i, l in enumerate(LINES) if l.startswith("## Appendix C."))])
+    src = "\n".join(LINES[slice(*body_range())])
     n_warn, n_tbc = len(WARN_RE.findall(src)), text.count("(TBC)")
     if n_warn != n_tbc:
         errors.append(f"{n_warn} warning signs in the spec but {n_tbc} '(TBC)' in the docx")
@@ -1092,9 +1155,36 @@ def verify_output(n_land, date_text):
           f"no template text left")
 
 
+def find_validator():
+    """XSD validator of the docx skill (not part of the kit): $FTEL_DOCX_VALIDATOR or an installed copy."""
+    if os.environ.get("FTEL_DOCX_VALIDATOR"):
+        return os.environ["FTEL_DOCX_VALIDATOR"]
+    found = sorted(glob.glob(os.path.expanduser("~/.claude/skills/**/docx/scripts/office/validate.py"),
+                             recursive=True))
+    return found[0] if found else None
+
+
+def validate():
+    tool = find_validator()
+    if not tool or not os.path.isfile(tool):
+        sys.exit("[md2docx] ERROR: --validate: no validator (set FTEL_DOCX_VALIDATOR to the docx skill's "
+                 "scripts/office/validate.py)")
+    r = subprocess.run([sys.executable, tool, OUT], capture_output=True, text=True, cwd=os.path.dirname(tool))
+    print("\n".join(f"[md2docx] xsd    : {l}" for l in (r.stdout + r.stderr).strip().splitlines()[-3:]))
+    if r.returncode:
+        sys.exit("[md2docx] ERROR: XSD validation failed")
+
+
 def main():
+    ap = argparse.ArgumentParser(description="spec.md -> DOCX in the FTEL HAS / HDS format")
+    ap.add_argument("--doc", default=os.path.dirname(os.path.realpath(__file__)),
+                    help="folder of spec.md and doc_kit.yaml (default: the folder of this script)")
+    ap.add_argument("--validate", action="store_true", help="also run the XSD validator of the docx skill")
+    args = ap.parse_args()
+    configure(args.doc)
     if not os.path.isfile(TEMPLATE):
-        sys.exit(f"[md2docx] ERROR: template not found: {TEMPLATE} (set FTEL_DPHY_RX_HAS_TEMPLATE)")
+        sys.exit(f"[md2docx] ERROR: template not found: {TEMPLATE} (set FTEL_DOC_TEMPLATE)")
+    print(f"[md2docx] template: {TEMPLATE} (sha256 {sha256(TEMPLATE)[:16]})")
     pre = preprocess_md()
     n_land = assemble(pandoc_body(pre))
     date_text = footer_date_text()
@@ -1111,10 +1201,12 @@ def main():
     else:
         sys.exit("[md2docx] ERROR: page layout did not converge in 5 passes")
     verify_output(n_land, date_text)
+    if args.validate:
+        validate()
     older = [f for f in os.listdir(HERE) if f.startswith(DOC_ID) and f.endswith(".docx")
              and f != os.path.basename(OUT)]
     if older:
-        print(f"[md2docx] NOTE: older HAS docx beside the new one: {older} (git mv / remove by hand)")
+        print(f"[md2docx] NOTE: older docx beside the new one: {older} (git mv / remove by hand)")
 
 
 if __name__ == "__main__":

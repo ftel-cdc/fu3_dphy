@@ -1,4 +1,4 @@
-# ftel_dphy_rx — RTL Design Notes (HAS ↔ RTL bridge and decisions)
+# ftel_dphy_rx - RTL Design Notes (HAS ↔ RTL bridge and decisions)
 
 > Companion to `spec.md` (the RTL follows HAS draft v0.16 in Block No. 4 and the configuration package, v0.14 elsewhere; v0.15 changes timing figures only) and `rtl_rule.md` (v1.2). It records which HAS section each RTL block implements and why each RTL-level decision was
 > made, so a reviewer can trace the RTL back to the HAS and a later change stays in one place. Same
@@ -28,7 +28,7 @@
   - the two-stage HS path that sets Λ, D-18.
 
   The simulation of Block No. 1 (§8) found one more erratum: the loss of the clock is an upper bound
-  of 60 ns, not a range of 50–60 ns (N-6).
+  of 60 ns, not a range of 50-60 ns (N-6).
   - New modules: `_byte_clk`, `_hs_deser` and `_clk_act`, plus copies of two fu2 clock cells,
     `_cg` and `_clk_inv` (D-23). `_afe_adapter` is rewritten for the HS part.
   - Small changes: `_cl_ctrl` (byte-clock enable, D-21), `_timing_init` (reset synchronizer of the
@@ -106,12 +106,12 @@ packages: ftel_dphy_rx_config_pkg (generated from config/ftel_dphy_rx.yaml), fte
 | §3 Table 3-1, 3-2 | `ftel_dphy_rx_config_pkg` (generated), `PARA_*` of the core and wrapper | `config/validate_config.py` checks the values against §4.3, §4.6 and Appendix B |
 | §4.1 crossings, Figure 4-1 | `m_ftel_dphy_rx_sync`, `_tsync`, `_rst_sync`; tags `CDC_CROSSING`, `CDC_QUASI_STATIC`, `CDC_GATING` | Every instance of a cell carries its crossing |
 | §4.2 reset | `_timing_init` (reset synchronizers), `_wrap` (inverter) | D-4 |
-| §4.3 Block No. 1 | `_afe_adapter`, `_lp_filter`, `_hs_deser`, `_byte_clk`, `_clk_act`, `_cg`, `_clk_inv` | D-5, D-6, D-17 – D-25 |
+| §4.3 Block No. 1 | `_afe_adapter`, `_lp_filter`, `_hs_deser`, `_byte_clk`, `_clk_act`, `_cg`, `_clk_inv` | D-5, D-6, D-17 - D-25 |
 | §4.4 Block No. 2 | `_cl_ctrl` | D-8, D-9 |
 | §4.5 Block No. 3 | `_dl_ctrl`, `_esc_decoder` | D-7, D-8, D-9 |
 | §4.6 Block No. 4 | `_hs_datapath`, `_sync_search`, `_eot` | D-12, D-13, D-15, D-26, D-27 |
 | §4.7 Block No. 6 | `_timing_init` | D-10, D-11 |
-| §4.9 Block No. 7 | `_ppi_out` | — |
+| §4.9 Block No. 7 | `_ppi_out` | - |
 | §4.10 Block No. 8 | absent | D-2 |
 | §5.1, §5.2 | ports of `m_ftel_dphy_rx` (HAS names) and `m_ftel_dphy_rx_wrap` (`dphy_rx` token) | Per-lane signals are packed arrays: PPI ports by logical lane, AFE ports by physical lane |
 
@@ -237,7 +237,7 @@ reset of the divider and of the two load-phase flip-flops.
   - In zero-delay RTL, the enable and the divided clock can change on the same DDR edge (a race at
     the latch).
 - With the reset: `rxbyteclkhs` is Low while the gate is closed, and the first pulse after it opens
-  is whole. It starts 3–4 DDR periods after `cl_rxclkactivehs`, 5 when the synchronizer resolves
+  is whole. It starts 3-4 DDR periods after `cl_rxclkactivehs`, 5 when the synchronizer resolves
   late.
 - SpyGlass reports the reset used as data (STARC05-1.3.1.3). The waiver names this decision
   (`lint/lint_waiver.tcl`, rtl_rule K2 (4)).
@@ -284,10 +284,10 @@ goes to Blocks No. 4, 6 and 7.
 keeps the synchronized sync-search start High for `C_EOT_HOLD_BYTES` = 3 byte clocks after it falls:
 a 3-bit shift register of the synchronized level, ORed with it. The sync search, the active flag and
 the EoT request follow the held level.
-- Why: at the line the bytes of the LP-11 detection reach the delay line 4–5 byte clocks after their
-  last bit (Λ = 2.06, the window and the entry register), while the synchronized fall arrives 2–3
+- Why: at the line the bytes of the LP-11 detection reach the delay line 4-5 byte clocks after their
+  last bit (Λ = 2.06, the window and the entry register), while the synchronized fall arrives 2-3
   byte clocks after the core detection. Without the hold, the sync search cleared its window and lock
-  on the fall, so at 80 Mb/s the last 5–6 bytes of a burst were lost for every `eot_skip_bytes`, and
+  on the fall, so at 80 Mb/s the last 5-6 bytes of a burst were lost for every `eot_skip_bytes`, and
   at 260 Mb/s only `eot_skip_bytes` = 0 was exact.
 - Why 3: measured windows of exact values at 260 Mb/s, minimum trail: {0} without a hold, {1, 2}
   with 2, {2, 3} with 3. With 3 the crossing and the data path latency cancel to within one byte
@@ -321,7 +321,7 @@ writing the RTL these points were read literally; the HAS could state them to re
 | N-3 | Line states not named in Tables 4-4 and 4-5 (e.g. LP-01 in DL_LP_RQST, LP-00 in DL_STOP) | The state is kept (D-8) |
 | N-4 | `rxclkesc_x` is the XOR of the synchronized Dp and Dn, combinational | Cannot glitch in escape mode (one line changes at a time); a direct LP-01 ↔ LP-10 change could |
 | N-5 | Status of aborted clock-lane requests | Both HS and ULPS aborts (D-14) |
-| N-6 | Loss of the clock, HAS v0.13: `cl_rxclkactivehs` falls 50–60 ns after the last clock edge | The toggles change on rising edges only. The trail ends on a falling edge, and near 800 and 1600 Mb/s the edge toggle aliases. Simulation (§8): 38.5–42.2 ns after the last edge at 80 Mb/s, at most 54.7 ns at every rate. HAS v0.14 states the upper bound, at most 60 ns, which is TCLK-MISS |
+| N-6 | Loss of the clock, HAS v0.13: `cl_rxclkactivehs` falls 50-60 ns after the last clock edge | The toggles change on rising edges only. The trail ends on a falling edge, and near 800 and 1600 Mb/s the edge toggle aliases. Simulation (§8): 38.5-42.2 ns after the last edge at 80 Mb/s, at most 54.7 ns at every rate. HAS v0.14 states the upper bound, at most 60 ns, which is TCLK-MISS |
 
 ## 6. Timing constraints and trial synthesis (Stage D)
 
@@ -434,13 +434,13 @@ One line per correction round (rule 1 of `/dphy_rtl_gen`: at most 3 rounds per m
 | Module | Round | Finding | Fix |
 |---|---|---|---|
 | `m_ftel_dphy_rx_afe_adapter` | 1 | VCS Lint-[UI]/[ONGS]: clock-lane AFE enables not connected | `o_afe_cl_hs_en`, `o_afe_cl_term_en` assigned |
-| `m_ftel_dphy_rx_timing_init` | — | checker N11 on the output resets and on `i_phy_core_rst` | checker corrected: N11 covers clock inputs and active-low reset inputs (rtl_rule 1.1); no RTL change |
+| `m_ftel_dphy_rx_timing_init` | - | checker N11 on the output resets and on `i_phy_core_rst` | checker corrected: N11 covers clock inputs and active-low reset inputs (rtl_rule 1.1); no RTL change |
 | `m_ftel_dphy_rx_dl_ctrl` | 1 | checker T1: REQ-135 tagged but not in the header | header completed |
-| whole IP (SpyGlass) | 1 | 29 W415a (multiple assignments in one always block), 3 W528 (timer fields distributed but unused) | encoders rewritten (D-15); Block No. 6 distributes only the fields Blocks No. 2–4 use |
+| whole IP (SpyGlass) | 1 | 29 W415a (multiple assignments in one always block), 3 W528 (timer fields distributed but unused) | encoders rewritten (D-15); Block No. 6 distributes only the fields Blocks No. 2-4 use |
 | whole IP (`flow_check` P3a) | 1 | CF-COVER REQ-164, REQ-182 untagged | tags added in `_eot` and `_dl_ctrl` |
 | whole IP (HAS v0.12) | 1 | P2 CF-CONFIG: config package header behind the spec; P3a CF-COVER REQ-324 (this IP completes the deserialization) untagged | package regenerated; tag added at the barrel shifter of `_sync_search` |
 
-| `m_ftel_dphy_rx_*` (HAS v0.14, rtl_rule 1.2) | 1 | VCS per module (`_cg`, `_clk_inv`, `_clk_act`, `_byte_clk`, `_hs_deser`, `_afe_adapter`, `_timing_init`, `_cl_ctrl`): 0 / 0 / 0 at the first round | — |
+| `m_ftel_dphy_rx_*` (HAS v0.14, rtl_rule 1.2) | 1 | VCS per module (`_cg`, `_clk_inv`, `_clk_act`, `_byte_clk`, `_hs_deser`, `_afe_adapter`, `_timing_init`, `_cl_ctrl`): 0 / 0 / 0 at the first round | - |
 | whole IP (SpyGlass, HAS v0.14) | 1 | STARC05-1.3.1.3 (AsyncResetOtherUse): the gate-enable reset synchronizer output is also the enable of the clock gate | intended structure of rtl_rule K2 (4), waived with D-19 in `lint/lint_waiver.tcl` (first attempt: `-comment {...}` is an SGDC syntax error, the comment must be a quoted string) |
 | whole IP (`flow_check` P3a, HAS v0.14) | 1 | CF-COVER REQ-083 (termination enable from the FSM register, no extra timer) untagged | tags added at the state registers of `_dl_ctrl` and `_cl_ctrl` |
 | whole IP (`flow_check` P3a, HAS v0.15) | 1 | CF-DRIFT: the configuration package was regenerated (header HAS v0.15) after both lints | lints rerun, no RTL change: VCS 0 / 0 / 0 for 1, 2, 4 lanes; SpyGlass `lint_rtl` 0 / 0 / 0, one waiver (D-19) |
@@ -457,7 +457,7 @@ Rerun on 2026-10-19 after the Block No. 4 fix of HAS v0.16: PASS at the five lin
 
 `sim/tb_afe_adapter/run.sh`: `tb_afe_adapter.sv` drives the core `m_ftel_dphy_rx` with four lanes.
 The clock-lane FSM, the reset synchronizers and the byte-clock enable are the real ones.
-- Per line rate: four clock-lane bursts of 64–67 DDR periods, so the divider stops at every phase.
+- Per line rate: four clock-lane bursts of 64-67 DDR periods, so the divider stops at every phase.
 - Data: PRBS31 on lanes 0 and 2; lane 1 repeats lane 0 and lane 3 inverts lane 2, with polarity bits
   `1010`.
 - Pulses at the HS-RX output during TCLK-SETTLE and after the trail.
@@ -466,11 +466,11 @@ The clock-lane FSM, the reset synchronizers and the byte-clock enable are the re
 
 | Rate (Mb/s) | Words checked | Λ (byte clocks) | `rxbyteclkhs` start after `cl_rxclkactivehs` (DDR periods) | Loss seen after the last rising edge (ns) | `cl_rxclkactivehs` falls after the last edge (ns) | Result |
 |---|---|---|---|---|---|---|
-| 80 | 55 | 2.0625 | 3.41–3.56 | 46.0–49.7 | 38.5–42.2 | PASS |
-| 800 | 51 | 2.0625 | 3.12–3.87 | 41.0–49.1 | 44.7–52.8 | PASS |
-| 1500 | 46 | 2.0625 | 3.03–3.96 | 45.2–49.1 | 49.5–53.5 | PASS |
-| 1600 | 45 | 2.0625 | 3.07–3.51 | 46.1–49.6 | 50.4–54.0 | PASS |
-| 1792 | 44 | 2.0625 | 3.34–3.92 | 46.0–49.4 | 50.4–53.8 | PASS |
+| 80 | 55 | 2.0625 | 3.41-3.56 | 46.0-49.7 | 38.5-42.2 | PASS |
+| 800 | 51 | 2.0625 | 3.12-3.87 | 41.0-49.1 | 44.7-52.8 | PASS |
+| 1500 | 46 | 2.0625 | 3.03-3.96 | 45.2-49.1 | 49.5-53.5 | PASS |
+| 1600 | 45 | 2.0625 | 3.07-3.51 | 46.1-49.6 | 50.4-54.0 | PASS |
+| 1792 | 44 | 2.0625 | 3.34-3.92 | 46.0-49.4 | 50.4-53.8 | PASS |
 
 Every word is 8 consecutive bits, bit 0 received first, and words follow each other. All lanes are
 cut at the same time, and the polarity inversion works.
@@ -511,14 +511,14 @@ A burst passes on a lane when:
 
 | Scenario | Rate (Mb/s), lanes | What varies | AMD: trailer bytes | ftel_dphy_rx: trailer bytes | Result |
 |---|---|---|---|---|---|
-| E1-1 | 1440, 4 | 1 to 1024 bytes | 16–17 | 0 | PASS |
-| E1-2a–c | 1440, 4 | PRBS9, sync-like data, uneven lanes | 16–17 | 0 | PASS |
-| E1-3a–g | 1440, 4 | THS-PREPARE and THS-ZERO at their limits, minimum TRAIL/EXIT/LPX, clock skew, lane skew up to 139 ps, AFE noise (E1-3g, behind `afe_model`) | 14–17 | 0 | PASS |
-| E1-4a | 260, 4 | default and minimum timing | 1–2 | 0; behind `afe_model`, 0–2 in 8 of 40 bursts at minimum timing (limit 4) | PASS |
-| E1-4b, E1-4c | 800 and 1500, 4 | rate | 9 and 17–18 | 0 | PASS |
-| E1-4d, E1-4e | 1440, 2 and 1 | lanes | 16–17 | 0 | PASS |
-| E1-5, 96 runs | 260–1500, 4 (fair run: both receivers; before it: ftel_dphy_rx alone) | trail min/def/max × jitter × 0 or 40 ns of junk, `core_clk` 400 ppm slow | 1–25 | within Table 4-7; most 12, at 1440 Mb/s with junk | PASS |
-| R-80 | 80, ftel_dphy_rx alone | outside the guarantee | — | 0–1, in 10 of 36 bursts | report only |
+| E1-1 | 1440, 4 | 1 to 1024 bytes | 16-17 | 0 | PASS |
+| E1-2a-c | 1440, 4 | PRBS9, sync-like data, uneven lanes | 16-17 | 0 | PASS |
+| E1-3a-g | 1440, 4 | THS-PREPARE and THS-ZERO at their limits, minimum TRAIL/EXIT/LPX, clock skew, lane skew up to 139 ps, AFE noise (E1-3g, behind `afe_model`) | 14-17 | 0 | PASS |
+| E1-4a | 260, 4 | default and minimum timing | 1-2 | 0; behind `afe_model`, 0-2 in 8 of 40 bursts at minimum timing (limit 4) | PASS |
+| E1-4b, E1-4c | 800 and 1500, 4 | rate | 9 and 17-18 | 0 | PASS |
+| E1-4d, E1-4e | 1440, 2 and 1 | lanes | 16-17 | 0 | PASS |
+| E1-5, 96 runs | 260-1500, 4 (fair run: both receivers; before it: ftel_dphy_rx alone) | trail min/def/max × jitter × 0 or 40 ns of junk, `core_clk` 400 ppm slow | 1-25 | within Table 4-7; most 12, at 1440 Mb/s with junk | PASS |
+| R-80 | 80, ftel_dphy_rx alone | outside the guarantee | - | 0-1, in 10 of 36 bursts | report only |
 
 How the results were reached:
 

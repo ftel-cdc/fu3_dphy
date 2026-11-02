@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Vendored from ftel_doc_kit 1.0.1 (skills/ftel-block-diagram/scripts/selftest/build_glyph_sheet.py); edit the kit, then run kit.py vendor.
 #-------------------------------------------------------------------------------
 # Copyright (c) 2026 FPT Telecom. All rights reserved.
 #
@@ -15,7 +16,8 @@
 # Evolution History:
 # ------------------------------------------------------------------------------
 # Date         Version    Author        Description
-# 2026-09-29   0.1        Ho Khanh Linh Initial creation.
+# 2026-09-29   0.1        Ho Khanh Linh Initial creation (ftel_dphy_rx).
+# 2026-11-02   1.0        Ho Khanh Linh Moved into ftel_doc_kit, unchanged.
 #
 # This section is not intended for routine updates or minor design changes.
 # A new version is strictly reserved for major architectural shifts

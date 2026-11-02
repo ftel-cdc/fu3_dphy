@@ -1,4 +1,4 @@
-# fpga — FPGA prototype of ftel_dphy_rx
+# fpga - FPGA prototype of ftel_dphy_rx
 
 Prototype work for the D-PHY receiver `ftel_dphy_rx` (RTL in [`../logical`](../logical)) on an AMD Versal
 VP1902 board (part `xcvp1902-vsva6865-2MP-e-S`) with a MIPI camera on FMC+, next to the MIPI CSI-2 Rx
@@ -22,7 +22,7 @@ IP and of the device, and the tools that check the captures.
 > - Table 4-7 comes from `run_exp1.sh window`, which reaches LP-11 at every phase of `core_clk`. The
 >   first table had been measured without these phases; this measurement led to the refit of
 >   `eot_skip_bytes`.
-> - At 1440 Mb/s AMD's receiver keeps 16–17 trailer bytes in every burst. ftel_dphy_rx keeps none
+> - At 1440 Mb/s AMD's receiver keeps 16-17 trailer bytes in every burst. ftel_dphy_rx keeps none
 >   without junk, and none in about 99 % of bursts with 40 ns of junk.
 >
 > TN1 compares the digital parts on equal terms ([`PLAN_TN1_FAIR.md`](PLAN_TN1_FAIR.md)).
@@ -49,8 +49,8 @@ IP and of the device, and the tools that check the captures.
 >   scenarios with ftel_dphy_rx behind `afe_model` also pass (29/29). No fault was found in ftel_dphy_rx.
 > - EoT at every phase of `core_clk` (both receivers 400 ppm slow, then fast, against the TX): 432/432 lane bursts at
 >   each rate. From 400 Mb/s ftel_dphy_rx keeps no trailer byte.
-> - The timing of the TX measured at the pads is within D-PHY v1.1 at every rate. Its TCLK-PREPARE (82–89 ns) and
->   its THS-PREPARE at 260 Mb/s (96–103 ns) go beyond the values TN1 tried.
+> - The timing of the TX measured at the pads is within D-PHY v1.1 at every rate. Its TCLK-PREPARE (82-89 ns) and
+>   its THS-PREPARE at 260 Mb/s (96-103 ns) go beyond the values TN1 tried.
 > - Details are in [`exp2/README.md`](exp2/README.md); `exp2/tn2a_evidence.py evidence` re-checks all of it.
 >
 > TN2b (`exp2b/`, [`PLAN_TN2B.md`](PLAN_TN2B.md)) sends synthetic RAW10 frames through AMD's CSI-2 TX Subsystem into

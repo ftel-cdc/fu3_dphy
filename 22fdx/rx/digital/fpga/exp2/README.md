@@ -60,7 +60,7 @@ Mô phỏng chạy trong XSIM của Vivado 2025.2, part xcvp1902.
 - **Pad:** `OBUFDS_DPHY` lái strong trong LP và supply trong HS. Cả hai đều là strength "S", nên `IBUFDS_DPHY` của
   hai RX vẫn thấy cùng loại front end như ở TN1.
 - **Hai điều đo được khi làm** (`../PLAN_TN2A.md` §13):
-  - TX khởi động sau 380–571 µs, tuỳ rate, dù `C_INIT` = 99 µs;
+  - TX khởi động sau 380-571 µs, tuỳ rate, dù `C_INIT` = 99 µs;
   - model clock của TX cho line đúng rate danh định, bất kể chu kỳ `core_clk` của TX. Vì vậy muốn line lệch so với
     RX thì phải lệch `core_clk` của RX (`+CORE_HALF`), như TN1.
 
@@ -200,7 +200,7 @@ Payload mặc định như E1-1: độ dài 1, 2, 3, 4, 5, 8, 16, 64, 256, 1024 
 | E2a-1 | 1440, 4 | mặc định | Cơ bản. RX AMD phải đạt trước, để chứng minh hookup TX và truth |
 | E2a-2a | 1440, 4 | `+PATTERN=prbs9 +LENS=1,2,3,8,64,256,1024 +REPEAT=2` | Như E1-2a: dữ liệu ngẫu nhiên |
 | E2a-2b | 1440, 4 | `+PATTERN=synclike +LENS=4,8,16,64,256,1024` | Như E1-2b: payload giống sync |
-| E2a-2c | 1440, 4 | `+UNEVEN=1 +LENS=2,3,5,9,65,257` | Như E1-2c: lane 2–3 ít hơn 1 byte, lane 0 dài nhất |
+| E2a-2c | 1440, 4 | `+UNEVEN=1 +LENS=2,3,5,9,65,257` | Như E1-2c: lane 2-3 ít hơn 1 byte, lane 0 dài nhất |
 | E2a-3 | 1440, 4 | `+GAP_NS=0 +LENS=1,4,64,256 +REPEAT=2` | Burst kế được request ngay khi về `stopstate`: THS-EXIT nhỏ nhất của TX |
 | E2a-4a | 260, 4 | `+TIMEOUT_US=3000`; trailer RX mình ≤ 4 | Rate thấp nhất của TX |
 | E2a-4b/c | 800 / 1500, 4 | mặc định | Phủ dải R1 |
@@ -231,8 +231,8 @@ Kết quả chạy trên RTL của commit `5fa890b` (HAS v0.16). `logical/` và 
    1500 Mb/s, ở 1, 2 và 4 lane, và cả với lane kết thúc lệch nhau, payload giống sync, PRBS-9, burst sát nhau.
 2. **Mọi timing của TX đo trên pad đều nằm trong giới hạn D-PHY v1.1, ở cả 8 rate** (`run_exp2.sh txtiming`: 0 giá
    trị `OUTSIDE`). Hai chỗ TN1 chưa phủ, nay đã được phủ bằng TX thật, và RX mình đạt:
-   - TCLK-PREPARE 81,9–88,5 ns (TN1 chỉ thử 66 ns);
-   - THS-PREPARE ở 260 Mb/s là 95,6–103,0 ns, gần mức max 108,1 ns (TN1 thử giá trị giữa khoảng ở rate này).
+   - TCLK-PREPARE 81,9-88,5 ns (TN1 chỉ thử 66 ns);
+   - THS-PREPARE ở 260 Mb/s là 95,6-103,0 ns, gần mức max 108,1 ns (TN1 thử giá trị giữa khoảng ở rate này).
 3. **Có.** E2a-5 cho `core_clk` của hai RX lệch ±400 ppm so với line của TX. Ở cả 8 rate, RX mình nhận đủ 432/432
    lane burst ở cả hai front end, và trailer trong giới hạn.
 
@@ -241,15 +241,15 @@ là của byte payload cuối.
 
 | Rate (Mb/s) | Kịch bản | Trailer: AMD | Trailer: RX mình sau `IBUFDS_DPHY` | Trailer: RX mình sau `afe_model` | Giới hạn | Độ trễ: AMD | Độ trễ: RX mình |
 |---|---|---|---|---|---|---|---|
-| 260 | E2a-4a, E2a-5 | 2 | 0 | 0–2 (20/40 ở E2a-4a; 216/432 ở E2a-5) | 4 | 167 ns | 1117 ns |
+| 260 | E2a-4a, E2a-5 | 2 | 0 | 0-2 (20/40 ở E2a-4a; 216/432 ở E2a-5) | 4 | 167 ns | 1117 ns |
 | 400 | E2a-5 | 4 | 0 | 0 | 6 | 99 ns | 741 ns |
 | 600 | E2a-5 | 7 | 0 | 0 | 0 | 66 ns | 484 ns |
-| 800 | E2a-4b, E2a-5 | 9–10 | 0 | 0 | 0 | 50 ns | 363–366 ns |
-| 1000 | E2a-5 | 12–13 | 0 | 0 | 0 | 40 ns | 295 ns |
+| 800 | E2a-4b, E2a-5 | 9-10 | 0 | 0 | 0 | 50 ns | 363-366 ns |
+| 1000 | E2a-5 | 12-13 | 0 | 0 | 0 | 40 ns | 295 ns |
 | 1200 | E2a-5 | 15 | 0 | 0 | 0 | 33 ns | 244 ns |
-| 1440 | E2a-1…E2a-3, E2a-4d/e, E2a-5 | 17–18 | 0 | 0 | 0 | 28 ns | 202–205 ns |
-| 1500 | E2a-4c, E2a-5 | 18–19 | 0 | 0 | 0 | 26 ns | 195–198 ns |
-| 1440, generator | E2a-0a/b/c | 14–17 | 0 | 0 | 0 | 28–32 ns | 201–206 ns |
+| 1440 | E2a-1…E2a-3, E2a-4d/e, E2a-5 | 17-18 | 0 | 0 | 0 | 28 ns | 202-205 ns |
+| 1500 | E2a-4c, E2a-5 | 18-19 | 0 | 0 | 0 | 26 ns | 195-198 ns |
+| 1440, generator | E2a-0a/b/c | 14-17 | 0 | 0 | 0 | 28-32 ns | 201-206 ns |
 
 **Timing TX trên pad** (ns; min..max trên mọi run từ TX ở rate đó). Bảng đủ, kèm giới hạn ở từng rate, in bằng
 `run_exp2.sh txtiming`:
@@ -257,16 +257,16 @@ là của byte payload cuối.
 | Tham số | 260 | 400 | 600 | 800 | 1000 | 1200 | 1440 | 1500 | TN1 đã phủ ở 1440 |
 |---|---|---|---|---|---|---|---|---|---|
 | TLPX (data, clock) | 55,0 | 55,0 | 55,0 | 55,0 | 55,0 | 55,0 | 55,0 | 55,0 | 50 / 75 |
-| THS-PREPARE | 95,6–103,0 | 87,3 | 86,6–89,9 | 77,3 | 77,9–81,9 | 79,9–83,2 | 76,3–81,3 | 75,9–80,9 | 42,8 / 66 / 89,2 |
-| THS-PREPARE + THS-ZERO | 300,9–305,5 | 274,4 | 264,6–268,0 | 223,2 | 210,6–214,6 | 223,8–227,1 | 212,9–217,9 | 207,1–212,1 | 151,9 / 182 |
+| THS-PREPARE | 95,6-103,0 | 87,3 | 86,6-89,9 | 77,3 | 77,9-81,9 | 79,9-83,2 | 76,3-81,3 | 75,9-80,9 | 42,8 / 66 / 89,2 |
+| THS-PREPARE + THS-ZERO | 300,9-305,5 | 274,4 | 264,6-268,0 | 223,2 | 210,6-214,6 | 223,8-227,1 | 212,9-217,9 | 207,1-212,1 | 151,9 / 182 |
 | THS-TRAIL | 85,9 | 82,9 | 81,9 | 84,2 | 83,3 | 82,7 | 80,1 | 76,9 | 62,8 / 75,3 / 107,8 |
-| THS-EXIT | 322,8–327,4 | 307,7 | 301,8–305,1 | 287,7 | 287,1–291,1 | 285,1–291,8 | 137,6–290,4 | 285,1–291,8 | 100 / 150 |
+| THS-EXIT | 322,8-327,4 | 307,7 | 301,8-305,1 | 287,7 | 287,1-291,1 | 285,1-291,8 | 137,6-290,4 | 285,1-291,8 | 100 / 150 |
 | TCLK-PREPARE | 86,8 | 87,3 | 88,2 | 87,3 | 81,9 | 86,6 | 88,5 | 88,2 | 66 |
 | TCLK-PREPARE + TCLK-ZERO | 379,8 | 375,7 | 347,1 | 363,8 | 343,1 | 377,6 | 375,5 | 358,4 | 360 |
 
 - THS-EXIT phụ thuộc `+GAP_NS`, tức thời gian bench chờ sau `stopstate`. Giá trị 137,6 ns là của E2a-3, khi burst kế
   được request ngay; các run khác chờ 150 ns.
-- TCLK-PRE khoảng 2,05–2,18 µs, vì bench chờ 2 µs sau khi clock chạy rồi mới phát burst đầu.
+- TCLK-PRE khoảng 2,05-2,18 µs, vì bench chờ 2 µs sau khi clock chạy rồi mới phát burst đầu.
 - THS-TRAIL không đổi trong một rate, vì TX không có jitter trail và không có nhiễu.
 
 **Khởi động TX** (`init_done`, `C_INIT` = 99 µs):
@@ -279,11 +279,11 @@ là của byte payload cuối.
 - **Payload:** khi TX thật phát vào, phần digital của RX mình nhận đúng mọi payload như RX AMD, ở mọi rate và mọi
   số lane.
 - **Trailer:**
-  - RX AMD giữ 2–19 byte tuỳ rate. RX mình sau `IBUFDS_DPHY` cắt hết ở mọi rate. Sau `afe_model` cũng cắt hết, trừ
-    260 Mb/s (0–2 byte, dưới giới hạn 4).
-  - Ở 1440 Mb/s, RX AMD giữ 17–18 byte với TX, so với 14–17 byte với generator. Lý do: trail của TX (80,1 ns) dài
+  - RX AMD giữ 2-19 byte tuỳ rate. RX mình sau `IBUFDS_DPHY` cắt hết ở mọi rate. Sau `afe_model` cũng cắt hết, trừ
+    260 Mb/s (0-2 byte, dưới giới hạn 4).
+  - Ở 1440 Mb/s, RX AMD giữ 17-18 byte với TX, so với 14-17 byte với generator. Lý do: trail của TX (80,1 ns) dài
     hơn trail mặc định của generator (75,3 ns) khoảng một byte (5,56 ns).
-- **Độ trễ:** RX mình trễ hơn RX AMD 6,7–7,5 lần, giống TN1, do delay line cần cho việc cắt trailer.
+- **Độ trễ:** RX mình trễ hơn RX AMD 6,7-7,5 lần, giống TN1, do delay line cần cho việc cắt trailer.
 
 Chi tiết từng run nằm trong `fpga/work/exp2/<tên>/` (gitignored): `check.txt`, `tbcheck.txt`, `tb.txt`.
 
@@ -362,7 +362,7 @@ Kết quả ngày 2026-10-22: **EVIDENCE: PASS (10/10 checks)**. Ngày 2026-10-2
 - **Vì vậy E2a-5 lệch `core_clk` của hai RX ±400 ppm,** như E1-5. Với RX, điều cần là pha tương đối giữa LP-11 và
   `core_clk`, nên hai cách tương đương.
 - **Phủ:** mỗi rate 432 lane burst cho mỗi RX và mỗi front end, LP-11 rơi vào mọi pha `core_clk`.
-- **Kết quả:** RX mình 0 trailer từ 400 Mb/s. Ở 260 Mb/s, 0–2 byte sau `afe_model`, dưới giới hạn 4.
+- **Kết quả:** RX mình 0 trailer từ 400 Mb/s. Ở 260 Mb/s, 0-2 byte sau `afe_model`, dưới giới hạn 4.
 - **Giới hạn:** trail của TX không đổi trong một rate, nên E2a-5 phủ mọi pha nhưng không phủ các độ dài trail khác
   nhau. Các độ dài trail (min, mặc định, max, jitter, nhiễu) đã được E1-5 của TN1 phủ.
 
@@ -474,8 +474,8 @@ EXP2_DEBUG=typical fpga/exp2/run_exp2.sh run 1440 4 DBG-x +VCD=1     # build có
 
 - **Build:** mỗi tổ hợp rate × số lane cần một build. Lần đầu mất khoảng 3 phút cho Vivado và 4 phút cho compile.
   Khi chỉ testbench đổi thì compile lại trong vài chục giây.
-- **Thời gian chạy:** một run từ TX mất 85–130 s ở 4 lane và khoảng 55 s ở 1 hoặc 2 lane, vì TX khởi động 380–571 µs
-  mô phỏng. Một run `+SRC=gen` mất 12–15 s.
+- **Thời gian chạy:** một run từ TX mất 85-130 s ở 4 lane và khoảng 55 s ở 1 hoặc 2 lane, vì TX khởi động 380-571 µs
+  mô phỏng. Một run `+SRC=gen` mất 12-15 s.
 - **Chạy song song:** các lệnh trên các build khác nhau chạy song song được; hai lệnh không được dùng chung một build
   cùng lúc. Lần chạy 2026-10-22 dùng 3 tiến trình, mỗi tiến trình giữ riêng các build của mình. Kết quả: 10 build
   (4 build mới) và 60 run xong trong 40 phút; tổng thời gian mô phỏng 5 573 s.

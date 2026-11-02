@@ -1,4 +1,4 @@
-# TN2 — Báo cáo thí nghiệm: TX của AMD phát vào `ftel_dphy_rx` và vào RX của AMD (mô phỏng XSIM)
+# TN2 - Báo cáo thí nghiệm: TX của AMD phát vào `ftel_dphy_rx` và vào RX của AMD (mô phỏng XSIM)
 
 > Báo cáo kết quả TN2 cho team FPGA. Cách dựng bench và cách chạy lại nằm ở
 > [`TN2_DESCRIPTION.md`](TN2_DESCRIPTION.md).
@@ -17,7 +17,7 @@
     mô hình AFE, cũng đạt 29/29. Hai phép thử âm hỏng đúng chỗ đã cài.
   - Không tìm thấy lỗi nào ở `ftel_dphy_rx`.
   - Timing của TX đo trên pad nằm trong giới hạn D-PHY v1.1 ở cả 8 rate. Hai giá trị vượt dải TN1 đã thử: TCLK-PREPARE
-    82–89 ns, và THS-PREPARE ở 260 Mb/s 96–103 ns. RX mình vẫn đạt với cả hai.
+    82-89 ns, và THS-PREPARE ở 260 Mb/s 96-103 ns. RX mình vẫn đạt với cả hai.
   - Với `core_clk` của hai RX lệch ±400 ppm so với TX, RX mình nhận đủ 432/432 lane burst ở mỗi rate, trailer trong
     giới hạn của HAS.
 - **TN2b, frame RAW10 qua CSI-2 TX Subsystem vào hai đường nhận CSI-2:**
@@ -60,7 +60,7 @@ TN2b
 - Ở cả hai bench, RX mình đứng sau đúng buffer `IBUFDS_DPHY` mà IP AMD dùng, và bench kiểm ở mọi run rằng đầu ra LP
   của hai bộ buffer trùng nhau.
 
-Chi tiết bench, luật so và danh sách kịch bản nằm ở [`TN2_DESCRIPTION.md`](TN2_DESCRIPTION.md) §4–§7.
+Chi tiết bench, luật so và danh sách kịch bản nằm ở [`TN2_DESCRIPTION.md`](TN2_DESCRIPTION.md) §4-§7.
 
 ## 3. Kết quả TN2a
 
@@ -82,15 +82,15 @@ byte payload cuối, từ lúc nó rời pad tới lúc ra PPI.
 
 | Rate (Mb/s) | Kịch bản | Trailer: AMD | Trailer: RX mình sau `IBUFDS_DPHY` | Trailer: RX mình sau `afe_model` | Giới hạn của RX mình | Độ trễ: AMD | Độ trễ: RX mình |
 |---|---|---|---|---|---|---|---|
-| 260 | E2a-4a, E2a-5 | 2 | 0 | 0–2 (20/40 ở E2a-4a; 216/432 ở E2a-5) | 4 | 167 ns | 1117 ns |
+| 260 | E2a-4a, E2a-5 | 2 | 0 | 0-2 (20/40 ở E2a-4a; 216/432 ở E2a-5) | 4 | 167 ns | 1117 ns |
 | 400 | E2a-5 | 4 | 0 | 0 | 6 | 99 ns | 741 ns |
 | 600 | E2a-5 | 7 | 0 | 0 | 0 | 66 ns | 484 ns |
-| 800 | E2a-4b, E2a-5 | 9–10 | 0 | 0 | 0 | 50 ns | 363–366 ns |
-| 1000 | E2a-5 | 12–13 | 0 | 0 | 0 | 40 ns | 295 ns |
+| 800 | E2a-4b, E2a-5 | 9-10 | 0 | 0 | 0 | 50 ns | 363-366 ns |
+| 1000 | E2a-5 | 12-13 | 0 | 0 | 0 | 40 ns | 295 ns |
 | 1200 | E2a-5 | 15 | 0 | 0 | 0 | 33 ns | 244 ns |
-| 1440 | E2a-1 tới E2a-3, E2a-4d, E2a-4e, E2a-5 | 17–18 | 0 | 0 | 0 | 28 ns | 202–205 ns |
-| 1500 | E2a-4c, E2a-5 | 18–19 | 0 | 0 | 0 | 26 ns | 195–198 ns |
-| 1440, line generator | E2a-0a, E2a-0b, E2a-0c | 14–17 | 0 | 0 | 0 | 28–32 ns | 201–206 ns |
+| 1440 | E2a-1 tới E2a-3, E2a-4d, E2a-4e, E2a-5 | 17-18 | 0 | 0 | 0 | 28 ns | 202-205 ns |
+| 1500 | E2a-4c, E2a-5 | 18-19 | 0 | 0 | 0 | 26 ns | 195-198 ns |
+| 1440, line generator | E2a-0a, E2a-0b, E2a-0c | 14-17 | 0 | 0 | 0 | 28-32 ns | 201-206 ns |
 
 ### 3.3 Timing của TX trên pad
 
@@ -100,19 +100,19 @@ Min..max trên mọi run từ TX ở rate đó, tính bằng ns. Bảng đủ, k
 | Tham số | 260 | 400 | 600 | 800 | 1000 | 1200 | 1440 | 1500 | TN1 đã thử ở 1440 |
 |---|---|---|---|---|---|---|---|---|---|
 | TLPX (data, clock) | 55,0 | 55,0 | 55,0 | 55,0 | 55,0 | 55,0 | 55,0 | 55,0 | 50 / 75 |
-| THS-PREPARE | 95,6–103,0 | 87,3 | 86,6–89,9 | 77,3 | 77,9–81,9 | 79,9–83,2 | 76,3–81,3 | 75,9–80,9 | 42,8 / 66 / 89,2 |
-| THS-PREPARE + THS-ZERO | 300,9–305,5 | 274,4 | 264,6–268,0 | 223,2 | 210,6–214,6 | 223,8–227,1 | 212,9–217,9 | 207,1–212,1 | 151,9 / 182 |
+| THS-PREPARE | 95,6-103,0 | 87,3 | 86,6-89,9 | 77,3 | 77,9-81,9 | 79,9-83,2 | 76,3-81,3 | 75,9-80,9 | 42,8 / 66 / 89,2 |
+| THS-PREPARE + THS-ZERO | 300,9-305,5 | 274,4 | 264,6-268,0 | 223,2 | 210,6-214,6 | 223,8-227,1 | 212,9-217,9 | 207,1-212,1 | 151,9 / 182 |
 | THS-TRAIL | 85,9 | 82,9 | 81,9 | 84,2 | 83,3 | 82,7 | 80,1 | 76,9 | 62,8 / 75,3 / 107,8 |
-| THS-EXIT | 322,8–327,4 | 307,7 | 301,8–305,1 | 287,7 | 287,1–291,1 | 285,1–291,8 | 137,6–290,4 | 285,1–291,8 | 100 / 150 |
+| THS-EXIT | 322,8-327,4 | 307,7 | 301,8-305,1 | 287,7 | 287,1-291,1 | 285,1-291,8 | 137,6-290,4 | 285,1-291,8 | 100 / 150 |
 | TCLK-PREPARE | 86,8 | 87,3 | 88,2 | 87,3 | 81,9 | 86,6 | 88,5 | 88,2 | 66 |
 | TCLK-PREPARE + TCLK-ZERO | 379,8 | 375,7 | 347,1 | 363,8 | 343,1 | 377,6 | 375,5 | 358,4 | 360 |
 
 - THS-EXIT phụ thuộc thời gian bench chờ sau `stopstate` (`+GAP_NS`). Giá trị 137,6 ns là của E2a-3, khi burst kế được
   request ngay; các run khác chờ 150 ns.
-- TCLK-PRE khoảng 2,05–2,18 µs, vì bench chờ 2 µs sau khi clock chạy rồi mới phát burst đầu.
+- TCLK-PRE khoảng 2,05-2,18 µs, vì bench chờ 2 µs sau khi clock chạy rồi mới phát burst đầu.
 - THS-TRAIL không đổi trong một rate, vì TX không có jitter trail và không có nhiễu.
-- Hai chỗ TN1 chưa thử nay đã được TX thật phủ, và RX mình đạt: TCLK-PREPARE 81,9–88,5 ns (TN1 chỉ thử 66 ns), và
-  THS-PREPARE ở 260 Mb/s 95,6–103,0 ns, gần mức max 108,1 ns (TN1 thử giá trị giữa khoảng ở rate này).
+- Hai chỗ TN1 chưa thử nay đã được TX thật phủ, và RX mình đạt: TCLK-PREPARE 81,9-88,5 ns (TN1 chỉ thử 66 ns), và
+  THS-PREPARE ở 260 Mb/s 95,6-103,0 ns, gần mức max 108,1 ns (TN1 thử giá trị giữa khoảng ở rate này).
 
 **Khởi động TX** (`C_INIT` = 99 µs):
 
@@ -127,7 +127,7 @@ Min..max trên mọi run từ TX ở rate đó, tính bằng ns. Bảng đủ, k
   LP-11 và `core_clk`, nên hai cách tương đương.
 - Mỗi rate có 432 lane burst cho mỗi RX và mỗi front end, với LP-11 rơi vào mọi pha của `core_clk`.
 - **Kết quả:** ở cả 8 rate, RX mình nhận đủ 432/432 lane burst ở cả hai front end. Trailer bằng 0 từ 400 Mb/s; ở
-  260 Mb/s là 0–2 byte sau `afe_model`, dưới giới hạn 4.
+  260 Mb/s là 0-2 byte sau `afe_model`, dưới giới hạn 4.
 - **Giới hạn:** trail của TX không đổi trong một rate, nên E2a-5 phủ mọi pha nhưng không phủ các độ dài trail khác
   nhau. Các độ dài trail (min, mặc định, max, jitter, nhiễu) đã được E1-5 của TN1 phủ.
 
@@ -145,11 +145,11 @@ Riêng NEG-front không có số đo của RX mình, vì PPI của RX mình ở 
 - **Payload:** khi TX thật phát vào, phần digital của RX mình nhận đúng mọi payload như RX AMD, ở mọi rate và mọi số
   lane.
 - **Trailer:**
-  - RX AMD giữ 2–19 byte tuỳ rate. RX mình sau `IBUFDS_DPHY` cắt hết ở mọi rate. Sau `afe_model` cũng cắt hết, trừ
-    260 Mb/s (0–2 byte, dưới giới hạn 4).
-  - Ở 1440 Mb/s, RX AMD giữ 17–18 byte với TX, so với 14–17 byte với line generator. Lý do: trail của TX (80,1 ns) dài
+  - RX AMD giữ 2-19 byte tuỳ rate. RX mình sau `IBUFDS_DPHY` cắt hết ở mọi rate. Sau `afe_model` cũng cắt hết, trừ
+    260 Mb/s (0-2 byte, dưới giới hạn 4).
+  - Ở 1440 Mb/s, RX AMD giữ 17-18 byte với TX, so với 14-17 byte với line generator. Lý do: trail của TX (80,1 ns) dài
     hơn trail mặc định của generator (75,3 ns) khoảng một byte time (5,56 ns).
-- **Độ trễ:** RX mình trễ hơn RX AMD 6,7–7,5 lần, như TN1, do delay line 32 byte cần cho việc cắt trailer.
+- **Độ trễ:** RX mình trễ hơn RX AMD 6,7-7,5 lần, như TN1, do delay line 32 byte cần cho việc cắt trailer.
 
 ## 4. Kết quả TN2b
 
@@ -167,16 +167,16 @@ giá trị đúng như bảng ở mọi lane burst.
 |---|---|---|---|---|---|
 | 260 | E2b-4a | 7 | 0 | 0 | 1 |
 | 800 | E2b-4b | 12 | 0 | 0 | 1 |
-| 1440 | E2b-1, E2b-6 | 19–20 | 0 | 0 | 1 |
-| 1500 | E2b-4c | 19–20 | 0 | 0 | 1 |
+| 1440 | E2b-1, E2b-6 | 19-20 | 0 | 0 | 1 |
+| 1500 | E2b-4c | 19-20 | 0 | 0 | 1 |
 
 **Chẩn đoán** ở 1440 Mb/s: testbench sửa đầu burst của PPI vào R-F theo từng cách.
 
 | Run | Thay đổi trên PPI vào R-F | `rxactivehs` → `rxsynchs` | R-F |
 |---|---|---|---|
-| `DBG-E2b-1-xfill` | bit X của `rxdatahs` (khi `rxvalidhs` = 0) thành 0 | 19–20 | 0 line |
+| `DBG-E2b-1-xfill` | bit X của `rxdatahs` (khi `rxvalidhs` = 0) thành 0 | 19-20 | 0 line |
 | `DBG-E2b-1-amd1` | như D-PHY AMD: `rxsynchs` trước byte đầu, `rxactivehs` từ `rxsynchs` | 0 | PASS |
-| `DBG-E2b-1-amd2` | chỉ dời `rxsynchs` lên trước byte đầu; `rxactivehs` vẫn sớm | 19–20 | 0 line |
+| `DBG-E2b-1-amd2` | chỉ dời `rxsynchs` lên trước byte đầu; `rxactivehs` vẫn sớm | 19-20 | 0 line |
 | `DBG-E2b-1-amd3` | chỉ giữ `rxactivehs` tới `rxsynchs`; `rxsynchs` vẫn cùng byte đầu | 0 | PASS |
 
 **Kết luận:** controller CSI-2 của AMD (RX Subsystem không PHY) cần `rxactivehs` không lên trước `rxsynchs`. Vị trí của
@@ -269,16 +269,16 @@ chu kỳ của `rxsynchs`. Đó là PPI của `ftel_dphy_rx` sau một lỗi SoT
 
 | | Kết quả |
 |---|---|
-| PPI vào R-F | Lane 0 có 52 burst, lane 1–3 có 53. `errsotsynchs` lên một lần, trong packet 5 của các lane khác, lúc `rxactivehs` của lane 0 bằng 0 |
+| PPI vào R-F | Lane 0 có 52 burst, lane 1-3 có 53. `errsotsynchs` lên một lần, trong packet 5 của các lane khác, lúc `rxactivehs` của lane 0 bằng 0 |
 | R-X | 48/48 line đúng, ISR sạch |
 | R-F, frame 1 và 2 | Trùng golden từng pixel, đúng word count ở mọi line: **controller phục hồi**, không treo |
-| R-F, frame 0 | 15 line thay vì 16: 14 line đúng (line 0–3 và 6–15); không có line 4 và 5; thay vào đó là 1 line lẫn. Trong line lẫn, byte của lane 0 là của line 5. Ở lane 1–3, 17 byte đầu là của line 4, phần sau là byte 3 tới 185 của line 5 |
+| R-F, frame 0 | 15 line thay vì 16: 14 line đúng (line 0-3 và 6-15); không có line 4 và 5; thay vào đó là 1 line lẫn. Trong line lẫn, byte của lane 0 là của line 5. Ở lane 1-3, 17 byte đầu là của line 4, phần sau là byte 3 tới 185 của line 5 |
 | ISR của R-F | Frame received, frame level của VC0 (bit 0), CRC (bit 9). Không có bit SoT sync (bit 12), dù PPI có `errsotsynchs`. Packet count: R-F 47, R-X 48 |
 
 - **Cái giá của một lỗi sync ở một lane là hai line,** và một trong hai line là line sai vẫn được đưa ra. Cờ CRC chỉ có
   ở ISR; `video_out` không đánh dấu line đó (§4.7).
 - **Cách đọc, chưa kiểm:** FIFO mỗi lane của controller sâu khoảng 18 phần tử. Lane 0 thiếu một burst, nên FIFO của lane
-  1–3 đầy, đuôi packet 5 và đầu packet 6 bị mất, và hai packet bị ghép thành một line. Controller căn lại ở packet 7.
+  1-3 đầy, đuôi packet 5 và đầu packet 6 bị mất, và hai packet bị ghép thành một line. Controller căn lại ở packet 7.
 - **Chưa biết** D-PHY của AMD xử lý lỗi sync ra sao. Bench không cài được lỗi sync vào line của TX AMD.
 - Trong burst có lỗi sync, khối chỉnh giữ `rxactivehs` ở 0. Cách khác, nâng `rxactivehs` cùng `errsotsynchs`, chưa
   được thử.
@@ -292,14 +292,14 @@ chu kỳ của `rxsynchs`. Đó là PPI của `ftel_dphy_rx` sau một lỗi SoT
 | Run | SH_E2b-4a, SH_M_E2b-4a | SH_E2b-4b, SH_M_E2b-4b | SH_E2b-1, SH_E2b-2a, SH_E2b-2b và `M_` của chúng | SH_E2b-4c, SH_M_E2b-4c |
 | `init_done` của TX (µs) | 392,758 | 570,463 | 383,263 | 380,538 |
 | Controller TX xin HS clock (µs) | 394,585 | 571,880 | 384,593 | 381,861 |
-| Trailer mỗi packet, PPI của R-X (byte, tổng 4 lane) | 8 | 40 | 72 | 72–74 |
-| Trailer mỗi packet, PPI vào R-F (byte, tổng 4 lane) | 0 sau `IBUFDS_DPHY`, 0–8 sau `afe_model` | 0 | 0 | 0 |
-| Burst của một line trên PPI của TX (ns) | 6708 | 2300–2470 | 1400–1572 | 1349–1520 |
+| Trailer mỗi packet, PPI của R-X (byte, tổng 4 lane) | 8 | 40 | 72 | 72-74 |
+| Trailer mỗi packet, PPI vào R-F (byte, tổng 4 lane) | 0 sau `IBUFDS_DPHY`, 0-8 sau `afe_model` | 0 | 0 | 0 |
+| Burst của một line trên PPI của TX (ns) | 6708 | 2300-2470 | 1400-1572 | 1349-1520 |
 | Độ trễ của SOF đầu, TX → `video_out` của R-X / R-F (ns) | 2926 / 3874 | 1822 / 2138 | 1654 / 1834 | 1638 / 1810 |
 | R-F trễ hơn R-X (ns) | 948 | 316 | 180 | 172 |
 
 - Controller của AMD bỏ được byte trailer của cả hai PHY.
-- R-F trễ hơn R-X khoảng 31–32 byte time ở mọi rate. Con số này bằng độ trễ thêm TN2a đo ở PPI, tức đến từ delay line
+- R-F trễ hơn R-X khoảng 31-32 byte time ở mọi rate. Con số này bằng độ trễ thêm TN2a đo ở PPI, tức đến từ delay line
   cắt trailer của `ftel_dphy_rx`, không phải từ controller.
 - Độ trễ của các line sau tăng dần, tới 26 µs ở 1440 Mb/s, vì TX nhận line ở AXI4-Stream nhanh hơn tốc độ dây và giữ
   chúng trong line buffer. Hai RX tăng như nhau.

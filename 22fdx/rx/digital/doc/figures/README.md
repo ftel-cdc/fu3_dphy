@@ -7,8 +7,9 @@ SVGs are committed, and `spec.md` embeds the SVG. PNG renders are local build pr
 
 ## Rules
 
-The ten conventions of `reference_diagram_conventions`, the figure rules of `ftel_intctl`, and
-four additions for this IP. `check_figures.py` enforces the rules marked (checked).
+The list below is the figure rule set of this IP. ftel_doc_kit, the shared document kit of the FTEL
+IPs, took its rules B1 to B17 (block diagrams) and W1 to W8 (timing diagrams) from it. `check_figures.py`
+enforces the rules marked (checked); the names it checks are `figure_names` of `../doc_kit.yaml`.
 
 1. Main flow left to right: AFE side on the left, PPI side on the right, shared blocks at the bottom.
 2. Every arrow carries a signal name, group name or bus width.
@@ -90,7 +91,8 @@ python3 check_figures.py                         # rules above; --selftest-negat
 ```
 
 - The renderer is drawio 31.5.3, pinned by `drawio_lock.json` (sha256 of `viewer-static.min.js` and
-  `stencils.min.js`). The files are taken from `$FTEL_DPHY_RX_DRAWIO_DIR`, from `.drawio_cache/`
+  `stencils.min.js`). The files are taken from `$FTEL_DRAWIO_DIR` (or the older
+  `$FTEL_DPHY_RX_DRAWIO_DIR`), from `.drawio_cache/`
   (filled by `render_drawio.py --fetch`, needs network) or from the VSCode extension
   `hediet.vscode-drawio`, and only when their sha256 matches the lock.
 - A render is offline: Chrome gets a dead proxy, and any stencil that fails to load stops the render.
@@ -101,7 +103,11 @@ python3 check_figures.py                         # rules above; --selftest-negat
 - `selftest/build_glyph_sheet.py` rebuilds the glyph sheet from the FTEL library
   (`~/Documents/FX1_ips/Common_Info/FTEL_DRAWIO_LIB_V1.drawio`, or `$FTEL_DRAWIO_LIB`).
 - `render_wave.py ftel_dphy_rx_wave_*.json5` renders the timing diagrams with `wavedrom-cli@3.2.0`,
-  offline: it takes a wavedrom-cli of that version from `$FTEL_DPHY_RX_WAVEDROM_CLI` or from the npx
+  offline: it takes a wavedrom-cli of that version from `$FTEL_WAVEDROM_CLI` (or the older
+  `$FTEL_DPHY_RX_WAVEDROM_CLI`) or from the npx
   cache, and falls back to `npx` (network, first install only). The SVG stamp records the sha256 of
   the `.json5` and the wavedrom-cli and wavedrom versions.
 - `check_figures.py` checks the `.json5` files as well (rules marked checked, and F-COLS for rule 17).
+- The scripts of this folder, `../md2docx.py` and `../check_spec.py` are vendored from ftel_doc_kit:
+  each carries a stamp with the kit version, and `../doc_kit.lock` lists them. Change them in the kit,
+  then run `kit.py vendor` there; `kit.py status <this doc folder>` tells whether they are current.

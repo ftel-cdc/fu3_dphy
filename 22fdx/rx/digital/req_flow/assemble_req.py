@@ -139,11 +139,11 @@ def load_chunks(chunks_dir):
                 sys.exit(f"{f}: '{key}' must be a list")
         for n, r in enumerate(ch.get("requirements", [])):
             if "req_id" in r:
-                sys.exit(f"{f}: requirement {n} carries req_id — ids are assigned by this script")
+                sys.exit(f"{f}: requirement {n} carries req_id - ids are assigned by this script")
             reqs.append((r.get("source_line", 0), os.path.basename(f), n, r))
         for n, x in enumerate(ch.get("findings", [])):
             if "finding_id" in x:
-                sys.exit(f"{f}: finding {n} carries finding_id — ids are assigned by this script")
+                sys.exit(f"{f}: finding {n} carries finding_id - ids are assigned by this script")
             finds.append((x.get("source_line", 0), os.path.basename(f), n, x))
     reqs.sort(key=lambda t: (t[0], t[1], t[2]))
     finds.sort(key=lambda t: (t[0], t[1], t[2]))

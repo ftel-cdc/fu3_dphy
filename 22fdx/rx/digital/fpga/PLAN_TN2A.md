@@ -1,4 +1,4 @@
-# Plan: TN2a — TX D-PHY thật của AMD phát vào hai RX, mô phỏng XSIM (2026-10-22)
+# Plan: TN2a - TX D-PHY thật của AMD phát vào hai RX, mô phỏng XSIM (2026-10-22)
 
 > Repo `fu3_dphy`, branch `dev`, sau commit `5fa890b`; thư mục `22fdx/rx/digital/fpga/`.
 > Ký hiệu: ✅ đã kiểm hôm nay (đọc file hoặc dữ liệu đã lưu) · ⚠️ ước lượng hoặc giả định · 🔍 kiểm khi làm.
@@ -29,7 +29,7 @@
 **Từ IP Vivado 2025.2** (`mipi_dphy_v4_3`, xgui và component.xml):
 - Continuous clock không phải tham số IP: phía PPI giữ `cl_txrequesths` = 1, như example của AMD làm.
 - MASTER trên xcvp1902 chạy 260 tới 2538/2594 Mb/s, tuỳ speed grade.
-- `C_INIT` 99 µs–1 ms (MASTER mặc định 1 ms); `C_LPX_PERIOD` 50–100 ns.
+- `C_INIT` 99 µs-1 ms (MASTER mặc định 1 ms); `C_LPX_PERIOD` 50-100 ns.
 - Các timing HS (PREPARE, ZERO, TRAIL, EXIT, CLK-*) do IP tự tính, không chỉnh được.
 - `C_USE_LANE0_TXREADYHS` mặc định true, nghĩa là "dùng `txreadyhs` của lane 0 cho mọi lane".
 - `C_EXAMPLE_SIMULATION` mặc định true (rút ngắn timer khi mô phỏng). `xrx` của TN1 cũng dùng true.
@@ -50,19 +50,19 @@ output nằm trong thư mục work của nhóm, git bỏ qua; `f2.vcd` được 
   | Tham số | Đo | Giới hạn | TN1 đã phủ |
   |---|---|---|---|
   | TLPX | 55,0 ns | ≥ 50 | 50 / 75 |
-  | THS-PREPARE | 76,9–79,6 ns | 42,8–89,2 | 42,8 / 66 / 89,2 |
+  | THS-PREPARE | 76,9-79,6 ns | 42,8-89,2 | 42,8 / 66 / 89,2 |
   | PREPARE + ZERO | khoảng 214 ns | ≥ 151,9 | 151,9 / 182 |
-  | THS-TRAIL | 80,2 ns | 62,8–113,3 (TEOT) | 62,8 / 75,3 / 107,8 |
-  | TCLK-PREPARE | 88,5 ns | 38–95 | 66 |
+  | THS-TRAIL | 80,2 ns | 62,8-113,3 (TEOT) | 62,8 / 75,3 / 107,8 |
+  | TCLK-PREPARE | 88,5 ns | 38-95 | 66 |
   | TCLK-PREPARE + ZERO | 375 ns | ≥ 300 | 360 |
 
 - **Burst:** TX nhận burst 1 byte.
-  - RX AMD giữ 18 byte trailer mỗi burst, khớp với 16–18 byte ở TN1.
+  - RX AMD giữ 18 byte trailer mỗi burst, khớp với 16-18 byte ở TN1.
   - `txreadyhs` lên khoảng 255 ns sau LP-01, ngay trước sync.
 - **Khởi động:** byte clock của TX chạy từ 3,3 µs, nhưng clock lane chỉ rời LP-11 ở khoảng 384 µs (example
   đặt `C_INIT` 200 µs) ⚠️. Mỗi run TN2a vì vậy dài hơn run TN1 nhiều.
-- **Model cấu hình** (`config/validate_config.py`): R1 = 80–1500 Mb/s. R2 (1792 Mb/s) không có trong RTL này,
-  nên TN2a giữ 260–1500 Mb/s như TN1.
+- **Model cấu hình** (`config/validate_config.py`): R1 = 80-1500 Mb/s. R2 (1792 Mb/s) không có trong RTL này,
+  nên TN2a giữ 260-1500 Mb/s như TN1.
 
 ## 3. Thiết kế bench (`fpga/exp2/`)
 
@@ -213,7 +213,7 @@ ppi_tx_drv ─PPI─► xtx: mipi_dphy 4.3 MASTER ─┐               dphy_line
 | ID | Rate, lane | Tham số | Mục đích |
 |---|---|---|---|
 | E2a-0a/b/c | 1440, 4 | `+SRC=gen`: độ dài của E1-1; góc của E1-3c (`+TRAIL=min +EXIT=min +LPX=min`); `+UNEVEN=1` | Chứng minh `pad_truth` bằng generator đã kiểm ở TN1. Hai RX phải PASS như TN1 |
-| E2a-1 | 1440, 4 | burst 1–1024 byte, payload counter | Cơ bản. RX AMD phải PASS trước (chứng minh hookup TX và truth) |
+| E2a-1 | 1440, 4 | burst 1-1024 byte, payload counter | Cơ bản. RX AMD phải PASS trước (chứng minh hookup TX và truth) |
 | E2a-2a | 1440, 4 | `+PATTERN=prbs9 +REPEAT=2` | Như E1-2a |
 | E2a-2b | 1440, 4 | `+PATTERN=synclike` | Như E1-2b |
 | E2a-2c | 1440, 4 | `+UNEVEN=1` | Lane kết thúc lệch nhau 🔍 (`C_USE_LANE0_TXREADYHS`) |
@@ -247,18 +247,18 @@ Cuối cùng chạy `run_exp2.sh recheck`: kiểm lại mọi output với `csi2
 
 | Bước | Việc | Cổng: nếu sai thì dừng và báo bạn | Ước lượng |
 |---|---|---|---|
-| 1 | Lưu plan thành `fpga/PLAN_TN2A.md`; thêm ghi chú ngày vào đầu `PLAN_TN1_TN3.md` (TN2 làm ở repo này; đường dẫn cũ `hw/rtl/ip/ftel_dphy_rx/x` ứng với `22fdx/rx/digital/x`) | — | 0,1 ngày |
+| 1 | Lưu plan thành `fpga/PLAN_TN2A.md`; thêm ghi chú ngày vào đầu `PLAN_TN1_TN3.md` (TN2 làm ở repo này; đường dẫn cũ `hw/rtl/ip/ftel_dphy_rx/x` ứng với `22fdx/rx/digital/x`) | - | 0,1 ngày |
 | 2 = S0 | `exp2.tcl`, `ppi_tx_drv.sv`, `tb_exp2a.sv` bản đầu (chưa có `pad_truth`). Build 1440×4 (`EXP2_DEBUG=typical`). Chạy thử `+LENS=1,2,3 +TXLOG=1`, lần với `+TX_CORE_HALF=2.5` và lần với 2.50025 | (a) clock lane vào HS một lần và chạy liên tục; (b) burst 1 byte được; (c) pad chỉ 0/1; (d) TX khởi động trước khi hết timeout, ghi lại thời gian; (e) PLL của TX chạy được với clock lệch ppm; (f) front check 0 khác; (g) đo tốc độ mô phỏng | 0,5 ngày |
 | 3 = S1 | `pad_truth.sv`; E2a-0a/b/c; NEG-tx | Truth trùng 100 % (t0/t1 lệch ≤ 1 ps); NEG-tx báo đúng 1 lỗi | 0,5 ngày |
 | 4 = S2 | `run_exp2.sh` đủ lệnh; E2a-1 rồi E2a-2…4; thêm 5 build (260, 800, 1500, 1440×2, 1440×1) | RX AMD PASS E2a-1. Nếu chỉ RX mình hỏng: dừng, báo phát hiện RTL kèm bằng chứng | 0,5 ngày |
 | 5 = S3 | 4 build còn lại (400, 600, 1000, 1200); E2a-5; bộ `M_*`; NEG-front; `tn2a_evidence.py`; bảng `txtiming` | Evidence PASS mọi check | 0,5 ngày |
-| 6 = S4 | `exp2/README.md` (ghi chép nội bộ: sơ đồ, khối, kết quả, kiểm chứng, giới hạn); trạng thái và lệnh trong `fpga/README.md`; mục Kết quả ở cuối `PLAN_TN2A.md` | — | 0,25 ngày |
+| 6 = S4 | `exp2/README.md` (ghi chép nội bộ: sơ đồ, khối, kết quả, kiểm chứng, giới hạn); trạng thái và lệnh trong `fpga/README.md`; mục Kết quả ở cuối `PLAN_TN2A.md` | - | 0,25 ngày |
 
-- **Tổng:** khoảng 2–2,5 ngày ⚠️. Plan cũ ước 1–2 ngày; phần tăng thêm là bộ giải mã pad và phần kiểm chứng.
+- **Tổng:** khoảng 2-2,5 ngày ⚠️. Plan cũ ước 1-2 ngày; phần tăng thêm là bộ giải mã pad và phần kiểm chứng.
 - **Thời gian máy:**
-  - mỗi build khoảng 6–8 phút ⚠️;
-  - mỗi run khoảng 1–1,5 phút, vì TX khởi động khoảng 0,4 ms mô phỏng; S0 đo lại;
-  - toàn bộ khoảng 1,5 giờ máy, chạy 2–3 luồng song song.
+  - mỗi build khoảng 6-8 phút ⚠️;
+  - mỗi run khoảng 1-1,5 phút, vì TX khởi động khoảng 0,4 ms mô phỏng; S0 đo lại;
+  - toàn bộ khoảng 1,5 giờ máy, chạy 2-3 luồng song song.
 - **Bước dài:** mỗi bước dài tôi báo trước thời gian rồi chạy nền. Trước mỗi pha song song tôi kiểm RAM trống
   (máy dùng chung); dưới 15 GB thì chỉ chạy 2 luồng.
 
@@ -335,11 +335,11 @@ Cuối cùng chạy `run_exp2.sh recheck`: kiểm lại mọi output với `csi2
    - Vì vậy E2a-5 dùng phương án của rủi ro 4: `core_clk` của hai RX lệch ±400 ppm (`+CORE_HALF=2.501` và `2.499`),
      giống E1-5, còn TX chạy đúng 200 MHz. `+TX_CORE_HALF` vẫn có trong bench, mặc định 2.5.
 2. **TX khởi động lâu, và lâu khác nhau theo rate:**
-   - `init_done` của TX lên sau 380–571 µs, dù `C_INIT` = 99 µs: 395,2 µs ở 260 Mb/s, 570,5 µs ở 800, 383,3 µs ở
+   - `init_done` của TX lên sau 380-571 µs, dù `C_INIT` = 99 µs: 395,2 µs ở 260 Mb/s, 570,5 µs ở 800, 383,3 µs ở
      1440, 380,5 µs ở 1500 (bảng đủ 8 rate ở §14).
    - Clock lane được request 1 µs sau `init_done` (ở 1440 Mb/s là 384,26 µs) và chạy sau đó khoảng 0,5 µs.
-   - Mỗi run vì vậy dài 400–600 µs mô phỏng, tức 85–100 s máy. Riêng các run `+SRC=gen` không chờ TX, nên chỉ mất
-     12–13 s.
+   - Mỗi run vì vậy dài 400-600 µs mô phỏng, tức 85-100 s máy. Riêng các run `+SRC=gen` không chờ TX, nên chỉ mất
+     12-13 s.
 3. **Front check bị race ở t = 2 ps** (E2a-4d 1440×2 và E2a-4e 1440×1, 1 khác trên khoảng 31 000 lần so).
    - Diễn biến:
      - pad của TX rời X lên LP-11 ở 1 ps;
@@ -378,19 +378,19 @@ Cuối cùng chạy `run_exp2.sh recheck`: kiểm lại mọi output với `csi2
 ## 14. Kết quả (2026-10-22)
 
 **60/60 run ra đúng kỳ vọng. `tn2a_evidence.py evidence`: PASS (10/10 checks).** Chi tiết và bảng số nằm ở
-[`exp2/README.md`](exp2/README.md) §6–§7.
+[`exp2/README.md`](exp2/README.md) §6-§7.
 
 - **Hai RX:**
   - 29/29 kịch bản PASS cho cả hai RX, ở 8 rate từ 260 tới 1500 Mb/s, với 1, 2 và 4 lane;
   - bộ phụ `M_*` (RX mình sau `afe_model`): 29/29 PASS;
   - không có phát hiện RTL. RTL `logical/` và `config/` không đổi.
 - **E2a-5** (`core_clk` của hai RX lệch ±400 ppm): RX mình nhận 432/432 lane burst ở mỗi rate, với cả hai front end.
-  Trailer bằng 0 từ 400 Mb/s; ở 260 Mb/s sau `afe_model` là 0–2 byte, trong giới hạn 4.
-- **Trailer của RX AMD:** 2–19 byte tuỳ rate. RX mình sau `IBUFDS_DPHY`: 0 ở mọi rate.
+  Trailer bằng 0 từ 400 Mb/s; ở 260 Mb/s sau `afe_model` là 0-2 byte, trong giới hạn 4.
+- **Trailer của RX AMD:** 2-19 byte tuỳ rate. RX mình sau `IBUFDS_DPHY`: 0 ở mọi rate.
 - **Timing TX:** mọi tham số nằm trong giới hạn D-PHY v1.1 ở cả 8 rate (`run_exp2.sh txtiming`: 0 giá trị
   `OUTSIDE`). So với TN1, có hai điểm mới đã được phủ:
-  - TCLK-PREPARE 81,9–88,5 ns (TN1 chỉ thử 66 ns);
-  - THS-PREPARE 95,6–103,0 ns ở 260 Mb/s (giới hạn tới 108,1 ns).
+  - TCLK-PREPARE 81,9-88,5 ns (TN1 chỉ thử 66 ns);
+  - THS-PREPARE 95,6-103,0 ns ở 260 Mb/s (giới hạn tới 108,1 ns).
 - **Khởi động TX** (`init_done`, µs):
 
   | 260 | 400 | 600 | 800 | 1000 | 1200 | 1440 | 1500 |
@@ -418,6 +418,6 @@ Cuối cùng chạy `run_exp2.sh recheck`: kiểm lại mọi output với `csi2
 - Thêm hai run debug (`DBG-E2a-4d`, `DBG-NEG-front`) trên hai build debug typical (1440×4 và 1440×2), để đọc VCD. Các
   run này không thuộc tập kiểm.
 - **Thời gian:**
-  - Plan ước 2–2,5 ngày công; thực tế từ plan tới kết quả làm trong ngày 22/10.
+  - Plan ước 2-2,5 ngày công; thực tế từ plan tới kết quả làm trong ngày 22/10.
   - Build mới mất khoảng 7 phút (3 phút Vivado, 4 phút compile); compile lại chỉ mất vài chục giây.
-  - Run từ TX mất 85–130 s ở 4 lane, khoảng 55 s ở 1–2 lane, đúng như ước lượng.
+  - Run từ TX mất 85-130 s ở 4 lane, khoảng 55 s ở 1-2 lane, đúng như ước lượng.

@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Vendored from ftel_doc_kit 1.0.1 (skills/ftel-block-diagram/scripts/render_drawio.py); edit the kit, then run kit.py vendor.
 #-------------------------------------------------------------------------------
 # Copyright (c) 2026 FPT Telecom. All rights reserved.
 #
@@ -15,7 +16,10 @@
 # Evolution History:
 # ------------------------------------------------------------------------------
 # Date         Version    Author        Description
-# 2026-09-29   0.1        Ho Khanh Linh Initial creation.
+# 2026-09-29   0.1        Ho Khanh Linh Initial creation (ftel_dphy_rx).
+# 2026-11-02   1.0        Ho Khanh Linh Moved into ftel_doc_kit: environment variable
+#                                       FTEL_DRAWIO_DIR (FTEL_DPHY_RX_DRAWIO_DIR still read);
+#                                       Chrome runs without LD_LIBRARY_PATH and LD_PRELOAD.
 #
 # This section is not intended for routine updates or minor design changes.
 # A new version is strictly reserved for major architectural shifts
@@ -23,12 +27,12 @@
 #-------------------------------------------------------------------------------
 """Render .drawio files to standalone .svg + .png, offline, with a pinned drawio build.
 
-Pipeline (after ip-dev ftel_intctl doc/figures/render_drawio.py):
+Pipeline (skill ftel-block-diagram of ftel_doc_kit; first built for ftel_intctl):
   drawio XML -> HTML page embedding the drawio GraphViewer
   -> chrome --headless --dump-dom -> extract the rendered <svg> -> .svg
   -> chrome --headless --screenshot of the same page -> .png (@2x)
 
-Differences from the ftel_intctl script (measurements: RTL_FLOW_PLAN.md, Track Doc, Doc0):
+Differences from the first ftel_intctl script (measured on ftel_dphy_rx, 2026-09-29):
   1. viewer-static.min.js + stencils.min.js. viewer.min.js alone fetches mxElectrical.js and
      stencils/electrical/logic_gates.xml from viewer.diagrams.net at render time; offline, the
      logic gates and flip-flops of FTEL_DRAWIO_LIB_V1 then become empty rectangles. The page
@@ -39,7 +43,7 @@ Differences from the ftel_intctl script (measurements: RTL_FLOW_PLAN.md, Track D
   3. A render fails when a page message reports a stencil or shape load error or names an
      http(s) URL: a missing glyph can no longer turn into a plain rectangle silently.
   4. The viewer files are pinned by drawio_lock.json (drawio version + sha256). They are taken
-     from $FTEL_DPHY_RX_DRAWIO_DIR, from .drawio_cache/<version>/ beside this script (filled by
+     from $FTEL_DRAWIO_DIR, from .drawio_cache/<version>/ beside this script (filled by
      --fetch), or from the VSCode extension hediet.vscode-drawio, in that order, and only when
      their sha256 matches the lock.
   5. The SVG records the sha256 of its .drawio source; check_figures.py uses it to find stale
@@ -55,7 +59,8 @@ Usage:
   render_drawio.py --selftest  render selftest/ftel_lib_glyphs.drawio and require no differing
                                pixel against selftest/ftel_lib_glyphs.png
 Env:
-  FTEL_DPHY_RX_DRAWIO_DIR  directory that holds the locked files (optional)
+  FTEL_DRAWIO_DIR          directory that holds the locked files (optional; the older name
+                           FTEL_DPHY_RX_DRAWIO_DIR is read too)
   CHROME                   chrome binary (default: google-chrome)
 Exit status: 0 on success, 1 on any lock, render or selftest failure.
 """
@@ -77,10 +82,14 @@ CHROME = os.environ.get("CHROME", "google-chrome")
 CHROME_ARGS = [CHROME, "--headless=new", "--no-sandbox", "--disable-gpu",
                "--enable-logging=stderr", "--v=0",
                "--proxy-server=http://127.0.0.1:9", "--proxy-bypass-list=<-loopback>"]
+# Chrome must not inherit a library path set by the wrapper of another tool (the python3 of an EDA
+# suite, for one): a foreign libpango or libharfbuzz makes it exit with a symbol lookup error.
+CHROME_ENV = {k: v for k, v in os.environ.items() if k not in ("LD_LIBRARY_PATH", "LD_PRELOAD")}
 LOAD_ERROR = re.compile(r"error in (getStencil|loadStencil)|Failed to load|net::ERR_|https?://")
 # Standalone-SVG check (calibrated 2026-09-29 on the top-level figure: a correct SVG leaves at most
 # 29 unmatched pixels per 40x40 tile, one missing "LP state" label about 250 per tile).
 SVG_CHECK_RADIUS, SVG_CHECK_TILE, SVG_CHECK_LIMIT = 3, 40, 150
+ENV_DIRS = ("FTEL_DRAWIO_DIR", "FTEL_DPHY_RX_DRAWIO_DIR")
 EXTENSION_DIRS = ("~/.vscode/extensions/hediet.vscode-drawio-*/drawio/src/main/webapp/js",
                   "~/.vscode-server/extensions/hediet.vscode-drawio-*/drawio/src/main/webapp/js")
 
@@ -104,7 +113,7 @@ def load_lock():
 
 def resolve(lock):
     """Paths of the locked files, from the first source whose files all match the lock."""
-    dirs = [os.environ["FTEL_DPHY_RX_DRAWIO_DIR"]] if os.environ.get("FTEL_DPHY_RX_DRAWIO_DIR") else []
+    dirs = [os.environ[n] for n in ENV_DIRS if os.environ.get(n)]
     dirs.append(os.path.join(HERE, ".drawio_cache", lock["drawio_version"]))
     for pattern in EXTENSION_DIRS:
         dirs += sorted(glob.glob(os.path.expanduser(pattern)), reverse=True)
@@ -114,7 +123,7 @@ def resolve(lock):
             return paths
     fail(f"no source holds the drawio {lock['drawio_version']} files of drawio_lock.json "
          f"(checked: {', '.join(dirs)}). Run 'render_drawio.py --fetch' (needs network) "
-         "or set FTEL_DPHY_RX_DRAWIO_DIR.")
+         "or set FTEL_DRAWIO_DIR.")
 
 
 def fetch(lock):
@@ -145,7 +154,7 @@ def page_html(xml, files):
 
 
 def chrome(args, src):
-    r = subprocess.run(CHROME_ARGS + args, capture_output=True, text=True, timeout=120)
+    r = subprocess.run(CHROME_ARGS + args, capture_output=True, text=True, timeout=120, env=CHROME_ENV)
     bad = [line for line in r.stderr.splitlines() if ":CONSOLE" in line and LOAD_ERROR.search(line)]
     if bad:
         fail(f"{src}: the viewer could not draw every shape offline:\n  "
@@ -159,10 +168,11 @@ def render(src, files, lock):
         f.write(page_html(open(src, encoding="utf-8").read(), files))
         page = f.name
     try:
-        dom = chrome(["--virtual-time-budget=4000", "--dump-dom", f"file://{page}"], src).stdout
-        m = re.search(r"<svg[^>]*>.*</svg>", dom, re.S)
+        r = chrome(["--virtual-time-budget=4000", "--dump-dom", f"file://{page}"], src)
+        m = re.search(r"<svg[^>]*>.*</svg>", r.stdout, re.S)
         if not m:
-            fail(f"no <svg> in the rendered DOM of {src}")
+            fail(f"no <svg> in the rendered DOM of {src} (chrome exit {r.returncode}: "
+                 f"{r.stderr.strip().splitlines()[-1:] or 'no message'})")
         svg = m.group(0)
         if "xmlns" not in svg[:200]:
             svg = svg.replace("<svg", '<svg xmlns="http://www.w3.org/2000/svg" '

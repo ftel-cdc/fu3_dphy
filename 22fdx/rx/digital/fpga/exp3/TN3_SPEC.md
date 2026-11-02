@@ -1,11 +1,11 @@
-# TN3 — D-PHY TX trên một board FPGA thứ hai → mạch test → RX trên board VP1902
+# TN3 - D-PHY TX trên một board FPGA thứ hai → mạch test → RX trên board VP1902
 
 > Đặc tả thí nghiệm cho team FPGA. Nhóm D-PHY RX viết, ngày 2026-10-19.
 > Ký hiệu: ✅ đã kiểm bằng tool hoặc tài liệu (2026-10-19) · ⚠️ ước lượng hoặc giả định · 🔍 cần kiểm khi làm
 >
 > | Phiên bản | Ngày | Nội dung |
 > |---|---|---|
-> | v0.1 | 2026-10-19 | Phần 1: mục tiêu, sơ đồ, phần cứng, mạch test, bảng chân, câu hỏi. Board TX chưa chốt, vì VEK280 không dùng được (§3.2). Các mục 5–11 (design TX và RX, quy trình, tiêu chí đạt, dữ liệu gửi về, xử lý sự cố, phụ lục Tcl) sẽ viết sau, khi đã chốt board TX và mô phỏng TN2 xong |
+> | v0.1 | 2026-10-19 | Phần 1: mục tiêu, sơ đồ, phần cứng, mạch test, bảng chân, câu hỏi. Board TX chưa chốt, vì VEK280 không dùng được (§3.2). Các mục 5-11 (design TX và RX, quy trình, tiêu chí đạt, dữ liệu gửi về, xử lý sự cố, phụ lục Tcl) sẽ viết sau, khi đã chốt board TX và mô phỏng TN2 xong |
 > | v0.2 | 2026-10-26 | R-F có thêm khối chỉnh `rxactivehs` của nhóm D-PHY, giữa RX của nhóm và CSI-2 RX Subsystem (§0, §1, §2). Lý do: kết quả mô phỏng TN2b |
 
 ---
@@ -18,9 +18,9 @@
    - Phía VP1902 đã cố định (§4.1).
    - Phía TX chốt khi đã có board (§4.2).
    - Nếu board TX là một board VP1902 thứ hai cùng loại, netlist của mạch test đã có ở §4.3.
-3. **Trả lời câu hỏi Q1–Q7** dưới đây.
+3. **Trả lời câu hỏi Q1-Q7** dưới đây.
 
-Nhóm D-PHY sẽ build trước thiết kế FPGA cho cả hai đầu (mục 5–6), kèm script. Team FPGA cũng có thể build lại từ đặc tả.
+Nhóm D-PHY sẽ build trước thiết kế FPGA cho cả hai đầu (mục 5-6), kèm script. Team FPGA cũng có thể build lại từ đặc tả.
 
 Design R-F có thêm một khối nhỏ do nhóm D-PHY giao: `fpga/rtl/m_ftel_ppi_act_gate.sv`, 6 flip-flop với 4 lane. Khối nằm giữa RX của nhóm và CSI-2 RX Subsystem (§2):
 - Ở mỗi lane, khối giữ `rxactivehs` ở mức thấp cho tới `rxsynchs`. Lý do: mô phỏng TN2b cho thấy controller CSI-2 của AMD cần hai tín hiệu này lên cùng lúc, như D-PHY của AMD.
@@ -94,10 +94,10 @@ Cả hai board điều khiển qua JTAG (Vivado Hardware Manager và `xsdb`), kh
 
 | Mục | Đặt | Nguồn |
 |---|---|---|
-| SW192 | **1.2 V.** SW192 chọn VCCIO 1.0 / 1.2 / 1.5 V cho bank 703–706, là các bank nối ra FMC+ "01". Mặc định 1.5 V | User guide của board ✅ |
+| SW192 | **1.2 V.** SW192 chọn VCCIO 1.0 / 1.2 / 1.5 V cho bank 703-706, là các bank nối ra FMC+ "01". Mặc định 1.5 V | User guide của board ✅ |
 | SW1 (boot mode) | **JTAG** | User guide của board ✅ |
 | FMC+ "01" | Tháo camera, chỉ cắm mạch test | |
-| Chuẩn IO trong XDC | `MIPI_DPHY` cho 10 chân ở §4.1. Không gán chân nào khác của bank 703–706 với chuẩn có điện áp khác 1.2 V | User guide của board: đổi VCCIO thì phải đổi IOSTANDARD theo ✅ |
+| Chuẩn IO trong XDC | `MIPI_DPHY` cho 10 chân ở §4.1. Không gán chân nào khác của bank 703-706 với chuẩn có điện áp khác 1.2 V | User guide của board: đổi VCCIO thì phải đổi IOSTANDARD theo ✅ |
 
 JTAG là một cổng USB-C ở mặt trước (user guide của board) ✅. Lưu ý vận hành ở §3.4.
 
@@ -121,7 +121,7 @@ JTAG là một cổng USB-C ở mặt trước (user guide của board) ✅. Lư
 | Board VP1902 thứ hai cùng loại | **Đạt T2, T3.** Trên FMC+ "01", 5 cặp chân camera nằm chung bank 705 ✅ (§4.1), và SW192 đặt được 1.2 V ✅. Mạch test nối thẳng các chân cùng tên (§4.3) | Netlist và user guide của board |
 | VCK190, VMK180 | **Có thể.** Theo nguồn ngoài AMD, system controller đặt được VADJ_FMC 1.2 V, dựa trên EEPROM của card FMC hoặc ghi I2C thẳng vào regulator 🔍. Team kiểm user guide của board rồi chọn chân | Một bài viết ngoài AMD; team kiểm lại theo user guide của AMD cho VCK190 và VMK180 🔍 |
 
-Board khác cũng dùng được nếu đạt T1–T5.
+Board khác cũng dùng được nếu đạt T1-T5.
 
 ### 3.3 Mạch test
 
@@ -141,9 +141,9 @@ Board khác cũng dùng được nếu đạt T1–T5.
 | E3 | Mặt phẳng tham chiếu | GND liền bên dưới mọi dây, kể cả qua connector và via. Có dây hoặc vùng GND xen giữa các cặp. Đặt via GND cạnh via tín hiệu ⚠️ | D-PHY: mặt tham chiếu sát mọi dây, liền mạch qua connector, xen GND giữa các cặp. Via GND là cách làm thường dùng, không phải yêu cầu của D-PHY |
 | E4 | Ghép DC | Không tụ nối tiếp, không điện trở nối tiếp, không điện trở termination trên mạch test. RX dùng termination 100 Ω trong chip (`DIFF_TERM_ADV TERM_100` trong XDC của design camera tham chiếu) ✅ | UG863: khi RX là FPGA AMD thì dùng termination trong chip. Ở chế độ LP, đường dây phải là trở kháng cao, ghép DC |
 | E5 | Không stub | Không test point, không nhánh rẽ trên 10 dây tín hiệu | |
-| E6 | Thời gian bay | ≤ 2 ns cho cả đường nối giữa hai chip: đường mạch trên hai board, cộng mạch test và cáp. Trên PCB thông thường, con số này ứng với khoảng 25–30 cm | D-PHY |
+| E6 | Thời gian bay | ≤ 2 ns cho cả đường nối giữa hai chip: đường mạch trên hai board, cộng mạch test và cáp. Trên PCB thông thường, con số này ứng với khoảng 25-30 cm | D-PHY |
 | E7 | Lệch P/N trong một cặp | ±2 ps, **tính cả trễ package** | UG863 |
-| E8 | Lệch clock–data và data–data | ≤ 0.075 UI, **tính cả trễ package**. Mục tiêu tốt hơn: riêng phần đường nối (không tính package) lệch < UI/50 | UG863 (0.075 UI); D-PHY (UI/50) |
+| E8 | Lệch clock-data và data-data | ≤ 0.075 UI, **tính cả trễ package**. Mục tiêu tốt hơn: riêng phần đường nối (không tính package) lệch < UI/50 | UG863 (0.075 UI); D-PHY (UI/50) |
 | E9 | Insertion loss | Nằm trong template của D-PHY | UG863 |
 | E10 | Điện trở nối tiếp của mỗi dây | < 5 Ω, tính cả điện trở tiếp xúc của connector | D-PHY |
 | E11 | GND giữa hai board | Điện trở đường GND < 0.2 Ω. Lệch GND DC < 50 mV khi đang chạy | D-PHY |
@@ -165,13 +165,13 @@ Quy đổi ⚠️: với stripline FR-4 (εr ≈ 4), 1 mm ≈ 6.7 ps. Như vậy
 - Mạch test chỉnh độ dài từng dây sao cho trễ tổng của các lane bằng nhau, trong giới hạn E7 và E8.
 - Riêng package VP1902 đã cần bù: so với clock, D1 sớm 38.9 ps và D0 trễ 12.7 ps (§4.4).
 
-**Cách làm mạch test** (team chọn, cách nào cũng phải đạt E1–E11):
+**Cách làm mạch test** (team chọn, cách nào cũng phải đạt E1-E11):
 
 | Cách | Ưu | Nhược |
 |---|---|---|
 | (a) Một cầu nối cứng, cắm cùng lúc vào hai connector | Ít điểm gián đoạn, đường ngắn | Hai connector phải cùng độ cao và đúng khoảng cách; khó làm nếu VP1902 vẫn nằm trong vỏ máy |
-| (b) Hai card mezzanine nhỏ nối bằng cáp đồng trục hoặc twinax đã khớp trễ | Đặt hai board linh hoạt | Mỗi đầu cáp thêm một chỗ gián đoạn trở kháng (D-PHY lưu ý về connector). Bộ cáp phải khớp trễ theo E7–E8 |
-| (c) Flex | Gọn | Phải đạt E1–E3 trên vật liệu flex |
+| (b) Hai card mezzanine nhỏ nối bằng cáp đồng trục hoặc twinax đã khớp trễ | Đặt hai board linh hoạt | Mỗi đầu cáp thêm một chỗ gián đoạn trở kháng (D-PHY lưu ý về connector). Bộ cáp phải khớp trễ theo E7-E8 |
+| (c) Flex | Gọn | Phải đạt E1-E3 trên vật liệu flex |
 
 **Equalization.** Nếu đường nối dài hoặc tổn hao lớn, RX có thể cần bật equalization. UG863 bảo quyết định việc này theo D-PHY và theo khuyến nghị SI của AMD. Nhóm D-PHY sẽ quyết khi có số liệu kênh (Q2, Q3) 🔍.
 
@@ -201,7 +201,7 @@ Quy đổi ⚠️: với stripline FR-4 (εr ≈ 4), 1 mm ≈ 6.7 ps. Như vậy
 
    Lý do: không để board đang chạy đẩy mức 1.2 V vào chân của board đang tắt, vì dòng sẽ chạy ngược qua diode bảo vệ vào nguồn của board đó.
 5. **USB của VP1902 hay rớt.**
-   - Theo log của máy station ngày 15–17/10, cổng USB JTAG và UART của VP1902 đã rớt khỏi máy ở các lần bật nguồn, nạp và tắt-bật nguồn.
+   - Theo log của máy station ngày 15-17/10, cổng USB JTAG và UART của VP1902 đã rớt khỏi máy ở các lần bật nguồn, nạp và tắt-bật nguồn.
    - Sau mỗi lần rớt, phải cắm lại cáp thì máy mới nhận lại.
    - Vì vậy, mỗi lần bật/tắt nguồn hoặc nạp cần có người ở lab. Trên máy station, theo dõi bằng `dmesg -wT`.
 
@@ -257,19 +257,19 @@ Lưu ý:
 
 ### 4.4 Trễ package phía VP1902
 
-Số liệu lấy từ device data của Vivado 2025.2, probe `tn3_pins`, cho 10 chân ở §4.1. Đơn vị ps; mỗi ô P/N là khoảng min–max.
+Số liệu lấy từ device data của Vivado 2025.2, probe `tn3_pins`, cho 10 chân ở §4.1. Đơn vị ps; mỗi ô P/N là khoảng min-max.
 
 | Lane | P | N | Trung bình cặp | N − P | Lane − CLK |
 |---|---|---|---|---|---|
-| CLK | 173.1–174.9 | 176.3–178.1 | 175.6 | +3.2 | 0 |
-| D0 | 189.6–191.5 | 185.1–186.9 | 188.3 | −4.6 | +12.7 |
-| D1 | 138.6–139.9 | 133.5–134.8 | 136.7 | −5.1 | −38.9 |
-| D2 | 175.2–176.9 | 180.5–182.4 | 178.7 | +5.4 | +3.1 |
-| D3 | 182.7–184.5 | 188.4–190.3 | 186.5 | +5.7 | +10.9 |
+| CLK | 173.1-174.9 | 176.3-178.1 | 175.6 | +3.2 | 0 |
+| D0 | 189.6-191.5 | 185.1-186.9 | 188.3 | −4.6 | +12.7 |
+| D1 | 138.6-139.9 | 133.5-134.8 | 136.7 | −5.1 | −38.9 |
+| D2 | 175.2-176.9 | 180.5-182.4 | 178.7 | +5.4 | +3.1 |
+| D3 | 182.7-184.5 | 188.4-190.3 | 186.5 | +5.7 | +10.9 |
 
 **Đọc bảng:**
 - Chỉ riêng package VP1902 đã làm D1 đến sớm hơn clock 38.9 ps. Ở 1500 Mb/s, giới hạn E8 là 50 ps.
-- Mọi cặp đều lệch P/N 3–6 ps ngay trong package, tức là đã vượt ±2 ps của E7 nếu không bù.
+- Mọi cặp đều lệch P/N 3-6 ps ngay trong package, tức là đã vượt ±2 ps của E7 nếu không bù.
 - Trường hợp §4.3 (hai VP1902), các số trên nhân đôi:
   - lệch so với clock: D1 −77.8 ps, D0 +25.3 ps, D3 +21.7 ps, D2 +6.3 ps;
   - N − P: từ −10.2 đến +11.4 ps.

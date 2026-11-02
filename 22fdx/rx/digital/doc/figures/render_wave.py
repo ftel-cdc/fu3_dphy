@@ -1,4 +1,5 @@
 #!/usr/bin/env python3
+# Vendored from ftel_doc_kit 1.0.1 (skills/ftel-waveform/scripts/render_wave.py); edit the kit, then run kit.py vendor.
 #-------------------------------------------------------------------------------
 # Copyright (c) 2026 FPT Telecom. All rights reserved.
 #
@@ -14,7 +15,10 @@
 # Evolution History:
 # ------------------------------------------------------------------------------
 # Date         Version    Author        Description
-# 2026-09-29   0.1        Ho Khanh Linh Initial creation.
+# 2026-09-29   0.1        Ho Khanh Linh Initial creation (ftel_dphy_rx).
+# 2026-11-02   1.0        Ho Khanh Linh Moved into ftel_doc_kit: environment variable
+#                                       FTEL_WAVEDROM_CLI (FTEL_DPHY_RX_WAVEDROM_CLI still read);
+#                                       Chrome runs without LD_LIBRARY_PATH and LD_PRELOAD.
 #
 # This section is not intended for routine updates or minor design changes.
 # A new version is strictly reserved for major architectural shifts
@@ -22,17 +26,18 @@
 #-------------------------------------------------------------------------------
 """Render WaveJSON (.json5) timing diagrams to .svg + .png.
 
-Pipeline (after ip-dev ftel_intctl doc/figures/render_wave.py): wavedrom-cli -> SVG, then
+Pipeline (skill ftel-waveform of ftel_doc_kit; first built for ftel_intctl): wavedrom-cli -> SVG, then
 chrome --headless --screenshot -> PNG (@2x), with the offline Chrome flags of render_drawio.py.
 wavedrom-cli is pinned (WAVEDROM_CLI_VERSION), so a render does not change when npm publishes a new
 release. The render is offline: a wavedrom-cli of the pinned version is taken from
-$FTEL_DPHY_RX_WAVEDROM_CLI (path of wavedrom-cli.js) or from the npx cache (~/.npm/_npx); npx
+$FTEL_WAVEDROM_CLI (path of wavedrom-cli.js) or from the npx cache (~/.npm/_npx); npx
 (network, first install only) is the fallback. The SVG records the sha256 of its .json5 source and
 the wavedrom-cli and wavedrom versions, which check_figures.py uses to find stale renders.
 
 Usage: render_wave.py <in.json5> [<in.json5> ...]
 Env:   CHROME                      chrome binary (default: google-chrome)
-       FTEL_DPHY_RX_WAVEDROM_CLI   path of a local wavedrom-cli.js of the pinned version
+       FTEL_WAVEDROM_CLI           path of a local wavedrom-cli.js of the pinned version (the older
+                                   name FTEL_DPHY_RX_WAVEDROM_CLI is read too)
 """
 import glob
 import hashlib
@@ -46,6 +51,9 @@ WAVEDROM_CLI_VERSION = "3.2.0"
 CHROME = os.environ.get("CHROME", "google-chrome")
 CHROME_ARGS = [CHROME, "--headless=new", "--no-sandbox", "--disable-gpu",
                "--proxy-server=http://127.0.0.1:9", "--proxy-bypass-list=<-loopback>"]
+# Chrome must not inherit a library path set by the wrapper of another tool (the python3 of an EDA
+# suite, for one): a foreign libpango or libharfbuzz makes it exit with a symbol lookup error.
+CHROME_ENV = {k: v for k, v in os.environ.items() if k not in ("LD_LIBRARY_PATH", "LD_PRELOAD")}
 
 
 def package_version(pkg_dir):
@@ -57,7 +65,7 @@ def package_version(pkg_dir):
 
 def wavedrom_cli():
     """(command, version stamp) of the pinned wavedrom-cli: a local copy first, npx otherwise."""
-    candidates = [os.environ.get("FTEL_DPHY_RX_WAVEDROM_CLI", "")]
+    candidates = [os.environ.get(n, "") for n in ("FTEL_WAVEDROM_CLI", "FTEL_DPHY_RX_WAVEDROM_CLI")]
     candidates += sorted(glob.glob(os.path.expanduser("~/.npm/_npx/*/node_modules/wavedrom-cli/wavedrom-cli.js")))
     for js in candidates:
         cli_dir = os.path.dirname(js)
@@ -83,7 +91,7 @@ def render(src):
     subprocess.run(CHROME_ARGS + ["--hide-scrollbars", "--force-device-scale-factor=2",
                                   f"--window-size={w + 8},{h + 8}", f"--screenshot={base}.png",
                                   f"file://{os.path.abspath(base)}.svg"],
-                   capture_output=True, text=True, timeout=120, check=True)
+                   capture_output=True, text=True, timeout=120, check=True, env=CHROME_ENV)
     print(f"[render] png  : {base}.png ({(w + 8) * 2}x{(h + 8) * 2} @2x)")
 
 

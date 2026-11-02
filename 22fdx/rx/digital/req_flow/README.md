@@ -1,4 +1,4 @@
-# req_flow — requirement tooling for the adapted RTL flow
+# req_flow - requirement tooling for the adapted RTL flow
 
 Deterministic scripts behind the flow commands `/dphy_autoflow` and `/dphy_spec_parse`, which are kept
 outside this repository. They do the parts of the flow that a machine can check exactly; the LLM only

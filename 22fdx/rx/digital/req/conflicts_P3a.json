@@ -1,19 +1,19 @@
 {
  "phase": "P3a",
  "mode": "review",
- "at": "2026-10-21T16:04:58+07:00",
+ "at": "2026-11-02T12:08:47+07:00",
  "inputs": {
-  "spec": "9e6ec588dd17ef237b08aadfd2634622cf7239c62dac65a5aa8392de858eab04",
-  "structured_spec": "6cac5aca87af1e0b0186770b6b1cdcfb6926a27ca09598ba21ee0f4385063650",
+  "spec": "92a36c2a3c916b0e6de4b3b40d71b6666b38f68f5be7fab23522df308f589ebf",
+  "structured_spec": "bcaec9360086a63de7da330579c096933c06bffd9b72be0e77bd79c66cf89632",
   "config_pkg": "4cbcea6ac894197b2c6a06b24ce6bada257bb6ef116357cfac0587727c6c6ba3",
-  "rtl_rule": "6f29b17c3c5bd013421f056d321e6849892b1e5c3775a2e8fdacd4182a8d3e37",
+  "rtl_rule": "8e528520226a4e37534557890481755eaa80906076284b60092e145addfaff1d",
   "rtl_scope": "165d4d3971709ebdcbb7feceb53e6c94e039af3b4c06e4e60424dde6a7dee150",
   "vcs_manifest": "1638ca30e6a0bcdb84e7c316b00757d14ef6bd01d60e537f08fb72ffc5764f1b",
   "spyglass_report": "719fe5dbb9bbeea081902f12a74f406e604226594ec16720635a7e42cef8b58e"
  },
  "outputs": {
   "rtl": "d92668b8ef8845097175de140dae7f8da8f920f0a4543a2b8cad8cf4c0b4adec",
-  "rtm": "5fd984d3b7a814c3ffa70be524d3fddaa49dbec774033d4c9e7aab75c87d378e"
+  "rtm": "4b9fcbebafcae93a4be28ec992bbfc111ad9d601078cf1c176d40bb537f358a1"
  },
  "conflicts": [],
  "waived": [],
