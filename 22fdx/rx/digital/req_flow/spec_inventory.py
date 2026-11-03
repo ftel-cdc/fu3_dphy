@@ -142,6 +142,13 @@ CAPTION_RE = re.compile(r"^\*\*[^|]*\*\*\s*$")
 #              after the synchronized fall of the sync-search start, eot_skip_bytes subtracts the data
 #              path latency, the guaranteed range of the trailer cut is stated). Rows of the runtime,
 #              cdc, open and timing tables change their text only, so the counts equal v0.15.
+#   v0.17 - registered before the spec edit of 2026-11-03 (ADR-006, fpga/PLAN_EOT_NOWAIT.md: the lane
+#              no longer waits for EoT done, and the new synthesis parameter PARA_STOP_DRAIN_EN makes
+#              stopstate_x also wait until the burst has left the PPI). param +1 (PARA_STOP_DRAIN_EN).
+#              The EoT done row of the cdc table is replaced by the HS busy row, so cdc keeps 11 rows;
+#              the DL_HS_EOT row and the ADR-006 open-item row (still open: the stopstate_x mode and the
+#              trailer bytes, CSI team) change their text only. The new ADR-006 matrix (Table 7-4) is
+#              not graded.
 _V03 = {
     "param": 10, "runtime": 5, "clock": 3, "cdc": 5, "reset": 3,
     "fsm_cl": 10, "fsm_dl": 16, "ppi": 29, "afe": 8, "open": 10, "timing": 9,
@@ -167,6 +174,8 @@ EXPECTED = {
                   c_ids=16),
     "v0.16": dict(_V03, runtime=6, clock=4, cdc=11, fsm_cl=11, fsm_dl=17, afe=7, open=16, timing=11,
                   c_ids=16),
+    "v0.17": dict(_V03, param=11, runtime=6, clock=4, cdc=11, fsm_cl=11, fsm_dl=17, afe=7, open=16,
+                  timing=11, c_ids=16),
 }
 REVISION_RE = re.compile(r"\*\*DRAFT (v[0-9]+\.[0-9]+)\*\*")
 

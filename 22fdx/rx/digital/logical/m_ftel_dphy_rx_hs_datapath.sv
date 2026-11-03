@@ -11,13 +11,13 @@
 // Module          : m_ftel_dphy_rx_hs_datapath
 // Description     : HS Receive Datapath of one data lane (HAS Block No. 4): crossing of the
 //                   sync-search start into rxbyteclkhs and the hold of its fall, sync search,
-//                   EoT delay line, EoT done back to core_clk, and the status events of the lane.
+//                   EoT delay line, HS busy for Block No. 3 and the status events of the lane.
 // Parent          : m_ftel_dphy_rx
-// HAS             : draft v0.16, §4.1, §4.2, §4.6, Figures 4-8 and 4-9
-// Clock domains   : byte (lane reset of Block No. 4), core (EoT done only)
-// REQ-IDs         : REQ-020, REQ-024, REQ-052, REQ-053, REQ-058, REQ-061, REQ-064, REQ-067,
-//                   REQ-150, REQ-172, REQ-179, REQ-181, REQ-231, REQ-232, REQ-233, REQ-234,
-//                   REQ-235, REQ-242, REQ-243, REQ-367, REQ-368, REQ-379
+// HAS             : draft v0.17, §4.1, §4.2, §4.6, Figures 4-8 and 4-9
+// Clock domains   : byte (lane reset of Block No. 4)
+// REQ-IDs         : REQ-020, REQ-024, REQ-052, REQ-058, REQ-064, REQ-067, REQ-150, REQ-172,
+//                   REQ-181, REQ-231, REQ-232, REQ-233, REQ-234, REQ-235, REQ-242, REQ-243,
+//                   REQ-367, REQ-368, REQ-379, REQ-382, REQ-387, REQ-388, REQ-389
 // OPEN            : ADR-006
 //
 // Evolution History:
@@ -39,8 +39,6 @@ module m_ftel_dphy_rx_hs_datapath
   parameter int PARA_EOT_DELAY_BYTES   = 32
 ) (
   // ---- clock / reset ----
-  input  logic                          i_core_clk,
-  input  logic                          i_core_rst_n,
   input  logic                          i_byte_clk,
   // reset of Block No. 4 of this lane, cleared while the lane is disabled (Block No. 6)
   input  logic                          i_byte_rst_n,
@@ -57,8 +55,8 @@ module m_ftel_dphy_rx_hs_datapath
   output logic                          o_rxskewcalhs,
   output logic                          o_errsoths,
   output logic                          o_errsotsynchs,
-  // ---- data out: EoT done to Block No. 3 (core_clk) ----
-  output logic                          o_eot_done,
+  // ---- data out: HS busy to Block No. 3 (level, rxbyteclkhs) ----
+  output logic                          o_hs_busy,
   // ---- status: source toggles of the events for Block No. 8 (rtl_notes D-2, D-14) ----
   output logic                          o_sts_errsoths_tgl,
   output logic                          o_sts_errsotsynchs_tgl,
@@ -74,13 +72,13 @@ module m_ftel_dphy_rx_hs_datapath
   logic                        reg_start_d;
   logic                        reg_sync_d;
   logic [C_EOT_HOLD_BYTES-1:0] reg_hold;
+  logic                        reg_busy;
   logic                        reg_errsoths_tgl;
   logic                        reg_errsotsynchs_tgl;
   logic                        reg_erreotsync_tgl;
   logic                        w_start_sync;
   logic                        w_rise;
   logic                        w_hold;
-  logic                        w_sync_fall;
   logic                        w_start;
   logic                        w_eot_req;
   hs_entry_t                   w_entry;
@@ -88,6 +86,7 @@ module m_ftel_dphy_rx_hs_datapath
   logic                        w_cancel;
   logic                        w_no_sync;
   logic                        w_eot_sync_err;
+  logic                        w_line_busy;
 
   // The sync-search start is the only signal from core_clk: its rise starts the search and its
   // fall, held below, is the EoT request, so start, active flag and request cannot arrive out of
@@ -119,18 +118,14 @@ module m_ftel_dphy_rx_hs_datapath
     end
   end
 
-  // A rise during the hold (only below 260 Mb/s at the minimum THS-EXIT) ends the hold with one Low
-  // cycle, which is the EoT request of the previous burst, so two bursts never merge; the new burst
-  // starts one byte clock later.
-  // REQ-367, REQ-368
+  // A rise during the hold ends the hold with one Low cycle, which is the EoT request of the previous
+  // burst, so two bursts never merge; the new burst starts one byte clock later. With the hs_settle_cyc
+  // of HAS Appendix B the start is Low for at least four byte clocks after the crossing, so the hold
+  // ends first; the rise during the hold needs a smaller hs_settle_cyc.
+  // REQ-367, REQ-368, REQ-388
   assign w_rise  = w_start_sync && !reg_sync_d;
   assign w_hold  = |reg_hold;
   assign w_start = (w_start_sync || w_hold) && !(w_rise && w_hold);
-
-  // EoT done leaves at the synchronized fall, before the hold ends, so the hold does not delay the
-  // return of the lane to Stop (ADR-006).
-  // REQ-179
-  assign w_sync_fall = reg_sync_d && !w_start_sync;
 
   // REQ-052, REQ-058, REQ-064, REQ-067, REQ-172
   always_ff @(posedge i_byte_clk or negedge i_byte_rst_n) begin : p_start_d
@@ -169,20 +164,20 @@ module m_ftel_dphy_rx_hs_datapath
     .i_entry              (w_entry),
     .o_entry              (w_out),
     .o_eot_sync_err       (w_eot_sync_err),
+    .o_line_busy          (w_line_busy),
     .i_cfg_eot_skip_bytes (i_cfg_eot_skip_bytes)
   );
 
-  // One EoT done per burst, so two events are far more than three core_clk cycles apart.
-  // CDC_CROSSING: byte -> core: EoT done (HAS §4.1, Table 4-2)
-  // REQ-053, REQ-061, REQ-179
-  m_ftel_dphy_rx_tsync u_tsync_0 (
-    .i_src_clk   (i_byte_clk),
-    .i_src_rst_n (i_byte_rst_n),
-    .i_dst_clk   (i_core_clk),
-    .i_dst_rst_n (i_core_rst_n),
-    .i_pulse     (w_sync_fall),
-    .o_pulse     (o_eot_done)
-  );
+  // A burst of the lane is still in this block: the held start is High, or the delay line holds one of its
+  // entries. Registered, as the source of the crossing into core_clk (Block No. 3).
+  // REQ-382, REQ-387
+  always_ff @(posedge i_byte_clk or negedge i_byte_rst_n) begin : p_busy
+    if (!i_byte_rst_n) begin
+      reg_busy <= 1'b0;
+    end else begin
+      reg_busy <= w_start || w_line_busy;
+    end
+  end
 
   // Status events counted when they reach the PPI; the EoT sync error when the cut is decided.
   // REQ-020
@@ -198,7 +193,7 @@ module m_ftel_dphy_rx_hs_datapath
     end
   end
 
-  // REQ-020, REQ-231, REQ-232, REQ-233, REQ-234, REQ-235, REQ-242, REQ-243
+  // REQ-020, REQ-231, REQ-232, REQ-233, REQ-234, REQ-235, REQ-242, REQ-243, REQ-387, REQ-389
   assign o_rxdatahs             = w_out.data;
   assign o_rxvalidhs            = w_out.valid;
   assign o_rxactivehs           = w_out.active;
@@ -206,6 +201,7 @@ module m_ftel_dphy_rx_hs_datapath
   assign o_rxskewcalhs          = w_out.skewcal;
   assign o_errsoths             = w_out.soterr;
   assign o_errsotsynchs         = w_out.sotsyncerr;
+  assign o_hs_busy              = reg_busy;
   assign o_sts_errsoths_tgl     = reg_errsoths_tgl;
   assign o_sts_errsotsynchs_tgl = reg_errsotsynchs_tgl;
   assign o_sts_erreotsync_tgl   = reg_erreotsync_tgl;

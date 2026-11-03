@@ -88,7 +88,7 @@
             <mxPoint x="95" y="-10" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="t_heend" value="EoT done (No.4)" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;exitX=0;exitY=0.3;exitDx=0;exitDy=0;entryX=0.674;entryY=0.969;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="heot" target="stop">
+        <mxCell id="t_heend" value="not LP-00" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;exitX=0;exitY=0.3;exitDx=0;exitDy=0;entryX=0.674;entryY=0.969;entryDx=0;entryDy=0;entryPerimeter=0;" edge="1" parent="1" source="heot" target="stop">
           <mxGeometry relative="1" as="geometry">
             <Array as="points">
               <mxPoint x="1570" y="346" />
@@ -98,7 +98,7 @@
             <mxPoint x="412" y="-14" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="t_hwait" value="EoT done,&lt;br&gt;LP-00 seen" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="1" source="heot" target="hwait">
+        <mxCell id="t_hwait" value="LP-00 (still HS&lt;br&gt;after the timeout)" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;exitX=0;exitY=0.75;exitDx=0;exitDy=0;entryX=1;entryY=0.75;entryDx=0;entryDy=0;" edge="1" parent="1" source="heot" target="hwait">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="0" y="30" as="offset" />
           </mxGeometry>
@@ -223,7 +223,7 @@
             </Array>
           </mxGeometry>
         </mxCell>
-        <mxCell id="o_stop" value="stopstate_x = 1" style="text;html=1;whiteSpace=wrap;fontSize=18;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+        <mxCell id="o_stop" value="stopstate_x = 1 *" style="text;html=1;whiteSpace=wrap;fontSize=18;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="330" y="62" width="200" height="30" as="geometry" />
         </mxCell>
         <mxCell id="o_hpr" value="term_en_x = 1" style="text;html=1;whiteSpace=wrap;fontSize=18;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
@@ -250,7 +250,7 @@
         <mxCell id="o_ewait" value="rxtriggeresc_x&lt;br&gt;held" style="text;html=1;whiteSpace=wrap;fontSize=18;align=right;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="790" y="795" width="170" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="n_any" value="Every state except DL_INIT, DL_HS_RX and DL_HS_EOT goes to DL_STOP on LP-11; only the regular LP-11 exits are drawn. Escape watchdog expiry (No.6) in DL_LP_RQST to DL_ESC_CMD: DL_ESC_WAIT, no PPI error. dl_enable_x Low holds the lane in DL_INIT; a rising forcerxmode_x returns it there. The fall of the sync-search start, on leaving DL_HS_RX, is the EoT request to No.4. Outputs not written beside a state keep their inactive value." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+        <mxCell id="n_any" value="Every state except DL_INIT and DL_HS_RX goes to DL_STOP on LP-11; only the regular LP-11 exits are drawn. Escape watchdog expiry (No.6) in DL_LP_RQST to DL_ESC_CMD: DL_ESC_WAIT, no PPI error. dl_enable_x Low holds the lane in DL_INIT; a rising forcerxmode_x returns it there. The fall of the sync-search start, on leaving DL_HS_RX, is the EoT request to No.4; DL_HS_EOT lasts one cycle and does not wait for No.4, which completes the EoT on its own. * With PARA_STOP_DRAIN_EN = 1, stopstate_x is also held Low while HS busy (No.4) is High; the FSM does not use HS busy. Outputs not written beside a state keep their inactive value." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="20" y="955" width="1950" height="90" as="geometry" />
         </mxCell>
         <mxCell id="leg_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=none;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">

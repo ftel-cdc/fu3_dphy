@@ -9,7 +9,7 @@ board) are kept by the team and are not in this repository. This folder holds wh
 them: the simulation experiments, the specification of TN3 for the FPGA team, the Vivado probes of AMD's
 IP and of the device, and the tools that check the captures.
 
-> Status (2026-10-26): the work is split into three experiments ([`PLAN_TN1_TN3.md`](PLAN_TN1_TN3.md)).
+> Status (2026-11-03): the work is split into three experiments ([`PLAN_TN1_TN3.md`](PLAN_TN1_TN3.md)).
 > TN1 and TN2 run in Vivado simulation; TN3 (TX on a second FPGA board, test board, RX on the VP1902
 > board) is specified for the FPGA team in [`exp3/TN3_SPEC.md`](exp3/TN3_SPEC.md) (part 1; the VEK280
 > cannot be the TX, its FMC banks are fixed at 1.5 V). TN1 is in `exp1/`. Its first run found two faults
@@ -42,6 +42,19 @@ IP and of the device, and the tools that check the captures.
 >   ftel_dphy_rx meets both checks in every run.
 > - Three new runs skew lane 3 by 2.5, 5.5 and 7.5 byte times. Neither receiver aligns the lanes, so the skew reaches
 >   the PPI. The first two pass; the third fails at the lane skew only.
+>
+> On 2026-11-03 a tester of the FPGA team pointed at a contradiction in HAS v0.16: Table 1-3 promises 80-1792 Mb/s,
+> but at low rates a lane could miss a burst that follows another at the minimum gap
+> ([`PLAN_EOT_NOWAIT.md`](PLAN_EOT_NOWAIT.md)).
+> - `run_exp1.sh lowgap` (32 bursts per lane at THS-EXIT + TLPX = 100 + 50 ns, 13 rates from 80 to 1792 Mb/s,
+>   ftel_dphy_rx alone) confirmed it on the old RTL: 16/32 bursts per lane at 80 and 120 Mb/s, 24/32 at 160 Mb/s.
+> - With HAS v0.17 the lane returns to Stop without waiting for the end of the burst in the byte clock domain: all 24
+>   runs receive 32/32 bursts per lane.
+> - The new synthesis parameter `PARA_STOP_DRAIN_EN` (default 0) makes `stopstate` wait until the burst has left the
+>   PPI. `run_exp1.sh drain` runs the same 24 runs with 1 and checks it; their captures differ from those of `lowgap`
+>   in `stopstate` only. NEG-drain, the default build under that check, fails at `stopstate` only.
+> - TN1 was run again on the new RTL (230 runs and the 128 of `window`): every capture equals that of 2026-10-26 in
+>   every column but `stopstate`. `exp1/tn1_evidence.py` passes 9/9 with the new check `lowgap`.
 >
 > TN2a (`exp2/`, [`PLAN_TN2A.md`](PLAN_TN2A.md)) drives both receivers with AMD's own D-PHY TX (`mipi_dphy` 4.3
 > MASTER, driven at its PPI) instead of the line generator.
@@ -83,6 +96,8 @@ fpga/
 │                          tester of the FPGA team), TN1 run again with them
 ├── PLAN_TN2B_GATE.md    ← plan and results of the rxactivehs gate between ftel_dphy_rx and AMD's controller
 │                          (option A), TN2b run again through it, E2b-9 (SoT sync error on one lane)
+├── PLAN_EOT_NOWAIT.md   ← plan and results of the lane that no longer waits for the end of the burst (HAS v0.17,
+│                          PARA_STOP_DRAIN_EN), the lowgap and drain runs, TN1 and TN2 run again
 ├── exp1/                ← TN1: D-PHY line generator, AFE model, PPI monitor, testbench, run_exp1.sh (XSIM),
 │                          eot_window.py (table of the eot_skip_bytes window); README.md describes the tests;
 │                          TN1_DESCRIPTION.md and TN1_REPORT.md: description and report for the FPGA team;
@@ -119,12 +134,15 @@ fpga/exp1/run_exp1.sh all                  # TN1 scenarios E1-1..E1-5 (one Vivad
                                            #     E1-5: EoT stress of both receivers, HAS v0.16 Table 4-7; ~23 min)
 fpga/exp1/run_exp1.sh model                # the same with ftel_dphy_rx behind afe_model, outputs in M_<name>
 python3 fpga/exp1/tn1_evidence.py          # re-checks all TN1 outputs: checker, decode, runs, front end, AFE,
-                                           #     configuration, sources, margin
+                                           #     configuration, sources, margin, lowgap
 python3 fpga/exp1/tn1_evidence.py evselftest   # the same with one planted fault at a time: each must fail its check
 fpga/exp1/run_exp1.sh skew                 # lane 3 skewed by 2.5, 5.5 and 7.5 byte times (the last must fail)
 fpga/exp1/run_exp1.sh window               # eot_skip_bytes from its model value - 1 to + 2, LP-11 at every phase
                                            #     (ftel_dphy_rx alone, ~7 min; table by exp1/eot_window.py)
 fpga/exp1/run_exp1.sh report               # 80 Mb/s, outside the guaranteed range (AMD's IP needs 260..3200 Mb/s)
+fpga/exp1/run_exp1.sh lowgap               # bursts at the minimum gap, 80-1792 Mb/s, ftel_dphy_rx alone (LG-*, ~1 min)
+fpga/exp1/run_exp1.sh drain                # the same with PARA_STOP_DRAIN_EN = 1 and its stopstate check (DR-*),
+                                           #     then NEG-drain, which must fail at stopstate only (~1 min)
 fpga/exp1/run_exp1.sh summary              # result line of every TN1 scenario run so far
 fpga/exp1/run_exp1.sh recheck              # check every TN1 output again with the current csi2_dump.py (no sim)
 fpga/exp2/run_exp2.sh E2a-1                # TN2a at 1440 Mb/s: AMD's D-PHY TX into AMD's D-PHY RX and ftel_dphy_rx

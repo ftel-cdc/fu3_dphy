@@ -57,10 +57,24 @@
 
   EoT done now leaves `_hs_datapath` at the synchronized fall, so `_eot` lost its `o_eot_done` port.
   The headers of the three files and the package say HAS v0.16; the other files keep v0.14.
+- **HAS v0.17, 2026-11-03** (`fpga/PLAN_EOT_NOWAIT.md`, approved the same day). At the minimum
+  THS-EXIT + TLPX the lane missed bursts below about 170 Mb/s, while waiting in DL_HS_EOT for EoT
+  done: 16 of 32 per lane at 80 and 120 Mb/s, 24 of 32 at 160 Mb/s (TN1 `lowgap`, §9). The lane no
+  longer waits, and EoT done is gone (D-28):
+  - `_dl_ctrl`: DL_HS_EOT lasts one cycle; new parameter `PARA_STOP_DRAIN_EN` (default 0, Table
+    3-1 #11) with the HS busy synchronizer that holds `stopstate_x` Low when it is 1;
+  - `_hs_datapath`: `o_eot_done`, the toggle synchronizer and the `core_clk` ports removed; the HS
+    busy register added. `_eot` gives the OR of its active and skew-calibration flags;
+  - `m_ftel_dphy_rx_tsync.sv` stays in `logical/` but left `filelist.f` (no instance, user decision
+    of 2026-11-03).
+
+  The headers of the changed files (`_dl_ctrl`, `_hs_datapath`, `_eot`, `_sync`, the core and the
+  wrapper) and the package say HAS v0.17.
 - **Checked:** VCS `+lint=all`, SpyGlass `lint_rtl` (one waiver, D-19), `check_rtl_rules.py`,
   `flow_check.py --phase P1|P2|P3a` (§7). **Simulated:** Block No. 1 with a directed TB at five line
   rates (§8), and the whole receiver behind an AFE model in XSIM by TN1 (§9): dummy bursts, not
-  CSI-2 packets, and no escape, ULPS or deskew traffic. The unit testbenches (M3) and the CDC/RDC runs
+  CSI-2 packets, and no escape, ULPS or deskew traffic; since v0.17 also back-to-back bursts at the
+  minimum THS-EXIT + TLPX, with both values of `PARA_STOP_DRAIN_EN`. The unit testbenches (M3) and the CDC/RDC runs
   (M4) are the next steps. STA after layout
   comes with the target technology (M7).
 - **Release R1 only.** Block No. 5 (deskew calibration, R2, ADR-004) is absent: `PARA_DESKEW_EN` is
@@ -89,12 +103,12 @@ m_ftel_dphy_rx_wrap                      wrapper: ports <dir>_dphy_rx_<name>, re
    ├─ m_ftel_dphy_rx_cl_ctrl             Block No. 2
    ├─ g_lane[x] (x = 0..N-1)
    │  ├─ m_ftel_dphy_rx_dl_ctrl          Block No. 3
-   │  │  └─ m_ftel_dphy_rx_esc_decoder
+   │  │  ├─ m_ftel_dphy_rx_esc_decoder
+   │  │  └─ m_ftel_dphy_rx_sync          HS busy byte -> core (used with PARA_STOP_DRAIN_EN = 1)
    │  └─ m_ftel_dphy_rx_hs_datapath      Block No. 4
    │     ├─ m_ftel_dphy_rx_sync          sync-search start core -> byte
    │     ├─ m_ftel_dphy_rx_sync_search
-   │     ├─ m_ftel_dphy_rx_eot
-   │     └─ m_ftel_dphy_rx_tsync         EoT done byte -> core
+   │     └─ m_ftel_dphy_rx_eot
    └─ m_ftel_dphy_rx_ppi_out             Block No. 7
 packages: ftel_dphy_rx_config_pkg (generated from config/ftel_dphy_rx.yaml), ftel_dphy_rx_pkg
 ```
@@ -104,12 +118,12 @@ packages: ftel_dphy_rx_config_pkg (generated from config/ftel_dphy_rx.yaml), fte
 | HAS | RTL | Notes |
 |---|---|---|
 | §3 Table 3-1, 3-2 | `ftel_dphy_rx_config_pkg` (generated), `PARA_*` of the core and wrapper | `config/validate_config.py` checks the values against §4.3, §4.6 and Appendix B |
-| §4.1 crossings, Figure 4-1 | `m_ftel_dphy_rx_sync`, `_tsync`, `_rst_sync`; tags `CDC_CROSSING`, `CDC_QUASI_STATIC`, `CDC_GATING` | Every instance of a cell carries its crossing |
+| §4.1 crossings, Figure 4-1 | `m_ftel_dphy_rx_sync`, `_rst_sync`; tags `CDC_CROSSING`, `CDC_QUASI_STATIC`, `CDC_GATING` | Every instance of a cell carries its crossing. `_tsync` has no instance since v0.17 (D-28): the status toggles cross inside Block No. 8, which is absent (D-2) |
 | §4.2 reset | `_timing_init` (reset synchronizers), `_wrap` (inverter) | D-4 |
 | §4.3 Block No. 1 | `_afe_adapter`, `_lp_filter`, `_hs_deser`, `_byte_clk`, `_clk_act`, `_cg`, `_clk_inv` | D-5, D-6, D-17 - D-25 |
 | §4.4 Block No. 2 | `_cl_ctrl` | D-8, D-9 |
-| §4.5 Block No. 3 | `_dl_ctrl`, `_esc_decoder` | D-7, D-8, D-9 |
-| §4.6 Block No. 4 | `_hs_datapath`, `_sync_search`, `_eot` | D-12, D-13, D-15, D-26, D-27 |
+| §4.5 Block No. 3 | `_dl_ctrl`, `_esc_decoder` | D-7, D-8, D-9, D-28 |
+| §4.6 Block No. 4 | `_hs_datapath`, `_sync_search`, `_eot` | D-12, D-13, D-15, D-26, D-27, D-28 |
 | §4.7 Block No. 6 | `_timing_init` | D-10, D-11 |
 | §4.9 Block No. 7 | `_ppi_out` | - |
 | §4.10 Block No. 8 | absent | D-2 |
@@ -295,10 +309,14 @@ the EoT request follow the held level.
   at every rate from 260 to 1500 Mb/s (Table 3-2), measured with LP-11 at every phase of the byte
   clock and of `core_clk` (`fpga/exp1/run_exp1.sh window`). The first fit, 27 ns, came from runs with
   `core_clk` in a fixed ratio to the line and left no margin at 600, 800 and 1440 Mb/s.
-- A rise of the start during the hold (only below 260 Mb/s at the minimum THS-EXIT) forces one Low
-  cycle, the EoT request of the previous burst, and delays the new start by one byte clock.
-- EoT done is the synchronized fall, before the hold, so the ADR-006 round trip and S5 do not change
-  (no missed burst at 80 Mb/s from THS-EXIT + TLPX ≥ 315 ns; S5 asks 415 ns).
+- A rise of the start during the hold forces one Low cycle, the EoT request of the previous burst, and
+  delays the new start by one byte clock. With the `hs_settle_cyc` of Appendix B the start is Low for
+  at least THS-EXIT + TLPX + (1 + `hs_settle_cyc`) × 5 ns, 505 ns at 80 Mb/s, so 4 byte clocks after
+  the crossing: the hold always ends first, and the forced Low cycle needs a smaller `hs_settle_cyc`
+  (HAS v0.17; v0.16 had written "only below 260 Mb/s at the minimum THS-EXIT").
+- Up to v0.17, EoT done was the synchronized fall, before the hold, so the hold did not lengthen the
+  round trip of ADR-006: no missed burst at 80 Mb/s from THS-EXIT + TLPX ≥ 315 ns (the low-gap runs
+  of v0.17 on the v0.16 RTL: bursts missed at 300 ns, none at 350 ns). EoT done is removed by D-28.
 - The hold length is the default of the open ADR-006 decision: tag `// OPEN ADR-006 REQ-379`.
 
 **D-27 Valid, sync and SoT error only while the search has started** (HIGH, HAS v0.16 §4.6, REQ-366).
@@ -307,6 +325,36 @@ and active = 0. `_eot` shifts the entry of the cycle into the line without the c
 `rxvalidhs_x` pulse, a byte after the trail, left after `rxactivehs_x` in every burst on every lane
 (TN1, against REQ-249). `_sync_search` now ANDs valid, sync and SoT error with the start; the
 skew-calibration flag is kept, as §4.6 asks.
+
+**D-28 No wait for the EoT; `PARA_STOP_DRAIN_EN`** (HIGH, HAS v0.17 §4.5, §4.6, ADR-006; REQ-111,
+REQ-147, REQ-381 to REQ-391).
+- `_dl_ctrl`: DL_HS_EOT lasts one cycle, LP-00 (the line still in HS after the HS RX timeout) to
+  DL_HS_WAIT, any other line state to DL_STOP. `i_eot_done` and `reg_eot_lp00` are removed.
+- Why: any wait passes through the byte clock domain, at least two byte clocks (200 ns at 80 Mb/s),
+  more than the minimum THS-EXIT + TLPX of 150 ns. With the wait the lane missed bursts below about
+  170 Mb/s at that gap (§9), against the 80 Mb/s of HAS Table 1-3. The tester of the FPGA team raised
+  the gap between the two; the user chose the fix in the RX and option C on 2026-11-03.
+- `stopstate_x` cannot mark both moments, because the delay line separates the return to Stop from
+  the last byte at the PPI by up to about 35 byte clocks at 80 Mb/s. `PARA_STOP_DRAIN_EN` selects:
+  - 0, the default: the Stop state of the lane, as D-PHY defines it;
+  - 1: also Low while HS busy is High. `_eot` drives `o_line_busy`, the OR of its active and
+    skew-calibration flags; `_hs_datapath` registers HS busy = held start OR `o_line_busy`
+    (`p_busy`, the source of the crossing); `_dl_ctrl` synchronizes it with `m_ftel_dphy_rx_sync`
+    (2 flip-flops, tag `CDC_CROSSING`), and `w_stop_hold` holds `reg_stopstate` Low. The lane FSM does
+    not use HS busy.
+- No `generate`: with 0 the AND is constant and synthesis removes the synchronizer and the register.
+  DC against v0.16: 5 flip-flops fewer per lane, cell area −0.7 %, timing unchanged (§6). VCS lints
+  both values (`sim/vcs_lint.sh`, run `wrap_lanes4_drain`); SpyGlass lints the default.
+- OPEN tags: `OPEN ADR-006 REQ-147, REQ-391` and `OPEN S12 REQ-386` at `w_stop_hold` (with 1,
+  `stopstate_x` waits for the byte clock to drain the lane, like the tail of the burst);
+  `OPEN ADR-006 REQ-390` at DL_HS_EOT; `OPEN ADR-006, S12 REQ-381` in the package.
+- Measured (TN1 `lowgap` and `drain`, §9): every burst received in 24 settings from 80 to 1792 Mb/s
+  with both values; the PPI captures of the two values differ only in `stopstate_x`. With 0 it rises
+  before the last byte by 34-35 byte clocks at 80 Mb/s and 11-13 at 1792 Mb/s; with 1 it rises 2 byte
+  clocks after the last cycle of `rxactivehs_x` at 80-400 Mb/s and 18-22 ns after it from 1440 Mb/s,
+  with no Stop pulse between bursts at the minimum gap up to 1500 Mb/s. The order of `stopstate_x`
+  and `rxskewcalhs_x` with 1 follows from the structure (busy includes the skew-calibration flags);
+  no deskew burst was simulated with 1.
 
 ## 5. Notes for the HAS (no RTL question pending)
 
@@ -424,6 +472,10 @@ Slack in ps, setup unless marked:
   - No. 6: 875. No. 3: 492. No. 2: 56. No. 7: 36.5.
   - No. 1: 412, of which deserializers 113, LP filters 64, synchronizers 29, byte clock 18 and clock
     activity 17.
+  - HAS v0.17 (D-28, 2026-11-03, `PARA_STOP_DRAIN_EN` = 0): 5948 µm² at 125 °C, 9901 cells of which
+    2646 are flip-flops, against 5990 µm² and 2666 for the RTL of v0.16 run the same day: No. 3 480
+    (was 492), No. 4 4088 (was 4118). Every WNS as before, except `core_clk` at −40 °C, 3 ps less
+    (+2785 ps); TNS 0 in all 4 runs.
 - Not modelled: wires, clock trees, the skew at the samplers, the corner and the body bias of the
   chip. The numbers rank the paths; they do not sign off the timing.
 
@@ -445,10 +497,12 @@ One line per correction round (rule 1 of `/dphy_rtl_gen`: at most 3 rounds per m
 | whole IP (`flow_check` P3a, HAS v0.14) | 1 | CF-COVER REQ-083 (termination enable from the FSM register, no extra timer) untagged | tags added at the state registers of `_dl_ctrl` and `_cl_ctrl` |
 | whole IP (`flow_check` P3a, HAS v0.15) | 1 | CF-DRIFT: the configuration package was regenerated (header HAS v0.15) after both lints | lints rerun, no RTL change: VCS 0 / 0 / 0 for 1, 2, 4 lanes; SpyGlass `lint_rtl` 0 / 0 / 0, one waiver (D-19) |
 | `_hs_datapath`, `_sync_search`, `_eot` (HAS v0.16) | 1 | VCS 0 / 0 / 0 and SpyGlass 0 / 0 / 0 at the first round; `flow_check` P3a CF-COVER REQ-186 (guaranteed range of the trailer removal, a constraint in v0.16, a decision before) untagged | tag added at `w_skip` of `_eot` |
+| `_dl_ctrl`, `_hs_datapath`, `_eot` (HAS v0.17, D-28) | 1 | VCS 0 / 0 / 0 for 1, 2, 4 lanes and for `PARA_STOP_DRAIN_EN` = 1; `check_rtl_rules` T2 on `w_stop_hold`, `o_line_busy` and `p_busy` until the P1 resync gave their REQs; `flow_check` P3a CF-TAG REQ-146 (retired: the old "keep waiting" decision), CF-COVER REQ-382 to REQ-391, CF-TAG OPEN for REQ-386, REQ-390, REQ-391 | tags added after the resync; two stale comments (EoT done in `_eot`, the parents of `_sync`) corrected; SpyGlass `lint_rtl` 0 / 0 / 0 at the first round |
 
-Final state (HAS v0.16, rtl_rule 1.2): `check_rtl_rules` 0 violations on 22 files; VCS 0 Error /
-0 Warning / 0 Lint for `PARA_NUM_LANES` = 1, 2, 4; SpyGlass `lint_rtl` 0 Fatal / 0 Error / 0 Warning,
-one waiver (D-19).
+Final state (HAS v0.17, rtl_rule 1.2): `check_rtl_rules` 0 violations on 22 files; VCS 0 Error /
+0 Warning / 0 Lint for `PARA_NUM_LANES` = 1, 2, 4 and for `PARA_STOP_DRAIN_EN` = 1; SpyGlass
+`lint_rtl` 0 Fatal / 0 Error / 0 Warning, one waiver (D-19); `flow_check` P3a 0 conflicts, 304/304 REQs
+in scope tagged.
 VCS `+lint=all` does not report latches or unused nets (probe of 2026-10-03); SpyGlass covers them.
 
 ## 8. Simulation of Block No. 1 (directed, 2026-10-07)
@@ -519,6 +573,8 @@ A burst passes on a lane when:
 | E1-4d, E1-4e | 1440, 2 and 1 | lanes | 16-17 | 0 | PASS |
 | E1-5, 96 runs | 260-1500, 4 (fair run: both receivers; before it: ftel_dphy_rx alone) | trail min/def/max × jitter × 0 or 40 ns of junk, `core_clk` 400 ppm slow | 1-25 | within Table 4-7; most 12, at 1440 Mb/s with junk | PASS |
 | R-80 | 80, ftel_dphy_rx alone | outside the guarantee | - | 0-1, in 10 of 36 bursts | report only |
+| LG-*, 24 runs (HAS v0.17) | 80-1792, ftel_dphy_rx alone, 4 | back-to-back bursts at the minimum THS-EXIT + TLPX; minimum THS-PREPARE + THS-ZERO, minimum THS-TRAIL, THS-EXIT 400 ns | - | 0-3 below 240 Mb/s, 0 from 240 Mb/s | PASS |
+| DR-*, 24 runs (HAS v0.17) | the same, `PARA_STOP_DRAIN_EN` = 1 | `stopstate_x` checked after the drain; NEG-drain: the same check on the default build must fail | - | as LG-* | PASS; NEG-drain fails as planned |
 
 How the results were reached:
 
@@ -556,3 +612,15 @@ How the results were reached:
    - The same scenarios behind `afe_model` (`run_exp1.sh model`) pass. Their captures, and those of the
      window measurement, equal the run before the change byte for byte.
    - `fpga/exp1/tn1_evidence.py` passes its 8 checks.
+6. **Low gap between bursts, 2026-11-03 (HAS v0.17, `fpga/PLAN_EOT_NOWAIT.md`).** `run_exp1.sh lowgap`
+   sends 32 bursts of 1 to 64 bytes per lane at the minimum THS-EXIT + TLPX to ftel_dphy_rx alone.
+   - On the RTL of v0.16 the lane missed bursts below about 170 Mb/s: 16 of 32 per lane at 80 and
+     120 Mb/s, 24 of 32 at 160 Mb/s; at 80 Mb/s THS-EXIT had to reach 300 ns (TLPX 50 ns). The lane
+     waited in DL_HS_EOT for EoT done while the next HS request went by.
+   - On the RTL of v0.17 (D-28) every burst is received in all 24 settings, and `run_exp1.sh drain`
+     gives the same with `PARA_STOP_DRAIN_EN` = 1. The trailer bytes equal those of v0.16. Between
+     two bursts `rxactivehs_x` is Low for 330-400 ns at every rate.
+   - The whole TN1 set ran again on the v0.17 RTL (230 runs and the 128 cells of `window`): every
+     capture equals the v0.16 run in every column but `stopstate_x`, which rises 2-5 byte clocks
+     earlier (no wait), with the same number of pulses. `tn1_evidence.py` passes its 9 checks (new
+     check `lowgap`), and its `evselftest` finds the 19 planted faults.

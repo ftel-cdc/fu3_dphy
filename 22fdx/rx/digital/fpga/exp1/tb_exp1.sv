@@ -54,12 +54,14 @@
 //                                 drift against the line, so LP-11 meets it at every phase
 // Defaults of the line timing sit inside the D-PHY v1.1 ranges at the rate (see p_main).
 // Compile with TN1_STUB defined for the build with xrx_stub.sv, which has no front end to compare.
+// Parameter STOP_DRAIN (-generic_top) sets PARA_STOP_DRAIN_EN of ftel_dphy_rx (default 0, HAS Table 3-1).
 `timescale 1ns/1ps
 module tb_exp1;
   import ftel_dphy_rx_pkg::*;
   import ftel_dphy_rx_config_pkg::*;
 
   parameter int NL = 4;
+  parameter int STOP_DRAIN = 0;
   localparam int SELW = f_lane_sel_w(NL);
 
   typedef byte unsigned bq_t [$];
@@ -241,7 +243,7 @@ module tb_exp1;
   end
 `endif
 
-  m_ftel_dphy_rx_wrap #(.PARA_NUM_LANES(NL)) u_ftel (
+  m_ftel_dphy_rx_wrap #(.PARA_NUM_LANES(NL), .PARA_STOP_DRAIN_EN(STOP_DRAIN)) u_ftel (
     .i_dphy_rx_core_clk              (core_clk),
     .i_dphy_rx_phy_core_rst_n        (f_rst_n),
     .i_dphy_rx_cl_enable             (1'b1),
@@ -480,8 +482,8 @@ module tb_exp1;
              u_gen.t_clk_prepare, u_gen.t_clk_zero, u_gen.skew_ps, u_gen.clk_skew_ps, 2.0 * core_half);
     $display("TB FRONT END: ftel_dphy_rx behind %s",
              afe_xil ? "IBUFDS_DPHY (SIM_DEVICE VERSAL_PREMIUM), the input buffer of AMD's receiver" : "afe_model");
-    $display("TB FTEL CFG: hs_settle_cyc %0d, clk_settle_cyc %0d, eot_skip_bytes %0d, tinit_cyc %0d",
-             cfg_hs_settle, cfg_clk_settle, cfg_eot_skip, cfg_tinit);
+    $display("TB FTEL CFG: hs_settle_cyc %0d, clk_settle_cyc %0d, eot_skip_bytes %0d, tinit_cyc %0d, PARA_STOP_DRAIN_EN %0d",
+             cfg_hs_settle, cfg_clk_settle, cfg_eot_skip, cfg_tinit, STOP_DRAIN);
 
     #100;
     xrst    = 1'b0;

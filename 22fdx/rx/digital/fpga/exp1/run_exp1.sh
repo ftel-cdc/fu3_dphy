@@ -38,16 +38,23 @@
 #   fpga/exp1/run_exp1.sh report                               # 80 Mb/s, outside the guaranteed range
 #   fpga/exp1/run_exp1.sh skew                                 # lane 3 skewed by 2.5, 5.5, 7.5 byte times (the
 #                                                              # last one, NEG-skew, must fail at the lane spread)
+#   fpga/exp1/run_exp1.sh lowgap                               # back-to-back bursts at the minimum THS-EXIT +
+#                                                              # TLPX, 80-1792 Mb/s, ftel_dphy_rx alone (LG-*)
+#   fpga/exp1/run_exp1.sh drain                                # the same with PARA_STOP_DRAIN_EN = 1, stopstate
+#                                                              # checked after the drain (DR-*), and NEG-drain
 #   fpga/exp1/run_exp1.sh summary                              # result line of every scenario run so far
 #   fpga/exp1/run_exp1.sh recheck                              # check every run again (new csi2_dump.py), no sim
-# A build lives in fpga/work/exp1/build_<rate>_<lanes>l (build_stub for the stub); it is compiled and
+# A build lives in fpga/work/exp1/build_<rate>_<lanes>l (build_stub for the stub, build_stub_drain for the stub
+# with PARA_STOP_DRAIN_EN = 1); it is compiled and
 # elaborated again when a source changed. A scenario writes fpga/work/exp1/<name>/: truth.txt, xil_ppi.csv, ftel_ppi.csv, xsim.log and
 # check.txt (fpga/tools/csi2_dump.py bursts). ftel_dphy_rx gets the run-time fields of its configuration
 # model at the rate (cfg_for_rate.py) unless the arguments set them. Trailer bytes: AMD's receiver keeps
 # them (no limit); ftel_dphy_rx removes them: more than MAXTR in a burst is an error (default 0; the
 # scenarios at the limits of HAS v0.16 Table 4-7 take it from that table, tmax). Timing at the PPI (HAS
 # Table A-2): rxsynchs one cycle, in the cycle of the first byte for ftel_dphy_rx (C6) and one cycle before it
-# for AMD's D-PHY; the bytes of a burst at most LANE_SPREAD byte clocks apart on the lanes (C10).
+# for AMD's D-PHY; the bytes of a burst at most LANE_SPREAD byte clocks apart on the lanes (C10). stopstate
+# (STOPSTATE, set by lowgap and drain, recorded in args.txt): reported, and checked after the drain with
+# drain:<depth> (csi2_dump.py --stopstate).
 # EXP1_DEBUG=typical keeps the signals for waveforms (new build); VIVADO overrides the Vivado binary.
 set -uo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -98,18 +105,20 @@ build() {
   fi
 }
 
-stub_build() {
-  local d=$W/build_stub sha
+stub_build() {   # stub_build [<STOP_DRAIN>]: build_stub, or build_stub_drain with PARA_STOP_DRAIN_EN = 1
+  local sd=${1:-0} n=stub sha
+  [ "$sd" = 1 ] && n=stub_drain
+  local d=$W/build_$n
   mkdir -p "$d"
   sha=$(sources | xargs sha256sum | sha256sum | cut -c1-16)
   if [ "$(cat "$d/src.sha" 2>/dev/null)" != "$sha" ]; then
-    echo "build stub: compile and elaborate ftel_dphy_rx with xrx_stub.sv (~10 s)"
+    echo "build $n: compile and elaborate ftel_dphy_rx with xrx_stub.sv, STOP_DRAIN $sd (~10 s)"
     # TN1_STUB: no AMD front end to compare; IBUFDS_DPHY comes from Vivado's unisims_ver and needs glbl
     if ! (cd "$d" && xvlog -sv --relax -d TN1_STUB -i "$REPO/logical" $(sources) \
             "$(dirname "$XBIN")/data/verilog/src/glbl.v" > compile.log 2>&1 \
-          && xelab --relax -debug off -L unisims_ver tb_exp1 glbl -generic_top NL=4 -s tb_exp1_stub \
-            > elaborate.log 2>&1); then
-      echo "build stub FAIL: see $d/compile.log and $d/elaborate.log"
+          && xelab --relax -debug off -L unisims_ver tb_exp1 glbl -generic_top NL=4 -generic_top "STOP_DRAIN=$sd" \
+            -s "tb_exp1_$n" > elaborate.log 2>&1); then
+      echo "build $n FAIL: see $d/compile.log and $d/elaborate.log"
       return 1
     fi
     echo "$sha" > "$d/src.sha"
@@ -120,10 +129,10 @@ run() {
   local rate=$1 lanes=$2 name=${TN1_PRE:-}$3 out sim snap=tb_exp1_behav nl=$2 t0 args=() csv=()
   shift 3
   set -- "$@" ${TN1_ARGS:-}       # set by "model"
-  if [ "$lanes" = stub ]; then
-    stub_build || return 1
-    sim=$W/build_stub
-    snap=tb_exp1_stub
+  if [ "$lanes" = stub ] || [ "$lanes" = stub_drain ]; then
+    stub_build "$([ "$lanes" = stub_drain ] && echo 1 || echo 0)" || return 1
+    sim=$W/build_$lanes
+    snap=tb_exp1_$lanes
     nl=4
   else
     build "$rate" "$lanes" || return 1
@@ -148,8 +157,13 @@ run() {
     sat="-1,0"
   fi
   echo "trailer limit (AMD, ftel_dphy_rx or ftel_dphy_rx alone): $lim" >> "$out/args.txt"
+  local stop=()
+  if [ -n "${STOPSTATE:-}" ]; then
+    stop=(--stopstate="$STOPSTATE")
+    echo "stopstate check: $STOPSTATE" >> "$out/args.txt"
+  fi
   python3 "$FPGA/tools/csi2_dump.py" bursts --truth "$out/truth.txt" --lanes "$nl" --max-trailer="$lim" \
-    --sync-at="$sat" --max-lane-spread="$LANE_SPREAD" "${csv[@]}" > "$out/check.txt" 2>&1
+    --sync-at="$sat" --max-lane-spread="$LANE_SPREAD" "${stop[@]}" "${csv[@]}" > "$out/check.txt" 2>&1
   local rc=$?
   echo "$name ($(( $(date +%s) - t0 )) s): $(grep -m1 '^TB DONE' "$out/tb.txt" | cut -c1-60)..."
   grep -E '^(RESULT|[AB] )' "$out/check.txt"
@@ -248,24 +262,62 @@ skew() {
   run 1440 4 E1-6b $l +SKEW3=30556
   run 1440 4 NEG-skew $l +SKEW3=41667
 }
+# Back-to-back bursts at low rates (fpga/PLAN_EOT_NOWAIT.md): THS-EXIT + TLPX at their minimum from 80 to
+# 1792 Mb/s, and controls with THS-EXIT 400 ns, the minimum THS-PREPARE + THS-ZERO and the minimum THS-TRAIL;
+# ftel_dphy_rx alone. Trailer bytes: Table 4-7 from 260 Mb/s (tmax); below it the formula of its last column,
+# floor((TEOT,max + 29 ns) / byte period) - eot_skip_bytes (tlow), outside the guaranteed range.
+tlow() {   # tlow <rate Mb/s>
+  case $1 in 80) echo 2 ;; 120) echo 3 ;; 160|180|200|240) echo 4 ;; 220) echo 5 ;; *) tmax "$1" 0 ;; esac
+}
+lowgap_set() {   # lowgap_set <stub|stub_drain> <prefix>
+  local ln=$1 p=$2 l="+LENS=1,2,3,4,5,8,16,64 +REPEAT=4 +TIMEOUT_US=2500" r
+  for r in 80 120 160 180 200 220 240 260 400 800 1440 1500 1792; do
+    MAXTR=$(tlow "$r") run "$r" "$ln" "$p-$(printf %04d "$r")-min" +EXIT=min +LPX=min $l
+  done
+  for r in 80 160 180 220; do
+    MAXTR=$(tlow "$r") run "$r" "$ln" "$p-$(printf %04d "$r")-x400" +TLPX=50 +THS_EXIT=400 $l
+  done
+  for r in 80 120 160 260; do
+    MAXTR=$(tlow "$r") run "$r" "$ln" "$p-$(printf %04d "$r")-pz" +PREP=min +ZERO=min +EXIT=min +LPX=min $l
+  done
+  for r in 80 160 260; do
+    MAXTR=$(tlow "$r") run "$r" "$ln" "$p-$(printf %04d "$r")-tmin" +TRAIL=min +EXIT=min +LPX=min $l
+  done
+}
+# lowgap: the default build, stopstate reported (Stop in the gaps between bursts at the pad). drain:
+# PARA_STOP_DRAIN_EN = 1, stopstate checked after the drain of the PARA_EOT_DELAY_BYTES delay line; NEG-drain is
+# the 80 Mb/s run of the default build under that check and must fail at stopstate only (tn1_evidence.py).
+lowgap() {
+  STOPSTATE=lane lowgap_set stub LG
+}
+drain() {
+  local depth
+  depth=$(sed -n 's/^ *EOT_DELAY_BYTES: *\([0-9]*\).*/\1/p' "$REPO/config/ftel_dphy_rx.yaml")
+  STOPSTATE="drain:$depth" lowgap_set stub_drain DR
+  STOPSTATE="drain:$depth" MAXTR=$(tlow 80) run 80 stub NEG-drain +EXIT=min +LPX=min \
+    +LENS=1,2,3,4,5,8,16,64 +REPEAT=4 +TIMEOUT_US=2500
+}
 
 # The check of every run so far again, with the current csi2_dump.py: same truth, captures, lane count and
 # trailer limits as recorded by run (tb.txt, args.txt); the window runs too. No simulation.
 recheck() {
-  local c out nl lim sat
-  local -a csv
+  local c out nl lim sat sm
+  local -a csv stop
   for c in "$W"/*/check.txt "$W"/window/*/check.txt; do
     out=$(dirname "$c")
     nl=$(sed -n 's/^TB START: NL \([0-9]*\),.*/\1/p' "$out/tb.txt")
     lim=$(sed -n 's/^trailer limit .*: //p' "$out/args.txt")
+    sm=$(sed -n 's/^stopstate check: //p' "$out/args.txt")
+    stop=()
+    [ -n "$sm" ] && stop=(--stopstate="$sm")
     csv=("$out/ftel_ppi.csv")
     sat=0
-    if ! grep -q ' stub lane(s)' "$out/args.txt"; then
+    if ! grep -q -e ' stub lane(s)' -e ' stub_drain lane(s)' "$out/args.txt"; then
       csv=("$out/xil_ppi.csv" "$out/ftel_ppi.csv")
       sat="-1,0"
     fi
     python3 "$FPGA/tools/csi2_dump.py" bursts --truth "$out/truth.txt" --lanes "$nl" --max-trailer="$lim" \
-      --sync-at="$sat" --max-lane-spread="$LANE_SPREAD" "${csv[@]}" > "$c" 2>&1
+      --sync-at="$sat" --max-lane-spread="$LANE_SPREAD" "${stop[@]}" "${csv[@]}" > "$c" 2>&1
   done
 }
 
@@ -290,7 +342,9 @@ case "${1:-}" in
   model)   shift; TN1_PRE=M_ TN1_ARGS=+AFE=model "$0" "${@:-all}" ;;
   report)  report ;;
   skew)    skew ;;
+  lowgap)  lowgap ;;
+  drain)   drain ;;
   summary) summary ;;
   recheck) recheck; summary ;;
-  *)       sed -n '24,51p' "$0"; exit 2 ;;
+  *)       sed -n '24,58p' "$0"; exit 2 ;;
 esac

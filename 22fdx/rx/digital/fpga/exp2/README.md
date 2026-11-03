@@ -110,7 +110,9 @@ Mô phỏng chạy trong XSIM của Vivado 2025.2, part xcvp1902.
 
   Ba khối này được `tn2a_evidence.py` (check `copy`) so lại với TN1 ở mỗi lần kiểm chứng. Cũng lấy từ TN1, nhưng
   không thuộc check `copy`: ba nhánh `g_x` của `xrx`, hookup `afe_model`, hai `ppi_csv_mon`, các hàm payload, và
-  watchdog.
+  watchdog. Từ 2026-11-03 (`../PLAN_EOT_NOWAIT.md`), instance của TN1 có thêm `.PARA_STOP_DRAIN_EN(STOP_DRAIN)`:
+  `tn1_code_lines()` bỏ kết nối đó trước khi so, và chỉ bỏ khi `STOP_DRAIN` của `tb_exp1.sv` còn mặc định 0. TN2a
+  và TN2b build mặc định, nên vẫn là cùng instance.
 - **Phần mới:**
   - `xtx` (ba nhánh theo số lane) và `tx_core_clk` (`+TX_CORE_HALF`, mặc định 2,5 ns);
   - **mux pad (`+SRC=tx|gen`):** lái hai bản pad cùng giá trị, đều bằng `assign`, nên đều strong:

@@ -15,12 +15,12 @@
 //                   (configuration path, K3) are absent: the configuration fields are inputs
 //                   and the status is exported (rtl_notes D-2).
 // Parent          : m_ftel_dphy_rx_wrap
-// HAS             : draft v0.14, §1.4, §2.2, §3, §5, Tables 2-2, 3-1, 5-1 and 5-2
+// HAS             : draft v0.17, §1.4, §2.2, §3, §5, Tables 2-2, 3-1, 5-1 and 5-2
 // Clock domains   : core, byte, ddr, ddrn
 // REQ-IDs         : REQ-001, REQ-002, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008, REQ-009,
 //                   REQ-011, REQ-013, REQ-014, REQ-030, REQ-031, REQ-032, REQ-033, REQ-034,
 //                   REQ-035, REQ-036, REQ-038, REQ-057, REQ-218, REQ-219, REQ-220, REQ-221,
-//                   REQ-222, REQ-331
+//                   REQ-222, REQ-331, REQ-381
 // OPEN            : K1, K3
 //
 // Evolution History:
@@ -38,7 +38,7 @@ module m_ftel_dphy_rx
   import ftel_dphy_rx_pkg::*;
   import ftel_dphy_rx_config_pkg::*;
 #(
-  // REQ-013, REQ-030, REQ-031, REQ-032, REQ-033, REQ-034, REQ-035, REQ-036, REQ-038
+  // REQ-013, REQ-030, REQ-031, REQ-032, REQ-033, REQ-034, REQ-035, REQ-036, REQ-038, REQ-381
   parameter int PARA_NUM_LANES         = C_NUM_LANES,
   parameter int PARA_DESER_RATIO       = C_DESER_RATIO,
   parameter int PARA_CORE_CLK_MHZ      = C_CORE_CLK_MHZ,
@@ -48,7 +48,8 @@ module m_ftel_dphy_rx
   parameter int PARA_LP_FILTER_CYC     = C_LP_FILTER_CYC,
   parameter int PARA_EOT_DELAY_BYTES   = C_EOT_DELAY_BYTES,
   parameter int PARA_SYNC_SEARCH_BYTES = C_SYNC_SEARCH_BYTES,
-  parameter int PARA_DLY_TAP_WIDTH     = C_DLY_TAP_WIDTH
+  parameter int PARA_DLY_TAP_WIDTH     = C_DLY_TAP_WIDTH,
+  parameter int PARA_STOP_DRAIN_EN     = C_STOP_DRAIN_EN
 ) (
   // ---- clock / reset ----
   // REQ-007, REQ-222
@@ -160,7 +161,7 @@ module m_ftel_dphy_rx
   logic [PARA_NUM_LANES-1:0]                       w_erresc_tgl;
   logic [PARA_NUM_LANES-1:0]                       w_hs_en;
   logic [PARA_NUM_LANES-1:0]                       w_term_en;
-  logic [PARA_NUM_LANES-1:0]                       w_eot_done;
+  logic [PARA_NUM_LANES-1:0]                       w_hs_busy;
   logic [PARA_NUM_LANES-1:0][PARA_DESER_RATIO-1:0] w_rxdatahs;
   logic [PARA_NUM_LANES-1:0]                       w_rxvalidhs;
   logic [PARA_NUM_LANES-1:0]                       w_rxactivehs;
@@ -266,7 +267,9 @@ module m_ftel_dphy_rx
   // ------------------------------------------------------------------ Blocks No. 3 and 4, per data lane
   for (genvar x = 0; x < PARA_NUM_LANES; x++) begin : g_lane
     // REQ-001, REQ-002, REQ-030
-    m_ftel_dphy_rx_dl_ctrl u_dl_ctrl_0 (
+    m_ftel_dphy_rx_dl_ctrl #(
+      .PARA_STOP_DRAIN_EN (PARA_STOP_DRAIN_EN)
+    ) u_dl_ctrl_0 (
       .i_core_clk          (i_core_clk),
       .i_core_rst_n        (w_core_rst_n),
       .i_en                (w_dl_en[x]),
@@ -274,7 +277,7 @@ module m_ftel_dphy_rx
       .i_init_done         (w_dl_init_done[x]),
       .i_hs_rx_timeout     (w_hs_rx_timeout[x]),
       .i_esc_timeout       (w_esc_timeout[x]),
-      .i_eot_done          (w_eot_done[x]),
+      .i_hs_busy           (w_hs_busy[x]),
       .i_lp_state          (w_lp_state[x]),
       .o_stopstate         (w_stopstate[x]),
       .o_ulpsactivenot     (w_ulpsactivenot[x]),
@@ -295,8 +298,6 @@ module m_ftel_dphy_rx
       .PARA_SYNC_SEARCH_BYTES (PARA_SYNC_SEARCH_BYTES),
       .PARA_EOT_DELAY_BYTES   (PARA_EOT_DELAY_BYTES)
     ) u_hs_datapath_0 (
-      .i_core_clk             (i_core_clk),
-      .i_core_rst_n           (w_core_rst_n),
       .i_byte_clk             (w_byte_clk),
       .i_byte_rst_n           (w_hs_rst_n[x]),
       .i_sync_search_start    (w_sync_search_start[x]),
@@ -308,7 +309,7 @@ module m_ftel_dphy_rx
       .o_rxskewcalhs          (w_rxskewcalhs[x]),
       .o_errsoths             (w_errsoths[x]),
       .o_errsotsynchs         (w_errsotsynchs[x]),
-      .o_eot_done             (w_eot_done[x]),
+      .o_hs_busy              (w_hs_busy[x]),
       .o_sts_errsoths_tgl     (o_sts_errsoths_tgl[x]),
       .o_sts_errsotsynchs_tgl (o_sts_errsotsynchs_tgl[x]),
       .o_sts_erreotsync_tgl   (o_sts_erreotsync_tgl[x]),

@@ -846,3 +846,68 @@ của `core_clk`. Bench được bổ sung hai thứ:
 | Docx v0.16 | Build lại: 85 trang, XSD PASS. Đã xem bằng mắt trang 51 (Table 4-7) |
 
 Không ID REQ nào bị retire. `doc/sync/questions_csi_team.md` (ADR-006 câu 2) đã cập nhật số mới.
+
+### 7.17 Đồng bộ P1 với spec v0.17 (lane không chờ EoT done, `PARA_STOP_DRAIN_EN`, 2026-11-03)
+
+Tester của team FPGA chỉ ra một mâu thuẫn: Table 1-3 hứa 80-1792 Mb/s, còn §4.5 của v0.16 để lane bỏ
+lỡ burst dưới khoảng 240 Mb/s khi THS-EXIT + TLPX ở mức tối thiểu. `fpga/exp1/run_exp1.sh lowgap` xác
+nhận trên RTL v0.16: 16/32 burst mỗi lane ở 80 và 120 Mb/s, 24/32 ở 160 Mb/s. Người dùng chọn sửa
+ngay trong RX theo phương án C-param của `fpga/PLAN_EOT_NOWAIT.md`, duyệt cùng ngày.
+
+Khác các lần trước, RTL đổi trước spec. Phần B (không chờ) được đo trên RTL trước (`fpga/work/exp1/NW-*`),
+tham số được thêm vào RTL trong cùng plan, rồi spec mới viết lại. Tag REQ được gắn sau lần resync này,
+và history của `req/rtl_scope.json` ghi lại thứ tự đó.
+
+- **Lane không chờ EoT done (REQ-384 và REQ-390 mới; REQ-111, REQ-122, REQ-123 viết lại).** DL_HS_EOT
+  chỉ còn 1 cycle: gặp LP-00 thì sang DL_HS_WAIT, còn lại sang DL_STOP. Lane về DL_STOP 30-35 ns sau
+  LP-11; Block No. 4 tự hoàn tất EoT.
+- **Tham số `PARA_STOP_DRAIN_EN` (REQ-381, REQ-385, REQ-386 mới; REQ-106, REQ-147, REQ-148 viết lại).**
+  Table 3-1 #11, mặc định 0. Với 0, `stopstate_x` là trạng thái Stop của lane. Với 1, nó chờ thêm HS
+  busy về 0, tức là chờ burst ra hết PPI. Ở chế độ 1, `stopstate_x` phụ thuộc byte clock giống đuôi dữ
+  liệu (S12, REQ-386).
+- **HS busy (REQ-382, REQ-383, REQ-387, REQ-388, REQ-389 mới; REQ-052, REQ-126 viết lại).**
+  - Table 4-2 vẫn 11 dòng: bỏ EoT done, thêm HS busy (byte → core, level qua 2 flop);
+  - chỉ thanh ghi `stopstate_x` dùng HS busy, FSM thì không (REQ-383). Vì vậy hai giá trị của tham số
+    nhận cùng các burst;
+  - REQ-388: start Low ít nhất THS-EXIT + TLPX + (1 + `hs_settle_cyc`) × 5 ns, nên hold 3 byte clock
+    luôn xong trước. REQ-368 viết lại theo đó;
+  - REQ-389: giữa hai burst sát nhau, `rxactivehs_x` Low 330-400 ns ở mọi rate.
+- **Phần còn lại của §4.6 và §5 (REQ-164, REQ-253 viết lại).** Bỏ EoT done; thứ tự `rxskewcalhs_x` /
+  `stopstate_x` ghi theo từng giá trị của tham số.
+- **ADR-006 (REQ-391 mới; REQ-276, REQ-311 viết lại).**
+  - Table 7-4 mới là ma trận có trọng số: A 49, B 81, C 82, D 77, E 75, F 67;
+  - C hơn B đúng bằng trọng số readiness trừ trọng số effort;
+  - còn mở cho team CSI: giá trị nào của tham số controller cần, kể cả thứ tự `rxskewcalhs_x` /
+    `stopstate_x` ở chế độ 1.
+
+  Hai bảng của ADR-007 dời thành Table 7-5 và Table 7-6.
+- **§8 và TCLK-POST (REQ-392 mới; REQ-290, REQ-296, REQ-320 viết lại).** §8 thêm các kịch bản burst
+  sát nhau từ 80 tới 1792 Mb/s, và phủ cả hai giá trị của tham số. TCLK-POST cần thêm 1 byte clock cho
+  `stopstate_x` ở chế độ 1.
+- **Retire 5 REQ.** Cả năm mô tả đúng cơ chế bị bỏ, nên câu nguồn không còn trong spec:
+
+  | REQ | Nội dung cũ |
+  |---|---|
+  | REQ-053 | EoT done qua toggle synchronizer |
+  | REQ-146 | DL_HS_EOT chờ EoT done; giới hạn rate dưới khoảng 240 Mb/s |
+  | REQ-149 | Phương án không chờ được giữ trong tài liệu như một lựa chọn nhanh hơn |
+  | REQ-179 | EoT done ra ở sườn đã đồng bộ, trước khi hold xong |
+  | REQ-275 | Quyết định ADR-006 cũ: tiếp tục chờ EoT done |
+- **Neo lại, nội dung không đổi** (dòng nguồn dời, hoặc đơn vị chữ quanh nó đổi): REQ-124, REQ-125,
+  REQ-163, REQ-177, REQ-178, REQ-250, REQ-379, và F-001 bằng `prev_finding_id`. Các ID giữ nguyên.
+
+| Bước | Kết quả |
+|---|---|
+| `spec_inventory.py` | EXPECTED v0.17 đăng ký **trước** khi sửa spec: `param` 10 → 11 (Table 3-1 #11), các nhóm khác như v0.16 (Table 4-2 vẫn 11 dòng). Selftest PASS. Dòng OPEN 47 → 49, dòng ⚠️ 117 → 128, dòng phụ thuộc open item 178 → 236 |
+| `rebase_req.py` | Giữ 343/371 REQ và 2/3 finding; 28 REQ và F-001 lỗi thời (19 câu nguồn không còn, 7 đổi đơn vị chữ, 3 lệch dòng); 27 vùng cần trích |
+| Chunk bổ sung `20_v17_delta.json` | 35 REQ: 23 neo lại bằng `prev_req_id` nên giữ ID (16 viết lại, 7 không đổi), 12 mới (REQ-381 đến REQ-392); F-001 neo lại. 5 REQ retire như bảng trên |
+| `validate_req.py` | 378 REQ · 3 finding · trích dẫn 381/381 · độ phủ 100% ở 15 nhóm · 0 lỗi · 0 cảnh báo. `needs_human_decision` 77 → 79 |
+| `validate_config.py` | `STOP_DRAIN_EN` vào `SYN_KEYS`, luật mới CFG-17 (giá trị 0 hoặc 1) và ca âm của nó. Package sinh lại, thêm `C_STOP_DRAIN_EN` với tag `OPEN ADR-006, S12 REQ-381`. Selftest âm 29/29 |
+| `flow_check.py` | P1: 0 xung đột. P2: 0 xung đột. P3a: 0 xung đột, 304/304 REQ trong phạm vi có tag (REQ-381 đến REQ-391 trong phạm vi, REQ-392 là verification), 30 tag OPEN. Test âm 28/28. `check_rtl_rules`: 0 vi phạm trên 22 file. VCS 0/0/0 cho 1, 2, 4 lane và cho `PARA_STOP_DRAIN_EN` = 1. SpyGlass `lint_rtl` 0/0/0, một waiver (D-19) |
+| DC | Mặc định (`PARA_STOP_DRAIN_EN` = 0), 4 lần chạy (2 góc × 1500/1792 Mb/s): TNS 0, WNS như v0.16 trừ `core_clk` ở một góc, kém 3 ps; diện tích 5990 → 5948 µm², flop 2666 → 2646 (bỏ khối tsync). Chế độ 1 chưa tổng hợp |
+| Hình | 2-4 (top), 4-5 (HS busy vào thanh ghi `stopstate_x`), 4-6 (DL_HS_EOT 1 cycle), 4-8 (thanh ghi HS busy), 4-9 (OR active/skew cal.; bỏ tầng thanh ghi ra không có thật), 5-1 (thêm hàng chế độ 1), 5-2, 5-3, 5-9. `check_figures`: 0 vi phạm |
+| Docx v0.17 | 90 trang, XSD PASS. Đã xem bằng mắt trang 41-42 (Figure 4-5, 4-6), 50-51 (4-8, 4-9), 66 (5-1, 5-2), 72 (5-9) và 76 (Table 7-4) |
+
+RTL: header của `_dl_ctrl`, `_hs_datapath`, `_eot`, `_sync`, top, wrapper và package ghi HAS v0.17
+(D-28 trong `doc/rtl_notes.md`). `m_ftel_dphy_rx_tsync.sv` giữ trong repo nhưng ra khỏi `filelist.f`.
+Hồi quy TN1 trên RTL mới: 358 run, mọi capture trùng lần chạy trước trừ cột `stopstate`.

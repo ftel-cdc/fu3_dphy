@@ -27,7 +27,6 @@ ${FTEL_DPHY_RX_PATH}/logical/ftel_dphy_rx_config_pkg.sv
 ${FTEL_DPHY_RX_PATH}/logical/ftel_dphy_rx_pkg.sv
 ${FTEL_DPHY_RX_PATH}/logical/m_ftel_dphy_rx_sync.sv
 ${FTEL_DPHY_RX_PATH}/logical/m_ftel_dphy_rx_rst_sync.sv
-${FTEL_DPHY_RX_PATH}/logical/m_ftel_dphy_rx_tsync.sv
 ${FTEL_DPHY_RX_PATH}/logical/m_ftel_dphy_rx_cg.sv
 ${FTEL_DPHY_RX_PATH}/logical/m_ftel_dphy_rx_clk_inv.sv
 ${FTEL_DPHY_RX_PATH}/logical/m_ftel_dphy_rx_lp_filter.sv

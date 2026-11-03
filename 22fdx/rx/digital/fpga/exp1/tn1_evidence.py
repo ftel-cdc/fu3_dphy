@@ -41,10 +41,17 @@ Checks, one result line each:
             another with the same payload (count and payloads still match in order) must show the three bursts out
             of time; rxsynchs High for three cycles, rxsynchs with the third byte and a lane eight cycles later must
             each be found, and must pass without the timing checks.
-  runs      every scenario was run (the 113 of run_exp1.sh all, their M_ runs, R-80, E1-6a, E1-6b and NEG-skew);
-            every run ended with "TB DONE OK", and truth.txt has one line per burst and lane; check.txt passed in
-            every run but NEG-skew, which must fail at the lane spread only: lane 3 is 7.5 byte times late at the
-            pads, the payloads pass, every burst is wider than LANE_SPREAD on both receivers.
+  runs      every scenario was run (the 113 of run_exp1.sh all, their M_ runs, R-80, E1-6a, E1-6b, NEG-skew and
+            NEG-drain); every run ended with "TB DONE OK", and truth.txt has one line per burst and lane; check.txt
+            passed in every run but the two negative ones. NEG-skew must fail at the lane spread only: lane 3 is 7.5
+            byte times late at the pads, the payloads pass, every burst is wider than LANE_SPREAD on both
+            receivers. NEG-drain must fail at stopstate only: the default build under the after-drain check, the
+            payloads pass, stopstate is High with an HS output still to come on every lane.
+  lowgap    (when run_exp1.sh lowgap or drain was run, fpga/PLAN_EOT_NOWAIT.md) the 24 low-gap runs of both builds
+            are there; every burst of each was received with an intact payload; in the DR- runs (PARA_STOP_DRAIN_EN
+            = 1) stopstate is never High with rxactivehs High at that sample or within PARA_EOT_DELAY_BYTES samples
+            after it, and High in the last sample, on every lane; each LG- run equals its DR- run in every column but
+            stopstate. Reported: the gaps between bursts at the pad with stopstate High in the LG- runs.
   front     both receivers had the same front end (fpga/PLAN_TN1_FAIR.md): in every run of both, the LP outputs
             of AMD's buffers and of the IBUFDS_DPHY buffers of ftel_dphy_rx were equal at every change, and
             ftel_dphy_rx sat behind those buffers unless the scenario set +AFE=model.
@@ -87,7 +94,11 @@ SCENARIOS = (['E1-1', 'E1-2a', 'E1-2b', 'E1-2c'] + [f'E1-3{s}' for s in 'abcdefg
              + [f'E1-5_{r}_{t}_j{j}_n{n}' for r in RATES for t in ('min', 'def', 'max') for j in (0, 1)
                 for n in (0, 40)])
 OTHERS = ('R-80', 'E1-6a', 'E1-6b')
-NEGATIVE = ('NEG-skew',)
+NEGATIVE = ('NEG-skew', 'NEG-drain')
+# run_exp1.sh lowgap (LG-<case>) and drain (DR-<case>)
+LOWGAP = ([f'{r:04d}-min' for r in (80, 120, 160, 180, 200, 220, 240, 260, 400, 800, 1440, 1500, 1792)]
+          + [f'{r:04d}-x400' for r in (80, 160, 180, 220)] + [f'{r:04d}-pz' for r in (80, 120, 160, 260)]
+          + [f'{r:04d}-tmin' for r in (80, 160, 260)])
 # timing at the PPI (HAS Table A-2): rxsynchs from the first byte per capture (C6), inter-lane byte divergence (C10)
 SYNC_AT = {'xil_ppi.csv': -1, 'ftel_ppi.csv': 0}
 LANE_SPREAD = 6
@@ -255,17 +266,60 @@ def sources_hash():
     return hashlib.sha256(text.encode()).hexdigest()[:16]
 
 
+def is_stub(args):
+    """ftel_dphy_rx alone: a run of the stub build or of the stub build with PARA_STOP_DRAIN_EN = 1."""
+    return ' stub lane(s)' in args or ' stub_drain lane(s)' in args
+
+
 def captures(args):
     """The PPI captures of a run: ftel_dphy_rx alone in a stub run, else AMD's receiver and ftel_dphy_rx."""
-    return ['ftel_ppi.csv'] if ' stub lane(s)' in args else ['xil_ppi.csv', 'ftel_ppi.csv']
+    return ['ftel_ppi.csv'] if is_stub(args) else ['xil_ppi.csv', 'ftel_ppi.csv']
+
+
+def stop_check(path, lanes, depth, truth=None):
+    """stopstate of one capture, apart from csi2_dump.py: per lane the samples where it is High although rxactivehs
+    is High there or within depth samples after it (none with PARA_STOP_DRAIN_EN = 1; depth None: not counted),
+    whether it is High in the last sample, and the gaps between bursts at the pad (truth) with it High."""
+    rows = list(csv.reader(open(path)))
+    col = {name: i for i, name in enumerate(rows[0])}
+    body = rows[2:]
+    t = [int(r[col['sim_time_ps']]) for r in body]
+    out = {'bad': [], 'end': [], 'seen': 0, 'gaps': 0}
+    for lane in range(lanes):
+        a = [r[col[f'dl{lane}_rxactivehs']] == '1' for r in body]
+        st = [r[col[f'dl{lane}_stopstate']] == '1' for r in body]
+        bad, nxt = 0, None
+        for n in range(len(body) - 1, -1, -1):
+            if a[n]:
+                nxt = n
+            if depth is not None and st[n] and nxt is not None and nxt - n <= depth:
+                bad += 1
+        out['bad'].append(bad)
+        out['end'].append(bool(st) and st[-1])
+        for (_p0, _s0, end), (_p1, start, _e1) in zip(truth.get(lane, []), truth.get(lane, [])[1:]) if truth else ():
+            out['gaps'] += 1
+            out['seen'] += any(st[n] for n in range(len(t)) if end < t[n] < start)
+    return out
+
+
+def same_but_stop(path_a, path_b):
+    """Two captures equal in every column but stopstate."""
+    ra, rb = (list(csv.reader(open(p))) for p in (path_a, path_b))
+    if ra[0] != rb[0] or len(ra) != len(rb):
+        return False
+    keep = [i for i, name in enumerate(ra[0]) if not name.endswith('_stopstate')]
+    return all([x[i] for i in keep] == [y[i] for i in keep] for x, y in zip(ra, rb))
 
 
 def evidence(w):
     """The checks over the runs in w ({check: passed}), printed one line each."""
     with open(vc.YAML_DEFAULT, 'rb') as f:
-        model = vc.Model(vc.yaml.safe_load(f.read()))
+        ycfg = vc.yaml.safe_load(f.read())
+    model = vc.Model(ycfg)
+    depth = int(ycfg['synthesis']['EOT_DELAY_BYTES'])   # PARA_EOT_DELAY_BYTES: the drain of the delay line
     runs = sorted(os.path.dirname(c) for c in glob.glob(os.path.join(w, '*', 'check.txt')))
     results = {}
+    lg_dec = {}   # low-gap runs: (bursts with an intact payload, all bursts, errors)
 
     def report(name, ok, text):
         results[name] = ok
@@ -293,7 +347,7 @@ def evidence(w):
         check = open(os.path.join(run, 'check.txt')).read()
         truth = read_truth(os.path.join(run, 'truth.txt'))
         lanes = int(re.search(r'^TB START: NL (\d+)', tb, re.M)[1])
-        stub = ' stub lane(s)' in args
+        stub = is_stub(args)
         caps = captures(args)
         lim = re.search(r'^trailer limit .*: (\S+)$', args, re.M)   # runs before the limit existed have none
         limits = lim[1].split(',') if lim else ['-']
@@ -314,11 +368,18 @@ def evidence(w):
             else:
                 bad.append(f'{name}/{cap}: {n_ok}/{n_all} trailer {span} errors {errs}; check.txt {ref[0]}/{ref[1]}'
                            f' trailer {ref[2]} errors {ref[3]}')
-            if name in NEGATIVE:
+            if name.startswith(('LG-', 'DR-')):
+                lg_dec[name] = (n_ok, n_all, errs)
+            if name == 'NEG-skew':
                 plain = decode_cached(os.path.join(run, cap), truth, lanes, lim, SYNC_AT[cap], None)[3]
                 neg[cap] = (st['over'] == st['bursts'] > 0 and plain == 0,
                             f'{cap} {st["over"]}/{st["bursts"]} bursts wider than {LANE_SPREAD} (widest'
                             f' {st["spread"]}), {plain} errors without the lane spread')
+            elif name == 'NEG-drain':
+                sv = stop_check(os.path.join(run, cap), lanes, depth)
+                neg[cap] = (errs == 0 and all(b > 0 for b in sv['bad']),
+                            f'{cap} {errs} errors without stopstate, stopstate High with an HS output at most'
+                            f' {depth} samples later on {sum(b > 0 for b in sv["bad"])}/{lanes} lanes')
         result = re.search(r'^RESULT: (PASS|FAIL)', check, re.M)
         if name in NEGATIVE:
             ok = bool(result) and result[1] == 'FAIL' and len(neg) == len(caps) and all(x for x, _ in neg.values())
@@ -375,8 +436,8 @@ def evidence(w):
            f'{len(runs)} runs ({len(SCENARIOS)} scenarios, their M_ runs, {", ".join(OTHERS + NEGATIVE)}:'
            f' {"all there" if not missing else "missing " + str(missing[:6])}); {n_done} ended with TB DONE OK,'
            f' {n_truth} with one truth line per burst and lane; check.txt PASS in'
-           f' {len(runs) - len(verdict_bad) - len(neg_text)}/{len(runs) - len(neg_text)} runs outside NEG-skew'
-           f' {verdict_bad[:4] if verdict_bad else ""}; '
+           f' {len(runs) - len(verdict_bad) - len(neg_text)}/{len(runs) - len(neg_text)} runs outside the negative'
+           f' ones {verdict_bad[:4] if verdict_bad else ""}; '
            + '; '.join(t for _, t in neg_text.values()))
     n_m = sum(1 for r in fe_model if r.startswith('M_'))
     report('front', n_pair > 0 and not fe_bad,
@@ -397,6 +458,39 @@ def evidence(w):
     used = [b for b in builds if open(b).read().strip()]
     report('sources', bool(used) and not stale, f'{len(used) - len(stale)}/{len(used)} builds compiled from the'
            f' current sources (hash {cur}) {stale if stale else ""}')
+
+    if lg_dec or 'NEG-drain' in names:
+        miss = [f'{p}-{c}' for p in ('LG', 'DR') for c in LOWGAP if f'{p}-{c}' not in names]
+        full = [n for n, (ok, alln, e) in lg_dec.items() if ok == alln > 0 and e == 0]
+        dr_ok, same, seen, gaps, bad = 0, 0, 0, 0, []
+        for c in LOWGAP:
+            lg, dr = os.path.join(w, f'LG-{c}'), os.path.join(w, f'DR-{c}')
+            if os.path.isdir(dr):
+                tr = read_truth(os.path.join(dr, 'truth.txt'))
+                sv = stop_check(os.path.join(dr, 'ftel_ppi.csv'), len(tr), depth)
+                if not any(sv['bad']) and all(sv['end']):
+                    dr_ok += 1
+                else:
+                    bad.append(f'DR-{c}: stopstate High with an HS output at most {depth} samples later'
+                               f' {sv["bad"]} times per lane, High at the end {sv["end"]}')
+            if os.path.isdir(lg):
+                tr = read_truth(os.path.join(lg, 'truth.txt'))
+                sv = stop_check(os.path.join(lg, 'ftel_ppi.csv'), len(tr), None, tr)
+                seen, gaps = seen + sv['seen'], gaps + sv['gaps']
+            if os.path.isdir(lg) and os.path.isdir(dr):
+                if same_but_stop(os.path.join(lg, 'ftel_ppi.csv'), os.path.join(dr, 'ftel_ppi.csv')):
+                    same += 1
+                else:
+                    bad.append(f'LG-{c} and DR-{c} differ outside stopstate')
+        report('lowgap', not miss and len(full) == 2 * len(LOWGAP) and dr_ok == same == len(LOWGAP),
+               f'{2 * len(LOWGAP) - len(miss)}/{2 * len(LOWGAP)} low-gap runs (LG- default build, DR- with'
+               f' PARA_STOP_DRAIN_EN = 1{"" if not miss else ", missing " + str(miss[:4])}); {len(full)} with every'
+               f' burst received intact and no error; DR-: stopstate never High with an HS output at most {depth}'
+               f' samples later and High at the end on every lane in {dr_ok}/{len(LOWGAP)}; LG- equal to DR- but'
+               f' for stopstate in {same}/{len(LOWGAP)}; LG- stopstate High in {seen}/{gaps} gaps between bursts'
+               f' at the pad (reported)')
+        for b in bad[:6]:
+            print(f'          {b}')
 
     win = glob.glob(os.path.join(w, 'window', 'W_*', 'check.txt'))
     if win:
@@ -500,6 +594,20 @@ def drop_burst(text, lane=0):
     return '\n'.join(lines)
 
 
+def stop_early(text, lane=0):
+    """stopstate High in the three samples before the first burst with three bytes or more: a lane state that leads
+    the PPI, as with PARA_STOP_DRAIN_EN = 0."""
+    lines, col = _lines(text)
+    rows, _ = _burst(lines, col, lane)
+    a = col[f'dl{lane}_rxactivehs']
+    i = rows[0]
+    while i > 2 and lines[i - 1].split(',')[a] == '1':
+        i -= 1
+    for k in range(max(i - 3, 2), i):
+        _set(lines, k, col[f'dl{lane}_stopstate'], '1')
+    return '\n'.join(lines)
+
+
 def check_again(run):
     """check.txt of a run made again by csi2_dump.py with the arguments run_exp1.sh recheck gives it."""
     args = open(os.path.join(run, 'args.txt')).read()
@@ -508,9 +616,10 @@ def check_again(run):
     lanes = re.search(r'^TB START: NL (\d+)', tb, re.M)[1]
     lim = re.search(r'^trailer limit .*: (\S+)$', args, re.M)[1]
     sat = ','.join(str(SYNC_AT[c]) for c in caps)
+    sm = re.search(r'^stopstate check: (\S+)$', args, re.M)
     cmd = [sys.executable, CSI2_DUMP, 'bursts', '--truth', os.path.join(run, 'truth.txt'), '--lanes', lanes,
            f'--max-trailer={lim}', f'--sync-at={sat}', f'--max-lane-spread={LANE_SPREAD}',
-           *(os.path.join(run, c) for c in caps)]
+           *([f'--stopstate={sm[1]}'] if sm else []), *(os.path.join(run, c) for c in caps)]
     out = subprocess.run(cmd, capture_output=True, text=True)
     with open(os.path.join(run, 'check.txt'), 'w') as f:
         f.write(out.stdout + out.stderr)
@@ -541,6 +650,10 @@ EV_FAULTS = (   # (fault, entry of the folder, file, change of its text, check.t
      False, ['config']),
     ('another sources hash of a build', 'build_1440_4l', 'src.sha', lambda s: '0000000000000000\n', False,
      ['sources']),
+    ('a burst lost in a low-gap run', 'LG-0080-min', 'ftel_ppi.csv', drop_burst, False, ['decode', 'lowgap']),
+    ('stopstate High before a burst of a drain run', 'DR-0080-min', 'ftel_ppi.csv', stop_early, False, ['lowgap']),
+    ('NEG-drain passing in check.txt', 'NEG-drain', 'check.txt', lambda s: s.replace('RESULT: FAIL', 'RESULT: PASS'),
+     False, ['runs']),
 )
 
 

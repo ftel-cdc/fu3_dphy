@@ -24,7 +24,8 @@
 # ============================================================================
 # VCS lint of the ftel_dphy_rx RTL (doc/rtl_rule.md L1), in the form of ftel_intctl/sim/compile_rtl.sh.
 #
-#   vcs_lint.sh                    wrapper m_ftel_dphy_rx_wrap with PARA_NUM_LANES = 1, 2 and 4;
+#   vcs_lint.sh                    wrapper m_ftel_dphy_rx_wrap with PARA_NUM_LANES = 1, 2 and 4, and with
+#                                  PARA_STOP_DRAIN_EN = 1 (4 lanes);
 #                                  writes sim/vcs_lint/manifest.json (sha256 of the RTL linted, counts per run)
 #   vcs_lint.sh --module <name>    one module or package: the files of logical/filelist.f up to its own
 #                                  (compile order), top = <name>; writes sim/vcs_lint/module_<name>.json
@@ -104,6 +105,8 @@ status=0
 for n in 1 2 4; do
   run "wrap_lanes$n" m_ftel_dphy_rx_wrap "-pvalue+m_ftel_dphy_rx_wrap.PARA_NUM_LANES=$n" || status=1
 done
+# stopstate_x after the drain of the delay line (PARA_STOP_DRAIN_EN = 1, HAS Table 3-1)
+run "wrap_lanes4_drain" m_ftel_dphy_rx_wrap "-pvalue+m_ftel_dphy_rx_wrap.PARA_STOP_DRAIN_EN=1" || status=1
 manifest "$OUT/manifest.json"
 echo "=== VCS lint: $([ $status -eq 0 ] && echo PASS || echo FAIL) (manifest: sim/vcs_lint/manifest.json) ==="
 exit $status

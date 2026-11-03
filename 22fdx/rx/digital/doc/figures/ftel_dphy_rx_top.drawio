@@ -146,7 +146,7 @@
             <mxPoint x="-96" y="0" as="offset" />
           </mxGeometry>
         </mxCell>
-        <mxCell id="e_eotdn" value="EoT done&lt;br&gt;(CDC)" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;exitX=0.9;exitY=0;exitDx=0;exitDy=0;entryX=0.9;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="n4" target="n3">
+        <mxCell id="e_hsbusy" value="HS busy&lt;br&gt;(CDC)" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;exitX=0.9;exitY=0;exitDx=0;exitDy=0;entryX=0.9;entryY=1;entryDx=0;entryDy=0;" edge="1" parent="1" source="n4" target="n3">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="58" y="0" as="offset" />
           </mxGeometry>

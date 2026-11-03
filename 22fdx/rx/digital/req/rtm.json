@@ -1,31 +1,31 @@
 {
  "ip": "ftel_dphy_rx",
  "generated_by": "flow_check.py --phase P3a",
- "spec_sha256": "92a36c2a3c916b0e6de4b3b40d71b6666b38f68f5be7fab23522df308f589ebf",
- "structured_spec_sha256": "bcaec9360086a63de7da330579c096933c06bffd9b72be0e77bd79c66cf89632",
+ "spec_sha256": "1214230ce90d417b502db88544678b2a3afd6b62c432a6fd62d6d74c00b38b8f",
+ "structured_spec_sha256": "b474adcc9afdee07e7a8bc862b92027a340d27d51514e6d562e37c7439768c79",
  "rtl": {
-  "logical/ftel_dphy_rx_config_pkg.sv": "4cbcea6ac894197b2c6a06b24ce6bada257bb6ef116357cfac0587727c6c6ba3",
+  "logical/ftel_dphy_rx_config_pkg.sv": "a292981d74f5750ae5a20154b51438b76f282ee0c4746f7004f2a64ac488a5f0",
   "logical/ftel_dphy_rx_pkg.sv": "f728a8def80c92f27a5cfcd7b38ee2c0438f3b69f6d2de1c3f30fc1fe51599de",
-  "logical/m_ftel_dphy_rx.sv": "ee7b9e0f2ff09e1eee9e9ebfcd92f2c12310b2deba221dbc966dd31afa3a2ef5",
+  "logical/m_ftel_dphy_rx.sv": "dace106dda9b4a9c6c7ef68b06f6cfd7cc6b52ed7013a8cc6ea2a072790debb6",
   "logical/m_ftel_dphy_rx_afe_adapter.sv": "16e8deff5bc306a19a8f7446bb4480811d5f675230e12b183b5e47b30fabf02e",
   "logical/m_ftel_dphy_rx_byte_clk.sv": "6d5f62d108991606a774e772ae53b1b35921db4057b2d76da44be0361e7cbb3b",
   "logical/m_ftel_dphy_rx_cg.sv": "ddef6cc710a59d3c89ac7c06ff53c6dad3da786c905db5de4f483adb86602673",
   "logical/m_ftel_dphy_rx_cl_ctrl.sv": "2453daacaef1008ee03217606c325b3e754cf0f5fc27e108aca54c1afeee5430",
   "logical/m_ftel_dphy_rx_clk_act.sv": "6a1b76378efd6a42d3b1bfd5f9a316a6415af6cac745fe701acd226f76ae677b",
   "logical/m_ftel_dphy_rx_clk_inv.sv": "e69af4fffa58cc2a6ae71797982b8d3a5bb38440560ed6b19e4562e2c8c05410",
-  "logical/m_ftel_dphy_rx_dl_ctrl.sv": "da2197e2ff2c5c6f4161af3e06a2ea47550c403020f24ca69580601fa81b7c00",
-  "logical/m_ftel_dphy_rx_eot.sv": "1e9f157a1329f002d27028640f845349c9853764c37d05fc605c89d303069589",
+  "logical/m_ftel_dphy_rx_dl_ctrl.sv": "575075944be4a3a0004ffe4957dc06952144b99bed5ede7843ace07502e2c73b",
+  "logical/m_ftel_dphy_rx_eot.sv": "f337a1626a4c3346850dd9972e966cf1036369d2347215f06f0d31358a7fc828",
   "logical/m_ftel_dphy_rx_esc_decoder.sv": "fa6bd69d035109a16daf90be8a4c14247042cf9337fe8c8f67aea93589852690",
-  "logical/m_ftel_dphy_rx_hs_datapath.sv": "d19d94665237be58b2a6e55059aa7f630080468bcb30f095d8449472ce577dbb",
+  "logical/m_ftel_dphy_rx_hs_datapath.sv": "69192566dfaf36ef9d0fadc5d141b8a3c2b80e47af1add8ca86d1bd03558fd71",
   "logical/m_ftel_dphy_rx_hs_deser.sv": "340822eed0fcda865e750d75b716d6bf43866ed8031404f0e2f62ff4146e486b",
   "logical/m_ftel_dphy_rx_lp_filter.sv": "90885b949865f081e0386be2832bac5866c375a5c141dda91ae6807498f213f7",
   "logical/m_ftel_dphy_rx_ppi_out.sv": "74799a514da473ea8f47cc2d7855e01355b09976089946524c108036e53058f5",
   "logical/m_ftel_dphy_rx_rst_sync.sv": "3da4975d3de554a8880548aa87e0c0d3efe7b2675dc658427c07fe28bd9eabe6",
-  "logical/m_ftel_dphy_rx_sync.sv": "3d8bada9621e5a938b9c123aaaa0b7cd52b7ea4c66a66a376953abf1a0d02fbe",
+  "logical/m_ftel_dphy_rx_sync.sv": "6c5501130e5b78e60da61f4a3d4524494b5d461b07218be918c49f218ff76e2e",
   "logical/m_ftel_dphy_rx_sync_search.sv": "e056ee7f33c7daf13e07c04f40b6fe76de546e1922ebec9f3da8abc5f3238804",
   "logical/m_ftel_dphy_rx_timing_init.sv": "4413d3639d283f94ba91fabdc3804e8086f70653e30f8760235a313b7017e66c",
   "logical/m_ftel_dphy_rx_tsync.sv": "2154fba3dadc9af5b5568090f1fef4657fe58e1722f213ec205b6b1ae882f0f0",
-  "logical/m_ftel_dphy_rx_wrap.sv": "fdf84478897f217f15cf0b20649ecc9a6b2bb603bc72d07c6d0db9b5eb42a890"
+  "logical/m_ftel_dphy_rx_wrap.sv": "cabd71fc5c235673d8d613438f96b0880dced1dad71affc5a8e8457af3762934"
  },
  "requirements": [
   {
@@ -139,7 +139,7 @@
     "K3"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx.sv:113"
+    "logical/m_ftel_dphy_rx.sv:114"
    ]
   },
   {
@@ -188,7 +188,7 @@
     "K1"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx.sv:382"
+    "logical/m_ftel_dphy_rx.sv:383"
    ]
   },
   {
@@ -654,7 +654,7 @@
     "ADR-007"
    ],
    "open_tags": [
-    "logical/ftel_dphy_rx_config_pkg.sv:65"
+    "logical/ftel_dphy_rx_config_pkg.sv:68"
    ]
   },
   {
@@ -673,7 +673,7 @@
     "ADR-007"
    ],
    "open_tags": [
-    "logical/ftel_dphy_rx_config_pkg.sv:65"
+    "logical/ftel_dphy_rx_config_pkg.sv:68"
    ]
   },
   {
@@ -722,7 +722,7 @@
     "K8"
    ],
    "open_tags": [
-    "logical/ftel_dphy_rx_config_pkg.sv:75"
+    "logical/ftel_dphy_rx_config_pkg.sv:78"
    ]
   },
   {
@@ -756,7 +756,7 @@
     "ADR-001"
    ],
    "open_tags": [
-    "logical/ftel_dphy_rx_config_pkg.sv:82"
+    "logical/ftel_dphy_rx_config_pkg.sv:85"
    ]
   },
   {
@@ -823,21 +823,6 @@
   },
   {
    "req_id": "REQ-052",
-   "block": "all",
-   "category": "clocking",
-   "release": "both",
-   "in_rtl_scope": true,
-   "excluded_reason": null,
-   "rtl_traced": true,
-   "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
-   ],
-   "provisional": false,
-   "open_item_ref": [],
-   "open_tags": []
-  },
-  {
-   "req_id": "REQ-053",
    "block": "all",
    "category": "clocking",
    "release": "both",
@@ -966,7 +951,6 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv",
     "logical/m_ftel_dphy_rx_tsync.sv"
    ],
    "provisional": false,
@@ -1975,7 +1959,7 @@
     "ADR-007"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv:218"
+    "logical/m_ftel_dphy_rx_dl_ctrl.sv:242"
    ]
   },
   {
@@ -2257,25 +2241,6 @@
    ]
   },
   {
-   "req_id": "REQ-146",
-   "block": "No.3",
-   "category": "timing",
-   "release": "both",
-   "in_rtl_scope": true,
-   "excluded_reason": null,
-   "rtl_traced": true,
-   "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
-   ],
-   "provisional": true,
-   "open_item_ref": [
-    "ADR-006"
-   ],
-   "open_tags": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv:169"
-   ]
-  },
-  {
    "req_id": "REQ-147",
    "block": "No.3",
    "category": "interface",
@@ -2291,7 +2256,7 @@
     "ADR-006"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv:169"
+    "logical/m_ftel_dphy_rx_dl_ctrl.sv:149"
    ]
   },
   {
@@ -2305,19 +2270,6 @@
    "rtl_files": [
     "logical/m_ftel_dphy_rx_dl_ctrl.sv"
    ],
-   "provisional": false,
-   "open_item_ref": [],
-   "open_tags": []
-  },
-  {
-   "req_id": "REQ-149",
-   "block": "No.3",
-   "category": "decision",
-   "release": "both",
-   "in_rtl_scope": false,
-   "excluded_reason": "category decision",
-   "rtl_traced": false,
-   "rtl_files": [],
    "provisional": false,
    "open_item_ref": [],
    "open_tags": []
@@ -2475,7 +2427,7 @@
     "ADR-007"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_eot.sv:138"
+    "logical/m_ftel_dphy_rx_eot.sv:141"
    ]
   },
   {
@@ -2772,21 +2724,6 @@
    "open_tags": []
   },
   {
-   "req_id": "REQ-179",
-   "block": "No.4",
-   "category": "functional",
-   "release": "both",
-   "in_rtl_scope": true,
-   "excluded_reason": null,
-   "rtl_traced": true,
-   "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
-   ],
-   "provisional": false,
-   "open_item_ref": [],
-   "open_tags": []
-  },
-  {
    "req_id": "REQ-180",
    "block": "No.4",
    "category": "functional",
@@ -2928,7 +2865,7 @@
     "S12"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_eot.sv:161"
+    "logical/m_ftel_dphy_rx_eot.sv:164"
    ]
   },
   {
@@ -4067,7 +4004,7 @@
     "ADR-001"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv:219"
+    "logical/m_ftel_dphy_rx_dl_ctrl.sv:243"
    ]
   },
   {
@@ -4213,23 +4150,8 @@
     "ADR-006"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_eot.sv:113"
+    "logical/m_ftel_dphy_rx_eot.sv:116"
    ]
-  },
-  {
-   "req_id": "REQ-275",
-   "block": "No.3",
-   "category": "decision",
-   "release": "both",
-   "in_rtl_scope": false,
-   "excluded_reason": "category decision",
-   "rtl_traced": false,
-   "rtl_files": [],
-   "provisional": true,
-   "open_item_ref": [
-    "ADR-006"
-   ],
-   "open_tags": []
   },
   {
    "req_id": "REQ-276",
@@ -4608,7 +4530,7 @@
     "K6"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_wrap.sv:125"
+    "logical/m_ftel_dphy_rx_wrap.sv:126"
    ]
   },
   {
@@ -4888,7 +4810,7 @@
     "S12"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_eot.sv:161"
+    "logical/m_ftel_dphy_rx_eot.sv:164"
    ]
   },
   {
@@ -5791,7 +5713,7 @@
     "ADR-006"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv:110"
+    "logical/m_ftel_dphy_rx_hs_datapath.sv:109"
    ]
   },
   {
@@ -5806,14 +5728,212 @@
    "provisional": false,
    "open_item_ref": [],
    "open_tags": []
+  },
+  {
+   "req_id": "REQ-381",
+   "block": "No.4",
+   "category": "parameter",
+   "release": "both",
+   "in_rtl_scope": true,
+   "excluded_reason": null,
+   "rtl_traced": true,
+   "rtl_files": [
+    "logical/ftel_dphy_rx_config_pkg.sv",
+    "logical/m_ftel_dphy_rx.sv"
+   ],
+   "provisional": true,
+   "open_item_ref": [
+    "ADR-006",
+    "S12"
+   ],
+   "open_tags": [
+    "logical/ftel_dphy_rx_config_pkg.sv:63"
+   ]
+  },
+  {
+   "req_id": "REQ-382",
+   "block": "all",
+   "category": "clocking",
+   "release": "both",
+   "in_rtl_scope": true,
+   "excluded_reason": null,
+   "rtl_traced": true,
+   "rtl_files": [
+    "logical/m_ftel_dphy_rx_dl_ctrl.sv",
+    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+   ],
+   "provisional": false,
+   "open_item_ref": [],
+   "open_tags": []
+  },
+  {
+   "req_id": "REQ-383",
+   "block": "No.3",
+   "category": "functional",
+   "release": "both",
+   "in_rtl_scope": true,
+   "excluded_reason": null,
+   "rtl_traced": true,
+   "rtl_files": [
+    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+   ],
+   "provisional": false,
+   "open_item_ref": [],
+   "open_tags": []
+  },
+  {
+   "req_id": "REQ-384",
+   "block": "No.3",
+   "category": "timing",
+   "release": "both",
+   "in_rtl_scope": true,
+   "excluded_reason": null,
+   "rtl_traced": true,
+   "rtl_files": [
+    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+   ],
+   "provisional": false,
+   "open_item_ref": [],
+   "open_tags": []
+  },
+  {
+   "req_id": "REQ-385",
+   "block": "No.3",
+   "category": "functional",
+   "release": "both",
+   "in_rtl_scope": true,
+   "excluded_reason": null,
+   "rtl_traced": true,
+   "rtl_files": [
+    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+   ],
+   "provisional": false,
+   "open_item_ref": [],
+   "open_tags": []
+  },
+  {
+   "req_id": "REQ-386",
+   "block": "No.3",
+   "category": "functional",
+   "release": "both",
+   "in_rtl_scope": true,
+   "excluded_reason": null,
+   "rtl_traced": true,
+   "rtl_files": [
+    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+   ],
+   "provisional": true,
+   "open_item_ref": [
+    "S12"
+   ],
+   "open_tags": [
+    "logical/m_ftel_dphy_rx_dl_ctrl.sv:150"
+   ]
+  },
+  {
+   "req_id": "REQ-387",
+   "block": "No.4",
+   "category": "functional",
+   "release": "both",
+   "in_rtl_scope": true,
+   "excluded_reason": null,
+   "rtl_traced": true,
+   "rtl_files": [
+    "logical/m_ftel_dphy_rx_eot.sv",
+    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+   ],
+   "provisional": false,
+   "open_item_ref": [],
+   "open_tags": []
+  },
+  {
+   "req_id": "REQ-388",
+   "block": "No.4",
+   "category": "timing",
+   "release": "both",
+   "in_rtl_scope": true,
+   "excluded_reason": null,
+   "rtl_traced": true,
+   "rtl_files": [
+    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+   ],
+   "provisional": false,
+   "open_item_ref": [],
+   "open_tags": []
+  },
+  {
+   "req_id": "REQ-389",
+   "block": "No.4",
+   "category": "interface",
+   "release": "both",
+   "in_rtl_scope": true,
+   "excluded_reason": null,
+   "rtl_traced": true,
+   "rtl_files": [
+    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+   ],
+   "provisional": false,
+   "open_item_ref": [],
+   "open_tags": []
+  },
+  {
+   "req_id": "REQ-390",
+   "block": "No.3",
+   "category": "constraint",
+   "release": "both",
+   "in_rtl_scope": true,
+   "excluded_reason": null,
+   "rtl_traced": true,
+   "rtl_files": [
+    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+   ],
+   "provisional": true,
+   "open_item_ref": [
+    "ADR-006"
+   ],
+   "open_tags": [
+    "logical/m_ftel_dphy_rx_dl_ctrl.sv:192"
+   ]
+  },
+  {
+   "req_id": "REQ-391",
+   "block": "all",
+   "category": "constraint",
+   "release": "both",
+   "in_rtl_scope": true,
+   "excluded_reason": null,
+   "rtl_traced": true,
+   "rtl_files": [
+    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+   ],
+   "provisional": true,
+   "open_item_ref": [
+    "ADR-006"
+   ],
+   "open_tags": [
+    "logical/m_ftel_dphy_rx_dl_ctrl.sv:149"
+   ]
+  },
+  {
+   "req_id": "REQ-392",
+   "block": "all",
+   "category": "verification",
+   "release": "both",
+   "in_rtl_scope": false,
+   "excluded_reason": "category verification",
+   "rtl_traced": false,
+   "rtl_files": [],
+   "provisional": false,
+   "open_item_ref": [],
+   "open_tags": []
   }
  ],
  "summary": {
   "rtl_files": 22,
-  "in_scope": 296,
-  "in_scope_traced": 296,
-  "provisional_in_scope": 43,
-  "traced_total": 299,
-  "open_tags": 27
+  "in_scope": 304,
+  "in_scope_traced": 304,
+  "provisional_in_scope": 46,
+  "traced_total": 307,
+  "open_tags": 30
  }
 }

@@ -12,14 +12,15 @@
 // Description     : EoT delay line and trailer removal of one data lane (HAS Block No. 4):
 //                   PARA_EOT_DELAY_BYTES entries of a byte and its flags; on the EoT request
 //                   the stored tail is scanned backwards and cut at the last payload byte.
+//                   Reports whether an HS output of the burst is still in the line (HS busy).
 // Parent          : m_ftel_dphy_rx_hs_datapath
-// HAS             : draft v0.16, §4.6, Figure 4-9, Table 4-7, ADR-006, Appendix B
+// HAS             : draft v0.17, §4.6, Figure 4-9, Table 4-7, ADR-006, Appendix B
 // Clock domains   : byte
 // REQ-IDs         : REQ-016, REQ-017, REQ-024, REQ-159, REQ-164, REQ-166, REQ-169, REQ-170,
 //                   REQ-171, REQ-172, REQ-173, REQ-174, REQ-175, REQ-176, REQ-177, REQ-178,
 //                   REQ-180, REQ-186, REQ-187, REQ-188, REQ-249, REQ-252, REQ-274, REQ-318, REQ-320,
 //                   REQ-369, REQ-370, REQ-371, REQ-372, REQ-373, REQ-374, REQ-375, REQ-376,
-//                   REQ-377, REQ-378
+//                   REQ-377, REQ-378, REQ-387
 // OPEN            : ADR-006, ADR-007, S12
 //
 // Evolution History:
@@ -52,6 +53,8 @@ module m_ftel_dphy_rx_eot
   output hs_entry_t                     o_entry,
   // ---- status ----
   output logic                          o_eot_sync_err,
+  // ---- data out: an entry of a burst is still in the line (Block No. 3 through the parent) ----
+  output logic                          o_line_busy,
   // ---- configuration ----
   // CDC_QUASI_STATIC: eot_skip_bytes (HAS §4.1)
   input  logic [C_EOT_SKIP_BYTES_W-1:0] i_cfg_eot_skip_bytes
@@ -206,9 +209,13 @@ module m_ftel_dphy_rx_eot
                      skewcal:    reg_skewcal[C_D-1],
                      active:     reg_active[C_D-1]};
 
-  // A partial last byte or a tail without a transition is an EoT sync error (status only). EoT done
-  // leaves the parent at the synchronized fall, before the cut (m_ftel_dphy_rx_hs_datapath).
+  // A partial last byte or a tail without a transition is an EoT sync error (status only).
   // REQ-175, REQ-176, REQ-180, REQ-370
   assign o_eot_sync_err = i_eot_req && (!w_found || !w_last_full);
+
+  // An entry with the active or the skew-calibration flag has not left the line: an HS output of the burst
+  // is still to reach the PPI (stopstate_x with PARA_STOP_DRAIN_EN, Block No. 3).
+  // REQ-387
+  assign o_line_busy = (|reg_active) || (|reg_skewcal);
 endmodule
 `default_nettype wire

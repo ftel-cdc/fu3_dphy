@@ -72,9 +72,9 @@ Timing diagrams (`ftel_dphy_rx_wave_*.json5`) follow rules 2, 6, 9, 12 and 14 an
 | 4-11 | `ftel_dphy_rx_deskew` | Block No.5: boundary only (content OPEN ADR-004) | Figure 2-4 |
 | 4-12 | `ftel_dphy_rx_ppi_out` | Block No.7: output gating, `rxclkesc_x`, tie-offs | Figure 2-4 |
 | 4-13 | `ftel_dphy_rx_cfg_status` | Block No.8: configuration and status (bus OPEN K3) | Figure 2-4 |
-| 5-1 | `ftel_dphy_rx_wave_hs_rx` | PPI: HS receive burst (`stopstate_x` order OPEN ADR-006) | HAS-CSI Figure 4-1, D-PHY Figure 57 |
+| 5-1 | `ftel_dphy_rx_wave_hs_rx` | PPI: HS receive burst, `stopstate_x` with both values of `PARA_STOP_DRAIN_EN` (OPEN ADR-006) | HAS-CSI Figure 4-1, D-PHY Figure 57 |
 | 5-2 | `ftel_dphy_rx_wave_sot_sync_err` | PPI: HS receive with a SoT sync error | HAS-CSI Figure 4-2 |
-| 5-3 | `ftel_dphy_rx_wave_deskew` | PPI: deskew burst | HAS-CSI Figure 4-3 |
+| 5-3 | `ftel_dphy_rx_wave_deskew` | PPI: deskew burst, `stopstate_x` with both values of `PARA_STOP_DRAIN_EN` | HAS-CSI Figure 4-3 |
 | 5-4 | `ftel_dphy_rx_wave_trigger` | PPI: escape mode, Reset-Trigger | D-PHY Figure 18 |
 | 5-5 | `ftel_dphy_rx_wave_ulps` | PPI: data-lane ULPS entry and exit | Table 4-5 |
 | 5-6 | `ftel_dphy_rx_wave_lp_err` | PPI: false control and unsupported escape command | Table 4-5 |

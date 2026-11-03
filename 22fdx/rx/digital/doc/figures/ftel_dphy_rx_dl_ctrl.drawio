@@ -74,7 +74,7 @@
           <mxGeometry x="470" y="256" width="170" height="30" as="geometry" />
         </mxCell>
         <mxCell id="fsm" value="&lt;b&gt;lane FSM&lt;/b&gt;&lt;br&gt;Figure 4-6" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#DAE8FC;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
-          <mxGeometry x="980" y="300" width="260" height="330" as="geometry" />
+          <mxGeometry x="980" y="300" width="200" height="330" as="geometry" />
         </mxCell>
         <mxCell id="w_lp_fsm" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
@@ -114,10 +114,10 @@
         </mxCell>
         <mxCell id="w_decoding" value="decoding" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1180" y="300" as="sourcePoint" />
+            <mxPoint x="1150" y="300" as="sourcePoint" />
             <mxPoint x="795" y="240" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="1180" y="270" />
+              <mxPoint x="1150" y="270" />
               <mxPoint x="795" y="270" />
             </Array>
             <mxPoint x="90" y="-14" as="offset" />
@@ -165,10 +165,10 @@
         <mxCell id="t_set" value="hs_settle_cyc (No.6)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=center;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;fontColor=#2D7600;" vertex="1" parent="1">
           <mxGeometry x="700" y="612" width="260" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="i_eot" value="EoT done (No.4)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=right;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+        <mxCell id="i_eot" value="HS busy (No.4)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=right;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="5" y="695.0" width="235" height="30" as="geometry" />
         </mxCell>
-        <mxCell id="tsync" value="toggle sync&lt;br&gt;(Figure 4-1)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#DAE8FC;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
+        <mxCell id="tsync" value="level sync&lt;br&gt;(Figure 4-1)" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=#DAE8FC;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">
           <mxGeometry x="300" y="685" width="170" height="50" as="geometry" />
         </mxCell>
         <mxCell id="w_eot" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;edgeStyle=none;" edge="1" parent="1">
@@ -180,12 +180,15 @@
         <mxCell id="w_eot2" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
             <mxPoint x="470" y="710" as="sourcePoint" />
-            <mxPoint x="980" y="600" as="targetPoint" />
+            <mxPoint x="1450" y="412" as="targetPoint" />
             <Array as="points">
-              <mxPoint x="950" y="710" />
-              <mxPoint x="950" y="600" />
+              <mxPoint x="1300" y="710" />
+              <mxPoint x="1300" y="412" />
             </Array>
           </mxGeometry>
+        </mxCell>
+        <mxCell id="l_busy" value="HS busy, synchronized: holds stopstate_x Low with PARA_STOP_DRAIN_EN = 1" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+          <mxGeometry x="480" y="681" width="790" height="28" as="geometry" />
         </mxCell>
         <mxCell id="g_out" value="&lt;b&gt;output registers&lt;/b&gt;" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=none;verticalAlign=top;align=left;spacingLeft=10;spacingTop=2;dashed=1;dashPattern=8 4;" vertex="1" parent="1">
           <mxGeometry x="1330" y="60" width="650" height="750" as="geometry" />
@@ -216,7 +219,7 @@
         </mxCell>
         <mxCell id="w_next" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;edgeStyle=none;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1240" y="365" as="sourcePoint" />
+            <mxPoint x="1180" y="365" as="sourcePoint" />
             <mxPoint x="1450" y="365" as="targetPoint" />
           </mxGeometry>
         </mxCell>
@@ -232,13 +235,13 @@
         </mxCell>
         <mxCell id="w_stop" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;edgeStyle=none;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1240" y="525" as="sourcePoint" />
+            <mxPoint x="1180" y="525" as="sourcePoint" />
             <mxPoint x="1450" y="525" as="targetPoint" />
           </mxGeometry>
         </mxCell>
         <mxCell id="w_err" value="" style="endArrow=block;endFill=1;html=1;fontSize=18;edgeStyle=orthogonalEdgeStyle;rounded=0;jumpStyle=arc;jumpSize=12;labelBackgroundColor=#FFFFFF;strokeWidth=2;edgeStyle=none;" edge="1" parent="1">
           <mxGeometry relative="1" as="geometry">
-            <mxPoint x="1240" y="595" as="sourcePoint" />
+            <mxPoint x="1180" y="595" as="sourcePoint" />
             <mxPoint x="1450" y="595" as="targetPoint" />
           </mxGeometry>
         </mxCell>
@@ -253,13 +256,13 @@
           </mxGeometry>
         </mxCell>
         <mxCell id="l_next" value="next state" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
-          <mxGeometry x="1244" y="336" width="84" height="28" as="geometry" />
+          <mxGeometry x="1184" y="336" width="84" height="28" as="geometry" />
         </mxCell>
         <mxCell id="l_stop" value="DL_STOP" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
-          <mxGeometry x="1244" y="496" width="84" height="28" as="geometry" />
+          <mxGeometry x="1184" y="496" width="84" height="28" as="geometry" />
         </mxCell>
         <mxCell id="l_err" value="DL_ERR" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
-          <mxGeometry x="1244" y="566" width="84" height="28" as="geometry" />
+          <mxGeometry x="1184" y="566" width="84" height="28" as="geometry" />
         </mxCell>
         <mxCell id="l_trg_s" value="set" style="text;html=1;whiteSpace=wrap;fontSize=18;align=right;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="1368" y="466" width="80" height="28" as="geometry" />
@@ -351,7 +354,7 @@
         <mxCell id="o6_t" value="erresc_x (No.7)" style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=middle;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="1710" y="685" width="270" height="50" as="geometry" />
         </mxCell>
-        <mxCell id="n_st" value="rxtriggeresc_x: set by a trigger at the eighth bit, cleared in DL_STOP. errcontrol_x: set on entry into DL_ERR; erresc_x: set by LPDT or unknown; both cleared by the next change. State and error events go to No.8 through toggle synchronizers." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
+        <mxCell id="n_st" value="rxtriggeresc_x: set by a trigger at the eighth bit, cleared in DL_STOP. errcontrol_x: set on entry into DL_ERR; erresc_x: set by LPDT or unknown; both cleared by the next change. State and error events go to No.8 through toggle synchronizers. stopstate_x: with PARA_STOP_DRAIN_EN = 1 also held Low while HS busy is High." style="text;html=1;whiteSpace=wrap;fontSize=18;align=left;verticalAlign=top;strokeColor=none;fillColor=none;spacing=2;" vertex="1" parent="1">
           <mxGeometry x="1390" y="90" width="585" height="190" as="geometry" />
         </mxCell>
         <mxCell id="leg_frame" value="" style="rounded=0;whiteSpace=wrap;html=1;fontSize=18;strokeWidth=2;fillColor=none;align=center;verticalAlign=middle;spacing=4;" vertex="1" parent="1">

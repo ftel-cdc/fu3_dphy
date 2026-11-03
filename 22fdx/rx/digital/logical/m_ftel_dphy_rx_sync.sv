@@ -12,9 +12,9 @@
 // Description     : Level synchronizer: a chain of PARA_LEVELS flip-flops in the destination
 //                   clock. Port-compatible with m_vlsi_synch, so that integration swaps
 //                   the module name only (rtl_rule K10).
-// Parent          : m_ftel_dphy_rx_afe_adapter, m_ftel_dphy_rx_timing_init, m_ftel_dphy_rx_tsync,
+// Parent          : m_ftel_dphy_rx_afe_adapter, m_ftel_dphy_rx_timing_init, m_ftel_dphy_rx_dl_ctrl,
 //                   m_ftel_dphy_rx_hs_datapath
-// HAS             : draft v0.14, §4.1, Figure 4-1
+// HAS             : draft v0.17, §4.1, Figure 4-1
 // Clock domains   : destination clock of the instance
 // REQ-IDs         : REQ-059
 // OPEN            : none

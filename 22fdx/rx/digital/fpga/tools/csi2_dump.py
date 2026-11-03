@@ -31,7 +31,8 @@ a "Radix - ..." line, then one line per sample.
   csi2_dump.py axis CAP.csv --tdata tdata --tvalid tvalid [--tready tready] --tuser tuser \\
                     --tlast tlast [--ppc 4] [--bpp 10] [--pgm lines.pgm]
   csi2_dump.py compare {ppi|axis} A.csv B.csv <options of that mode> [--headers-only]
-  csi2_dump.py bursts --truth TRUTH.txt [--lanes 4] [--sync-at -1,0] [--max-lane-spread 6] A.csv [B.csv ...]
+  csi2_dump.py bursts --truth TRUTH.txt [--lanes 4] [--sync-at -1,0] [--max-lane-spread 6] \\
+                      [--stopstate lane|drain:32] A.csv [B.csv ...]
   csi2_dump.py selftest [--tx-model]
 
 A column is chosen by a part of its name; "{n}" stands for the lane number.
@@ -61,8 +62,16 @@ Timing at the PPI, both modes (C6 and C10 of the HAS of ftel_dphy_rx, Table A-2)
     samples (inter-lane byte divergence, C10; the bursts of the lanes pair by the truth in bursts mode, by
     the samples where any lane is active in PPI mode);
   - the sample offsets of rxsynchs and the widest spread are reported even without the checks.
+stopstate in bursts mode (--stopstate, one mode for every capture or a comma list, "-" for none; HAS §4.5 of
+ftel_dphy_rx, fpga/PLAN_EOT_NOWAIT.md):
+  - lane: report only, the gaps between two bursts at the pad (truth times) with stopstate High in at least one
+    sample; a Stop state of THS-EXIT can fall between two samples at the lowest rates, so it is not checked;
+  - drain:<D> (PARA_STOP_DRAIN_EN = 1, D = PARA_EOT_DELAY_BYTES): stopstate is High only when no HS output of a
+    burst is left, so never in a sample with rxactivehs (or rxskewcalhs) High at that sample or within D samples
+    after it, and it is High at the end of the capture, after the last burst has left. Both are errors.
 """
 import argparse
+import bisect
 import csv
 import os
 import random
@@ -611,11 +620,62 @@ def trailer_limits(spec, n, opt='--max-trailer'):
     return vals
 
 
+def stop_modes(spec, n):
+    """--stopstate: None, one mode for every capture, or a comma list of n modes ('-': none, 'lane', 'drain:D')."""
+    if spec is None:
+        return [None] * n
+    vals = [None if v.strip() == '-' else v.strip() for v in spec.split(',')]
+    for v in vals:
+        if v is not None and v != 'lane' and not (v.startswith('drain:') and v[6:].isdigit()):
+            sys.exit(f"--stopstate: '{v}' is not -, lane or drain:<depth>")
+    if len(vals) == 1:
+        return vals * n
+    if len(vals) != n:
+        sys.exit(f"--stopstate: {len(vals)} values for {n} captures")
+    return vals
+
+
+def check_stopstate(cap, lanes, active, stop, mode, truth=None, time_col=None, skewcal=None):
+    """stopstate of each lane, mode 'lane' or 'drain:D' of the module docstring. Returns (errors, report line,
+    messages); 'lane' has no errors."""
+    depth = int(mode.split(':')[1]) if mode.startswith('drain:') else None
+    t = cap.values(time_col) if time_col and has_col(cap, time_col) else None
+    msgs, seen, gaps = [], 0, 0
+    for i in range(lanes):
+        a, st = cap.values(active.format(n=i)), cap.values(stop.format(n=i))
+        sk = cap.values(skewcal.format(n=i)) if skewcal and has_col(cap, skewcal.format(n=0)) else None
+        n = len(a)
+        if truth is not None and t is not None:
+            tr = truth.get(i, [])
+            for (_b0, _p0, _s0, end), (_b1, _p1, start, _e1) in zip(tr, tr[1:]):
+                lo, hi = bisect.bisect_right(t, end), bisect.bisect_left(t, start)
+                gaps += 1
+                seen += any(st[s] == 1 for s in range(lo, hi))
+        if depth is None:
+            continue
+        nxt, ahead = n, [n] * n     # first sample at or after s with an HS output of a burst
+        for s in range(n - 1, -1, -1):
+            if a[s] == 1 or (sk is not None and sk[s] == 1):
+                nxt = s
+            ahead[s] = nxt
+        bad = [s for s in range(n) if st[s] == 1 and ahead[s] < n and ahead[s] <= s + depth]
+        if bad:
+            msgs.append(f"lane {i}: stopstate High in {len(bad)} samples with an HS output at most {depth} samples"
+                        f" later, the first at sample {bad[0]} (HS output at sample {ahead[bad[0]]})")
+        if n and st[-1] != 1:
+            msgs.append(f"lane {i}: stopstate Low at the end of the capture (after the drain it must be High)")
+    line = f"stopstate: High in {seen}/{gaps} gaps between bursts at the pad" if gaps else "stopstate:"
+    if depth is not None:
+        line += f"; after the drain (depth {depth}): errors {len(msgs)}"
+    return len(msgs), line, msgs
+
+
 def run_bursts(a):
     truth = read_truth(a.truth)
     total = []
     limits = trailer_limits(a.max_trailer, len(a.csv))
     sync_at = trailer_limits(a.sync_at, len(a.csv), '--sync-at')
+    stops = stop_modes(a.stopstate, len(a.csv))
     for k, path in enumerate(a.csv):
         cap = Capture(path)
         flags = {name: col for name, col in (('rxsynchs', a.sync), ('errsoths', a.errsot),
@@ -626,6 +686,14 @@ def run_bursts(a):
         runs, stray = decode_bursts(cap, a.lanes, a.data, a.valid, a.active, flags, a.time)
         total.append(check_bursts(f"{chr(65 + k)} {os.path.basename(path)}", runs, stray, truth, a.lanes,
                                   max_trailer=limits[k], sync_at=sync_at[k], max_spread=a.max_lane_spread))
+        if stops[k] is not None:
+            if not has_col(cap, a.stop.format(n=0)):
+                sys.exit(f"{path}: --stopstate without a column '{a.stop}'")
+            e, line, msgs = check_stopstate(cap, a.lanes, a.active, a.stop, stops[k], truth, a.time, a.skewcal)
+            print(f"  {line}")
+            for m in msgs[:8]:
+                print(f"  {m}")
+            total[-1] += e
     print(f"RESULT: {'PASS' if not any(total) else 'FAIL'} "
           f"({', '.join(f'{chr(65 + k)} {e} errors' for k, e in enumerate(total))})")
     return int(any(total))
@@ -782,6 +850,7 @@ def selftest(tx_model):
           "AXIS round trip: lines, partial first line, start of frame")
 
     bursts_selftest(work, rnd, check)
+    stopstate_selftest(work, rnd, check)
     timing_selftest(work, rnd, check)
     if tx_model:
         fails += tx_model_check(work, rnd)
@@ -933,6 +1002,45 @@ def bursts_selftest(work, rnd, check):
           f" trailer bytes at limit 0, {e2} at limit 2)")
     check(trailer_limits('-,0', 2) == [None, 0] and trailer_limits('1', 3) == [1, 1, 1],
           "bursts: --max-trailer lists ('-,0' and one value for all captures)")
+
+
+def stopstate_selftest(work, rnd, check):
+    """--stopstate on synthetic captures: a stopstate High only after the drain passes drain:<D>; one High right
+    after each burst has left the pad (the lane state, which leads the PPI with PARA_STOP_DRAIN_EN = 0) and one Low
+    at the end fail it, one error per lane each."""
+    lanes, lens, slot, depth = 2, (1, 5, 30, 3), 80, 8
+    truth = {i: [(k, bytes(rnd.randrange(256) for _ in range(n)), *synth_times(k, n, slot))
+                 for k, n in enumerate(lens)] for i in range(lanes)}
+    tpath = os.path.join(work, 'stop_truth.txt')
+    write_truth(tpath, truth, lanes)
+    base = synth_bursts(truth, lanes, rnd, set(), slot)
+    n = len(base['sim_time_ps'])
+    errs, lines = {}, {}
+    for name in ('drain', 'lane', 'end'):
+        cols = dict(base)
+        for i in range(lanes):
+            a = base[f'u_rx/dl{i}_rxactivehs']
+            if name == 'lane':
+                t, ends = base['sim_time_ps'], [b[3] for b in truth[i][:-1]]
+                st = [int(any(e < t[s] <= e + 4 * SYNTH_PS for e in ends)) for s in range(n)]
+                st[-1] = 1
+            else:
+                st = [int(all(a[x] == 0 for x in range(s, min(n, s + depth + 1)))) for s in range(n)]
+                if name == 'end':
+                    st[-1] = 0
+            cols[f'u_rx/dl{i}_stopstate'] = st
+        path = os.path.join(work, f'stop_{name}.csv')
+        ila_csv(path, cols, {c: 'HEX' if 'data' in c else 'BIN' for c in cols})
+        errs[name], lines[name], _ = check_stopstate(Capture(path), lanes, 'dl{n}_rxactivehs', 'dl{n}_stopstate',
+                                                     f'drain:{depth}', read_truth(tpath), 'sim_time_ps')
+    check(errs['drain'] == 0 and errs['lane'] == lanes and errs['end'] == lanes,
+          f"stopstate: drain:{depth} passes a stopstate High only after the drain, fails one High right after"
+          f" each burst has left the pad and one Low at the end ({errs['drain']}, {errs['lane']}, {errs['end']}"
+          f" errors)")
+    check(lines['lane'].startswith(f"stopstate: High in {lanes * (len(lens) - 1)}/{lanes * (len(lens) - 1)} gaps"),
+          f"stopstate: the gaps between bursts at the pad with stopstate High are counted ({lines['lane']})")
+    check(stop_modes('lane,-', 2) == ['lane', None] and stop_modes('drain:32', 3) == ['drain:32'] * 3,
+          "stopstate: --stopstate lists ('lane,-' and one mode for all captures)")
 
 
 def delay_lane(cols, lane, n, rnd):
@@ -1151,6 +1259,10 @@ def main():
     p.add_argument('--max-trailer', default=None,
                    help='trailer bytes allowed per burst: one value, or a comma list per capture ("-": no limit)')
     timing_opts(p, True)
+    p.add_argument('--stopstate', default=None,
+                   help='lane (report) or drain:<depth> (check), one mode or a comma list per capture ("-": none)')
+    p.add_argument('--stop', default='dl{n}_stopstate')
+    p.add_argument('--skewcal', default='dl{n}_rxskewcalhs')
     p = sub.add_parser('selftest')
     p.add_argument('--tx-model', action='store_true', help='also check against the Tx model with XSIM')
     a = ap.parse_args()

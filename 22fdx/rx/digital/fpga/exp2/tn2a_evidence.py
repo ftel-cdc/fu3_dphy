@@ -289,6 +289,16 @@ def code_lines(path):
     return out
 
 
+def tn1_code_lines():
+    """code_lines of exp1/tb_exp1.sv in its default build, the one the TN2 benches copy: tb_exp1.sv passes its
+    parameter STOP_DRAIN to PARA_STOP_DRAIN_EN of the wrap (fpga/PLAN_EOT_NOWAIT.md), and that connection is left
+    out only while STOP_DRAIN defaults to 0."""
+    lines = code_lines(os.path.join(EXP1, 'tb_exp1.sv'))
+    if not any(line.strip() == 'parameter int STOP_DRAIN = 0;' for line in lines):
+        return lines
+    return [line.replace(', .PARA_STOP_DRAIN_EN(STOP_DRAIN)', '') for line in lines]
+
+
 def block(lines, start, end):
     """The lines from the first one that starts with start to the next one that starts with end ([] if none)."""
     for i, line in enumerate(lines):
@@ -302,7 +312,7 @@ def block(lines, start, end):
 def copy_blocks(tb2=None):
     """[(block, code lines in tb_exp1.sv, equal)] of the blocks tb_exp2a.sv (or the file tb2) takes from
     tb_exp1.sv."""
-    a = code_lines(os.path.join(EXP1, 'tb_exp1.sv'))
+    a = tn1_code_lines()
     b = code_lines(tb2 or os.path.join(HERE, 'tb_exp2a.sv'))
     out = []
     for name, start, end in COPY_BLOCKS:

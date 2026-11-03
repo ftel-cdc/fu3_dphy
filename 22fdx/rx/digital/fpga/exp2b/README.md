@@ -123,7 +123,9 @@ HS settle do IP tự chọn theo rate (`C_HS_SETTLE_NS`): 173 ns ở 260 Mb/s, 1
 **Testbench** ([`tb_exp2b.sv`](tb_exp2b.sv)):
 - **Lấy từ [`../exp1/tb_exp1.sv`](../exp1/tb_exp1.sv):** front end của RX mình (`IBUFDS_DPHY`, mux `+AFE`), nguyên
   văn; front check, khác đúng dòng đường dẫn (nay so với buffer trong D-PHY của R-X); instance wrap, khác đúng 6 dòng
-  của bảng nối. Check `copy` (§7) kiểm đúng các dòng khác này ở mỗi lần kiểm chứng.
+  của bảng nối. Check `copy` (§7) kiểm đúng các dòng khác này ở mỗi lần kiểm chứng. Từ 2026-11-03, nó so với
+  instance của TN1 ở build mặc định, bỏ kết nối `.PARA_STOP_DRAIN_EN(STOP_DRAIN)`, như check `copy` của TN2a
+  ([`../exp2/README.md`](../exp2/README.md)).
 - **Thứ tự cấu hình:**
   - RX theo driver của AMD: soft reset, chờ `CSR[0]`, active lanes, nhả soft reset, `GIER`, enable;
   - TX như example của TX SS: active lanes, `CCR` = 1 (enable, `CCR[4]` = 0 tức continuous clock), chờ `CCR[2]`

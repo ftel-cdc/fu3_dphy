@@ -26,6 +26,7 @@ synthesis:                        # Table 3-1, defaults of the PARA_* parameters
   EOT_DELAY_BYTES:   32           # R1 32, R2 36; OPEN S5, S12
   SYNC_SEARCH_BYTES: 16           # OPEN ADR-007
   DLY_TAP_WIDTH:     1            # placeholder: "to be determined" in the HAS (OPEN ADR-004); unused while DESKEW_EN = 0
+  STOP_DRAIN_EN:     0            # 0: stopstate_x is the lane state; 1: it also waits until the burst has left the PPI (ADR-006)
 
 runtime:                          # Table 3-2: reset value and field width (width: rtl_notes.md D-1)
   hs_settle_cyc:     {reset: 19,     width: 8}    # Appendix B value at rate_ref; OPEN ADR-007

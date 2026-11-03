@@ -1,6 +1,6 @@
 # ftel_dphy_rx - MIPI D-PHY Receiver High-Level Architecture Specification
 
-**DRAFT v0.16** - architecture level. Items that are not yet agreed are marked **OPEN** with the
+**DRAFT v0.17** - architecture level. Items that are not yet agreed are marked **OPEN** with the
 default assumption used by this draft; they are tracked in chapter 9.
 
 ## Revision and History
@@ -23,6 +23,7 @@ default assumption used by this draft; they are tracked in chapter 9.
 | v0.14 (draft) | 2026-10-07 | Ho Khanh Linh | Errata found while designing the RTL of Block No. 1 (§4.3). A deserializer that samples on both edges has one path of half a DDR clock period: the falling-edge parallel register takes its load phase from the rising-edge strobe of the divider through one falling-edge flip-flop; v0.13 had stated that no path was shorter than one period. The margin of that path is added to the design note on the sampler timing: about 110 ps at 1500 Mb/s and none at 1792 Mb/s, at 1.35 V and 125 °C. The byte-clock divider and the load phase are held in reset while the clock gate is closed, so `rxbyteclkhs` is Low while the gate is closed and restarts with a complete pulse (§4.1, §4.2). Both clock-activity toggles run on the rising edge of the DDR clock, one changing on every edge and one on every fourth edge, independent of the divider (§4.1). The HS path registers each word in two stages, which set Λ = 2. The loss of the clock is stated as an upper bound: `cl_rxclkactivehs` falls at most 60 ns after the last clock edge; the range of 50-60 ns did not hold at the lowest rates, where the last edge is a falling edge half a period after the last toggle change, nor where a toggle aliases (§4.3, §4.4, §5.1, Appendix B). Interfaces unchanged |
 | v0.15 (draft) | 2026-10-10 | Ho Khanh Linh | Timing figures moved from the 130 nm cells assumed until v0.14 to 22 nm cells, the node of the target: sampler aperture, clock buffers, the window left for the clock-to-data delay differences and the half-period path, now from a trial synthesis (§4.3 design note); the steps of a standard-cell delay line (§4.8); the basis of the timing score of ADR-001. The 1.2 V, 175 °C corner of the 130 nm cells no longer applies, and the half-period path at 1792 Mb/s is no longer an open risk. The samplers stay hand-placed. The cell library, its body bias and the sign-off corners are open items (chapter 9). No behaviour, interface or figure changes |
 | v0.16 (draft) | 2026-10-19 | Ho Khanh Linh | EoT corrected after the first simulation of the whole receiver, pads to PPI: the synchronized fall of the sync-search start reached Block No. 4 before the bytes of the same moment, so below about 800 Mb/s the last bytes of a burst were lost. Block No. 4 now holds that fall for three byte clocks; EoT done still leaves at the synchronized fall (§4.1, §4.5, §4.6). `eot_skip_bytes` lacked the latency of the data path: new formula from the value that cuts into the payload, with one byte of margin, fitted with LP-11 at every phase of the byte clock and of `core_clk` (Table 3-2, Appendix B). Range of the trailer removal measured and stated: no payload byte lost from 260 Mb/s; no trailer byte from 600 Mb/s without transition junk; otherwise some bursts keep trailer bytes, at most 4 at 260 Mb/s and 12 at 1500 Mb/s (Table 4-7, ADR-006). `rxvalidhs_x`, `rxsynchs_x` and `errsoths_x` only while the search has started, so `rxvalidhs_x` no longer pulses after `rxactivehs_x` falls (§4.6) |
+| v0.17 (draft) | 2026-11-03 | Ho Khanh Linh | Return to Stop after EoT decided (ADR-006). DL_HS_EOT lasts one cycle and no longer waits for EoT done, which is removed: at the minimum THS-EXIT + TLPX the lane missed bursts below about 170 Mb/s, one in two at 80 Mb/s, and now receives every burst at all rates of Table 1-3 (§4.1, §4.5, §4.6, §5.2). New synthesis parameter `PARA_STOP_DRAIN_EN` (Table 3-1): with 0, the default, `stopstate_x` is the Stop state of the lane; with 1 it also waits, through the new HS busy crossing, until the burst has left the PPI (Table 4-2, §4.5, §4.6, §5.1). The hold of the EoT request always ends before the next burst with the Appendix B values (§4.6). ADR-006 decided with a weighted matrix and the measured results (Table 7-4; the ADR-007 tables become Tables 7-5 and 7-6); verification (chapter 8), open items (chapter 9) and TCLK-POST (Appendix B) updated. Figures 2-4, 4-5, 4-6, 4-8, 4-9, 5-1, 5-2, 5-3 and 5-9 follow; Figure 4-9 also loses an output register stage that neither §4.6 nor the design has: the PPI outputs come from the oldest entry |
 
 ## Conventions
 
@@ -271,6 +272,7 @@ Synthesis-time parameters. Values that depend on an open item show the default u
 | 8 | `PARA_EOT_DELAY_BYTES` | 32 (R1), 36 (R2) ⚠️ | Configurable | Depth of the EoT delay line (Block No. 4). Shall hold TEOT,max plus the LP-11 detection latency, the crossing and the hold of the EoT request at the highest line rate, less the data path latency: about 30 bytes at 1500 Mb/s, 35 at 1792 Mb/s (§4.6) ⚠️. S5 confirms the Tx timing. The depth also sets the clock the Tx must supply after the last burst (S12) |
 | 9 | `PARA_SYNC_SEARCH_BYTES` | 16 ⚠️ | Configurable | Byte clocks searched for the sync sequence before `errsotsynchs_x` is raised, counted from the first non-zero word after the sync-search start ⚠️ (§4.6); a burst that ends earlier without a lock raises it at its end |
 | 10 | `PARA_DLY_TAP_WIDTH` | To be determined | Configurable | Width of the delay-tap control of a delay line in front of the samplers (R2, ADR-004; the AFE has none) |
+| 11 | `PARA_STOP_DRAIN_EN` | 0 | Configurable | Meaning of `stopstate_x` (§4.5). 0: the Stop state of the lane, as D-PHY [1] ✅ defines it. 1: Stop state, and no HS output of the burst left in Block No. 4, so `stopstate_x` rises after the last HS output of the burst at the PPI; it then gives no pulse between two bursts closer than the drain of the delay line and, like the tail of the burst, needs `rxbyteclkhs` after the last burst (S12). The lane FSM is the same with both values. Which one the CSI-2 Rx controller needs is OPEN ADR-006 |
 
 Run-time programmable timing values (reset defaults; the configuration path is OPEN K3):
 
@@ -311,8 +313,8 @@ Clock-domain crossings:
 | DDR clock → `rxbyteclkhs` | Words of the deserializer of Block No. 1 | Synchronous: `rxbyteclkhs` is generated from the DDR clock, and each word is held for four DDR clock periods; timed by STA, no synchronizer ⚠️ |
 | DDR clock → `core_clk` | Clock-activity toggles of Block No. 1 | Level, 2-flop synchronizers; the clock is active while one toggle has changed within the last 8 `core_clk` cycles (§4.3) ⚠️ |
 | `core_clk` → DDR clock | Byte-clock enable (Block No. 2, High in CL_HS_CLK) | Reset synchronizer in the DDR clock: cleared at once when the enable falls, set on the second DDR clock edge after it rises; it enables the clock gate of `rxbyteclkhs` and releases the byte-clock divider (§4.3) ⚠️ |
-| `core_clk` → `rxbyteclkhs` | Sync-search start (Block No. 3 → No. 4) | Level, 2-flop synchronizer. Block No. 4 starts the sync search on its rise; it holds the fall for three byte clocks and takes the held fall as the EoT request, so the start, the active flag and the EoT request cannot arrive out of order ⚠️. EoT done returns at the fall before the hold (§4.6) |
-| `rxbyteclkhs` → `core_clk` | EoT done (Block No. 4 → No. 3) | Toggle synchronizer |
+| `core_clk` → `rxbyteclkhs` | Sync-search start (Block No. 3 → No. 4) | Level, 2-flop synchronizer. Block No. 4 starts the sync search on its rise; it holds the fall for three byte clocks and takes the held fall as the EoT request, so the start, the active flag and the EoT request cannot arrive out of order ⚠️ (§4.6) |
+| `rxbyteclkhs` → `core_clk` | HS busy (Block No. 4 → No. 3) | Level, 2-flop synchronizer of a register in `rxbyteclkhs`, High while the held sync-search start is High or an entry with the active or the skew-calibration flag is in the delay line (§4.6). Used only with `PARA_STOP_DRAIN_EN` = 1, to hold `stopstate_x` Low (§4.5) ⚠️ |
 | `core_clk`, `rxbyteclkhs` → configuration clock | Status events of Blocks No. 2, 3 and 4; lane FSM states | Events: toggle synchronizers into the flags and counters of Block No. 8 ⚠️. FSM states: 2-flop synchronizers; a read during a state change may be incoherent (debug use) ⚠️ |
 | Enables (`lite_aclk`) → `core_clk` | `cl_enable`, `dl_enable_x`, `forcerxmode_x` | Level, 2-flop synchronizers; `lite_aclk` is the register clock of the CSI-2 Rx controller, and the PPI defines the enables as level sensitive **[CSI]** C14 |
 | Configuration clock → `core_clk` / `rxbyteclkhs` | Timer values, lane map, polarity | Quasi-static: software changes them only while the affected lanes are disabled |
@@ -516,12 +518,12 @@ entry, EoT hand-over and escape mode (D-PHY [1] ✅).
 | State | Line state | Exit condition → next state | Outputs / actions |
 |---|---|---|---|
 | DL_INIT | any | LP-11 held for `tinit_cyc` → DL_STOP | - |
-| DL_STOP | LP-11 | LP-01 → DL_HS_RQST; LP-10 → DL_LP_RQST | `stopstate_x` = 1 |
+| DL_STOP | LP-11 | LP-01 → DL_HS_RQST; LP-10 → DL_LP_RQST | `stopstate_x` = 1; with `PARA_STOP_DRAIN_EN` = 1 only while HS busy is Low ⚠️ |
 | DL_HS_RQST | LP-01 | LP-00 → DL_HS_PRPR; other → DL_ERR | - |
 | DL_HS_PRPR | LP-00 | termination enable issued → DL_HS_TERM | `term_en_x` = 1 |
 | DL_HS_TERM | LP-00 → HS | `hs_settle_cyc` elapsed → DL_HS_RX | `hs_en_x` = 1 |
 | DL_HS_RX | HS | LP-11 → DL_HS_EOT; `hs_rx_timeout_cyc` elapsed → DL_HS_EOT (timeout status) | Block No. 4 active, sync-search start |
-| DL_HS_EOT | LP-11 | Block No. 4 reports EoT done → DL_STOP; EoT done after the line has shown LP-00 in this state → DL_HS_WAIT ⚠️ | - (EoT requested by the fall of the sync-search start) |
+| DL_HS_EOT | LP-11, or HS after the timeout | One cycle: LP-00 (the line still in HS after the HS RX timeout) → DL_HS_WAIT; other → DL_STOP ⚠️ | - (EoT requested by the fall of the sync-search start; Block No. 4 completes it on its own) |
 | DL_HS_WAIT | any | LP-11 → DL_STOP | - |
 | DL_LP_RQST | LP-10 | LP-00 → DL_LP_YIELD; LP-11 → DL_ERR | - |
 | DL_LP_YIELD | LP-00 | LP-01 → DL_ESC_RQST; LP-10 → turnaround request, not supported → DL_ERR | - |
@@ -533,23 +535,26 @@ entry, EoT hand-over and escape mode (D-PHY [1] ✅).
 | DL_ESC_WAIT | any | LP-11 → DL_STOP | Trigger bit held on `rxtriggeresc_x` until Stop (D-PHY [1] ✅) |
 | DL_ERR | any | LP-11 → DL_STOP | `errcontrol_x` held until the next line-state change **[CSI]** C13 |
 
-Any state returns to DL_STOP on LP-11 (D-PHY [1] ✅: "any RX state"), except DL_INIT, DL_HS_RX
-(LP-11 ends the burst: DL_HS_EOT) and DL_HS_EOT (waits for EoT done) ⚠️.
+Any state returns to DL_STOP on LP-11 (D-PHY [1] ✅: "any RX state"), except DL_INIT and DL_HS_RX
+(LP-11 ends the burst: DL_HS_EOT, then DL_STOP one cycle later) ⚠️.
 DL_HS_WAIT keeps the lane out of DL_STOP while the line is not in LP-11: after an HS RX timeout the
-line is still in HS, and at low rates the transmitter may have started its next sequence before EoT
-done arrives; joining that sequence in the middle could take the LP-01 of an escape entry for an HS
-request and enable the termination ⚠️. Where a row names LP-11 or
+line is still in HS, and joining the sequence that follows in the middle could take the LP-01 of an
+escape entry for an HS request and enable the termination ⚠️. Where a row names LP-11 or
 "other" as a path to DL_ERR (DL_HS_RQST, DL_LP_RQST, DL_ESC_RQST), that row takes precedence: the
 lane passes through DL_ERR, raising `errcontrol_x`, and then returns to DL_STOP ⚠️. The four trigger
 entry commands of Table 4-6 map in table order: Reset-Trigger to `rxtriggeresc_x[0]`, Unknown-3 to
 `[1]`, Unknown-4 to `[2]`, Unknown-5 to `[3]` ⚠️ (T1).
 
 **Structure** (Figure 4-5). The lane FSM (Figure 4-6), a settle counter, the escape decoder
-(Figure 4-7), a line-state change detector and the output registers.
+(Figure 4-7), a line-state change detector, the level synchronizer of HS busy and the output
+registers.
 - `term_en_x` = 1 in DL_HS_PRPR, DL_HS_TERM and DL_HS_RX; `hs_en_x` = 1 in DL_HS_TERM and DL_HS_RX.
   The only signal to Block No. 4 is the sync-search start, High in DL_HS_RX (ADR-007); its fall, on
   any exit from DL_HS_RX, is the EoT request ⚠️.
   The outputs are registers, so the AFE controls are glitch-free.
+- `stopstate_x` = 1 in DL_STOP. With `PARA_STOP_DRAIN_EN` = 1 its register is also held Low while
+  HS busy from Block No. 4, synchronized by two flip-flops in `core_clk`, is High (Table 4-2); the
+  lane FSM does not use HS busy, so both values receive the same bursts ⚠️.
 - The settle counter counts `core_clk` cycles in DL_HS_TERM and restarts outside it; DL_HS_TERM lasts
   `hs_settle_cyc` cycles ⚠️. Its end is the end of THS-SETTLE for the sync search (§4.6,
   Appendix B).
@@ -586,28 +591,37 @@ included while `PARA_LPDT_EN` = 0, is unknown ⚠️.
 
 ![Figure 4-7: escape decoder of Block No. 3](figures/ftel_dphy_rx_esc_decoder.svg)
 
-**Design note ⚠️ (return to Stop after EoT).** DL_HS_EOT waits for EoT done from Block No. 4, a
-round trip through two crossings: 3-4 byte clocks plus about 3 `core_clk` cycles, i.e. 300-400 ns
-at 80 Mb/s and about 35 ns at 1500 Mb/s. A Tx that drives THS-EXIT and TLPX at their minimums
-(100 ns + 50 ns, D-PHY [1] ✅) can present its next HS request before the lane is back in DL_STOP
-below roughly 240 Mb/s, and the lane then misses that burst.
-- Decided (ADR-006): the lane keeps this wait. Below roughly 240 Mb/s the next burst is received
-  only when THS-EXIT + TLPX exceeds the round trip, about 32·UI + 15 ns (415 ns at 80 Mb/s) ⚠️; the
-  Tx side is asked in S5. Otherwise the lane waits in DL_HS_WAIT for the LP-11 that ends that burst.
-- Order at the PPI, OPEN ADR-006: the CSI-2 Rx controller expects `stopstate_x` to rise at or after
-  the last byte **[CSI]**. EoT done leaves Block No. 4 at the synchronized fall of the sync-search
-  start, before the cut and before the delay line drains (§4.6), so `stopstate_x` can rise up to
-  `PARA_EOT_DELAY_BYTES` byte clocks (3.2 µs at 80 Mb/s) before the last byte reaches the PPI ⚠️
-  (Figure 5-1); the CSI team is asked. The controller
-  routes `stopstate_x` to IRQ_STATUS bit 11 and LANE_STATUS only, and its Burst FSM opens and
-  closes a burst on `rxactivehs_x` **[CSI]**. Sending EoT done only after the drain would meet that
-  expectation, but the lane would then miss bursts at the minimum THS-EXIT + TLPX below roughly
-  1.2 Gb/s with the default depth ⚠️.
-- Faster option, kept for later: DL_HS_EOT does not wait; Block No. 4 completes the EoT on its own
-  and EoT done only feeds the status. The lane is then back in DL_STOP a few `core_clk` cycles after
-  LP-11, so bursts at the minimum THS-EXIT + TLPX are received at every rate, and `stopstate_x`
-  rises one round trip earlier. It needs Block No. 4 to accept the next sync-search start while the
-  previous EoT is still pending ⚠️.
+**Design note ⚠️ (return to Stop after EoT, ADR-006).** DL_HS_EOT lasts one cycle, so the lane is
+back in DL_STOP 30-35 ns after LP-11 at the LP-RX output, and Block No. 4 completes the EoT on its
+own (§4.6). The next HS request starts with LP-01 at least THS-EXIT = 100 ns after LP-11 (D-PHY [1]
+✅), so it is seen at every rate of Table 1-3. Up to v0.16 DL_HS_EOT waited for EoT done from Block
+No. 4, a round trip through two crossings of 300-400 ns at 80 Mb/s: at the minimum THS-EXIT + TLPX
+the lane missed bursts below about 170 Mb/s, one in two at 80 Mb/s.
+- Two bursts never merge in Block No. 4: the next sync-search start rises after the hold of the EoT
+  request has ended (§4.6). Between two bursts at the minimum THS-EXIT + TLPX, `rxactivehs_x` is Low
+  for 330-400 ns at every rate, 3-4 byte clocks at 80 Mb/s (measured, ADR-006) ⚠️.
+- Stop state at the PPI (OPEN ADR-006). The delay line separates the return to Stop from the last
+  byte at the PPI by up to about 35 byte clocks, 3.5 µs at 80 Mb/s, so `stopstate_x` can mark only
+  one of the two moments; `PARA_STOP_DRAIN_EN` selects which (Table 3-1).
+  - 0, the default: `stopstate_x` is the Stop state of the lane, as D-PHY [1] ✅ defines it. It rises
+    before the last byte reaches the PPI, by 34-35 byte clocks at 80 Mb/s, 30 at 400 Mb/s, 15-17 at
+    1500 Mb/s and 11-13 at 1792 Mb/s with the minimum THS-EXIT + TLPX (measured) ⚠️, and pulses once
+    between two bursts.
+  - 1: `stopstate_x` also waits until HS busy falls, so it rises after the last HS output of the
+    burst, `rxactivehs_x` or `rxskewcalhs_x`, has left the PPI: 2 byte clocks after the last cycle of
+    `rxactivehs_x` at 80-400 Mb/s, 18-22 ns after it from 1440 Mb/s (measured) ⚠️. It gives no pulse
+    between two bursts closer than the drain of the delay line: none at the minimum THS-EXIT + TLPX
+    up to 1500 Mb/s with the default depth, one in every gap at 1792 Mb/s. Like the tail of the
+    burst it needs `rxbyteclkhs` after the last burst: while the clock is stopped with entries in the
+    delay line, `stopstate_x` stays Low (OPEN S12) ⚠️.
+  - The CSI-2 Rx controller expects `stopstate_x` to rise at or after the last byte **[CSI]**, which
+    1 meets. It routes `stopstate_x` to IRQ_STATUS bit 11 and LANE_STATUS only, and its Burst FSM
+    opens and closes a burst on `rxactivehs_x` **[CSI]**. With 1, `rxskewcalhs_x` falls before
+    `stopstate_x` rises, while C9 holds it until the return to Stop ⚠️. The CSI team is asked which
+    value it needs.
+- `stopstate_x` delayed with the HS outputs was rejected: the other LP outputs are not delayed, so the
+  PPI could show Stop and ULPS at once, and there is no byte clock to delay it during initialization
+  (ADR-006).
 
 ### 4.6 HS Receive Datapath (Block No. 4)
 
@@ -649,8 +663,9 @@ that Block No. 1 starts (§1).
   `rxvalidhs_x` or `rxsynchs_x` is produced **[CSI]** C9. In R2 the burst is forwarded to Block No. 5.
   - The skew-calibration flag is set on every delay-line entry written from the detection until the held
     sync-search start falls. At the PPI `rxskewcalhs_x` therefore falls after `rxactivehs_x`, by about
-    `eot_skip_bytes` byte clocks, and after `stopstate_x` rises (Figure 5-3) ⚠️; the CSI-2 Rx
-    controller expects `rxskewcalhs_x` to stay asserted after `rxactivehs_x` has fallen **[CSI]**.
+    `eot_skip_bytes` byte clocks, and after `stopstate_x` rises with `PARA_STOP_DRAIN_EN` = 0
+    (Figure 5-3); with 1, before it (§4.5) ⚠️. The CSI-2 Rx controller expects `rxskewcalhs_x` to
+    stay asserted after `rxactivehs_x` has fallen **[CSI]**.
   - The first 1 after HS-0 is located in the first non-zero word after the sync-search start; the
     burst is a deskew burst when the 16 bits from that position, taken from three consecutive words,
     are all ones ⚠️.
@@ -670,6 +685,10 @@ that Block No. 1 starts (§1).
   held as below, is High, so an HS entry aborted in DL_HS_TERM (LP-11 before THS-SETTLE ends) gives no
   `rxactivehs_x` ⚠️. The valid, sync and SoT error flags are set only on such entries, so `rxvalidhs_x`
   never stays High after `rxactivehs_x` falls ⚠️.
+  - HS busy, to Block No. 3, is a register that is High while the held sync-search start is High or
+    an entry with the active or the skew-calibration flag is in the delay line, so it falls one byte
+    clock after the last HS output of the burst has left the lane. It is used only with
+    `PARA_STOP_DRAIN_EN` = 1 (§4.5, Table 4-2) ⚠️.
 - **EoT and trailer removal** (Figures 4-8 and 4-9). The sync-search start falls on LP-11, on the HS
   RX timeout or on `forcerxmode_x` in Block No. 3. Block No. 4 holds its synchronized fall for three
   byte clocks: the sync search, the active flag and the EoT request follow the held level, so the
@@ -688,10 +707,13 @@ that Block No. 1 starts (§1).
     the PPI has no signal for it) ⚠️;
   - entries after the last byte lose their valid and active flags, so `rxactivehs_x` falls after the
     last byte. A burst without a lock, without a deskew detection and without `errsotsynchs_x` at the
-    search limit gets the SoT sync error flag on its last active entry ⚠️. EoT done goes to Block No. 3
-    at the synchronized fall, before the hold ends, so the hold does not delay the return to Stop. A
-    rise of the sync-search start during the hold, possible only below 260 Mb/s at the minimum
-    THS-EXIT, ends the hold with one Low cycle, so two bursts never merge ⚠️.
+    search limit gets the SoT sync error flag on its last active entry ⚠️. Block No. 3 does not wait
+    for the EoT, so the hold does not delay the return to Stop (§4.5).
+  - The next sync-search start rises at least THS-EXIT + TLPX + (1 + `hs_settle_cyc`) × 5 ns after
+    the fall, 505 ns at 80 Mb/s with the Appendix B value: 5 byte clocks, 4 after the crossing, and
+    more at the higher rates. The hold therefore ends before it ⚠️. A rise during the hold, possible
+    only with a smaller `hs_settle_cyc`, ends the hold with one Low cycle, so two bursts never merge
+    ⚠️.
 - **Timeout.** The HS RX timeout of Block No. 3 forces the same EoT sequence, so `rxactivehs_x`
   always falls while the byte clock runs **[CSI]** C11; the lane then waits in DL_HS_WAIT until the
   line returns to LP-11 (§4.5).
@@ -781,6 +803,8 @@ about 18 byte clocks after LP-11 at 1500 Mb/s and 7 at 80 Mb/s, while Bn reaches
   clocks after the last data lane enters LP-11: 288·UI in R1 and 320·UI in R2 with Λ = 2 ⚠️
   (OPEN S12, Tx side). The CSI-2 Rx controller, whose lane management also runs on `rxbyteclkhs`, is
   asked how many byte clocks it needs after the last byte; that number adds to this one.
+- With `PARA_STOP_DRAIN_EN` = 1, `stopstate_x` waits for the same clock and one byte clock more, the
+  register of HS busy (§4.5) ⚠️.
 
 ### 4.7 Timing & Init Control (Block No. 6)
 
@@ -912,17 +936,22 @@ some bursts have.
     when `rxvalidhs_x` is High and the sync is seen in that cycle or was seen before, so it would also
     accept the pulse one cycle before B1 **[CSI]**.
   - `rxvalidhs_x` is High for every byte from B1 to Bn and falls with `rxactivehs_x` after Bn.
-  - `stopstate_x` falls when LP-01 is seen, before `rxactivehs_x` rises, and rises before Bn reaches
-    the PPI (OPEN ADR-006, §4.5).
+  - `stopstate_x` falls when LP-01 is seen, before `rxactivehs_x` rises. With `PARA_STOP_DRAIN_EN`
+    = 0 it rises with the return to Stop, before Bn reaches the PPI, and pulses once between two
+    bursts; with 1 it rises after `rxactivehs_x` falls (OPEN ADR-006, §4.5).
+  - Between two bursts at the minimum THS-EXIT + TLPX, `rxactivehs_x` is Low for 330-400 ns at every
+    rate, 3-4 byte clocks at 80 Mb/s ⚠️ (§4.5).
   - SoT sync error (Figure 5-2): one `errsotsynchs_x` pulse `PARA_SYNC_SEARCH_BYTES` byte clocks after
     the first non-zero word that follows the sync-search start, then no `rxsynchs_x` or `rxvalidhs_x`
     until the end of the burst **[CSI]** C8. A burst that ends earlier without a lock has its pulse in
     the last cycle of `rxactivehs_x` ⚠️ (§4.6).
   - Deskew burst (Figure 5-3): `rxskewcalhs_x` from the detection until about `eot_skip_bytes` byte
-    clocks after `rxactivehs_x` falls; no `rxvalidhs_x` or `rxsynchs_x` **[CSI]** C9.
+    clocks after `rxactivehs_x` falls; no `rxvalidhs_x` or `rxsynchs_x` **[CSI]** C9. With
+    `PARA_STOP_DRAIN_EN` = 1, `stopstate_x` rises after `rxskewcalhs_x` falls ⚠️.
 - LP outputs. `stopstate_x`, the escape outputs and the clock-lane outputs are registers in
   `core_clk`. They follow the line state one cycle after the LP detection latency, 25-30 ns with the
-  defaults (§4.3, Appendix B).
+  defaults (§4.3, Appendix B); with `PARA_STOP_DRAIN_EN` = 1 the rise of `stopstate_x` after a burst
+  waits for HS busy (§4.5).
   - Escape mode (Figures 5-4 and 5-5): the trigger bit, or `rxulpsesc_x` with `ulpsactivenot_x`
     Low, is set when the eighth bit of the entry command is decoded. Mark-1 raises `ulpsactivenot_x`
     **[CSI]**. `rxtriggeresc_x` and `rxulpsesc_x` fall with the return to Stop **[CSI]** C12.
@@ -983,9 +1012,9 @@ byte boundary (§4.6).
   began at the line between Λ and Λ − 1 byte clocks before the entry into DL_HS_RX, so the words
   received during THS-PREPARE are ignored (§4.6).
 - EoT. LP-11 moves the lane to DL_HS_EOT, which clears both AFE enables and lowers the sync-search
-  start. Block No. 4 sends EoT done at the synchronized fall, which returns the lane to DL_STOP, and
-  holds the fall for three byte clocks before the EoT request (§4.5, §4.6). The PPI outputs of the
-  burst follow `PARA_EOT_DELAY_BYTES` byte clocks later (Figure 5-1).
+  start, and one cycle later to DL_STOP (§4.5). Block No. 4 holds the synchronized fall for three
+  byte clocks before the EoT request (§4.6). The PPI outputs of the burst follow
+  `PARA_EOT_DELAY_BYTES` byte clocks later (Figure 5-1).
 
 ![Figure 5-9: data lane at the AFE interface: SoT and EoT](figures/ftel_dphy_rx_wave_afe_sot_eot.svg)
 
@@ -1083,19 +1112,72 @@ fixed now: the R1 datapath already detects deskew bursts, so R2 only adds Block 
 | Area (1) | 5 | 3 | 5 |
 | **Total** | 42 | **55** | 34 |
 
-### ADR-006: Trailer removal (decided: delay line + last transition, wait for EoT done, hold of the EoT request; OPEN: order at the PPI)
+### ADR-006: Trailer removal and return to Stop (decided: delay line + last transition, hold of the EoT request, no wait for the EoT, `PARA_STOP_DRAIN_EN`; OPEN: meaning of `stopstate_x`)
 
 The PHY does not know packet lengths (it never parses content), so the only method that follows
 D-PHY [1] ✅ is to buffer the tail of the burst and cut it at the last transition before the
 THS-SKIP interval. Discarding a fixed number of bytes fails when the Tx trail length changes.
 
-Reopened by the block-level design (design notes of §4.5 and §4.6). Decided: DL_HS_EOT keeps waiting
-for EoT done; §4.5 states the resulting rate limit and keeps not waiting as the faster option.
-Decided in v0.16 after the simulation of the whole receiver: Block No. 4 holds the EoT request for
-three byte clocks so that the tail is stored before the cut, and `eot_skip_bytes` keeps one byte of
-margin to the payload; the guaranteed range is stated in §4.6 (Table 4-7). Still open: the order of
-`stopstate_x` and `rxactivehs_x` at the PPI, and whether the CSI-2 Rx controller ignores trailer
-bytes after the packet footer (CSI team).
+Reopened by the block-level design (design notes of §4.5 and §4.6). Decided in v0.16 after the
+simulation of the whole receiver: Block No. 4 holds the EoT request for three byte clocks so that
+the tail is stored before the cut, and `eot_skip_bytes` keeps one byte of margin to the payload; the
+guaranteed range is stated in §4.6 (Table 4-7).
+
+Return to Stop, decided in v0.17. Up to v0.16 DL_HS_EOT waited for EoT done from Block No. 4, and at
+the minimum THS-EXIT + TLPX the lane missed bursts at the low rates of Table 1-3. Any wait passes
+through the byte clock domain, at least two byte clocks (200 ns at 80 Mb/s), more than the minimum
+THS-EXIT + TLPX of 150 ns, so the lane does not wait at all. What remains is the meaning of
+`stopstate_x`: the delay line separates the return to Stop from the last byte at the PPI by up to
+about 35 byte clocks at 80 Mb/s, so one signal can mark only one of the two moments (§4.5).
+- A: wait for EoT done (v0.16), for comparison.
+- B: no wait; `stopstate_x` is the Stop state of the lane (D-PHY [1] ✅).
+- **C: B, and the synthesis parameter `PARA_STOP_DRAIN_EN`: with 1, `stopstate_x` also waits until
+  no HS output of the burst is left in Block No. 4 (§4.5).**
+- D: as C, selected by a run-time field.
+- E: no wait; `stopstate_x` rises when EoT done arrived in v0.16.
+- F: as B, with a delay-line depth that follows the line rate. The distance between the two moments
+  falls to about 7-8 byte clocks at 80 Mb/s but does not vanish, since the crossing and the hold
+  alone take 5-6 ⚠️; F needs a run-time field and Table 4-7 measured again.
+- Excluded: `stopstate_x` delayed with the HS outputs. The other LP outputs are not delayed, so the
+  PPI could show Stop and ULPS at once: at 80 Mb/s a lane can enter ULPS about 1.1 µs after LP-11,
+  before a Stop delayed by about 3.5 µs. There is also no byte clock to delay it during
+  initialization.
+
+**Table 7-4: ADR-006: return to Stop after EoT**
+
+| Criterion (weight) | A: wait (v0.16) | B: lane state | **C: B + parameter** | D: B + run-time field | E: v0.16 moment | F: depth per rate |
+|---|---|---|---|---|---|---|
+| Every burst received at the minimum THS-EXIT + TLPX, 80-1792 Mb/s (5) | 1 | 5 | 5 | 5 | 5 | 5 |
+| No constraint on the Tx beyond D-PHY [1] (3) | 1 | 5 | 5 | 5 | 5 | 5 |
+| Ready for the answer of the CSI team on `stopstate_x` (3) | 2 | 3 | 4 | 4 | 3 | 3 |
+| Risk in the default configuration, 5 = lowest (4) | 5 | 4 | 4 | 3 | 3 | 2 |
+| Effort, 5 = lowest (2) | 4 | 3 | 2 | 2 | 3 | 1 |
+| `stopstate_x` as D-PHY [1] defines the Stop state (1) | 2 | 5 | 5 | 5 | 3 | 5 |
+| Area, 5 = smallest (1) | 5 | 5 | 5 | 4 | 5 | 3 |
+| **Total** | 49 | 81 | **82** | 77 | 75 | 67 |
+
+- Readiness for the answer of the CSI team: 4 when both answers it may give, an early rise accepted
+  or a rise after the last byte required, need no RTL change; 3 when the second needs one; A has 2
+  because its rate limit stays whatever the answer.
+- C is chosen. B and C differ by one point, within the error of the scores: C − B is the weight of
+  the readiness criterion less that of the effort, so C leads unless effort weighs more. C costs
+  about half a day more than B ⚠️ and with 0 behaves as B; an answer that needs `stopstate_x` after
+  the last byte then needs a parameter value, not an RTL change.
+- Measured on the RTL, simulated from the pads to the PPI: four lanes, 32 bursts of 1 to 64 bytes per
+  lane, THS-EXIT and TLPX at their minimums, 24 settings from 80 to 1792 Mb/s, including the minimum
+  THS-PREPARE + THS-ZERO, the minimum THS-TRAIL and THS-EXIT = 400 ns.
+  - v0.16 received 16 of 32 bursts per lane at 80 and 120 Mb/s and 24 of 32 at 160 Mb/s; at 80 Mb/s
+    THS-EXIT had to reach 300 ns. Without the wait every burst is received with its payload in all
+    24 settings, with both values of `PARA_STOP_DRAIN_EN`, and the trailer bytes are those of v0.16
+    (at most 3, at 220 Mb/s).
+  - The PPI outputs with 0 and with 1 differ only in `stopstate_x`, whose timing is given in §4.5;
+    `rxactivehs_x` is Low for 330-400 ns between two bursts.
+  - A check that `stopstate_x` is never High while an HS output of the burst is still to reach the
+    PPI fails with 0 and passes with 1 in all 24 settings.
+
+Still open (CSI team): which value of `PARA_STOP_DRAIN_EN` the CSI-2 Rx controller needs, including
+the order of `rxskewcalhs_x` and `stopstate_x` with 1 (C9), and whether it ignores trailer bytes
+after the packet footer.
 
 ### ADR-007: Start of the sync search (decided: D)
 
@@ -1111,7 +1193,7 @@ until THS-SETTLE,min the HS-RX output, and so the words of Block No. 1, may be j
   (§4.6).**
 - E: the AFE forces its HS-RX output to zero until DL_HS_RX (a new AFE behaviour).
 
-**Table 7-4: ADR-007: sync-search start options**
+**Table 7-5: ADR-007: sync-search start options**
 
 | Criterion (weight) | A | B | C | **D** | E |
 |---|---|---|---|---|---|
@@ -1124,7 +1206,7 @@ until THS-SETTLE,min the HS-RX output, and so the words of Block No. 1, may be j
 | Behaviour after a corrupted leader (1) | 3 | 2 | 3 | 3 | 3 |
 | **Total** | 44 | 50 | 61 | **104** | 76 |
 
-Model behind the evidence below, Table 7-5 and the `hs_settle_cyc` values of Appendix B:
+Model behind the evidence below, Table 7-6 and the `hs_settle_cyc` values of Appendix B:
 - Line: time 0 is the start of LP-00. The Tx sends HS-0 until THS-PREPARE + THS-ZERO (the minimum
   145 ns + 10·UI, a few UI more, or 2 µs), then the leader `00011101` with 0, 1 or 2 bit errors and a
   payload.
@@ -1157,7 +1239,7 @@ Corrections to v0.8: a quiet AFE causes no leader loss at low rates (v0.8 compar
 entry into DL_HS_TERM with the line without the delay of the data path), and the words before
 THS-SETTLE,min were not ignored, so `hs_settle_cyc` had no effect on the search.
 
-**Table 7-5: ADR-007: events and fallbacks**
+**Table 7-6: ADR-007: events and fallbacks**
 
 | Event | A | B | C | **D** | E |
 |---|---|---|---|---|---|
@@ -1224,7 +1306,13 @@ the CSI-2 controller needs
   - Clock-lane and data-lane ULPS entry/exit; the four triggers; unknown escape command
     (`erresc_x`); false control (`errcontrol_x`).
   - HS RX timeout with the line still in HS (`stopstate_x` only after LP-11) and escape watchdog
-    expiry; at 80 Mb/s an EoT done that arrives after the next HS request or escape entry has begun.
+    expiry; at 80 Mb/s an escape entry that begins while the tail of the previous burst is still in
+    Block No. 4.
+  - Bursts at the minimum THS-EXIT + TLPX, 80-1792 Mb/s, with the minimum THS-PREPARE + THS-ZERO and
+    the minimum THS-TRAIL (ADR-006): every burst received and no two bursts merged, with both values
+    of `PARA_STOP_DRAIN_EN`; with 1, `stopstate_x` never High while an HS output of the burst is
+    still to reach the PPI and High after the last burst, also after a deskew burst; with 0, the
+    same check fails.
   - P/N-swapped and remapped lanes, in both HS and LP; the reset map; a map that is not a permutation.
   - Enables, also changed during a burst; `forcerxmode_x` held High until Stop has lasted TINIT, as the
     CSI-2 Rx controller does; `phy_core_rst`, TINIT and `init_done`.
@@ -1233,7 +1321,7 @@ the CSI-2 controller needs
 - **Integration.** Co-simulation with the CSI-2 Rx controller RTL, checking the expectations of its
   lane management: inter-lane divergence ≤ 6 byte cycles (C10) and no stuck `rxactivehs_x` (C11).
 - **Coverage.** Every FSM state and transition of Blocks No. 2 and 3, every PPI error output, every
-  lane count.
+  lane count, both values of `PARA_STOP_DRAIN_EN`.
 - **Static timing.** The sampler window of §4.3 at the sign-off corners, with the samplers placed
   (OPEN ADR-001).
 
@@ -1259,7 +1347,7 @@ the CSI-2 controller needs
 | S9 | Lane order and P/N polarity on the board and package | Straight, no inversion; the data lanes can be remapped and inverted (§4.3), the clock lane cannot | Tx side |
 | S12 | HS clock after the last burst, before the clock lane leaves HS (TCLK-POST) | Specification minimum: the tail of the last burst waits in the delay line until the clock runs again; this IP needs `PARA_EOT_DELAY_BYTES` + Λ + 2 byte clocks, 288·UI in R1 (§4.6) | Tx side; CSI team (its own need) |
 | T1 | Mapping of the four trigger commands to `rxtriggeresc_x[3:0]` | Order of Table 4-6 (D-PHY [1]) | Specification check |
-| ADR-006 | EoT: order of `stopstate_x` and `rxactivehs_x` at the PPI; trailer bytes after the packet footer (Table 4-7); gap between bursts below ~240 Mb/s | Lane waits for EoT done (decided); EoT request held three byte clocks (decided); `stopstate_x` may rise before the last byte, earlier than the CSI-2 Rx controller expects (to confirm); limits in §4.5 and §4.6 | This IP, CSI team, Tx side |
+| ADR-006 | EoT: meaning of `stopstate_x` at the PPI, `PARA_STOP_DRAIN_EN`, including the order of `rxskewcalhs_x` and `stopstate_x` with 1; trailer bytes after the packet footer (Table 4-7) | No wait for the EoT and EoT request held three byte clocks (decided); `PARA_STOP_DRAIN_EN` = 0: `stopstate_x` is the Stop state of the lane and rises before the last byte, earlier than the CSI-2 Rx controller expects; 1 makes it rise after the last HS output (§4.5); trailer limits in §4.6 | CSI team |
 | ADR-007 | Sync search, start decided (DL_HS_RX, option D): word latency Λ of Block No. 1, which places `hs_settle_cyc`; behaviour after a corrupted leader at the PPI, including a burst that ends before a lock | Λ = 2; `PARA_SYNC_SEARCH_BYTES` = 16; `errsotsynchs_x` at the end of a burst without a lock (§4.6) | This IP (Λ, with the RTL of Block No. 1); CSI team (corrupted leader) |
 
 ---
@@ -1324,7 +1412,7 @@ HS_TERM state 30-35 ns after the start of LP-00.
 | THS-SKIP | 40 … 55 ns + 4·UI | Bits discarded before the last-transition search (Block No. 4): `eot_skip_bytes` = max(⌊(THS-TRAIL,min + 24 ns) / byte period⌋ − 2, 0), one byte of margin to the payload (Table 3-2); with the defaults 80 Mb/s 0, 750 Mb/s 6, 1500 Mb/s 14, 1792 Mb/s 17. Without junk the cut is exact from 600 Mb/s; with 40 ns of junk before LP-11 some bursts keep trailer bytes (§4.6, Table 4-7) ⚠️ |
 | TCLK-MISS | ≤ 60 ns | Clock-activity detection of Block No. 1: `cl_rxclkactivehs` falls at most 60 ns after the last DDR clock edge (§4.3) ⚠️ |
 | TSETUP[RX], THOLD[RX] | Each ≥ 0.15·UI when the maximum rate is 1 Gb/s, ≥ 0.2·UI above: a setup and hold window of 0.3·UI (300 ps at 1 Gb/s) or 0.4·UI (267 ps at 1500 Mb/s) | Samplers of Block No. 1 on both edges of the DDR clock, hand-placed: the window holds their aperture and the clock-to-data delay differences of the AFE and of this IP (§4.3, OPEN ADR-001) ⚠️ |
-| TCLK-POST | ≥ 60 ns + 52·UI, transmitter | This IP needs the HS clock for `PARA_EOT_DELAY_BYTES` + Λ + 2 byte clocks after the last data lane enters LP-11: 288·UI in R1, 320·UI in R2 with Λ = 2 (§4.6, OPEN S12) ⚠️ |
+| TCLK-POST | ≥ 60 ns + 52·UI, transmitter | This IP needs the HS clock for `PARA_EOT_DELAY_BYTES` + Λ + 2 byte clocks after the last data lane enters LP-11: 288·UI in R1, 320·UI in R2 with Λ = 2 (§4.6, OPEN S12); one more for `stopstate_x` with `PARA_STOP_DRAIN_EN` = 1 ⚠️ |
 | TINIT (slave) | ≥ 100 µs | `tinit_cyc` = 20 000 |
 | TLPX | ≥ 50 ns | Basis of the LP oversampling (ADR-002) |
 | TWAKEUP | ≥ 1 ms | Tx-side; the Rx leaves ULPS on Mark-1 then Stop, no timer needed |

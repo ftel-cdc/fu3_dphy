@@ -1,20 +1,23 @@
 // Figure 5-1 - HS receive at the PPI, one data lane (spec.md 5.1; 4.6; 4.5 design note).
 // rxsynchs_x and the optional errsoths_x are in the cycle of B1 (C6).
 // rxvalidhs_x is High from B1 to Bn; rxvalidhs_x and rxactivehs_x fall together after Bn.
-// stopstate_x rises before Bn reaches the PPI, up to PARA_EOT_DELAY_BYTES byte clocks: OPEN ADR-006.
+// stopstate_x (PARA_STOP_DRAIN_EN = 0) rises with the return to Stop, before Bn reaches the PPI, by up to
+// about 35 byte clocks; with PARA_STOP_DRAIN_EN = 1 it rises after rxactivehs_x falls (OPEN ADR-006).
 { signal: [
-  { name: 'rxbyteclkhs',    wave: 'p.|......|......' },
-  { name: 'rxdatahs_x',     wave: 'x.|..====|====x.', data: ['B1', 'B2', 'B3', 'B4', 'Bn-3', 'Bn-2', 'Bn-1', 'Bn'] },
-  { name: 'rxactivehs_x',   wave: '0.|1.....|....0.', node: '...A............' },
-  { name: 'rxvalidhs_x',    wave: '0.|..1...|....0.' },
-  { name: 'rxsynchs_x',     wave: '0.|..10..|......', node: '.....B..........' },
-  { name: 'errsoths_x',     wave: '0.|..x0..|......' },
-  { name: 'errsotsynchs_x', wave: '0.|......|......' },
-  { name: 'stopstate_x',    wave: '10|.....x|..1...' },
-  {                                                   node: '........C....D..' },
+  { name: 'rxbyteclkhs',     wave: 'p.|......|.......' },
+  { name: 'rxdatahs_x',      wave: 'x.|..====|====x..', data: ['B1', 'B2', 'B3', 'B4', 'Bn-3', 'Bn-2', 'Bn-1', 'Bn'] },
+  { name: 'rxactivehs_x',    wave: '0.|1.....|....0..', node: '...A.............' },
+  { name: 'rxvalidhs_x',     wave: '0.|..1...|....0..' },
+  { name: 'rxsynchs_x',      wave: '0.|..10..|.......', node: '.....B...........' },
+  { name: 'errsoths_x',      wave: '0.|..x0..|.......' },
+  { name: 'errsotsynchs_x',  wave: '0.|......|.......' },
+  { name: 'stopstate_x (0)', wave: '10|.....x|..1....' },
+  {                                                    node: '........C....D...' },
+  { name: 'stopstate_x (1)', wave: '10|......|......1' },
+  {                                                    node: '..............E.F' },
 ],
-  edge: ['A~>B at or before', 'C<->D OPEN ADR-006'],
+  edge: ['A~>B at or before', 'C<->D rise before Bn', 'E->F after'],
   head: { text: 'PPI, one data lane: HS receive' },
-  foot: { text: 'hatched: undefined; errsoths_x only on a leader with a single-bit error' },
+  foot: { text: '(0), (1): PARA_STOP_DRAIN_EN; hatched: undefined; errsoths_x only after a single-bit error' },
   config: { hscale: 1, arcFontSize: 12 }
 }

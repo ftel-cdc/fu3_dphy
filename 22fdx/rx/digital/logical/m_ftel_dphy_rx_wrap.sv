@@ -14,7 +14,7 @@
 //                   other than the inverter. The configuration and status ports stand in for
 //                   Block No. 8 until the configuration path is defined (K3).
 // Parent          : SoC
-// HAS             : draft v0.14, §1.3, §4.2, §5, Table 9-1 (K3, K6)
+// HAS             : draft v0.17, §1.3, §3, §4.2, §5, Table 9-1 (K3, K6)
 // Clock domains   : core, byte, ddr, ddrn
 // REQ-IDs         : REQ-001, REQ-004, REQ-005, REQ-006, REQ-007, REQ-221, REQ-302
 // OPEN            : K3, K6
@@ -43,7 +43,8 @@ module m_ftel_dphy_rx_wrap
   parameter int PARA_LP_FILTER_CYC     = C_LP_FILTER_CYC,
   parameter int PARA_EOT_DELAY_BYTES   = C_EOT_DELAY_BYTES,
   parameter int PARA_SYNC_SEARCH_BYTES = C_SYNC_SEARCH_BYTES,
-  parameter int PARA_DLY_TAP_WIDTH     = C_DLY_TAP_WIDTH
+  parameter int PARA_DLY_TAP_WIDTH     = C_DLY_TAP_WIDTH,
+  parameter int PARA_STOP_DRAIN_EN     = C_STOP_DRAIN_EN
 ) (
   // ---- clock / reset ----
   // REQ-007
@@ -147,7 +148,8 @@ module m_ftel_dphy_rx_wrap
     .PARA_LP_FILTER_CYC     (PARA_LP_FILTER_CYC),
     .PARA_EOT_DELAY_BYTES   (PARA_EOT_DELAY_BYTES),
     .PARA_SYNC_SEARCH_BYTES (PARA_SYNC_SEARCH_BYTES),
-    .PARA_DLY_TAP_WIDTH     (PARA_DLY_TAP_WIDTH)
+    .PARA_DLY_TAP_WIDTH     (PARA_DLY_TAP_WIDTH),
+    .PARA_STOP_DRAIN_EN     (PARA_STOP_DRAIN_EN)
   ) u_dphy_rx_0 (
     .i_core_clk              (i_dphy_rx_core_clk),
     .i_phy_core_rst          (w_phy_core_rst),

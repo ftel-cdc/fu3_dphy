@@ -161,12 +161,16 @@ Kịch bản chỉ PASS khi cả hai RX đều 0 lỗi.
 | E1-6a/b (thêm 2026-10-26, `run_exp1.sh skew`) | 1440, 4 | Burst 1, 4, 64, 256 byte; cặp dây của lane 3 trễ 13 889 / 30 556 ps (2,5 / 5,5 byte time) | Lệch lane lớn mà vẫn trong ngân sách 6 byte clock (HAS C10). Không RX nào căn lại các lane, nên lệch tới thẳng PPI | Cả hai |
 | NEG-skew (như trên) | 1440, 4 | Như E1-6, lane 3 trễ 41 667 ps (7,5 byte time) | Thử âm thật cho luật lệch lane: payload vẫn đúng, chỉ luật lệch lane được phép hỏng | Cả hai |
 | R-80 | 80, 4 | Ngoài phạm vi bảo đảm | Chỉ báo cáo, không tính PASS/FAIL | Chỉ RX mình (stub) |
+| LG-* (24 run, thêm 2026-11-03, `run_exp1.sh lowgap`) | 80-1792, 4 | 32 burst 1-64 byte mỗi lane, sát nhau: THS-EXIT + TLPX tối thiểu (100 + 50 ns); thêm THS-PREPARE + THS-ZERO tối thiểu, THS-TRAIL tối thiểu và THS-EXIT 400 ns ở một số rate | Burst sát nhau ở mọi rate của HAS Table 1-3; `stopstate_x` chỉ báo cáo | Chỉ RX mình (stub) |
+| DR-* (24 run, `run_exp1.sh drain`) | như LG-* | Như LG-*, build với `PARA_STOP_DRAIN_EN` = 1 | Thêm luật `stopstate_x`: không High khi còn output HS của burst sắp ra PPI, và High ở cuối | Chỉ RX mình (stub, build riêng) |
+| NEG-drain (như trên) | 80, 4 | LG-0080-min trên build mặc định, kiểm bằng luật `stopstate_x` của DR-* | Thử âm thật cho luật đó: phải FAIL | Chỉ RX mình (stub) |
 
 **E1-5 chạy cả hai RX.**
 - Cần 8 build, một build cho mỗi rate.
 - Giới hạn trailer chỉ áp cho RX mình, vì RX AMD theo thiết kế không cắt trailer.
 - Ở chế độ `stub`, chỗ của IP AMD được thay bằng một khối rỗng ([`xrx_stub.sv`](xrx_stub.sv)). Chế độ này chỉ còn
-  dùng cho R-80 (rate mà IP AMD không build được) và cho `window`.
+  dùng cho R-80 (rate mà IP AMD không build được), cho `window`, và từ 2026-11-03 cho `lowgap` và `drain`
+  (build `build_stub_drain` cho `PARA_STOP_DRAIN_EN` = 1).
 
 Ngoài các test trên còn có `run_exp1.sh window`. Đây là phép đo, không phải test đạt/hỏng:
 - nó quét `eot_skip_bytes` quanh giá trị model ([`eot_window.py`](eot_window.py) in bảng), và cho ra các con số
@@ -241,6 +245,30 @@ RTL; bench chỉ khác header và đường dẫn IP; bộ so có thêm timing �
 Chi tiết từng kịch bản nằm trong `fpga/work/exp1/<tên>/check.txt` (gitignored) và ở
 [`doc/rtl_notes.md`](../../doc/rtl_notes.md) §9.
 
+**Lần chạy 2026-11-03 (HAS v0.17, [`../PLAN_EOT_NOWAIT.md`](../PLAN_EOT_NOWAIT.md)).** Tester của team FPGA chỉ ra
+mâu thuẫn: HAS Table 1-3 hứa 80-1792 Mb/s, nhưng §4.5 để lane bỏ lỡ burst ở tốc độ thấp khi hai burst sát nhau.
+- **Trên RTL cũ (HAS v0.16),** `lowgap` xác nhận: lane chỉ nhận 16/32 burst ở 80 và 120 Mb/s, 24/32 ở 160 Mb/s;
+  ở 80 Mb/s phải kéo THS-EXIT lên 300 ns mới đủ. Lane đợi EoT done ở DL_HS_EOT trong lúc request kế tiếp đã qua.
+- **Trên RTL mới (HAS v0.17),** lane không đợi nữa:
+  - `lowgap` 24/24 PASS, mỗi run đủ 128/128 burst; byte trailer giống hệt v0.16 (0-3 dưới 240 Mb/s, 0 từ 240 Mb/s);
+  - `drain` 24/24 PASS với luật `stopstate_x`, NEG-drain FAIL đúng chỗ (4 lane);
+  - capture của LG-* và DR-* chỉ khác nhau ở cột `stopstate_x`, ở cả 24 cặp.
+- **Thời điểm `stopstate_x`:**
+
+  | Rate (Mb/s) | `PARA_STOP_DRAIN_EN` = 0: lên trước byte cuối | = 1: lên sau chu kỳ cuối của `rxactivehs_x` | = 1: xung Stop giữa hai burst |
+  |---|---|---|---|
+  | 80 | 34-35 byte clock | 2 byte clock (200 ns) | 0/124 khe |
+  | 400 | 30 | 2 (40 ns) | 0/124 |
+  | 800 | 24-25 | 3 (30 ns) | 0/124 |
+  | 1500 | 15-17 | 4 (21 ns) | 0/124 |
+  | 1792 | 11-13 | 4-5 (18-22 ns) | 124/124 |
+
+  Với 0, `stopstate_x` có xung ở mọi khe giữa hai burst; mẫu lấy theo byte clock nên ở 80 Mb/s với khe tối thiểu
+  chỉ thấy 108/124 xung. Giữa hai burst, `rxactivehs_x` Low 330-400 ns ở mọi rate.
+- **Hồi quy:** cả bộ TN1 chạy lại trên RTL mới (230 run và 128 ô của `window`). Mọi capture trùng lần chạy trước
+  ở mọi cột trừ `stopstate_x`; `stopstate_x` lên sớm hơn 2-5 byte clock, số xung không đổi. Các lần chạy trước
+  được giữ ở `fpga/work/exp1/_pre_nowait/` (gitignored).
+
 ## 7. Kiểm chứng: vì sao tin được kết quả
 
 Kết quả chỉ đáng tin khi trả lời được sáu câu hỏi dưới đây, mỗi lớp kiểm một câu.
@@ -254,23 +282,27 @@ python3 fpga/exp1/tn1_evidence.py          # mỗi check một dòng PASS/FAIL, 
 ```
 
 Kết quả ngày 2026-10-20: **EVIDENCE: PASS (8/8 checks)**. Ngày 2026-10-26, trên lần chạy lại trong fu3_dphy với
-timing ở PPI: **EVIDENCE: PASS (8/8 checks)**.
+timing ở PPI: **EVIDENCE: PASS (8/8 checks)**. Ngày 2026-11-03, trên RTL của HAS v0.17: **EVIDENCE: PASS (9/9
+checks)**, thêm check `lowgap`.
 
-| Check | Kiểm gì | 2026-10-20 | 2026-10-26 |
-|---|---|---|---|
-| `checker` | Selftest của `csi2_dump.py`: tìm được các lỗi cài sẵn, kể cả ca chỉ sai thời gian và, từ 2026-10-26, ba lỗi timing PPI của tester; capture sạch thì đạt | PASS | PASS |
-| `decode` | Giải mã lại mọi capture bằng code riêng, theo thứ tự và theo thời gian, từ 2026-10-26 cả timing ở PPI (vị trí `rxsynchs`, lệch lane); kết quả phải trùng `check.txt`. Bộ giải mã tự thử trên capture giả trước | 453/453 capture | 459/459 capture |
-| `runs` | Mọi run kết thúc `TB DONE OK`; file truth có một dòng cho mỗi burst và lane; từ 2026-10-26 mọi kịch bản PASS trong `check.txt`, NEG-skew FAIL chỉ vì lệch lane | 227/227 run | 230/230 run |
-| `front` | Mỗi run có hai RX: đầu ra LP của buffer AMD và của buffer trước RX mình trùng nhau ở mọi lần đổi; RX mình đứng sau `IBUFDS_DPHY` trừ khi kịch bản đặt `+AFE=model` | 226/226 run, 4 854 302 lần đổi, 0 khác | 229/229 run, 4 893 764 lần đổi, 0 khác |
-| `afe` | Mô hình AFE không lỗi trạng thái; `term_en` không trễ, không thiếu | 227/227 run | 230/230 run |
-| `config` | Cấu hình RX mình đúng giá trị model HAS cho rate đó, hoặc giá trị kịch bản đặt | 227/227 run | 230/230 run |
-| `sources` | Mã băm nguồn của mọi build bằng mã băm nguồn hiện tại | 11/11 build | 11/11 build |
-| `margin` | Trail min: `eot_skip_bytes` model + 1 không mất payload, model + 2 mất, ở mọi rate | 8/8 rate | 8/8 rate |
+| Check | Kiểm gì | 2026-10-20 | 2026-10-26 | 2026-11-03 |
+|---|---|---|---|---|
+| `checker` | Selftest của `csi2_dump.py`: tìm được các lỗi cài sẵn, kể cả ca chỉ sai thời gian và, từ 2026-10-26, ba lỗi timing PPI của tester; capture sạch thì đạt | PASS | PASS | PASS |
+| `decode` | Giải mã lại mọi capture bằng code riêng, theo thứ tự và theo thời gian, từ 2026-10-26 cả timing ở PPI (vị trí `rxsynchs`, lệch lane); kết quả phải trùng `check.txt`. Bộ giải mã tự thử trên capture giả trước | 453/453 capture | 459/459 capture | 508/508 capture |
+| `runs` | Mọi run kết thúc `TB DONE OK`; file truth có một dòng cho mỗi burst và lane; từ 2026-10-26 mọi kịch bản PASS trong `check.txt`, NEG-skew FAIL chỉ vì lệch lane; từ 2026-11-03 NEG-drain FAIL chỉ vì luật `stopstate_x` | 227/227 run | 230/230 run | 279/279 run |
+| `front` | Mỗi run có hai RX: đầu ra LP của buffer AMD và của buffer trước RX mình trùng nhau ở mọi lần đổi; RX mình đứng sau `IBUFDS_DPHY` trừ khi kịch bản đặt `+AFE=model` | 226/226 run, 4 854 302 lần đổi, 0 khác | 229/229 run, 4 893 764 lần đổi, 0 khác | 229/229 run, 4 893 764 lần đổi, 0 khác |
+| `afe` | Mô hình AFE không lỗi trạng thái; `term_en` không trễ, không thiếu | 227/227 run | 230/230 run | 279/279 run |
+| `config` | Cấu hình RX mình đúng giá trị model HAS cho rate đó, hoặc giá trị kịch bản đặt | 227/227 run | 230/230 run | 279/279 run |
+| `sources` | Mã băm nguồn của mọi build bằng mã băm nguồn hiện tại | 11/11 build | 11/11 build | 12/12 build |
+| `margin` | Trail min: `eot_skip_bytes` model + 1 không mất payload, model + 2 mất, ở mọi rate | 8/8 rate | 8/8 rate | 8/8 rate |
+| `lowgap` | Mọi run LG-* và DR-* có, đủ burst, không lỗi; DR-*: `stopstate_x` không High khi còn output HS của burst trong 32 mẫu sau, và High ở cuối, trên mọi lane; LG-* trùng DR-* trừ `stopstate_x`; số khe có xung Stop của LG-* (chỉ báo cáo) | - | - | 48/48 run, 24/24 cặp |
 
 Các con số trong bảng:
 - 227 run = 113 kịch bản ở chế độ công bằng + 113 kịch bản của bộ phụ `M_*` + R-80; 230 = 227 + E1-6a, E1-6b,
   NEG-skew.
 - 453 capture = 226 run có hai RX × 2 + 1 capture của R-80; 459 = 453 + 3 run × 2.
+- 279 run = 230 + 24 LG-* + 24 DR-* + NEG-drain; 508 capture = 459 + 49 (mỗi run stub một capture). 12 build = 11 +
+  `build_stub_drain`.
 
 ### 7.1 Lớp 1: tín hiệu phát vào có đúng không?
 
@@ -403,8 +435,11 @@ Script kiểm chứng cũng phải biết báo FAIL. Các phép thử ngày 2026
 | Một `term_en` trễ | `afe` | đúng |
 | `eot_skip_bytes` khác model | `config` | đúng |
 | Hash nguồn của một build khác | `sources` | đúng |
+| Mất một burst trong LG-0080-min (thêm 2026-11-03) | `decode`, `lowgap` | đúng |
+| `stopstate_x` High trước một burst của DR-0080-min | `lowgap` | đúng |
+| NEG-drain PASS trong `check.txt` | `runs` | đúng |
 
-Kết quả: `evselftest: PASS` (1 ca sạch, 15 lỗi), 3 s.
+Kết quả: `evselftest: PASS` (1 ca sạch, 15 lỗi), 3 s. Ngày 2026-11-03: `evselftest: PASS` (1 ca sạch, 18 lỗi), 6 s.
 
 ### 7.8 Giới hạn của phần kiểm chứng
 
@@ -454,6 +489,8 @@ fpga/exp1/run_exp1.sh run 600 stub <tên> +TRAIL=min +EOT_JUNK=40     # chỉ RX
 fpga/exp1/run_exp1.sh window               # đo cửa sổ eot_skip_bytes (~7 phút)
 fpga/exp1/run_exp1.sh report               # R-80
 fpga/exp1/run_exp1.sh skew                 # E1-6a, E1-6b, NEG-skew: lane 3 lệch 2,5 / 5,5 / 7,5 byte time (~35 s)
+fpga/exp1/run_exp1.sh lowgap               # LG-*: burst sát nhau ở 80-1792 Mb/s, chỉ RX mình (~1 phút)
+fpga/exp1/run_exp1.sh drain                # DR-* với PARA_STOP_DRAIN_EN = 1, rồi NEG-drain (~1 phút)
 fpga/exp1/run_exp1.sh summary              # dòng kết quả của mọi kịch bản đã chạy
 fpga/exp1/run_exp1.sh recheck              # kiểm lại mọi output bằng csi2_dump.py hiện tại (~25 s, không mô phỏng)
 python3 fpga/exp1/tn1_evidence.py          # kiểm chứng kết quả (§7)

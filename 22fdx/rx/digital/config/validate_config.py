@@ -24,6 +24,7 @@ Every error starts with its constraint id:
   CFG-14  eot_skip_bytes: reset value = Table 3-2 formula at rate_ref; every value 0..EOT_DELAY_BYTES-1 and fits
   CFG-15  assumptions: word latency >= 1, rate_ref inside the release, rate points positive
   CFG-16  unknown or missing keys
+  CFG-17  STOP_DRAIN_EN in {0, 1}
   CFG-90  formula self-check: the formulas reproduce the values printed in the HAS (answer key)
 
 Usage:
@@ -55,7 +56,7 @@ PKG_NAME = "ftel_dphy_rx_config_pkg"
 
 RELEASES = {"R1": (80, 1500), "R2": (80, 1792)}  # Table 1-3
 SYN_KEYS = ["NUM_LANES", "DESER_RATIO", "CORE_CLK_MHZ", "DESKEW_EN", "LPDT_EN", "LP_SYNC_STAGES",
-            "LP_FILTER_CYC", "EOT_DELAY_BYTES", "SYNC_SEARCH_BYTES", "DLY_TAP_WIDTH"]
+            "LP_FILTER_CYC", "EOT_DELAY_BYTES", "SYNC_SEARCH_BYTES", "DLY_TAP_WIDTH", "STOP_DRAIN_EN"]
 RT_KEYS = ["hs_settle_cyc", "clk_settle_cyc", "tinit_cyc", "hs_rx_timeout_cyc", "esc_timeout_cyc",
            "eot_skip_bytes"]
 ASSUMPTION_KEYS = ["afe_word_latency", "rate_ref_mbps", "rate_points_mbps", "longest_burst_bytes",
@@ -260,6 +261,10 @@ def validate(cfg):
         err(errs, "CFG-06", f"SYNC_SEARCH_BYTES {s['SYNC_SEARCH_BYTES']} < 2")
     if s["DLY_TAP_WIDTH"] < 1:
         err(errs, "CFG-07", f"DLY_TAP_WIDTH {s['DLY_TAP_WIDTH']} < 1")
+
+    # ---- CFG-17 stopstate_x after the drain of the delay line
+    if s["STOP_DRAIN_EN"] not in (0, 1):
+        err(errs, "CFG-17", f"STOP_DRAIN_EN {s['STOP_DRAIN_EN']} not in 0, 1 (Table 3-1 #11)")
 
     # ---- CFG-08 run-time fields
     ok_fields = True
@@ -532,6 +537,7 @@ NEGATIVE = [  # pre-registered: (name, mutation, expected constraint id)
     ("rate_ref_mbps 1792 outside R1", lambda c: c["assumptions"].update(rate_ref_mbps=1792), "CFG-15"),
     ("typo synthesis.NUM_LANE", lambda c: c["synthesis"].update(NUM_LANE=4), "CFG-16"),
     ("unknown section", lambda c: c.update(extra={}), "CFG-16"),
+    ("STOP_DRAIN_EN 2", lambda c: c["synthesis"].update(STOP_DRAIN_EN=2), "CFG-17"),
 ]
 
 

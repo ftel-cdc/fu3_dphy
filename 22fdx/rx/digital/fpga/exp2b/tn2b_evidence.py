@@ -834,7 +834,7 @@ def sources_hash():
 def copy_blocks(tb2=None):
     """[(block, code lines in tb_exp1.sv, differing line pairs or None, as allowed)] of the blocks tb_exp2b.sv (or
     the file tb2) takes from exp1/tb_exp1.sv, lines without comments, blank lines and runs of white space."""
-    a = [' '.join(x.split()) for x in tn2a.code_lines(os.path.join(EXP1, 'tb_exp1.sv'))]
+    a = [' '.join(x.split()) for x in tn2a.tn1_code_lines()]
     b = [' '.join(x.split()) for x in tn2a.code_lines(tb2 or os.path.join(HERE, 'tb_exp2b.sv'))]
     out = []
     for name, start, end in COPY_BLOCKS:
