@@ -6,7 +6,9 @@
 > `66f9f39`. Output được kiểm lại ngày 2026-10-22: 227/227 run PASS, kiểm chứng 8/8.
 > Chạy lại toàn bộ ngày 2026-10-26 trong repo fu3_dphy, cùng RTL, với bộ so có thêm hai luật timing ở PPI (§5): 227
 > run cho kết quả như cũ, output trùng từng byte với lần chạy 2026-10-20; thêm 3 run lệch lane (§3.4); kiểm chứng 8/8.
-> Phiên bản 1.1, ngày 2026-10-26 (1.0: 2026-10-22). Nhóm D-PHY RX viết.
+> Chạy lại toàn bộ ngày 2026-11-03 trên RTL theo HAS v0.17, trong đó lane về trạng thái Stop ngay sau mỗi burst (§4):
+> ngoài cột `stopstate`, mọi capture trùng lần chạy 2026-10-26; thêm 49 run burst sát nhau (§3.6); kiểm chứng 9/9.
+> Phiên bản 1.2, ngày 2026-11-03 (1.1: 2026-10-26, 1.0: 2026-10-22). Nhóm D-PHY RX viết.
 
 ## 1. Tóm tắt
 
@@ -25,13 +27,22 @@
   - Độ trễ: RX mình trễ hơn khoảng 6-7 lần (201-206 ns so với 27-32 ns ở 1440 Mb/s), vì delay line 32 byte dùng để
     cắt trailer.
 - **Lỗi tìm ra:** ở lần chạy đầu, RX mình có hai lỗi RTL. Cả hai đã được sửa trong HAS v0.16 và không còn xuất hiện
-  (§4).
+  (§4). Lỗi thứ ba, bỏ lỡ burst khi hai burst sát nhau ở rate thấp, được sửa trong HAS v0.17 (§4).
 - **Giới hạn chính:** cả hai front end đều là mô hình, nên kết luận cho silicon còn cần thí nghiệm trên board (TN3).
 - **Cập nhật 2026-10-26:**
   - Team FPGA tìm ra hai lỗ hổng của bộ so: độ rộng và vị trí của `rxsynchs`, và lệch giữa các lane. Cả hai đã được sửa.
   - Toàn bộ TN1 chạy lại: không kết luận nào đổi, và RX mình đạt cả hai luật mới ở mọi run (§5).
   - Ba run mới cho lane lệch lớn: hai run trong giới hạn 6 byte clock đạt; run vượt giới hạn hỏng đúng ở luật lệch
     lane (§3.4).
+- **Cập nhật 2026-11-03:**
+  - Tester của team FPGA chỉ ra một mâu thuẫn trong HAS v0.16: dải rate hứa 80-1792 Mb/s, nhưng ở rate thấp lane có
+    thể bỏ lỡ burst khi hai burst sát nhau. Bộ chạy mới `lowgap` xác nhận: với khe tối thiểu giữa hai burst, RTL cũ
+    chỉ nhận 16/32 burst mỗi lane ở 80 và 120 Mb/s, 24/32 ở 160 Mb/s.
+  - RTL theo HAS v0.17 sửa lỗi này. Ở 13 rate từ 80 tới 1792 Mb/s, RX mình nhận đủ 32/32 burst mỗi lane (§3.6).
+  - Tham số tổng hợp mới `PARA_STOP_DRAIN_EN` chọn lúc `stopstate` lên. Hai giá trị cho cùng dữ liệu ở PPI, chỉ khác
+    ở `stopstate` (§3.6).
+  - Toàn bộ TN1 chạy lại trên RTL mới: ngoài cột `stopstate`, mọi capture trùng lần chạy trước (§3.6); kiểm chứng 9/9
+    (§5).
 
 ## 2. Thí nghiệm
 
@@ -138,6 +149,66 @@ byte clock (HAS, bảng A-2).
     trường hợp xấu hơn.
 - **Độ trễ:** RX mình trễ hơn vì delay line 32 byte cần cho phép cắt trailer. Độ trễ không phụ thuộc front end.
 
+### 3.6 Burst sát nhau ở mọi rate (LG-*, DR-*, NEG-drain; thêm ngày 2026-11-03)
+
+Mỗi run phát 32 burst trên mỗi lane, 4 lane, payload 1-64 byte. Giữa hai burst, line chỉ ở LP-11 rồi LP-01 trong thời
+gian tối thiểu mà D-PHY cho phép: THS-EXIT + TLPX = 100 + 50 ns. Bộ `lowgap` có 24 run: 13 rate từ 80 tới 1792 Mb/s,
+cộng 11 biến thể ở 80, 120, 160, 180, 220 và 260 Mb/s (THS-PREPARE + THS-ZERO tối thiểu, THS-TRAIL tối thiểu, hoặc
+THS-EXIT 400 ns). Chỉ RX mình chạy, vì IP AMD không build được dưới 260 Mb/s. Kịch bản và lệnh nằm ở
+[`TN1_DESCRIPTION.md`](TN1_DESCRIPTION.md) §7-§8.
+
+**Số burst nhận được trên mỗi lane, với khe tối thiểu:**
+
+| Rate (Mb/s) | RTL cũ (HAS v0.16) | RTL mới (HAS v0.17) | Byte trailer, RTL mới |
+|---|---|---|---|
+| 80 | 16/32 | 32/32 | 0-1 |
+| 120 | 16/32 | 32/32 | 0 |
+| 160 | 24/32 | 32/32 | 0-2 |
+| 180 | 32/32 | 32/32 | 0-2 |
+| 200 | 32/32 | 32/32 | 0 |
+| 220 | 32/32 | 32/32 | 0-3 |
+| 240, 260 | 32/32 | 32/32 | 0 |
+| 400, 800, 1440, 1500, 1792 | chưa chạy | 32/32 | 0 |
+
+- **RTL cũ:**
+  - burst bị bỏ lỡ không để lại gì ở PPI. Mọi burst nhận được đều đúng payload, không có cờ lỗi;
+  - ở 80 Mb/s, số burst tăng theo THS-EXIT: 16/32 ở 100 và 150 ns, 20/32 ở 200 ns, 28/32 ở 250 ns, đủ từ 300 ns;
+  - lúc chạy RTL cũ, script chưa có bảng giới hạn trailer theo rate, nên run 180 và 220 Mb/s báo hỏng vì trailer. Số
+    burst vẫn đủ, và số byte trailer trùng RTL mới.
+- **RTL mới:** 24/24 run PASS, mỗi run 128/128 burst-lane, kể cả 11 biến thể. Byte trailer nằm trong giới hạn theo
+  rate của script (2-5 byte dưới 260 Mb/s). Giữa hai burst, `rxactivehs` về 0 trong 330-400 ns ở mọi rate.
+
+**`stopstate` và tham số `PARA_STOP_DRAIN_EN`.** Tham số tổng hợp mới này chọn lúc `stopstate` lên:
+- 0, mặc định: `stopstate` là trạng thái Stop của lane. Nó lên khoảng 30-35 ns sau khi line về LP-11, trước khi byte
+  cuối của burst ra PPI;
+- 1: `stopstate` chỉ lên khi mọi output HS của burst đã ra khỏi PPI.
+
+Bộ `drain` chạy lại 24 run của `lowgap` trên bản build với giá trị 1 (DR-*), và kiểm thêm luật `stopstate` của
+[`TN1_DESCRIPTION.md`](TN1_DESCRIPTION.md) §6:
+- DR-*: 24/24 PASS. Capture của mỗi cặp LG-* và DR-* chỉ khác nhau ở cột `stopstate`, ở cả 24 cặp;
+- NEG-drain: run 80 Mb/s của build mặc định, kiểm bằng cùng luật. Nó FAIL đúng như định: payload đúng, chỉ luật
+  `stopstate` hỏng, mỗi lane một lỗi.
+
+| Rate (Mb/s) | 0: `stopstate` lên trước byte cuối ra PPI | 1: `stopstate` lên sau mẫu cuối có `rxactivehs` = 1 | 1: số khe giữa hai burst có `stopstate` = 1 |
+|---|---|---|---|
+| 80 | 34-35 byte clock | 2 byte clock (200 ns) | 0/124 |
+| 400 | 30 | 2 (40 ns) | 0/124 |
+| 800 | 24-25 | 3 (30 ns) | 0/124 |
+| 1500 | 15-17 | 4 (21 ns) | 0/124 |
+| 1792 | 11-13 | 4-5 (18-22 ns) | 124/124 |
+
+- Với 0, `stopstate` lên ở mọi khe giữa hai burst. Capture lấy mẫu theo byte clock, nên ở 80 Mb/s với khe tối thiểu
+  chỉ thấy 108/124 lần.
+- Với 1, ở khe tối thiểu và dưới 1792 Mb/s, lane đã rời trạng thái Stop để nhận burst sau trước khi burst trước ra
+  hết PPI. Vì vậy `stopstate` giữ 0 suốt chuỗi burst.
+- Với 1, `stopstate` cần byte clock để delay line xả hết. Nếu byte clock dừng trước đó, `stopstate` giữ 0 tới khi byte
+  clock chạy lại. Clock liên tục, như ở mọi run TN1, không gặp trường hợp này.
+
+**Hồi quy trên RTL mới.** Cả bộ TN1 chạy lại trên RTL theo HAS v0.17: 230 run của §3.1-§3.4 và 128 run đo cửa sổ cắt
+trailer. Capture của RX AMD, file truth và kết quả so trùng từng byte với lần chạy 2026-10-26. Capture của RX mình
+trùng ở mọi cột trừ `stopstate`: cột này lên sớm hơn 2-5 byte clock, số lần lên không đổi. Mọi kết luận ở §3.1-§3.5
+giữ nguyên.
+
 ## 4. Lỗi TN1 tìm ra và đã sửa
 
 Lần chạy đầu ngày 2026-10-19, với RTL theo HAS v0.15, cùng tín hiệu và cùng bộ kiểm:
@@ -188,28 +259,50 @@ RX AMD đạt, nên tín hiệu phát ra là đúng và lỗi nằm ở RX mình
 - Bộ so đã được thêm luật thời gian ([`TN1_DESCRIPTION.md`](TN1_DESCRIPTION.md) §6).
 - Toàn bộ 355 run đã được kiểm lại theo luật mới: không kết luận nào đổi.
 
+**Lỗi 3 (2026-11-03): bỏ lỡ burst khi hai burst sát nhau ở rate thấp.**
+- **Hiện tượng:** với khe tối thiểu giữa hai burst, lane chỉ nhận 16/32 burst ở 80 và 120 Mb/s, 24/32 ở 160 Mb/s
+  (§3.6). Burst bị bỏ lỡ không để lại gì ở PPI, nên phía sau không biết đã mất burst.
+- **Nguyên nhân:** sau LP-11, lane đợi phần nhận HS, chạy theo byte clock, xác nhận đã kết thúc burst rồi mới về
+  trạng thái Stop. Ở rate thấp byte clock chậm, nên việc đợi có thể lâu hơn khe giữa hai burst. Trong lúc đợi, yêu cầu
+  HS của burst sau (LP-01) đã qua, và lane không nhận burst đó.
+- **Tìm ra thế nào:** tester của team FPGA chỉ ra mâu thuẫn trong HAS v0.16, giữa dải rate hứa 80-1792 Mb/s và một
+  ghi chú để lane bỏ lỡ burst ở rate thấp. Các kịch bản TN1 trước đó dùng khe mặc định, rộng hơn khe tối thiểu, nên
+  không gặp. Bộ `lowgap` được thêm để đo.
+- **Sửa (HAS v0.17):** lane về Stop ngay sau LP-11, không đợi; phần nhận HS tự kết thúc burst ở PPI. Tham số
+  `PARA_STOP_DRAIN_EN` giữ lựa chọn cho `stopstate` chỉ lên sau khi burst đã ra hết PPI (§3.6).
+
 ## 5. Vì sao tin được kết quả
 
 [`tn1_evidence.py`](tn1_evidence.py) kiểm lại toàn bộ output bằng code riêng, không dùng chung với bộ so. Ngày
 2026-10-22, trên output của lần chạy 2026-10-20, kết quả là **EVIDENCE: PASS (8/8 checks)**. Ngày 2026-10-26, trên
-lần chạy lại, với cả hai luật timing ở PPI: vẫn **PASS (8/8 checks)**. Bảng ghi số của lần chạy lại.
+lần chạy lại, với cả hai luật timing ở PPI: vẫn **PASS (8/8 checks)**. Ngày 2026-11-03, trên RTL theo HAS v0.17:
+**PASS (9/9 checks)**, thêm check `lowgap`. Bảng ghi số của hai lần chạy lại.
 
-| Check | Kiểm gì | Kết quả 2026-10-26 |
-|---|---|---|
-| `checker` | Selftest của bộ so: tìm được các lỗi cài sẵn, kể cả ca chỉ sai thời gian và ba lỗi tester đã cài; capture sạch thì đạt | PASS |
-| `decode` | Giải mã lại mọi capture bằng code riêng, kể cả vị trí `rxsynchs` và lệch giữa các lane; kết quả phải trùng `check.txt` | 459/459 capture của 230 run |
-| `runs` | Mọi run kết thúc bình thường; file truth có đủ dòng cho mỗi burst và lane; mọi kịch bản đạt, riêng NEG-skew hỏng và chỉ hỏng ở luật lệch lane | 230/230 run |
-| `front` | Đầu ra LP của hai bộ buffer trùng nhau ở mọi lần đổi | 229/229 run, 4 893 764 lần đổi, 0 khác |
-| `afe` | Mô hình AFE không báo lỗi trạng thái; tín hiệu bật terminal không trễ, không thiếu | 230/230 run |
-| `config` | Cấu hình RX mình đúng giá trị model cho rate đó, hoặc giá trị kịch bản đặt | 230 run |
-| `sources` | Mã băm nguồn của mọi build bằng mã băm nguồn hiện tại | 11/11 build |
-| `margin` | Với trail min, `eot_skip_bytes` model + 1 không mất payload, model + 2 có mất | 8/8 rate |
+| Check | Kiểm gì | Kết quả 2026-10-26 | Kết quả 2026-11-03 |
+|---|---|---|---|
+| `checker` | Selftest của bộ so: tìm được các lỗi cài sẵn, kể cả ca chỉ sai thời gian và ba lỗi tester đã cài; capture sạch thì đạt. Từ 2026-11-03 thêm các ca của luật `stopstate` | PASS | PASS |
+| `decode` | Giải mã lại mọi capture bằng code riêng, kể cả vị trí `rxsynchs` và lệch giữa các lane; kết quả phải trùng `check.txt` | 459/459 capture của 230 run | 508/508 capture của 279 run |
+| `runs` | Mọi run kết thúc bình thường; file truth có đủ dòng cho mỗi burst và lane; mọi kịch bản đạt, riêng NEG-skew hỏng và chỉ hỏng ở luật lệch lane, NEG-drain hỏng và chỉ hỏng ở luật `stopstate` | 230/230 run | 279/279 run |
+| `front` | Đầu ra LP của hai bộ buffer trùng nhau ở mọi lần đổi | 229/229 run, 4 893 764 lần đổi, 0 khác | Như bên trái |
+| `afe` | Mô hình AFE không báo lỗi trạng thái; tín hiệu bật terminal không trễ, không thiếu | 230/230 run | 279/279 run |
+| `config` | Cấu hình RX mình đúng giá trị model cho rate đó, hoặc giá trị kịch bản đặt | 230 run | 279 run |
+| `sources` | Mã băm nguồn của mọi build bằng mã băm nguồn hiện tại | 11/11 build | 12/12 build |
+| `margin` | Với trail min, `eot_skip_bytes` model + 1 không mất payload, model + 2 có mất | 8/8 rate | 8/8 rate |
+| `lowgap` | Mọi run LG-* và DR-* đủ burst, đúng payload, trailer trong giới hạn; ở DR-*, trên mọi lane, `stopstate` không lên khi burst còn output HS sắp ra PPI, và lên ở cuối capture; mỗi cặp LG-* và DR-* chỉ khác ở cột `stopstate` | - | 48/48 run, 24/24 cặp |
+
+Các con số của 2026-11-03: 279 run = 230 + 24 LG-* + 24 DR-* + NEG-drain; 508 capture = 459 + 49, vì mỗi run mới chỉ
+có capture của RX mình; build thứ 12 là bản build với `PARA_STOP_DRAIN_EN` = 1.
 
 Các bộ kiểm cũng được thử xem có biết báo FAIL không:
 - Bộ so bắt đủ 4 lỗi cài sẵn: đảo một byte, mất một burst, cờ lỗi SoT, sync hai lần. Luật thời gian bắt được ca mất một
   burst rồi thừa một burst cùng payload. Từ 2026-10-26, bộ so bắt thêm ba lỗi tester đã cài, mỗi lỗi đúng luật của nó.
+  Từ 2026-11-03, luật `stopstate` của bộ so đạt với capture có `stopstate` chỉ lên sau khi burst ra hết PPI, và hỏng
+  khi `stopstate` lên ngay sau khi burst rời line, hoặc còn 0 ở cuối capture.
 - `tn1_evidence.py evselftest` (từ 2026-10-26) cài lần lượt 15 lỗi vào bản copy của output thật, trong đó có ba lỗi
-  của tester. Mỗi lỗi làm hỏng đúng check của nó, không thừa, không thiếu; khi không cài lỗi thì mọi check đạt.
+  của tester. Mỗi lỗi làm hỏng đúng check của nó, không thừa, không thiếu; khi không cài lỗi thì mọi check đạt. Từ
+  2026-11-03 là 18 lỗi, thêm: mất một burst trong một run `lowgap`; `stopstate` lên trước một burst trong một run
+  `drain`; NEG-drain bị ghi là đạt.
+- NEG-drain là phép thử âm thật cho luật `stopstate` (§3.6).
 - Check `front` báo FAIL khi buffer của RX mình bị lái khác đi. Phép thử âm [`neg_front.sh`](neg_front.sh) cho 21 574
   trong 30 450 lần đổi khác nhau.
 - Đổi 1 bit payload trong một capture thì check `decode` báo FAIL.
@@ -246,7 +339,8 @@ Toàn bộ TN1 được chạy lại với luật mới, và không kết luận
 4. RTL mô phỏng zero-delay, không có metastability. Phần này thuộc phân tích CDC và STA.
 5. Chỉ kiểm theo kịch bản, không đo functional coverage.
 6. Chưa kiểm: ULPS, escape mode, deskew, non-continuous clock, packet CSI-2, hiệu ứng analog (jitter, ISI), lỗi bit
-   chèn vào. `stopstate` có ghi nhưng không so.
+   chèn vào. `stopstate` có ghi, nhưng chỉ được so ở các run `drain` (§3.6).
+7. `PARA_STOP_DRAIN_EN` = 1 chỉ chạy trong bộ `drain` (4 lane, chỉ RX mình). Mọi bộ khác dùng giá trị mặc định 0.
 
 **Độ tin cậy:**
 - **HIGH:** PASS là thật trong điều kiện đã mô phỏng; hai RX thật sự cùng front end (đọc từ mã nguồn IP, kiểm ở mọi
@@ -256,12 +350,9 @@ Toàn bộ TN1 được chạy lại với luật mới, và không kết luận
 
 ## 7. Việc tiếp theo
 
-TN1 đã xong. Các bước sau chưa lên lịch:
-- **TN2 (mô phỏng):**
-  - TX D-PHY của AMD phát vào cả hai RX;
-  - CSI-2 TX phát frame. Một nhánh là CSI-2 RX có PHY của AMD; nhánh kia là RX mình nối vào CSI-2 RX không có PHY. Hai
-    nhánh được so từng frame;
-  - bản FPGA của RX mình, trong đó XPHY thay khối lấy mẫu và giải nối tiếp.
+TN1 đã xong. TN2 (mô phỏng) cũng đã chạy: TX D-PHY của AMD phát vào cả hai RX, rồi CSI-2 TX phát frame vào hai nhánh
+CSI-2 RX. Kết quả nằm ở [`../exp2/TN2_REPORT.md`](../exp2/TN2_REPORT.md). Các bước sau chưa lên lịch:
+- **Bản FPGA của RX mình (mô phỏng):** XPHY thay khối lấy mẫu và giải nối tiếp.
 - **TN3 (trên board):** TX trên một board FPGA thứ hai có FMC chạy được 1,2 V → mạch test → RX trên board VP1902.
   Phần 1 của đặc tả nằm ở [`fpga/exp3/TN3_SPEC.md`](../exp3/TN3_SPEC.md).
 
@@ -269,7 +360,8 @@ TN1 đã xong. Các bước sau chưa lên lịch:
 
 - Output của lần chạy nằm ở `fpga/work/exp1/` trên máy của nhóm D-PHY RX. Thư mục này không có trong repo (git bỏ qua).
   Lần chạy 2026-10-20, kèm bản lưu của lần chạy đầu, nặng khoảng 1,7 GB. Lần chạy lại 2026-10-26 trong repo fu3_dphy
-  nặng khoảng 0,8 GB.
+  nặng khoảng 0,8 GB. Lần chạy 2026-11-03 nặng khoảng 0,9 GB; bản lưu của lần chạy 2026-10-26, dùng cho phép so ở
+  §3.6, nặng khoảng 0,6 GB.
 - Có hai cách lấy số liệu:
   - chạy lại theo [`TN1_DESCRIPTION.md`](TN1_DESCRIPTION.md);
   - xin nhóm một bản copy.

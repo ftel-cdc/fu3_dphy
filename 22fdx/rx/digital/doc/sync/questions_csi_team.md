@@ -2,10 +2,10 @@
 
 | Mục | Nội dung |
 |---|---|
-| Gửi | Team CSI-2 Rx controller (HAS-CSI = `FTEL_IP_MIPI_CSI-2_CONTROLLER_HAS_v1.2.docx`) |
+| Gửi | Team CSI-2 Rx controller (HAS-CSI = HAS của controller, bản v1.2) |
 | Từ | Nhóm thiết kế D-PHY Rx (`ftel_dphy_rx`) |
-| Ngày | 2026-09-26, cập nhật 2026-09-29 (thêm ADR-006; K3 thêm `eot_skip_bytes`), 2026-09-30 (ADR-006: điều đã biết từ HAS-CSI; phụ lục C6; waveform PPI), 2026-10-19 (ADR-006 câu 2: phạm vi cắt trailer đo trên RTL, HAS v0.16) và 2026-10-20 (ADR-006 câu 2: đo lại với LP-11 ở mọi pha của `core_clk`, số mới) |
-| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.8 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.8.docx`), HAS-CSI v1.2 |
+| Ngày | 2026-09-26, cập nhật 2026-09-29 (thêm ADR-006; K3 thêm `eot_skip_bytes`), 2026-09-30 (ADR-006: điều đã biết từ HAS-CSI; phụ lục C6; waveform PPI), 2026-10-19 (ADR-006 câu 2: phạm vi cắt trailer đo trên RTL, HAS v0.16) 2026-10-20 (ADR-006 câu 2: đo lại với LP-11 ở mọi pha của `core_clk`, số mới) và 2026-11-03 (ADR-006: lane không còn đợi EoT; tham số `PARA_STOP_DRAIN_EN` chọn nghĩa của `stopstate_x`; câu 4 mới về khe `rxactivehs_x` giữa hai burst; HAS v0.17) |
+| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.17 (`doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.17.docx`), HAS-CSI v1.2 |
 
 ## Bối cảnh
 
@@ -32,7 +32,7 @@ Nếu team đồng ý với giả định, chỉ cần trả lời "Đồng ý".
 | K7 | Sửa dẫn chiếu trong HAS-CSI (biên tập) | Thấp | - |
 | K8 | Burst HS dài nhất trên một lane | Trung bình | 2 |
 | F-001 | Thời gian giữ `errcontrol_x` khi lỗi do chính LP-11 gây ra | Trung bình | 1 |
-| ADR-006 | EoT: thứ tự `stopstate_x` / `rxactivehs_x`, byte trailer sau packet ở tốc độ thấp, độ trễ PPI | **Cao** | 7 |
+| ADR-006 | EoT: nghĩa của `stopstate_x` (tham số `PARA_STOP_DRAIN_EN`), byte trailer sau packet ở tốc độ thấp, độ trễ PPI, khe `rxactivehs_x` giữa hai burst | **Cao** | 8 |
 
 ---
 
@@ -212,13 +212,21 @@ Timeout đặt 2^18 chu kỳ `core_clk`, khoảng 1.31 ms.
 
 **Tham chiếu.** HAS-CSI Table 4-3 (#24-#26). HAS D-PHY §4.5 (luật thứ tự ưu tiên của FSM data lane).
 
-## ADR-006: EoT ở tốc độ thấp
+## ADR-006: EoT, `stopstate_x` và byte trailer
 
 **Câu hỏi.**
-1. HAS-CSI Figure 4-1 cho `stopstate_x` lên trong khoảng từ byte cuối trở đi. Sau EoT, D-PHY có thể bật
-   `stopstate_x` sớm hơn thế, tối đa `PARA_EOT_DELAY_BYTES` chu kỳ `rxbyteclkhs` trước khi byte cuối
-   ra PPI (3.2 µs ở 80 Mb/s), tức là trước khi `rxactivehs_x` hạ. Controller có chấp nhận thứ tự này
-   không? Controller có dùng `stopstate_x` để nhận biết burst đã kết thúc không?
+1. HAS-CSI Figure 4-1 cho `stopstate_x` lên trong khoảng từ byte cuối trở đi. Từ HAS v0.17, tham số
+   tổng hợp `PARA_STOP_DRAIN_EN` của D-PHY chọn một trong hai nghĩa:
+   - 0 (mặc định): trạng thái Stop của lane, đúng định nghĩa của D-PHY. `stopstate_x` lên ngay khi lane
+     về Stop, trước khi byte cuối ra PPI tới khoảng 35 chu kỳ `rxbyteclkhs` (3.5 µs ở 80 Mb/s; 11-13
+     chu kỳ ở 1792 Mb/s), tức là trước khi `rxactivehs_x` hạ. Giữa hai burst có một xung Stop.
+   - 1: `stopstate_x` chỉ lên khi mọi output HS của burst (`rxactivehs_x`, `rxskewcalhs_x`) đã ra khỏi
+     PPI: 2 chu kỳ sau chu kỳ cuối của `rxactivehs_x` ở 80-400 Mb/s, khoảng 20 ns từ 1440 Mb/s. Khi đó
+     hai burst sát nhau không có xung Stop ở giữa (tới 1500 Mb/s), `rxskewcalhs_x` hạ trước khi
+     `stopstate_x` lên, và `stopstate_x` cần `rxbyteclkhs` chạy sau burst cuối, giống đuôi dữ liệu.
+
+   Controller cần nghĩa nào? Controller có dùng `stopstate_x` để nhận biết burst đã kết thúc không? Nếu
+   chọn 1, controller có chấp nhận `rxskewcalhs_x` hạ trước khi `stopstate_x` lên không (C9)?
 2. Từ 260 Mb/s, D-PHY bảo đảm không mất byte payload nào, nhưng một số burst có thể còn sót byte
    trailer ra sau packet footer với `rxvalidhs_x` = 1 (HAS D-PHY v0.16, Table 4-7):
    - đường truyền sạch lúc chuyển sang LP-11: từ 600 Mb/s không burst nào sót; ở 260 Mb/s khoảng
@@ -232,19 +240,24 @@ Timeout đặt 2^18 chu kỳ `core_clk`, khoảng 1.31 ms.
    đó là lỗi?
 3. Dữ liệu ra PPI trễ `PARA_EOT_DELAY_BYTES` chu kỳ `rxbyteclkhs` so với đường truyền: 32 chu kỳ, tức
    3.2 µs ở 80 Mb/s và 0.17 µs ở 1500 Mb/s. Controller có ràng buộc nào về độ trễ này không?
+4. Hai burst sát nhau (THS-EXIT và TLPX tối thiểu): giữa chúng `rxactivehs_x` hạ khoảng 330-400 ns ở
+   mọi tốc độ, tức chỉ 3-4 chu kỳ `rxbyteclkhs` ở 80 Mb/s. Burst FSM của controller có cần
+   `rxactivehs_x` hạ lâu hơn không?
 
 **Vì sao cần.**
 - D-PHY phải giữ lại đuôi burst trong một delay line để cắt trailer (D-PHY §6.4.3). Khi LP-11 xuất
   hiện, yêu cầu EoT phải đi qua `core_clk` rồi sang `rxbyteclkhs`, nên thời điểm LP-11 chỉ biết được
   với sai số cỡ một chu kỳ byte clock. Ở tốc độ thấp, sai số này lớn hơn khoảng an toàn mà D-PHY để
   lại giữa trailer và LP-11.
-- Lane đợi EoT done của D-PHY rồi mới về Stop. Từ HAS v0.16, EoT done được gửi ngay khi D-PHY thấy
-  yêu cầu kết thúc burst, trước khi cắt và trước khi delay line xả hết, nên `stopstate_x` lên trước
-  khi byte cuối ra PPI (câu 1). Nếu controller cần
-  đúng thứ tự của Figure 4-1, D-PHY phải đợi xả hết delay line mới về Stop. Khi đó, dưới khoảng
-  1.2 Gb/s, lane bỏ lỡ burst kế tiếp nếu Tx dùng THS-EXIT và TLPX ở mức tối thiểu.
+- Từ HAS v0.17, lane không đợi D-PHY cắt xong mà về Stop ngay sau LP-11, nên nhận được burst kế tiếp
+  ở mọi tốc độ với THS-EXIT và TLPX tối thiểu (bản trước bỏ lỡ burst dưới khoảng 170 Mb/s). Vì delay
+  line, lúc lane về Stop và lúc byte cuối ra PPI cách nhau tới khoảng 35 chu kỳ ở 80 Mb/s, nên một tín
+  hiệu chỉ mang được một trong hai nghĩa. Tham số chọn nghĩa đó lúc tích hợp, không phải sửa RTL
+  (câu 1).
 - Câu 2: nếu controller bỏ qua byte sau footer thì phạm vi hiện tại đủ dùng. Nếu coi đó là lỗi,
   D-PHY phải đo thời điểm LP-11 ở mức dưới một byte và cắt ở mức bit (phức tạp hơn nhiều).
+- Câu 4: khe này là khe vốn có trên đường truyền (trail, THS-EXIT, TLPX, vào HS); D-PHY giữ nguyên nó
+  ở PPI.
 
 **Đã biết từ HAS-CSI.** `ppi_stopstate` chỉ đi vào IRQ_STATUS bit 11 và LANE_STATUS (Interrupt & Error
 Aggregator, Table 4-25). Burst FSM mở và đóng burst theo `rxactivehs_x` (Table 4-6). Nếu đúng như vậy,
@@ -252,12 +265,13 @@ việc `stopstate_x` lên sớm chỉ làm interrupt Stop state và LANE_STATUS 
 Nhờ team xác nhận, hoặc cho biết chỗ khác có dùng `stopstate_x`.
 
 **Giả định hiện tại.**
-- Lane đợi EoT done rồi mới về Stop (đã chốt). Hệ quả phía Tx: dưới khoảng 240 Mb/s, hai burst liền
-  nhau cần THS-EXIT + TLPX lớn hơn khoảng 32·UI + 15 ns (HAS D-PHY §4.5). Phần này đã hỏi phía Tx.
-- `stopstate_x` có thể lên trước byte cuối như ở câu 1, cho tới khi team trả lời.
+- Lane không đợi D-PHY cắt xong (đã chốt, HAS v0.17); phía Tx không còn ràng buộc THS-EXIT + TLPX.
+- `PARA_STOP_DRAIN_EN` = 0: `stopstate_x` là trạng thái Stop của lane và lên trước byte cuối như ở câu
+  1, cho tới khi team trả lời. Nếu team cần nghĩa "sau byte cuối", chỉ cần đặt tham số bằng 1.
 - Không mất payload từ 260 Mb/s; số byte trailer theo HAS D-PHY Table 4-7 (ADR-006).
 
-**Tham chiếu.** HAS D-PHY §4.5 và §4.6 (các design note), §5.1 Figure 5-1, ADR-006, §9. HAS-CSI
+**Tham chiếu.** HAS D-PHY Table 3-1 (`PARA_STOP_DRAIN_EN`), §4.5 và §4.6 (các design note), §5.1
+Figure 5-1, ADR-006, §9. HAS-CSI
 Figure 4-1, Table 4-3, Table 4-6, Table 4-25, §4.4 (`err_wc` chỉ báo khi thiếu byte).
 
 ---

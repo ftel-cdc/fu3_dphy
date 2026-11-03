@@ -6,7 +6,8 @@
 > - **TN2b** ([`fpga/exp2b/`](../exp2b/)): CSI-2 TX Subsystem của AMD phát frame RAW10 vào hai đường nhận CSI-2 đầy
 >   đủ, một trong hai đường dùng `ftel_dphy_rx`.
 >
-> Phiên bản 1.0, ngày 2026-10-26. Nhóm D-PHY RX viết.
+> Phiên bản 1.1, ngày 2026-11-03: check `copy` so với TN1 ở build mặc định (§5). Phiên bản 1.0, ngày 2026-10-26.
+> Nhóm D-PHY RX viết.
 
 ## 1. Thí nghiệm làm gì
 
@@ -191,7 +192,9 @@ Kiểm trong bench: đầu ra LP của buffer trong D-PHY của R-X và của bu
 **Testbench** ([`tb_exp2a.sv`](tb_exp2a.sv)):
 - Front end của RX mình, check front end và instance `m_ftel_dphy_rx_wrap` được lấy nguyên văn từ
   [`tb_exp1.sv`](../exp1/tb_exp1.sv). Check `copy` của `tn2a_evidence.py` so lại ba khối này với TN1 ở mỗi lần kiểm
-  chứng.
+  chứng. Từ 2026-11-03, instance trong `tb_exp1.sv` truyền thêm tham số `STOP_DRAIN` của bench, mặc định 0, vào
+  `PARA_STOP_DRAIN_EN`. TN2 dùng giá trị mặc định, nên check `copy` so với TN1 khi bỏ kết nối này, và chỉ khi
+  `STOP_DRAIN` vẫn mặc định 0.
 - Pad có hai bản cùng giá trị, đều lái bằng `assign` nên đều strong: một bản vào RX AMD và `pad_truth`, một bản vào
   front end của RX mình và `afe_model`.
 - `+SRC=tx|gen` chọn nguồn của pad: TX AMD (mặc định) hoặc line generator của TN1. Với `gen`, TX bị giữ reset, và truth
@@ -267,7 +270,8 @@ và `resp` được kiểm. Ba instance, cho TX, R-X và R-F. Mỗi truy cập i
 **Testbench** ([`tb_exp2b.sv`](../exp2b/tb_exp2b.sv)):
 - Lấy từ [`tb_exp1.sv`](../exp1/tb_exp1.sv): front end của RX mình, nguyên văn; check front end, khác đúng dòng đường
   dẫn (nay so với buffer trong D-PHY của R-X); instance `m_ftel_dphy_rx_wrap`, khác đúng 6 dòng của bảng nối. Check
-  `copy` của `tn2b_evidence.py` kiểm đúng các dòng khác này ở mỗi lần kiểm chứng.
+  `copy` của `tn2b_evidence.py` kiểm đúng các dòng khác này ở mỗi lần kiểm chứng, với cùng ngoại lệ `STOP_DRAIN` như
+  TN2a.
 - **Thứ tự cấu hình:**
   - RX, theo driver của AMD: soft reset, chờ `CSR[0]`, đặt active lanes, nhả soft reset, `GIER`, enable;
   - TX, như example của TX Subsystem: đặt active lanes, `CCR` = 1 (enable; `CCR[4]` = 0 là continuous clock), chờ

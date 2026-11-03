@@ -4,7 +4,7 @@
 |---|---|
 | Gửi | Đội phát triển phía Tx (CSI-2 transmitter / D-PHY Tx của sensor) |
 | Từ | Nhóm thiết kế D-PHY Rx (`ftel_dphy_rx`) |
-| Ngày | 2026-09-26, cập nhật 2026-09-29 (S9: clock lane; S5: THS-EXIT + TLPX ở tốc độ thấp), 2026-09-30 (S3: vì sao Rx cần continuous clock) và 2026-10-02 (S5: THS-ZERO không còn ảnh hưởng việc tìm sync; S12 mới: HS clock sau burst cuối) |
+| Ngày | 2026-09-26, cập nhật 2026-09-29 (S9: clock lane; S5: THS-EXIT + TLPX ở tốc độ thấp), 2026-09-30 (S3: vì sao Rx cần continuous clock), 2026-10-02 (S5: THS-ZERO không còn ảnh hưởng việc tìm sync; S12 mới: HS clock sau burst cuối) và 2026-11-03 (S5: bỏ ràng buộc THS-EXIT + TLPX ở tốc độ thấp, Rx nhận được burst kế tiếp ở mọi tốc độ) |
 | Căn cứ | MIPI CSI-2 v1.3, MIPI D-PHY v1.1 (Table 14); HAS của `ftel_dphy_rx` bản nháp v0.11 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.11.docx`) |
 
 ## Bối cảnh
@@ -16,14 +16,14 @@ Tx: CSI-2 protocol ─► D-PHY Tx ══ lane trên PCB ══► AFE ─► ft
 ```
 
 Chúng tôi thiết kế Rx theo CSI-2 v1.3 và D-PHY v1.1. Riêng deskew lấy theo D-PHY v1.2, vì cần khi
-chạy trên 1.5 Gb/s. Rx được thiết kế để chịu được **toàn bộ dải** min/max của spec, trừ hai ngoại
-lệ: THS-EXIT + TLPX ở tốc độ thấp (S5) và TCLK-POST trước khi clock lane rời HS (S12). Các câu hỏi dưới đây giúp chốt những giá trị mà spec chỉ cho một biên, hoặc để ngỏ.
+chạy trên 1.5 Gb/s. Rx được thiết kế để chịu được **toàn bộ dải** min/max của spec, trừ một ngoại
+lệ: TCLK-POST trước khi clock lane rời HS (S12). Các câu hỏi dưới đây giúp chốt những giá trị mà spec chỉ cho một biên, hoặc để ngỏ.
 
 Mỗi câu hỏi kèm **giả định đang dùng**. Nếu phía Tx đồng ý với giả định, chỉ cần trả lời "Đồng ý".
 Một số câu đã có câu trả lời một phần từ HAS của team CSI-2 Rx controller (HAS-CSI); với các câu
 đó, chúng tôi chỉ nhờ xác nhận.
 
-**Cần trả lời trước HAS v1.0:** **S4, S5**. Đây là hai mục mở trong HAS, đang chặn 4 yêu cầu.
+**Cần trả lời trước HAS v1.0:** **S4, S5**. Đây là hai mục mở trong HAS, đang chặn 7 yêu cầu.
 S12 không chặn RTL (Rx không đổi theo câu trả lời) nhưng cần trước khi chạy hệ thống thật.
 S1, S3, S9 và S10 cũng cần sớm, để chuẩn bị môi trường verify.
 
@@ -35,7 +35,7 @@ S1, S3, S9 và S10 cũng cần sớm, để chuẩn bị môi trường verify.
 | S2 | Số data lane cho từng sensor mode | Trung bình | Đã có từ HAS-CSI, nhờ xác nhận |
 | S3 | Continuous hay non-continuous clock | Cao | Đã có từ HAS-CSI, nhờ xác nhận |
 | S4 | Deskew: có gửi không, pattern, độ dài, thời điểm | **Cao** | Mở |
-| S5 | Bảng timing thực tế của Tx (đặc biệt THS-TRAIL max, THS-EXIT + TLPX ở tốc độ thấp) | **Cao** | Mở |
+| S5 | Bảng timing thực tế của Tx (đặc biệt THS-TRAIL max) | **Cao** | Mở |
 | S6 | ULPS: có dùng không, trình tự, TWAKEUP | Trung bình | Mở |
 | S7 | Thời gian giữ LP-11 sau khi bật nguồn (TINIT phía Tx) | Trung bình | Mở |
 | S8 | Chỉ CSI-2 v1.3, hay có tính năng v2.0 trở lên | Trung bình | Đã có từ HAS-CSI, nhờ xác nhận |
@@ -111,14 +111,13 @@ Rx nhận ra deskew burst khi thấy ≥ 16 bit 1 sau HS-0.
 - **THS-ZERO** không còn ảnh hưởng việc tìm sync. Từ HAS v0.9, Rx bắt đầu tìm sync khi hết THS-SETTLE
   và đếm cửa sổ từ word khác 0 đầu tiên, nên nhận đúng ở mọi tốc độ, cả với THS-PREPARE + THS-ZERO tối
   thiểu (145 ns + 10·UI) lẫn HS-0 rất dài. Giá trị thực chỉ dùng để đặt test case.
-- **THS-EXIT + TLPX ở tốc độ thấp.** Sau mỗi burst, Rx đợi cắt trailer xong mới về Stop. Vì vậy dưới
-  khoảng 240 Mb/s, Rx chỉ nhận được burst kế tiếp khi THS-EXIT + TLPX lớn hơn khoảng 32·UI + 15 ns
-  (415 ns ở 80 Mb/s; mức tối thiểu của spec là 100 ns + 50 ns). Nếu Tx gửi hai burst sát nhau ở tốc
-  độ thấp với THS-EXIT và TLPX tối thiểu, nhờ báo lại.
+- **THS-EXIT + TLPX không còn là ràng buộc** (cập nhật 2026-11-03). Bản trước, Rx đợi cắt trailer
+  xong mới về Stop, nên dưới khoảng 240 Mb/s cần THS-EXIT + TLPX lớn hơn mức tối thiểu. Nay Rx về
+  Stop khoảng 30-35 ns sau LP-11 và tự cắt trailer sau đó, nên nhận được burst kế tiếp ở mọi tốc độ
+  từ 80 Mb/s với THS-EXIT và TLPX tối thiểu (100 ns + 50 ns). Đã mô phỏng ở 80-1792 Mb/s.
 - Các giá trị còn lại dùng để đặt các góc timing trong môi trường verify.
 
-**Giả định hiện tại.** Đúng min/max của D-PHY v1.1 Table 14. Ngoại lệ đã biết: ràng buộc THS-EXIT +
-TLPX ở trên, khi chạy dưới khoảng 240 Mb/s (HAS D-PHY §4.5).
+**Giả định hiện tại.** Đúng min/max của D-PHY v1.1 Table 14.
 
 ## S6: ULPS
 

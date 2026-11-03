@@ -1,9 +1,11 @@
 # TN1 - Mô tả thí nghiệm: so RX D-PHY `ftel_dphy_rx` với RX D-PHY của AMD trong mô phỏng XSIM
 
 > Tài liệu cho team FPGA: lấy RTL và testbench ở đâu, bench gồm những gì, so theo luật nào, chạy và đọc kết quả ra
-> sao. Kết quả lần chạy ngày 2026-10-20 và lần chạy lại ngày 2026-10-26 nằm ở [`TN1_REPORT.md`](TN1_REPORT.md).
-> Phiên bản 1.1, ngày 2026-10-26: thêm hai luật timing ở PPI (§6), ba kịch bản lệch lane (§7), lệnh `skew` và
-> `evselftest` (§8). Phiên bản 1.0: 2026-10-22. Nhóm D-PHY RX viết.
+> sao. Kết quả lần chạy ngày 2026-10-20 và các lần chạy lại ngày 2026-10-26 và 2026-11-03 nằm ở
+> [`TN1_REPORT.md`](TN1_REPORT.md). Phiên bản 1.2, ngày 2026-11-03: thêm các kịch bản burst sát nhau ở mọi rate
+> (`lowgap`, `drain`, §7, §8), luật `stopstate` của `drain` (§6) và check thứ 9 (§9). Phiên bản 1.1, ngày
+> 2026-10-26: thêm hai luật timing ở PPI (§6), ba kịch bản lệch lane (§7), lệnh `skew` và `evselftest` (§8). Phiên
+> bản 1.0: 2026-10-22. Nhóm D-PHY RX viết.
 
 ## 1. Thí nghiệm làm gì
 
@@ -207,8 +209,16 @@ nghĩa là 40 ns cuối của trail là bit ngẫu nhiên, trường hợp xấu
 **Khác biệt chỉ ghi nhận, không tính là lỗi:**
 - số byte trailer của RX AMD;
 - độ trễ của byte payload cuối;
-- thời điểm `stopstate`: có ghi trong CSV nhưng không kiểm. Thứ tự giữa `stopstate` và `rxactivehs` ở cuối burst
-  còn đang được chốt với team CSI-2.
+- thời điểm `stopstate`: có ghi trong CSV nhưng chỉ kiểm ở các run `drain` (dưới đây). Thứ tự giữa `stopstate` và
+  `rxactivehs` ở cuối burst còn đang được chốt với team CSI-2.
+
+**Luật `stopstate` của các run `drain`** (từ 2026-11-03). RX mình có tham số tổng hợp `PARA_STOP_DRAIN_EN`:
+- 0, mặc định: `stopstate` là trạng thái Stop của lane. Nó lên ngay khi lane về Stop, trước khi byte cuối của burst ra
+  PPI, và có một xung giữa hai burst. Các run thường chỉ ghi nhận nó.
+- 1: `stopstate` chỉ lên khi mọi output HS của burst đã ra khỏi PPI. Các run `drain` build với giá trị này và kiểm
+  thêm hai điều: ở mẫu nào `stopstate` = 1 thì trong 32 mẫu sau (độ sâu delay line của RX mình) không có
+  `rxactivehs` hay `rxskewcalhs` = 1; và `stopstate` = 1 ở cuối capture. NEG-drain chạy cùng luật này trên build
+  mặc định và phải hỏng.
 
 ## 7. Các kịch bản
 
@@ -239,6 +249,9 @@ Rate và số lane là tham số build. Cột plusarg chỉ ghi những gì khá
 | E1-6a | 1440, 4 | `+LENS=1,4,64,256 +SKEW3=13889` | Lane 3 trễ 2,5 byte time. Không RX nào căn lại các lane, nên lệch tới thẳng PPI; vẫn trong mức 6 byte clock |
 | E1-6b | 1440, 4 | `+LENS=1,4,64,256 +SKEW3=30556` | Lane 3 trễ 5,5 byte time, sát mức 6 byte clock |
 | NEG-skew | 1440, 4 | `+LENS=1,4,64,256 +SKEW3=41667` | Phép thử âm: lane 3 trễ 7,5 byte time. Payload phải đúng, và chỉ luật lệch lane được báo hỏng, ở cả hai RX |
+| LG-* (24 run, `lowgap`) | 80, 120, 160, 180, 200, 220, 240, 260, 400, 800, 1440, 1500, 1792; 4 (`stub`) | `+EXIT=min +LPX=min +LENS=1,2,3,4,5,8,16,64 +REPEAT=4`; ở một số rate thêm `+PREP=min +ZERO=min`, `+TRAIL=min`, hoặc `+THS_EXIT=400` | 32 burst sát nhau mỗi lane (THS-EXIT + TLPX = 150 ns): RX mình phải nhận đủ ở mọi rate, kể cả dưới 260 Mb/s; giới hạn trailer dưới 260 Mb/s theo bảng riêng của script (2-5 byte) |
+| DR-* (24 run, `drain`) | Như LG-* | Như LG-*, build với `PARA_STOP_DRAIN_EN` = 1 | Như LG-*, cộng luật `stopstate` ở §6 |
+| NEG-drain | 80, 4 (`stub`) | Như LG-0080-min, build mặc định | Phép thử âm của luật `stopstate`: payload đúng, chỉ luật `stopstate` hỏng |
 
 Ngoài ra, `window` là một phép đo, không phải test đạt hay hỏng. Nó quét `eot_skip_bytes` từ giá trị model trừ 1 tới
 cộng 2 ở 8 rate, với trail min và max, nhiễu 0 và 40 ns, 1120 burst mỗi ô, rồi [`eot_window.py`](eot_window.py) in
@@ -256,6 +269,8 @@ fpga/exp1/run_exp1.sh E1-5 400 600         # E1-5 ở một số rate (mỗi rat
 fpga/exp1/run_exp1.sh model                # bộ phụ M_*: mọi kịch bản, RX mình sau afe_model (~23 phút)
 fpga/exp1/run_exp1.sh report               # R-80
 fpga/exp1/run_exp1.sh skew                 # E1-6a, E1-6b, NEG-skew (~35 s)
+fpga/exp1/run_exp1.sh lowgap               # LG-*: burst sát nhau ở 80-1792 Mb/s, chỉ RX mình (~1 phút)
+fpga/exp1/run_exp1.sh drain                # DR-* với PARA_STOP_DRAIN_EN = 1, rồi NEG-drain (~1 phút)
 fpga/exp1/run_exp1.sh window               # đo cửa sổ eot_skip_bytes (~7 phút)
 fpga/exp1/run_exp1.sh summary              # dòng kết quả của mọi kịch bản đã chạy
 python3 fpga/exp1/tn1_evidence.py          # kiểm chứng toàn bộ output (§9)
@@ -263,12 +278,13 @@ python3 fpga/exp1/tn1_evidence.py evselftest   # thử chính script kiểm ch�
 fpga/exp1/neg_front.sh                     # phép thử âm của check front end (~1 phút)
 ```
 
-Muốn có đủ bộ output thì chạy `all`, `model`, `report`, `skew` và `window`: 230 run (113 kịch bản, 113 run của bộ
-`M_*`, R-80, E1-6a, E1-6b và NEG-skew), cộng 128 run của `window`.
+Muốn có đủ bộ output thì chạy `all`, `model`, `report`, `skew`, `window`, `lowgap` và `drain`: 279 run (113 kịch
+bản, 113 run của bộ `M_*`, R-80, E1-6a, E1-6b, NEG-skew, 24 LG-*, 24 DR-* và NEG-drain), cộng 128 run của `window`.
 - Lần chạy 2026-10-20 (chưa có `skew`) chia thành hai pha song song và xong trong 13 phút:
   - pha 1: E1-1…E1-3, E1-4, R-80 với `window`, và E1-5 ở 400/600/1000/1200 Mb/s, mỗi nhóm một tiến trình;
   - pha 2: E1-5 ở 260/800/1440/1500 Mb/s.
 - Lần chạy lại 2026-10-26 chạy năm lệnh nối tiếp, ở mức ưu tiên thấp và cùng lúc với việc khác, trong 59 phút.
+- Lần chạy lại 2026-11-03 chạy bảy lệnh nối tiếp, cùng lúc với TN2, trong 58 phút.
 
 ## 9. Đọc kết quả
 
@@ -311,10 +327,11 @@ RESULT: PASS (A 0 errors, B 0 errors)
 
 **Tổng hợp:**
 - `run_exp1.sh summary` in một dòng `RESULT` cho mỗi kịch bản.
-- `tn1_evidence.py` kiểm lại toàn bộ output bằng code riêng (8 check) và in `EVIDENCE: PASS (8/8 checks)` khi mọi
-  check đạt. Check `margin` cần output của `window`; các check khác cần đủ bộ `all`, `model`, `report` và `skew`.
-- `tn1_evidence.py evselftest` thử chính script đó: cài lần lượt 15 lỗi vào bản copy của output thật và đòi mỗi lỗi
-  làm hỏng đúng check của nó. Trong 15 lỗi có ba lỗi tester team FPGA đã cài; danh sách đầy đủ nằm trong
+- `tn1_evidence.py` kiểm lại toàn bộ output bằng code riêng (9 check) và in `EVIDENCE: PASS (9/9 checks)` khi mọi
+  check đạt. Check `margin` cần output của `window`, check `lowgap` cần output của `lowgap` và `drain`; các check
+  khác cần đủ bộ `all`, `model`, `report`, `skew`, `lowgap` và `drain`.
+- `tn1_evidence.py evselftest` thử chính script đó: cài lần lượt 18 lỗi vào bản copy của output thật và đòi mỗi lỗi
+  làm hỏng đúng check của nó. Trong 18 lỗi có ba lỗi tester team FPGA đã cài; danh sách đầy đủ nằm trong
   `EV_FAULTS` của script. Output thật không bị đụng.
 - `run_exp1.sh recheck` chạy lại phần so cho mọi output mà không mô phỏng lại. Lệnh này ghi đè `check.txt`.
 
@@ -345,7 +362,7 @@ MAXTR=8 fpga/exp1/run_exp1.sh run 800 4 my_junk +EOT_JUNK=40              # cho 
 - **Metastability:** RTL chạy zero-delay. Phần này thuộc phân tích CDC và STA.
 - **Phủ:** chỉ kiểm theo kịch bản, không đo functional coverage.
 - **Chưa chạy:** ULPS, escape mode, deskew, non-continuous clock, packet CSI-2, lỗi bit chèn vào sync hay payload.
-- **`stopstate`:** có ghi nhưng không so (§6).
+- **`stopstate`:** có ghi, nhưng chỉ được so ở các run `drain` (§6).
 
 ## 12. Lưu ý khi đưa `ftel_dphy_rx` lên FPGA
 
