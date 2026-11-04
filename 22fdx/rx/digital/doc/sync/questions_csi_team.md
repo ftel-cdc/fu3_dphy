@@ -4,8 +4,8 @@
 |---|---|
 | Gửi | Team CSI-2 Rx controller (HAS-CSI = HAS của controller, bản v1.2) |
 | Từ | Nhóm thiết kế D-PHY Rx (`ftel_dphy_rx`) |
-| Ngày | 2026-09-26, cập nhật 2026-09-29 (thêm ADR-006; K3 thêm `eot_skip_bytes`), 2026-09-30 (ADR-006: điều đã biết từ HAS-CSI; phụ lục C6; waveform PPI), 2026-10-19 (ADR-006 câu 2: phạm vi cắt trailer đo trên RTL, HAS v0.16) 2026-10-20 (ADR-006 câu 2: đo lại với LP-11 ở mọi pha của `core_clk`, số mới) và 2026-11-03 (ADR-006: lane không còn đợi EoT; tham số `PARA_STOP_DRAIN_EN` chọn nghĩa của `stopstate_x`; câu 4 mới về khe `rxactivehs_x` giữa hai burst; HAS v0.17) |
-| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.17 (`doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.17.docx`), HAS-CSI v1.2 |
+| Ngày | 2026-09-26, cập nhật 2026-09-29 (thêm ADR-006; K3 thêm `eot_skip_bytes`), 2026-09-30 (ADR-006: điều đã biết từ HAS-CSI; phụ lục C6; waveform PPI), 2026-10-19 (ADR-006 câu 2: phạm vi cắt trailer đo trên RTL, HAS v0.16) 2026-10-20 (ADR-006 câu 2: đo lại với LP-11 ở mọi pha của `core_clk`, số mới) và 2026-11-03 (ADR-006: lane không còn đợi EoT; tham số `PARA_STOP_DRAIN_EN` chọn nghĩa của `stopstate_x`; câu 4 mới về khe `rxactivehs_x` giữa hai burst; HAS v0.17), 2026-11-04 (tên wrapper `m_fpt_dphy_rx_wrap`, theo quy tắc đặt tên của team PD) |
+| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.18 (`doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.18.docx`), HAS-CSI v1.2 |
 
 ## Bối cảnh
 
@@ -166,12 +166,12 @@ trùng chức năng. Mục Registers (§6) của HAS D-PHY đang hoãn cho tới
 4. `forcerxmode_x` là mức hay xung? Có phải chỉ được bật khi lane đang ở Stop state không?
 
 **Vì sao cần.** Cực tính và kiểu reset quyết định mạch đồng bộ reset trong từng clock domain và
-cách khai port ở wrapper `m_ftel_dphy_rx_wrap`.
+cách khai port ở wrapper `m_fpt_dphy_rx_wrap`.
 
 **Giả định hiện tại.**
 - `phy_core_rst` active High. Assert bất đồng bộ; release đồng bộ theo từng domain bên trong D-PHY.
 - Controller giữ `phy_core_rst` ≥ 40 chu kỳ `core_clk` (C14).
-- Ở wrapper: port active-low `_n`, inverter đặt trong `m_ftel_dphy_rx_wrap`.
+- Ở wrapper: port active-low `_n`, inverter đặt trong `m_fpt_dphy_rx_wrap`.
 - Hành vi của `init_done` khi khởi tạo lại một lane chưa được định nghĩa trong bản nháp.
 
 **Tham chiếu.** HAS-CSI Table 4-3 (#1-#3, #28-#29), mục "Bring-up". HAS D-PHY §4.2, §4.7.

@@ -26,7 +26,7 @@
     nào, dù PPI mang đúng các packet đó. `ftel_dphy_rx` nâng `rxactivehs` trước `rxsynchs` vài byte clock, như HAS cho
     phép. D-PHY của AMD nâng hai tín hiệu cùng lúc, và controller của AMD cần `rxactivehs` không lên trước `rxsynchs`
     (§4.1). Đây không phải lỗi so với HAS, mà là chỗ PPI của `ftel_dphy_rx` khác PPI mà controller của AMD chờ.
-  - **Cách xử lý, chỉ ở FPGA:** khối `m_ftel_ppi_act_gate` giữ `rxactivehs` của mỗi lane ở 0 tới `rxsynchs`. Khối có 6
+  - **Cách xử lý, chỉ ở FPGA:** khối `m_fpt_ppi_act_gate` giữ `rxactivehs` của mỗi lane ở 0 tới `rxsynchs`. Khối có 6
     flip-flop với 4 lane và không thêm trễ. RTL ASIC không đổi (§4.2).
   - Qua khối này, R-F ra đúng từng pixel ở 27/27 run: 14 kịch bản ở 4 rate, 2 và 1 lane active, ±400 ppm, RX cấu hình
     muộn, tắt rồi bật lại luồng, cộng 13 run với RX mình sau mô hình AFE. Chuỗi packet và thanh ghi của R-F bằng R-X.
@@ -191,7 +191,7 @@ giá trị đúng như bảng ở mọi lane burst.
 
 ### 4.2 Khối chỉnh `rxactivehs`
 
-[`fpga/rtl/m_ftel_ppi_act_gate.sv`](../rtl/m_ftel_ppi_act_gate.sv), chỉ dùng ở FPGA. Ở mỗi lane, `rxactivehs` ra lên
+[`fpga/rtl/m_fpt_ppi_act_gate.sv`](../rtl/m_fpt_ppi_act_gate.sv), chỉ dùng ở FPGA. Ở mỗi lane, `rxactivehs` ra lên
 cùng `rxsynchs` đầu tiên của burst và giữ tới hết burst. Burst không có `rxsynchs` thì giữ ở 0. Không thêm trễ; mọi tín
 hiệu PPI khác đi thẳng. Port và cách nối ở [`TN2_DESCRIPTION.md`](TN2_DESCRIPTION.md) §5.3.
 

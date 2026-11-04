@@ -6,6 +6,8 @@
 > - **TN2b** ([`fpga/exp2b/`](../exp2b/)): CSI-2 TX Subsystem của AMD phát frame RAW10 vào hai đường nhận CSI-2 đầy
 >   đủ, một trong hai đường dùng `ftel_dphy_rx`.
 >
+> Phiên bản 1.2, ngày 2026-11-04: module của RTL đổi tiền tố `m_ftel_` thành `m_fpt_` (wrapper `m_fpt_dphy_rx_wrap`,
+> khối chỉnh `m_fpt_ppi_act_gate`), theo quy tắc đặt tên của team PD; dòng RTL ở §2 nay ghi đúng phiên bản HAS.
 > Phiên bản 1.1, ngày 2026-11-03: check `copy` so với TN1 ở build mặc định (§5). Phiên bản 1.0, ngày 2026-10-26.
 > Nhóm D-PHY RX viết.
 
@@ -46,7 +48,9 @@ Cả hai bench chạy trong XSIM của Vivado, không cần board.
 ## 2. Lấy RTL và testbench ở đâu
 
 Repo `https://github.com/ftel-cdc/fu3_dphy`, nhánh `dev`.
-- RTL `ftel_dphy_rx` (`logical/`, `config/`) là RTL TN1 đã dùng, theo HAS v0.16, không đổi từ commit `66f9f39`.
+- RTL `ftel_dphy_rx` (`logical/`, `config/`) là RTL TN1 dùng, hiện theo HAS v0.18. Lần chạy đầu của TN2 dùng RTL theo
+  HAS v0.16 (từ commit `66f9f39`); các lần chạy lại ngày 2026-11-03 (HAS v0.17) và 2026-11-04 (HAS v0.18, chỉ đổi
+  tên module) ghi ở [`TN2_REPORT.md`](TN2_REPORT.md).
 - Bench TN2a có trên nhánh từ commit `cd1f0b2`, bench TN2b từ commit `e456f21`. Khối chỉnh `rxactivehs` và hai luật
   timing ở PPI (§6.1) có trên nhánh cùng lúc với tài liệu này.
 
@@ -59,9 +63,9 @@ cd fu3_dphy/22fdx/rx/digital          # mọi lệnh trong tài liệu này ch�
 
 | Thành phần | Đường dẫn | Ghi chú |
 |---|---|---|
-| RTL `ftel_dphy_rx` | [`logical/`](../../logical/) | Như TN1: thứ tự compile ở [`logical/filelist.f`](../../logical/filelist.f), top là [`m_ftel_dphy_rx_wrap.sv`](../../logical/m_ftel_dphy_rx_wrap.sv). Không sửa gì cho mô phỏng |
-| Khối chỉnh `rxactivehs` | [`fpga/rtl/m_ftel_ppi_act_gate.sv`](../rtl/m_ftel_ppi_act_gate.sv) | Chỉ dùng ở FPGA, không thuộc RTL ASIC. Nằm giữa `ftel_dphy_rx` và CSI-2 RX Subsystem không PHY, ở TN2b và ở R-F của TN3 (§5.3) |
-| Kiểm riêng khối chỉnh | [`fpga/rtl/tb_m_ftel_ppi_act_gate.sv`](../rtl/tb_m_ftel_ppi_act_gate.sv), [`fpga/rtl/run_rtl.sh`](../rtl/run_rtl.sh), [`fpga/rtl/synth_rtl.tcl`](../rtl/synth_rtl.tcl) | Unit testbench, lint, kiểm luật viết RTL, synth out-of-context bằng Vivado |
+| RTL `ftel_dphy_rx` | [`logical/`](../../logical/) | Như TN1: thứ tự compile ở [`logical/filelist.f`](../../logical/filelist.f), top là [`m_fpt_dphy_rx_wrap.sv`](../../logical/m_fpt_dphy_rx_wrap.sv). Không sửa gì cho mô phỏng |
+| Khối chỉnh `rxactivehs` | [`fpga/rtl/m_fpt_ppi_act_gate.sv`](../rtl/m_fpt_ppi_act_gate.sv) | Chỉ dùng ở FPGA, không thuộc RTL ASIC. Nằm giữa `ftel_dphy_rx` và CSI-2 RX Subsystem không PHY, ở TN2b và ở R-F của TN3 (§5.3) |
+| Kiểm riêng khối chỉnh | [`fpga/rtl/tb_m_fpt_ppi_act_gate.sv`](../rtl/tb_m_fpt_ppi_act_gate.sv), [`fpga/rtl/run_rtl.sh`](../rtl/run_rtl.sh), [`fpga/rtl/synth_rtl.tcl`](../rtl/synth_rtl.tcl) | Unit testbench, lint, kiểm luật viết RTL, synth out-of-context bằng Vivado |
 | TN2a: testbench top | [`fpga/exp2/tb_exp2a.sv`](tb_exp2a.sv) | Danh sách plusarg nằm ở đầu file |
 | TN2a: driver PPI của TX | [`fpga/exp2/ppi_tx_drv.sv`](ppi_tx_drv.sv) | Phát các burst qua PPI của TX AMD |
 | TN2a: bộ giải mã pad | [`fpga/exp2/pad_truth.sv`](pad_truth.sv) | Giải byte, trạng thái line và timing TX từ pad, độc lập với hai RX; ghi file truth |
@@ -140,7 +144,7 @@ CSI-2 TX Subsystem 2.2: controller ─PPI─► tx_ppi.csv ─► D-PHY TX bên 
    ├─► R-X: CSI-2 RX Subsystem 6.0 có D-PHY ─► cổng theo dõi PPI ─► xil_ppi.csv
    │        └─► video_out ─► xil_axis.csv
    │
-   └─► IBUFDS_DPHY (mặc định) hoặc afe_model ─► ftel_dphy_rx ─► PPI ─┬─► rxactivehs ─► m_ftel_ppi_act_gate ─┐
+   └─► IBUFDS_DPHY (mặc định) hoặc afe_model ─► ftel_dphy_rx ─► PPI ─┬─► rxactivehs ─► m_fpt_ppi_act_gate ─┐
                                                                      └─► các tín hiệu PPI khác ─────────────┤
                                                             PPI vào R-F ─► ftel_ppi.csv ◄───────────────────┤
                                                             R-F: CSI-2 RX Subsystem 6.0 không PHY ◄─────────┘
@@ -190,7 +194,7 @@ Kiểm trong bench: đầu ra LP của buffer trong D-PHY của R-X và của bu
   THS-EXIT của mỗi data lane; TLPX, TCLK-PREPARE, TCLK-ZERO, TCLK-PRE của clock lane. Phần này chỉ báo cáo.
 
 **Testbench** ([`tb_exp2a.sv`](tb_exp2a.sv)):
-- Front end của RX mình, check front end và instance `m_ftel_dphy_rx_wrap` được lấy nguyên văn từ
+- Front end của RX mình, check front end và instance `m_fpt_dphy_rx_wrap` được lấy nguyên văn từ
   [`tb_exp1.sv`](../exp1/tb_exp1.sv). Check `copy` của `tn2a_evidence.py` so lại ba khối này với TN1 ở mỗi lần kiểm
   chứng. Từ 2026-11-03, instance trong `tb_exp1.sv` truyền thêm tham số `STOP_DRAIN` của bench, mặc định 0, vào
   `PARA_STOP_DRAIN_EN`. TN2 dùng giá trị mặc định, nên check `copy` so với TN1 khi bỏ kết nối này, và chỉ khi
@@ -269,7 +273,7 @@ và `resp` được kiểm. Ba instance, cho TX, R-X và R-F. Mỗi truy cập i
 
 **Testbench** ([`tb_exp2b.sv`](../exp2b/tb_exp2b.sv)):
 - Lấy từ [`tb_exp1.sv`](../exp1/tb_exp1.sv): front end của RX mình, nguyên văn; check front end, khác đúng dòng đường
-  dẫn (nay so với buffer trong D-PHY của R-X); instance `m_ftel_dphy_rx_wrap`, khác đúng 6 dòng của bảng nối. Check
+  dẫn (nay so với buffer trong D-PHY của R-X); instance `m_fpt_dphy_rx_wrap`, khác đúng 6 dòng của bảng nối. Check
   `copy` của `tn2b_evidence.py` kiểm đúng các dòng khác này ở mỗi lần kiểm chứng, với cùng ngoại lệ `STOP_DRAIN` như
   TN2a.
 - **Thứ tự cấu hình:**
@@ -300,7 +304,7 @@ và `resp` được kiểm. Ba instance, cho TX, R-X và R-F. Mỗi truy cập i
 - `+RX_LATE=1`: cấu hình hai RX khi đã phát nửa frame 0. `+STREAM_TOGGLE=1`: tắt TX sau frame 0 rồi bật lại.
 - Danh sách đủ plusarg nằm ở đầu file.
 
-### 5.3 Khối chỉnh `rxactivehs` ([`fpga/rtl/m_ftel_ppi_act_gate.sv`](../rtl/m_ftel_ppi_act_gate.sv))
+### 5.3 Khối chỉnh `rxactivehs` ([`fpga/rtl/m_fpt_ppi_act_gate.sv`](../rtl/m_fpt_ppi_act_gate.sv))
 
 **Vì sao có khối này.** Ở đầu mỗi burst, `ftel_dphy_rx` nâng `rxactivehs` trước `rxsynchs` vài byte clock (7 ở
 260 Mb/s, 19-20 ở 1440 Mb/s), và đưa `rxsynchs` cùng chu kỳ với byte đầu. HAS cho phép như vậy. D-PHY của AMD nâng hai

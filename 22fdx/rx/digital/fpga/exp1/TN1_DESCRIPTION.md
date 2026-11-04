@@ -2,7 +2,9 @@
 
 > Tài liệu cho team FPGA: lấy RTL và testbench ở đâu, bench gồm những gì, so theo luật nào, chạy và đọc kết quả ra
 > sao. Kết quả lần chạy ngày 2026-10-20 và các lần chạy lại ngày 2026-10-26 và 2026-11-03 nằm ở
-> [`TN1_REPORT.md`](TN1_REPORT.md). Phiên bản 1.2, ngày 2026-11-03: thêm các kịch bản burst sát nhau ở mọi rate
+> [`TN1_REPORT.md`](TN1_REPORT.md). Phiên bản 1.3, ngày 2026-11-04: module của RTL đổi tiền tố `m_ftel_` thành `m_fpt_`
+> (wrapper `m_fpt_dphy_rx_wrap`), theo quy tắc đặt tên của team PD; bench, lệnh và luật so không đổi. Phiên bản 1.2,
+> ngày 2026-11-03: thêm các kịch bản burst sát nhau ở mọi rate
 > (`lowgap`, `drain`, §7, §8), luật `stopstate` của `drain` (§6) và check thứ 9 (§9). Phiên bản 1.1, ngày
 > 2026-10-26: thêm hai luật timing ở PPI (§6), ba kịch bản lệch lane (§7), lệnh `skew` và `evselftest` (§8). Phiên
 > bản 1.0: 2026-10-22. Nhóm D-PHY RX viết.
@@ -40,7 +42,7 @@ cd fu3_dphy/22fdx/rx/digital          # mọi lệnh trong tài liệu này ch�
 
 | Thành phần | Đường dẫn | Ghi chú |
 |---|---|---|
-| RTL `ftel_dphy_rx` | [`logical/`](../../logical/) | 22 file SystemVerilog. Thứ tự compile ở [`logical/filelist.f`](../../logical/filelist.f); đường dẫn trong đó bắt đầu bằng `${FTEL_DPHY_RX_PATH}`, script tự thay. Top là [`m_ftel_dphy_rx_wrap.sv`](../../logical/m_ftel_dphy_rx_wrap.sv) |
+| RTL `ftel_dphy_rx` | [`logical/`](../../logical/) | 22 file SystemVerilog. Thứ tự compile ở [`logical/filelist.f`](../../logical/filelist.f); đường dẫn trong đó bắt đầu bằng `${FTEL_DPHY_RX_PATH}`, script tự thay. Top là [`m_fpt_dphy_rx_wrap.sv`](../../logical/m_fpt_dphy_rx_wrap.sv) |
 | Package cấu hình | [`logical/ftel_dphy_rx_config_pkg.sv`](../../logical/ftel_dphy_rx_config_pkg.sv) | Sinh từ [`config/ftel_dphy_rx.yaml`](../../config/ftel_dphy_rx.yaml) bằng [`config/validate_config.py`](../../config/validate_config.py); đã có sẵn, không cần sinh lại |
 | Testbench top | [`fpga/exp1/tb_exp1.sv`](tb_exp1.sv) | Danh sách plusarg nằm ở đầu file |
 | Line generator | [`fpga/exp1/dphy_line_gen.sv`](dphy_line_gen.sv) | TX giả: phát tín hiệu D-PHY và ghi file truth |
@@ -128,7 +130,7 @@ RX mình nhận tín hiệu từ một front end (vai trò của AFE trên chip)
 
 ### 5.4 RX mình
 
-Module `m_ftel_dphy_rx_wrap`, tham số `PARA_NUM_LANES` bằng số lane của build. Cách testbench nối:
+Module `m_fpt_dphy_rx_wrap`, tham số `PARA_NUM_LANES` bằng số lane của build. Cách testbench nối:
 
 | Cổng | Nối với | Ý nghĩa |
 |---|---|---|
@@ -366,12 +368,12 @@ MAXTR=8 fpga/exp1/run_exp1.sh run 800 4 my_junk +EOT_JUNK=40              # cho 
 
 ## 12. Lưu ý khi đưa `ftel_dphy_rx` lên FPGA
 
-- **Phần riêng cho ASIC** là khối AFE adapter ([`m_ftel_dphy_rx_afe_adapter.sv`](../../logical/m_ftel_dphy_rx_afe_adapter.sv))
+- **Phần riêng cho ASIC** là khối AFE adapter ([`m_fpt_dphy_rx_afe_adapter.sv`](../../logical/m_fpt_dphy_rx_afe_adapter.sv))
   và các module con của nó:
-  - lấy mẫu và giải nối tiếp: `m_ftel_dphy_rx_hs_deser.sv`;
-  - tạo byte clock: `m_ftel_dphy_rx_byte_clk.sv`, cùng cổng đảo clock và clock gate bên trong
-    (`m_ftel_dphy_rx_clk_inv.sv`, `m_ftel_dphy_rx_cg.sv`);
-  - lọc nhiễu LP và phát hiện clock: `m_ftel_dphy_rx_lp_filter.sv`, `m_ftel_dphy_rx_clk_act.sv`.
+  - lấy mẫu và giải nối tiếp: `m_fpt_dphy_rx_hs_deser.sv`;
+  - tạo byte clock: `m_fpt_dphy_rx_byte_clk.sv`, cùng cổng đảo clock và clock gate bên trong
+    (`m_fpt_dphy_rx_clk_inv.sv`, `m_fpt_dphy_rx_cg.sv`);
+  - lọc nhiễu LP và phát hiện clock: `m_fpt_dphy_rx_lp_filter.sv`, `m_fpt_dphy_rx_clk_act.sv`.
 
   Khối này lấy mẫu bit HS trực tiếp bằng clock DDR của clock lane (720 MHz ở 1440 Mb/s) và có logic trên đường
   clock. Trong mô phỏng nó chạy đúng.

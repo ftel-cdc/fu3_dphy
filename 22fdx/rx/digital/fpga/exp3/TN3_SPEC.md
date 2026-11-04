@@ -7,6 +7,7 @@
 > |---|---|---|
 > | v0.1 | 2026-10-19 | Phần 1: mục tiêu, sơ đồ, phần cứng, mạch test, bảng chân, câu hỏi. Board TX chưa chốt, vì VEK280 không dùng được (§3.2). Các mục 5-11 (design TX và RX, quy trình, tiêu chí đạt, dữ liệu gửi về, xử lý sự cố, phụ lục Tcl) sẽ viết sau, khi đã chốt board TX và mô phỏng TN2 xong |
 > | v0.2 | 2026-10-26 | R-F có thêm khối chỉnh `rxactivehs` của nhóm D-PHY, giữa RX của nhóm và CSI-2 RX Subsystem (§0, §1, §2). Lý do: kết quả mô phỏng TN2b |
+> | v0.3 | 2026-11-04 | Module của nhóm D-PHY đổi tiền tố `m_ftel_` thành `m_fpt_` theo quy tắc đặt tên của team PD: khối chỉnh nay là `m_fpt_ppi_act_gate` (§0), wrapper của RX là `m_fpt_dphy_rx_wrap`. Không đổi chức năng |
 
 ---
 
@@ -22,7 +23,7 @@
 
 Nhóm D-PHY sẽ build trước thiết kế FPGA cho cả hai đầu (mục 5-6), kèm script. Team FPGA cũng có thể build lại từ đặc tả.
 
-Design R-F có thêm một khối nhỏ do nhóm D-PHY giao: `fpga/rtl/m_ftel_ppi_act_gate.sv`, 6 flip-flop với 4 lane. Khối nằm giữa RX của nhóm và CSI-2 RX Subsystem (§2):
+Design R-F có thêm một khối nhỏ do nhóm D-PHY giao: `fpga/rtl/m_fpt_ppi_act_gate.sv`, 6 flip-flop với 4 lane. Khối nằm giữa RX của nhóm và CSI-2 RX Subsystem (§2):
 - Ở mỗi lane, khối giữ `rxactivehs` ở mức thấp cho tới `rxsynchs`. Lý do: mô phỏng TN2b cho thấy controller CSI-2 của AMD cần hai tín hiệu này lên cùng lúc, như D-PHY của AMD.
 - Mọi tín hiệu PPI khác đi thẳng, không qua khối.
 - Khối chạy bằng byte clock của RX và dùng chung reset với RX.
