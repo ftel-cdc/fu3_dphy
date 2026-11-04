@@ -238,7 +238,7 @@
   |---|---|---|---|
   | TN1 | 358: 230 run và 128 run của `window` | 0 khác ngoài `stopstate`; `stopstate` khác ở cả 358 | `tn1_evidence.py` 9/9, `evselftest` PASS |
   | TN2a | 60 | 0 khác ngoài `stopstate`; `stopstate` khác ở 59, trừ NEG-front (RX mình không nhận burst nào) | `tn2a_evidence.py` 10/10, `evselftest` PASS (1 ca sạch, 12 lỗi), `selftest` PASS |
-  | TN2b | 40 | đang chạy | đang chạy |
+  | TN2b | 40: 31 qua khối chỉnh, 9 của phát hiện | 0 khác ngoài `stopstate`, kể cả `frames.txt`; `stopstate` khác ở 39, trừ SH_NEG-front (RX mình không nhận burst nào) | `tn2b_evidence.py` 12/12, `evselftest` PASS (1 ca sạch, 19 lỗi) |
 
   DC ở giá trị mặc định: TNS 0, WNS như cũ trừ `core_clk` ở một góc kém 3 ps; diện tích 5990 → 5948 µm², flop
   2666 → 2646. Chế độ 1 chưa tổng hợp.
@@ -260,7 +260,8 @@
     đúng từng chữ (§11 mục 5);
   - §7 của `TN1_REPORT.md` cũ ghi TN2 chưa làm, nay sửa;
   - `_pre_nowait` nặng 1,1 GB, không phải 2,7 GB như ước lượng;
-  - thời gian máy: luồng A (TN1 và DC) 1 giờ; luồng B (TN2a rồi TN2b) đang chạy.
+  - thời gian máy: luồng A (TN1 và DC) 1 giờ; luồng B (TN2a rồi TN2b) 3,2 giờ. TN2a mất 1,5 giờ, trong ước lượng;
+    TN2b mất 1,7 giờ, không phải khoảng 45 phút: 40 run chạy tuần tự, mỗi run 2-3 phút.
 - **Còn mở, bạn quyết:**
   - gửi câu hỏi cho team CSI và phía Tx, trả lời tester;
   - deskew ở chế độ 1 chưa mô phỏng; thứ tự `rxskewcalhs_x` / `stopstate_x` mới suy từ cấu trúc (MED);
