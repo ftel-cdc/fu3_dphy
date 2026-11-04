@@ -8,13 +8,13 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-03
-// Module          : m_ftel_dphy_rx
+// Module          : m_fpt_dphy_rx
 // Description     : Core of the D-PHY receiver controller: between the AFE and the PPI of the
 //                   CSI-2 Rx controller, one clock lane and PARA_NUM_LANES data lanes. Blocks
 //                   No. 1, 2, 3, 4, 6 and 7 of release R1; Block No. 5 (R2) and Block No. 8
 //                   (configuration path, K3) are absent: the configuration fields are inputs
 //                   and the status is exported (rtl_notes D-2).
-// Parent          : m_ftel_dphy_rx_wrap
+// Parent          : m_fpt_dphy_rx_wrap
 // HAS             : draft v0.17, §1.4, §2.2, §3, §5, Tables 2-2, 3-1, 5-1 and 5-2
 // Clock domains   : core, byte, ddr, ddrn
 // REQ-IDs         : REQ-001, REQ-002, REQ-004, REQ-005, REQ-006, REQ-007, REQ-008, REQ-009,
@@ -34,7 +34,7 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx
+module m_fpt_dphy_rx
   import ftel_dphy_rx_pkg::*;
   import ftel_dphy_rx_config_pkg::*;
 #(
@@ -172,7 +172,7 @@ module m_ftel_dphy_rx
 
   // ------------------------------------------------------------------ Block No. 6
   // REQ-005, REQ-007, REQ-221
-  m_ftel_dphy_rx_timing_init #(
+  m_fpt_dphy_rx_timing_init #(
     .PARA_NUM_LANES (PARA_NUM_LANES)
   ) u_timing_init_0 (
     .i_core_clk              (i_core_clk),
@@ -206,7 +206,7 @@ module m_ftel_dphy_rx
 
   // ------------------------------------------------------------------ Block No. 1
   // REQ-006, REQ-014
-  m_ftel_dphy_rx_afe_adapter #(
+  m_fpt_dphy_rx_afe_adapter #(
     .PARA_NUM_LANES      (PARA_NUM_LANES),
     .PARA_DESER_RATIO    (PARA_DESER_RATIO),
     .PARA_LP_SYNC_STAGES (PARA_LP_SYNC_STAGES),
@@ -245,7 +245,7 @@ module m_ftel_dphy_rx
 
   // ------------------------------------------------------------------ Block No. 2
   // REQ-001
-  m_ftel_dphy_rx_cl_ctrl u_cl_ctrl_0 (
+  m_fpt_dphy_rx_cl_ctrl u_cl_ctrl_0 (
     .i_core_clk           (i_core_clk),
     .i_core_rst_n         (w_core_rst_n),
     .i_en                 (w_cl_en),
@@ -267,7 +267,7 @@ module m_ftel_dphy_rx
   // ------------------------------------------------------------------ Blocks No. 3 and 4, per data lane
   for (genvar x = 0; x < PARA_NUM_LANES; x++) begin : g_lane
     // REQ-001, REQ-002, REQ-030
-    m_ftel_dphy_rx_dl_ctrl #(
+    m_fpt_dphy_rx_dl_ctrl #(
       .PARA_STOP_DRAIN_EN (PARA_STOP_DRAIN_EN)
     ) u_dl_ctrl_0 (
       .i_core_clk          (i_core_clk),
@@ -294,7 +294,7 @@ module m_ftel_dphy_rx
     );
 
     // REQ-001, REQ-002, REQ-030
-    m_ftel_dphy_rx_hs_datapath #(
+    m_fpt_dphy_rx_hs_datapath #(
       .PARA_SYNC_SEARCH_BYTES (PARA_SYNC_SEARCH_BYTES),
       .PARA_EOT_DELAY_BYTES   (PARA_EOT_DELAY_BYTES)
     ) u_hs_datapath_0 (
@@ -319,7 +319,7 @@ module m_ftel_dphy_rx
 
   // ------------------------------------------------------------------ Block No. 7
   // REQ-004, REQ-014
-  m_ftel_dphy_rx_ppi_out #(
+  m_fpt_dphy_rx_ppi_out #(
     .PARA_NUM_LANES   (PARA_NUM_LANES),
     .PARA_DESER_RATIO (PARA_DESER_RATIO)
   ) u_ppi_out_0 (

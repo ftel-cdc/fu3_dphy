@@ -3,8 +3,9 @@
 MIPI D-PHY receiver controller: receives one clock lane and up to four data lanes and
 presents the received data on the PHY-Protocol Interface (PPI) toward a CSI-2 receiver.
 
-This folder (`22fdx/rx/digital`) is the IP: its folders sit directly here, while the modules, the
-packages and the configuration keep the IP name `ftel_dphy_rx` (`dphy_rx` in the FX1 tool_flow).
+This folder (`22fdx/rx/digital`) is the IP: its folders sit directly here. The packages and the
+configuration keep the IP name `ftel_dphy_rx`; the modules are `m_fpt_dphy_rx_*`, after the naming rules
+of the PD team of fu3 (2026-11-04, `fpga/PLAN_RENAME_FPT.md`; `dphy_rx` in the FX1 tool_flow).
 It came with its history from the team's working repository on 2026-10-21; the HAS .docx builds,
 the planning notes and the reference specifications stayed there. Every command below runs from
 this folder.
@@ -72,7 +73,7 @@ in v1.2 (data rates above 1.5 Gbps, the deskew calibration sequence) are defined
 ```
 22fdx/rx/digital/
 ├── README.md             ← this file
-├── ip_config.yaml        ← tool_flow design overrides (all commented = default convention)
+├── ip_config.yaml        ← tool_flow design overrides: top_module m_fpt_dphy_rx_wrap, the rest default
 ├── .gitignore            ← tool outputs, flow work files, local HAS .docx builds, .env
 ├── .env.example          ← the local environment to copy to .env and fill in (see Environment Setup)
 ├── config/
@@ -102,8 +103,9 @@ in v1.2 (data rates above 1.5 Gbps, the deskew calibration sequence) are defined
 ├── lint/                 ← lint_constraint.tcl, lint_waiver.tcl (SpyGlass lint_rtl)
 ├── cdc/                  ← cdc.sgdc, cdc_waiver.sgdc (SpyGlass cdc_verify)
 ├── rdc/                  ← rdc.sgdc, rdc_waiver.sgdc (SpyGlass rdc_verify_struct)
-├── sdc/                  ← m_ftel_dphy_rx_wrap.sdc: clocks, exceptions, I/O budgets (design intent;
-│                           also read by cdc/ and rdc/)
+├── sdc/                  ← m_fpt_dphy_rx_wrap.sdc: clocks, exceptions, I/O budgets (design intent;
+│                           also read by cdc/ and rdc/); constraint.sdc, a link to it, is the name
+│                           the PD flow of fu3 reads
 ├── syn/                  ← synthesis (Design Compiler): run_syn.sh, dc_syn.tcl (environment, reports),
 │                           summarize.sh, tech.tcl (the library, from .env), cells/ (clock cells on the
 │                           library cells named in .env); work/, output/, netlist/ are generated (gitignored)
@@ -155,13 +157,13 @@ project settings (`ip-dev/hw/utils/tool_flow/config/project.yaml`). The complete
 |---|---|
 | Language | SystemVerilog (`.sv`), synthesizable subset; `always_ff` / `always_comb` only |
 | IP folder | `22fdx/rx/digital` (this folder) |
-| Module names | Every module starts with `m_` (Guideline Table 1-1): wrapper `m_ftel_dphy_rx_wrap` (IP top for tool_flow), core `m_ftel_dphy_rx`, sub-blocks `m_ftel_dphy_rx_<block>`; packages `ftel_dphy_rx[_<name>]_pkg` |
+| Module names | Every module starts with `m_` (Guideline Table 1-1): wrapper `m_fpt_dphy_rx_wrap` (IP top: `m_fpt_<ip>_wrap` of the PD rules of fu3, `top_module` of `ip_config.yaml` for tool_flow), core `m_fpt_dphy_rx`, sub-blocks `m_fpt_dphy_rx_<block>`; packages `ftel_dphy_rx[_<name>]_pkg` |
 | Parameters / defines | `PARA_<NAME>` / `DEF_<NAME>` |
 | Flip-flops / instances | `reg_<name>` / `u_<name>_<n>` |
 | Ports | `i_` / `o_` (no `io_` in this IP); wrapper ports `<dir>_dphy_rx_<type>_<name>` (Guideline Table 1-2, IP token `dphy_rx`) |
 | Resets | Active-low `_n` at the wrapper; an active-high reset gets its inverter inside the wrapper |
-| Clock-domain crossing | Only through the cells `m_ftel_dphy_rx_sync` (level, port-compatible with `m_vlsi_synch`), `m_ftel_dphy_rx_tsync` (toggle) and `m_ftel_dphy_rx_rst_sync` (reset, port-compatible with `m_fpt_lib_reset_sync_rising_edge_async_reset_n`), each instance tagged `// CDC_CROSSING` |
-| Clock structure | Only in `m_ftel_dphy_rx_byte_clk` (Block No. 1, HAS §4.3): inverted DDR clock, divider by 4, clock gate, gate enable from a reset synchronizer, each tagged `// CLK_STRUCT`; the cells `m_ftel_dphy_rx_cg` and `m_ftel_dphy_rx_clk_inv` keep the ports of `m_fpt_lib_cg` and `m_fpt_lib_clk_inv`, instances `u_dont_touch_*` |
+| Clock-domain crossing | Only through the cells `m_fpt_dphy_rx_sync` (level, port-compatible with `m_vlsi_synch`), `m_fpt_dphy_rx_tsync` (toggle) and `m_fpt_dphy_rx_rst_sync` (reset, port-compatible with `m_fpt_lib_reset_sync_rising_edge_async_reset_n`), each instance tagged `// CDC_CROSSING` |
+| Clock structure | Only in `m_fpt_dphy_rx_byte_clk` (Block No. 1, HAS §4.3): inverted DDR clock, divider by 4, clock gate, gate enable from a reset synchronizer, each tagged `// CLK_STRUCT`; the cells `m_fpt_dphy_rx_cg` and `m_fpt_dphy_rx_clk_inv` keep the ports of `m_fpt_lib_cg` and `m_fpt_lib_clk_inv`, instances `u_dont_touch_*` |
 | Traceability | `// REQ-xxx` on every always block, assign group and instance; `// OPEN <id> REQ-xxx: <default>` at the single place of a provisional REQ (`req/rtl_scope.json`, `req/rtm.json`) |
 | Files | One module per file; file name = module name |
 | File header | FTEL copyright + Evolution History block (`FTEL_signature.md` at the repository root), in the form used by `ftel_intctl` |

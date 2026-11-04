@@ -37,7 +37,7 @@ Kết quả TN2a dùng tiếp cho TN2b (CSI-2 TX Subsystem, chứa đúng TX nà
  pad_truth:    RX AMD: mipi_dphy 4.3 SLAVE  │          IBUFDS_DPHY (+AFE=xil, mặc định)    afe_model (TN1):
  truth.txt,    (như TN1)                    │                     │  ┌──────────────────── +AFE=model;
  timing TX,       │ PPI ► xil_ppi.csv       │                     ▼  ▼                     luôn kiểm line
- byte pad so      │                         │          m_ftel_dphy_rx_wrap (RTL ASIC)      state, term_en
+ byte pad so      │                         │          m_fpt_dphy_rx_wrap (RTL ASIC)      state, term_en
  với byte PPI     │                         │                     │ PPI ► ftel_ppi.csv
                   └──────── csi2_dump.py bursts: mỗi CSV so với truth.txt ────────────────────┘
 
@@ -106,7 +106,7 @@ Mô phỏng chạy trong XSIM của Vivado 2025.2, part xcvp1902.
 - **Lấy nguyên từ [`../exp1/tb_exp1.sv`](../exp1/tb_exp1.sv):**
   - front end của RX mình (`IBUFDS_DPHY` cho mỗi lane và cho clock, chọn `+AFE`);
   - front check;
-  - instance `m_ftel_dphy_rx_wrap` cùng các field cấu hình.
+  - instance `m_fpt_dphy_rx_wrap` cùng các field cấu hình.
 
   Ba khối này được `tn2a_evidence.py` (check `copy`) so lại với TN1 ở mỗi lần kiểm chứng. Cũng lấy từ TN1, nhưng
   không thuộc check `copy`: ba nhánh `g_x` của `xrx`, hookup `afe_model`, hai `ppi_csv_mon`, các hàm payload, và

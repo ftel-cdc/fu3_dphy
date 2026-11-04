@@ -14,7 +14,7 @@
   the AFE cuts the HS bit stream into 8-bit words at an arbitrary boundary, and Block No. 4 finds the
   byte boundary, which completes the deserialization. The RTL already worked this way. Only the
   `HAS` header field (v0.12) and the tag of the new REQ-324 at the barrel shifter of
-  `m_ftel_dphy_rx_sync_search` changed.
+  `m_fpt_dphy_rx_sync_search` changed.
 - **HAS v0.13, 2026-10-06.** v0.13 corrects the AFE boundary to option A, as announced by the AFE
   team: the AFE has the HS-RX, the LP-RX and the switched termination only. Block No. 1 gains the
   samplers on both edges of the DDR clock `afe_cl_hs_clk`, the 1:8 deserializer, the byte clock
@@ -34,7 +34,7 @@
   - Small changes: `_cl_ctrl` (byte-clock enable, D-21), `_timing_init` (reset synchronizer of the
     DDR domain), the ports of the core and the wrapper, and the package (clock-activity window).
   - rtl_rule v1.2 allows exactly the clock structure of HAS §4.3, in `_byte_clk` only (K2, K12).
-- **Constraints and trial synthesis, 2026-10-10.** `sdc/m_ftel_dphy_rx_wrap.sdc` replaces the stub of
+- **Constraints and trial synthesis, 2026-10-10.** `sdc/m_fpt_dphy_rx_wrap.sdc` replaces the stub of
   the common flow, and `syn/` runs Design Compiler on the library of the target (`.env`). Timing is
   met at 1792 and 1500 Mb/s in the slow corners before layout (§6). Two constraints listed in §6
   before are corrected: the hold multiplier of the DDR → byte transfer is 3, not 2, and the byte clock
@@ -65,11 +65,16 @@
     3-1 #11) with the HS busy synchronizer that holds `stopstate_x` Low when it is 1;
   - `_hs_datapath`: `o_eot_done`, the toggle synchronizer and the `core_clk` ports removed; the HS
     busy register added. `_eot` gives the OR of its active and skew-calibration flags;
-  - `m_ftel_dphy_rx_tsync.sv` stays in `logical/` but left `filelist.f` (no instance, user decision
+  - `m_fpt_dphy_rx_tsync.sv` stays in `logical/` but left `filelist.f` (no instance, user decision
     of 2026-11-03).
 
   The headers of the changed files (`_dl_ctrl`, `_hs_datapath`, `_eot`, `_sync`, the core and the
   wrapper) and the package say HAS v0.17.
+- **HAS v0.18, 2026-11-04** (`fpga/PLAN_RENAME_FPT.md`, approved the same day). Every module takes the
+  prefix `m_fpt_` of the naming rules of the PD team, the wrapper is `m_fpt_dphy_rx_wrap`, and
+  `sdc/constraint.sdc` links to `sdc/m_fpt_dphy_rx_wrap.sdc` (D-29). No technical change; the
+  package header says HAS v0.18, the headers of the other files keep the version they were written
+  against.
 - **Checked:** VCS `+lint=all`, SpyGlass `lint_rtl` (one waiver, D-19), `check_rtl_rules.py`,
   `flow_check.py --phase P1|P2|P3a` (§7). **Simulated:** Block No. 1 with a directed TB at five line
   rates (§8), and the whole receiver behind an AFE model in XSIM by TN1 (§9): dummy bursts, not
@@ -84,32 +89,32 @@
 ## 2. Module hierarchy
 
 ```
-m_ftel_dphy_rx_wrap                      wrapper: ports <dir>_dphy_rx_<name>, reset inverter (K6)
-└─ m_ftel_dphy_rx  (u_dphy_rx_0)         core
-   ├─ m_ftel_dphy_rx_timing_init         Block No. 6
-   │  ├─ m_ftel_dphy_rx_rst_sync ×(3+N)  core, DDR, byte, Block No. 4 of each lane
-   │  └─ m_ftel_dphy_rx_sync ×(1+2N)     cl_enable, dl_enable_x, forcerxmode_x
-   ├─ m_ftel_dphy_rx_afe_adapter         Block No. 1
-   │  ├─ m_ftel_dphy_rx_sync ×(2N+2)     LP lines, clock-lane LP lines
-   │  ├─ m_ftel_dphy_rx_lp_filter ×(N+1)
-   │  ├─ m_ftel_dphy_rx_hs_deser ×N      samplers and 1:8 deserializer of each physical lane
-   │  ├─ m_ftel_dphy_rx_byte_clk         clock structure (rtl_rule K2): DDR clock inverted, divider,
+m_fpt_dphy_rx_wrap                      wrapper: ports <dir>_dphy_rx_<name>, reset inverter (K6)
+└─ m_fpt_dphy_rx  (u_dphy_rx_0)         core
+   ├─ m_fpt_dphy_rx_timing_init         Block No. 6
+   │  ├─ m_fpt_dphy_rx_rst_sync ×(3+N)  core, DDR, byte, Block No. 4 of each lane
+   │  └─ m_fpt_dphy_rx_sync ×(1+2N)     cl_enable, dl_enable_x, forcerxmode_x
+   ├─ m_fpt_dphy_rx_afe_adapter         Block No. 1
+   │  ├─ m_fpt_dphy_rx_sync ×(2N+2)     LP lines, clock-lane LP lines
+   │  ├─ m_fpt_dphy_rx_lp_filter ×(N+1)
+   │  ├─ m_fpt_dphy_rx_hs_deser ×N      samplers and 1:8 deserializer of each physical lane
+   │  ├─ m_fpt_dphy_rx_byte_clk         clock structure (rtl_rule K2): DDR clock inverted, divider,
    │  │  │                                load phases, clock gate, clock-activity toggles
-   │  │  ├─ m_ftel_dphy_rx_rst_sync      byte-clock enable core -> DDR (gate enable, divider reset)
-   │  │  ├─ m_ftel_dphy_rx_clk_inv       u_dont_touch_clk_inv_0
-   │  │  └─ m_ftel_dphy_rx_cg            u_dont_touch_cg_0, rxbyteclkhs
-   │  └─ m_ftel_dphy_rx_clk_act          clock activity in core_clk
-   │     └─ m_ftel_dphy_rx_sync ×2       toggles DDR -> core
-   ├─ m_ftel_dphy_rx_cl_ctrl             Block No. 2
+   │  │  ├─ m_fpt_dphy_rx_rst_sync      byte-clock enable core -> DDR (gate enable, divider reset)
+   │  │  ├─ m_fpt_dphy_rx_clk_inv       u_dont_touch_clk_inv_0
+   │  │  └─ m_fpt_dphy_rx_cg            u_dont_touch_cg_0, rxbyteclkhs
+   │  └─ m_fpt_dphy_rx_clk_act          clock activity in core_clk
+   │     └─ m_fpt_dphy_rx_sync ×2       toggles DDR -> core
+   ├─ m_fpt_dphy_rx_cl_ctrl             Block No. 2
    ├─ g_lane[x] (x = 0..N-1)
-   │  ├─ m_ftel_dphy_rx_dl_ctrl          Block No. 3
-   │  │  ├─ m_ftel_dphy_rx_esc_decoder
-   │  │  └─ m_ftel_dphy_rx_sync          HS busy byte -> core (used with PARA_STOP_DRAIN_EN = 1)
-   │  └─ m_ftel_dphy_rx_hs_datapath      Block No. 4
-   │     ├─ m_ftel_dphy_rx_sync          sync-search start core -> byte
-   │     ├─ m_ftel_dphy_rx_sync_search
-   │     └─ m_ftel_dphy_rx_eot
-   └─ m_ftel_dphy_rx_ppi_out             Block No. 7
+   │  ├─ m_fpt_dphy_rx_dl_ctrl          Block No. 3
+   │  │  ├─ m_fpt_dphy_rx_esc_decoder
+   │  │  └─ m_fpt_dphy_rx_sync          HS busy byte -> core (used with PARA_STOP_DRAIN_EN = 1)
+   │  └─ m_fpt_dphy_rx_hs_datapath      Block No. 4
+   │     ├─ m_fpt_dphy_rx_sync          sync-search start core -> byte
+   │     ├─ m_fpt_dphy_rx_sync_search
+   │     └─ m_fpt_dphy_rx_eot
+   └─ m_fpt_dphy_rx_ppi_out             Block No. 7
 packages: ftel_dphy_rx_config_pkg (generated from config/ftel_dphy_rx.yaml), ftel_dphy_rx_pkg
 ```
 
@@ -118,7 +123,7 @@ packages: ftel_dphy_rx_config_pkg (generated from config/ftel_dphy_rx.yaml), fte
 | HAS | RTL | Notes |
 |---|---|---|
 | §3 Table 3-1, 3-2 | `ftel_dphy_rx_config_pkg` (generated), `PARA_*` of the core and wrapper | `config/validate_config.py` checks the values against §4.3, §4.6 and Appendix B |
-| §4.1 crossings, Figure 4-1 | `m_ftel_dphy_rx_sync`, `_rst_sync`; tags `CDC_CROSSING`, `CDC_QUASI_STATIC`, `CDC_GATING` | Every instance of a cell carries its crossing. `_tsync` has no instance since v0.17 (D-28): the status toggles cross inside Block No. 8, which is absent (D-2) |
+| §4.1 crossings, Figure 4-1 | `m_fpt_dphy_rx_sync`, `_rst_sync`; tags `CDC_CROSSING`, `CDC_QUASI_STATIC`, `CDC_GATING` | Every instance of a cell carries its crossing. `_tsync` has no instance since v0.17 (D-28): the status toggles cross inside Block No. 8, which is absent (D-2) |
 | §4.2 reset | `_timing_init` (reset synchronizers), `_wrap` (inverter) | D-4 |
 | §4.3 Block No. 1 | `_afe_adapter`, `_lp_filter`, `_hs_deser`, `_byte_clk`, `_clk_act`, `_cg`, `_clk_inv` | D-5, D-6, D-17 - D-25 |
 | §4.4 Block No. 2 | `_cl_ctrl` | D-8, D-9 |
@@ -127,7 +132,7 @@ packages: ftel_dphy_rx_config_pkg (generated from config/ftel_dphy_rx.yaml), fte
 | §4.7 Block No. 6 | `_timing_init` | D-10, D-11 |
 | §4.9 Block No. 7 | `_ppi_out` | - |
 | §4.10 Block No. 8 | absent | D-2 |
-| §5.1, §5.2 | ports of `m_ftel_dphy_rx` (HAS names) and `m_ftel_dphy_rx_wrap` (`dphy_rx` token) | Per-lane signals are packed arrays: PPI ports by logical lane, AFE ports by physical lane |
+| §5.1, §5.2 | ports of `m_fpt_dphy_rx` (HAS names) and `m_fpt_dphy_rx_wrap` (`dphy_rx` token) | Per-lane signals are packed arrays: PPI ports by logical lane, AFE ports by physical lane |
 
 The REQ-level trace is generated: `req/rtm.json` (`flow_check.py --phase P3a`) lists, for every REQ,
 whether it is in the RTL scope (`req/rtl_scope.json`), the files that tag it and its OPEN tag.
@@ -274,7 +279,7 @@ synchronizer near the AFE do not share a net.
 **D-22 Scan enable of the clock gate tied Low** (MEDIUM). The IP has no scan plan yet; at integration the
 DFT flow connects the scan enable of the `m_fpt_lib_cg` cell.
 
-**D-23 Clock cells** (HIGH). `m_ftel_dphy_rx_cg` and `m_ftel_dphy_rx_clk_inv` keep the ports of
+**D-23 Clock cells** (HIGH). `m_fpt_dphy_rx_cg` and `m_fpt_dphy_rx_clk_inv` keep the ports of
 `m_fpt_lib_cg` and `m_fpt_lib_clk_inv` of the fu2 lib and their behavioural model. At integration only
 the module name changes, as for the synchronizer cells. The instances are named `u_dont_touch_*`, the
 fu2 convention that keeps synthesis from optimizing them (rtl_rule K10, K12).
@@ -282,6 +287,11 @@ fu2 convention that keeps synthesis from optimizing them (rtl_rule K10, K12).
   clock-gating cell and the clock inverter of the library with the same ports; the cell and pin names
   come from `.env` (`FTEL_LIB_CG_*`, `FTEL_LIB_CKINV_*`). The script stops if either file is not
   replaced.
+- fu3 (checked 2026-11-04): its `m_fpt_lib_cg` has no `i_scan_en` (test enable tied Low inside), so
+  there the port list differs by `i_scan_en`. Its PD flow analyzes `logical/filelist.f` as it is, with
+  the define `FPT_SIGNOFF` and without the replacement that `syn/run_syn.sh` makes, and sets
+  `dont_touch` on `u_dont_touch*`: the two cells would reach it as behavioural models. Open with the PD
+  team (D-29).
 - Do not use `m_fpt_lib_dff_falling_edge_async_reset_n` for the falling-edge flip-flops: in its
   GF130 branch it maps to `DFFRQ`, a rising-edge flip-flop.
 
@@ -339,7 +349,7 @@ REQ-147, REQ-381 to REQ-391).
   - 0, the default: the Stop state of the lane, as D-PHY defines it;
   - 1: also Low while HS busy is High. `_eot` drives `o_line_busy`, the OR of its active and
     skew-calibration flags; `_hs_datapath` registers HS busy = held start OR `o_line_busy`
-    (`p_busy`, the source of the crossing); `_dl_ctrl` synchronizes it with `m_ftel_dphy_rx_sync`
+    (`p_busy`, the source of the crossing); `_dl_ctrl` synchronizes it with `m_fpt_dphy_rx_sync`
     (2 flip-flops, tag `CDC_CROSSING`), and `w_stop_hold` holds `reg_stopstate` Low. The lane FSM does
     not use HS busy.
 - No `generate`: with 0 the AND is constant and synthesis removes the synchronizer and the register.
@@ -355,6 +365,23 @@ REQ-147, REQ-381 to REQ-391).
   with no Stop pulse between bursts at the minimum gap up to 1500 Mb/s. The order of `stopstate_x`
   and `rxskewcalhs_x` with 1 follows from the structure (busy includes the skew-calibration flags);
   no deskew burst was simulated with 1.
+
+**D-29 Module prefix `m_fpt_`** (HIGH, HAS v0.18, rtl_rule 1.3 N1; `fpga/PLAN_RENAME_FPT.md`).
+- Why: the naming rules of the PD team (2026-11-04) ask for `logical/m_fpt_<ip>_wrap.sv`,
+  `logical/filelist.f` and `sdc/constraint.sdc`. The DC flow of fu3 reads
+  `$<IP>_PATH/logical/filelist.f` and `$<IP>_PATH/sdc/constraint.sdc` and takes the top from a table
+  of `m_fpt_<ip>_wrap` names. The user chose to rename every module rather than the wrapper only: a
+  name, no function, and one command.
+- `<ip>` = `dphy_rx`, the token of the wrapper ports (N8) and of `--ip dphy_rx` in tool_flow; the
+  IP name `ftel_dphy_rx` stays on the folder, the packages, the documents and `FTEL_DPHY_RX_PATH`.
+  tool_flow would derive the top `m_ftel_dphy_rx_wrap` (FX1 default), so `ip_config.yaml` sets
+  `top_module`.
+- `sdc/constraint.sdc` is a link to `sdc/m_fpt_dphy_rx_wrap.sdc`, as in the IPs of fu2 and fu3;
+  `syn/`, `cdc/` and `rdc/` keep reading the file by its own name.
+- Same function, checked: `rtm.json` and the DC reports and netlists equal to the previous ones once
+  the old prefix is replaced (whitespace and run dates aside).
+- Open with the PD team (plan §6): the `<ip_name>` and `<IP>_PATH` of fu3, how the IP folder enters
+  fu3, the two clock cells under `FPT_SIGNOFF` (D-23), `ifndef SYNTHESIS` against `FPT_SIGNOFF`.
 
 ## 5. Notes for the HAS (no RTL question pending)
 
@@ -373,7 +400,7 @@ writing the RTL these points were read literally; the HAS could state them to re
 
 ## 6. Timing constraints and trial synthesis (Stage D)
 
-`sdc/m_ftel_dphy_rx_wrap.sdc` holds the design intent: clocks, exceptions and I/O budgets. `syn/`
+`sdc/m_fpt_dphy_rx_wrap.sdc` holds the design intent: clocks, exceptions and I/O budgets. `syn/`
 adds the synthesis environment (library, margins before clock-tree synthesis, drive and load) and
 runs Design Compiler on it; the commands are in the README. Both exist since 2026-10-10. STA after
 layout comes with the target technology (M7).
@@ -485,14 +512,14 @@ One line per correction round (rule 1 of `/dphy_rtl_gen`: at most 3 rounds per m
 
 | Module | Round | Finding | Fix |
 |---|---|---|---|
-| `m_ftel_dphy_rx_afe_adapter` | 1 | VCS Lint-[UI]/[ONGS]: clock-lane AFE enables not connected | `o_afe_cl_hs_en`, `o_afe_cl_term_en` assigned |
-| `m_ftel_dphy_rx_timing_init` | - | checker N11 on the output resets and on `i_phy_core_rst` | checker corrected: N11 covers clock inputs and active-low reset inputs (rtl_rule 1.1); no RTL change |
-| `m_ftel_dphy_rx_dl_ctrl` | 1 | checker T1: REQ-135 tagged but not in the header | header completed |
+| `m_fpt_dphy_rx_afe_adapter` | 1 | VCS Lint-[UI]/[ONGS]: clock-lane AFE enables not connected | `o_afe_cl_hs_en`, `o_afe_cl_term_en` assigned |
+| `m_fpt_dphy_rx_timing_init` | - | checker N11 on the output resets and on `i_phy_core_rst` | checker corrected: N11 covers clock inputs and active-low reset inputs (rtl_rule 1.1); no RTL change |
+| `m_fpt_dphy_rx_dl_ctrl` | 1 | checker T1: REQ-135 tagged but not in the header | header completed |
 | whole IP (SpyGlass) | 1 | 29 W415a (multiple assignments in one always block), 3 W528 (timer fields distributed but unused) | encoders rewritten (D-15); Block No. 6 distributes only the fields Blocks No. 2-4 use |
 | whole IP (`flow_check` P3a) | 1 | CF-COVER REQ-164, REQ-182 untagged | tags added in `_eot` and `_dl_ctrl` |
 | whole IP (HAS v0.12) | 1 | P2 CF-CONFIG: config package header behind the spec; P3a CF-COVER REQ-324 (this IP completes the deserialization) untagged | package regenerated; tag added at the barrel shifter of `_sync_search` |
 
-| `m_ftel_dphy_rx_*` (HAS v0.14, rtl_rule 1.2) | 1 | VCS per module (`_cg`, `_clk_inv`, `_clk_act`, `_byte_clk`, `_hs_deser`, `_afe_adapter`, `_timing_init`, `_cl_ctrl`): 0 / 0 / 0 at the first round | - |
+| `m_fpt_dphy_rx_*` (HAS v0.14, rtl_rule 1.2) | 1 | VCS per module (`_cg`, `_clk_inv`, `_clk_act`, `_byte_clk`, `_hs_deser`, `_afe_adapter`, `_timing_init`, `_cl_ctrl`): 0 / 0 / 0 at the first round | - |
 | whole IP (SpyGlass, HAS v0.14) | 1 | STARC05-1.3.1.3 (AsyncResetOtherUse): the gate-enable reset synchronizer output is also the enable of the clock gate | intended structure of rtl_rule K2 (4), waived with D-19 in `lint/lint_waiver.tcl` (first attempt: `-comment {...}` is an SGDC syntax error, the comment must be a quoted string) |
 | whole IP (`flow_check` P3a, HAS v0.14) | 1 | CF-COVER REQ-083 (termination enable from the FSM register, no extra timer) untagged | tags added at the state registers of `_dl_ctrl` and `_cl_ctrl` |
 | whole IP (`flow_check` P3a, HAS v0.15) | 1 | CF-DRIFT: the configuration package was regenerated (header HAS v0.15) after both lints | lints rerun, no RTL change: VCS 0 / 0 / 0 for 1, 2, 4 lanes; SpyGlass `lint_rtl` 0 / 0 / 0, one waiver (D-19) |
@@ -509,7 +536,7 @@ VCS `+lint=all` does not report latches or unused nets (probe of 2026-10-03); Sp
 
 Rerun on 2026-10-19 after the Block No. 4 fix of HAS v0.16: PASS at the five line rates.
 
-`sim/tb_afe_adapter/run.sh`: `tb_afe_adapter.sv` drives the core `m_ftel_dphy_rx` with four lanes.
+`sim/tb_afe_adapter/run.sh`: `tb_afe_adapter.sv` drives the core `m_fpt_dphy_rx` with four lanes.
 The clock-lane FSM, the reset synchronizers and the byte-clock enable are the real ones.
 - Per line rate: four clock-lane bursts of 64-67 DDR periods, so the divider stops at every phase.
 - Data: PRBS31 on lanes 0 and 2; lane 1 repeats lane 0 and lane 3 inverts lane 2, with polarity bits
@@ -545,7 +572,7 @@ resolution, and the expected periods are derived from it.
 `fpga/exp1/run_exp1.sh` (TN1 of `fpga/PLAN_TN1_TN3.md`; fix plan `fpga/PLAN_TN1_FIX.md`) sends one
 D-PHY line from `dphy_line_gen.sv` to two receivers:
 - AMD's D-PHY RX (mipi_dphy 4.3, Vivado 2025.2), generated for each rate and lane count;
-- the core `m_ftel_dphy_rx` behind a front end:
+- the core `m_fpt_dphy_rx` behind a front end:
   - `IBUFDS_DPHY`, the input buffer of AMD's receiver, with the same strength on the pads (default
     since the fair run, `fpga/PLAN_TN1_FAIR.md`; LP-RX outputs follow the HS levels, the HS-RX output
     keeps its last bit at LP-11);

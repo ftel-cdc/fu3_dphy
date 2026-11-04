@@ -1,0 +1,1 @@
+m_fpt_dphy_rx_wrap.sdc

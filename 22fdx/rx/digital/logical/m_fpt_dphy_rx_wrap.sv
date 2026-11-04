@@ -8,7 +8,7 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-03
-// Module          : m_ftel_dphy_rx_wrap
+// Module          : m_fpt_dphy_rx_wrap
 // Description     : IP wrapper of ftel_dphy_rx under the FX1 IP Wrapper Guideline: ports
 //                   <dir>_dphy_rx_<name>, active-low reset with its inverter inside. No logic
 //                   other than the inverter. The configuration and status ports stand in for
@@ -30,7 +30,7 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_wrap
+module m_fpt_dphy_rx_wrap
   import ftel_dphy_rx_pkg::*;
   import ftel_dphy_rx_config_pkg::*;
 #(
@@ -123,7 +123,7 @@ module m_ftel_dphy_rx_wrap
   dl_state_t [PARA_NUM_LANES-1:0] w_sts_dl_state;
 
   // The wrapper reset is active Low (Wrapper Guideline); phy_core_rst of the core is active High.
-  // OPEN K6 REQ-302: active-low wrapper port, inverter inside m_ftel_dphy_rx_wrap
+  // OPEN K6 REQ-302: active-low wrapper port, inverter inside m_fpt_dphy_rx_wrap
   assign w_phy_core_rst = ~i_dphy_rx_phy_core_rst_n;
 
   // Wiring only: the configuration fields into the core structure, the states out as vectors.
@@ -138,7 +138,7 @@ module m_ftel_dphy_rx_wrap
   assign o_dphy_rx_sts_dl_state         = w_sts_dl_state;
 
   // REQ-001, REQ-004, REQ-005, REQ-006, REQ-007
-  m_ftel_dphy_rx #(
+  m_fpt_dphy_rx #(
     .PARA_NUM_LANES         (PARA_NUM_LANES),
     .PARA_DESER_RATIO       (PARA_DESER_RATIO),
     .PARA_CORE_CLK_MHZ      (PARA_CORE_CLK_MHZ),

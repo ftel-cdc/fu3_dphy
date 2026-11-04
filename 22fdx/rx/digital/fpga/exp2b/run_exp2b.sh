@@ -54,7 +54,7 @@
 # unless the arguments set them. rss.txt has the memory of the simulation every 10 s.
 # EXP2B_DEBUG=typical keeps the signals for waveforms and +VCD=1; VIVADO overrides the Vivado binary.
 # EXP2B_ARGS adds plusargs to every run and EXP2B_TAG puts a prefix before every run name; shim sets them to
-# +PPI_ADAPTER=1 and SH_ (tb_exp2b.sv: rxactivehs into R-F from fpga/rtl/m_ftel_ppi_act_gate.sv, held Low until
+# +PPI_ADAPTER=1 and SH_ (tb_exp2b.sv: rxactivehs into R-F from fpga/rtl/m_fpt_ppi_act_gate.sv, held Low until
 # rxsynchs, fpga/PLAN_TN2B_GATE.md).
 set -uo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
@@ -69,7 +69,7 @@ DEBUG=${EXP2B_DEBUG:-off}
 
 sources() {
   sed -n 's#^${FTEL_DPHY_RX_PATH}#'"$REPO"'#p' "$REPO/logical/filelist.f"
-  ls "$EXP1/afe_model.sv" "$EXP1/ppi_csv_mon.sv" "$FPGA/rtl/m_ftel_ppi_act_gate.sv" "$HERE"/*.sv
+  ls "$EXP1/afe_model.sv" "$EXP1/ppi_csv_mon.sv" "$FPGA/rtl/m_fpt_ppi_act_gate.sv" "$HERE"/*.sv
 }
 
 bdir() {   # bdir <rate>

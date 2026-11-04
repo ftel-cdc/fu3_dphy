@@ -8,12 +8,12 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-03
-// Module          : m_ftel_dphy_rx_sync_search
+// Module          : m_fpt_dphy_rx_sync_search
 // Description     : Sync search of one data lane (HAS Block No. 4): 2-word window, eight
 //                   leader comparators with single-bit error tolerance, lock of the lowest
 //                   offset, search counter, deskew-burst detection and barrel shifter. Each
 //                   byte clock it produces one delay-line entry.
-// Parent          : m_ftel_dphy_rx_hs_datapath
+// Parent          : m_fpt_dphy_rx_hs_datapath
 // HAS             : draft v0.16, §4.6, Figure 4-8, ADR-007
 // Clock domains   : byte
 // REQ-IDs         : REQ-033, REQ-150, REQ-151, REQ-152, REQ-153, REQ-154, REQ-155, REQ-156,
@@ -33,7 +33,7 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_sync_search
+module m_fpt_dphy_rx_sync_search
   import ftel_dphy_rx_pkg::*;
   import ftel_dphy_rx_config_pkg::*;
 #(

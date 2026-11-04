@@ -10,7 +10,7 @@
 // Created Date    : 2026-10-07
 // Module          : tb_afe_adapter
 // Description     : Directed self-checking testbench of Block No. 1 through the core
-//                   m_ftel_dphy_rx (HAS v0.14 §4.3): samplers and 1:8 deserializer, word
+//                   m_fpt_dphy_rx (HAS v0.14 §4.3): samplers and 1:8 deserializer, word
 //                   latency, byte clock and its gate, clock activity. Not the unit TB of M3.
 //                   One line rate per run: +RATE=<Mb/s>. See run.sh.
 //
@@ -70,7 +70,7 @@ module tb_afe_adapter;
     cfg.eot_skip_bytes    = C_EOT_SKIP_BYTES_RST;
   end
 
-  m_ftel_dphy_rx #(
+  m_fpt_dphy_rx #(
     .PARA_NUM_LANES (N)
   ) u_dut (
     .i_core_clk              (core_clk),

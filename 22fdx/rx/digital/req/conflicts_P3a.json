@@ -1,19 +1,19 @@
 {
  "phase": "P3a",
  "mode": "review",
- "at": "2026-11-03T17:45:23+07:00",
+ "at": "2026-11-04T15:43:45+07:00",
  "inputs": {
-  "spec": "1214230ce90d417b502db88544678b2a3afd6b62c432a6fd62d6d74c00b38b8f",
-  "structured_spec": "b474adcc9afdee07e7a8bc862b92027a340d27d51514e6d562e37c7439768c79",
-  "config_pkg": "a292981d74f5750ae5a20154b51438b76f282ee0c4746f7004f2a64ac488a5f0",
-  "rtl_rule": "8e528520226a4e37534557890481755eaa80906076284b60092e145addfaff1d",
-  "rtl_scope": "1a66f5d1d34c47ef46eee82f0cd55212ab32c80abc3f3dd0c6675ab73c3a1fb8",
-  "vcs_manifest": "c99f2a82e81e7150624b2fb0ce2089cd4b416bf7a182e7a9bd6a04e1260ba5b5",
-  "spyglass_report": "8cb82c3d0fc70b4b2f13c4d925b7e9bc798590519ebe8501818b1d1cf11bf1d2"
+  "spec": "27256440269efa5dc71000e63c996695c9a73a081bf061f499f12dd21a130489",
+  "structured_spec": "d6580aad9c7d9cdac97dde0811a004872be9750c2b2fcfe8a09a1b426f6bc961",
+  "config_pkg": "6bd5c09653685dce8ca6afe1a837c3867ad4e77fc66435bde1b1940a4343a428",
+  "rtl_rule": "effc2c96dcecac1a1df8f3041cd9ef3a811aa29232096ec239fdf6e29c466ad0",
+  "rtl_scope": "3d19856f5e79f99fab1f7f1ae0d8a24db78c520aada324d53b19db8afe815249",
+  "vcs_manifest": "c497ddbcc76d651efdc34e73dcfcd9809a3ee170b17c80c81a77af76f364d838",
+  "spyglass_report": "620f2bfb097f9b5d000ba5185ec76ae2df0c24480df475e669fbbb67f3322add"
  },
  "outputs": {
-  "rtl": "45fa23a9a20b0781a5e4540c987f40e8c85a39d1ee3ade3da6d81e7c0ceca328",
-  "rtm": "62551c5627fd2df3b26dab06c55818f5521b0f1bfde062dd7bab9afafe16dd83"
+  "rtl": "7c771679b4579d23b7974004fab64e32d6c1a75369c913e7de4cf4832d84978e",
+  "rtm": "a4412d5b48947567e6c982cdcca8d95b4411c450abfc290b3afc630408b1d574"
  },
  "conflicts": [],
  "waived": [],

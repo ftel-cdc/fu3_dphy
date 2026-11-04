@@ -8,10 +8,10 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-03
-// Module          : m_ftel_dphy_rx_cl_ctrl
+// Module          : m_fpt_dphy_rx_cl_ctrl
 // Description     : Clock Lane Control, CIL-SCNN (HAS Block No. 2): clock-lane FSM of
 //                   Table 4-4 with its settle counter; outputs are registers.
-// Parent          : m_ftel_dphy_rx
+// Parent          : m_fpt_dphy_rx
 // HAS             : draft v0.14, §4.1, §4.4, Table 4-2, Table 4-4, Figure 4-4, Appendix B
 // Clock domains   : core
 // REQ-IDs         : REQ-015, REQ-063, REQ-083, REQ-084, REQ-085, REQ-086, REQ-087, REQ-088,
@@ -31,7 +31,7 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_cl_ctrl
+module m_fpt_dphy_rx_cl_ctrl
   import ftel_dphy_rx_pkg::*;
   import ftel_dphy_rx_config_pkg::*;
 (

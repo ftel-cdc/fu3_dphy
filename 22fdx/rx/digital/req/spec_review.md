@@ -157,7 +157,7 @@ Mọi finding đều có trích dẫn nguyên văn đã được validator kiể
 | F-001 | 352 | Mơ hồ | §4.6 mô tả phép tìm sync vừa là "2-word window", vừa bị giới hạn bởi `PARA_SYNC_SEARCH_BYTES`. Spec không nói "2-word" là cửa sổ so sánh trong mỗi chu kỳ còn `PARA_SYNC_SEARCH_BYTES` là thời lượng tìm tối đa, cũng không nói bộ đếm bắt đầu từ lúc nào. Trích: *"searches a 2-word window for the"* | "2-word window" = cửa sổ so của barrel shifter trong mỗi chu kỳ. Phép tìm kéo dài tối đa `PARA_SYNC_SEARCH_BYTES` chu kỳ byte clock, đếm từ tín hiệu HS entry trong domain `rxbyteclkhs` | Nội bộ |
 | F-002 | 401 | Mơ hồ | §4.9 buộc mọi output của lane có enable = Low về giá trị inactive. Nhưng các output PPI thuộc domain `rxbyteclkhs` (`rxactivehs_x`, `rxvalidhs_x`, `rxsynchs_x`, `rxdatahs_x`) không thể được cập nhật bằng logic có clock khi byte clock đang dừng (clock lane ở ULPS, hoặc lane bị tắt trước khi vào HS). Trích: *"Forces the inactive value of every output of a lane whose enable is Low"* | Gate tổ hợp các output PPI domain `rxbyteclkhs` bằng enable đã đồng bộ, đặt ở tầng output, để giá trị inactive giữ được mà không cần byte clock chạy. Thêm một dòng CDC cho enable đi vào mạch gate này | Nội bộ |
 | F-003 | 408 | Không nhất quán | §4.10 liệt kê *"`PARA_DESKEW_EN` run-time bypass (R2)"* là trường cấu hình, trong khi §3 định nghĩa `PARA_DESKEW_EN` là tham số synthesis-time (quyết định có instantiate Block No. 5 hay không). Bypass lúc chạy cần một trường register riêng | Giữ `PARA_DESKEW_EN` là synthesis-time. Thêm trường run-time `deskew_bypass` trong Block No. 8 (R2); khi bật thì giữ tap ở giá trị reset | Nội bộ |
-| F-004 | 578 | Câu hỏi | K6 nay còn phụ thuộc thêm FX1 IP Wrapper Guideline: mọi port reset của wrapper là active-low `_n`, reset active-high thì đặt inverter trong wrapper. Spec chưa nói `phy_core_rst` (do CSR của CSI-2 controller lái, không phải CRM) là port loại RESET hay là input điều khiển. Trích: *"\| K6 \| \`phy_core_rst\` polarity and synchronicity;"* | Coi `phy_core_rst` là port loại RESET: port wrapper `<dir>_<ip>_core_rst_n` active-low, inverter đặt trong `m_ftel_dphy_rx_wrap`; logic bên trong không đổi. Hỏi team CSI cùng lúc với K6 | CSI team |
+| F-004 | 578 | Câu hỏi | K6 nay còn phụ thuộc thêm FX1 IP Wrapper Guideline: mọi port reset của wrapper là active-low `_n`, reset active-high thì đặt inverter trong wrapper. Spec chưa nói `phy_core_rst` (do CSR của CSI-2 controller lái, không phải CRM) là port loại RESET hay là input điều khiển. Trích: *"\| K6 \| \`phy_core_rst\` polarity and synchronicity;"* | Coi `phy_core_rst` là port loại RESET: port wrapper `<dir>_<ip>_core_rst_n` active-low, inverter đặt trong `m_fpt_dphy_rx_wrap`; logic bên trong không đổi. Hỏi team CSI cùng lúc với K6 | CSI team |
 | F-005 | 588 | Thiếu | Appendix A truy vết Q1-Q9 và C2-C16 nhưng thiếu C1 (baseline của HAS-CSI: CSI-2 v1.3 + D-PHY v1.2), dù §1.4 Baselines có hiện thực nó. Trích: *"IDs refer to \`DPHY_RX_RESEARCH_PLAN.md\` §2.1 (Q) and §2.4 (C)."* | Thêm dòng "C1 Baseline CSI-2 v1.3 + D-PHY v1.2 \| §1.4 Baselines" vào Appendix A | Nội bộ |
 
 ### 3.2 Từ lần trích độc lập A6
@@ -619,7 +619,7 @@ vi:
 | `rebase_req.py` | Giữ 313/323 REQ và 3/3 finding. 10 REQ lỗi thời |
 | Chunk bổ sung `28_v12_delta.json` | 13 REQ. 10 REQ lỗi thời được neo lại bằng `prev_req_id`, nên giữ được ID mà RTL đang dẫn. 3 REQ mới: REQ-324 (IP này hoàn tất việc deserialize, No.4), REQ-325 (ranh giới B), REQ-326 (căn cứ cho điểm timing của A) |
 | `validate_req.py` | 326 REQ · 3 finding · trích dẫn 329/329 · độ phủ 100% ở 15 nhóm · 0 lỗi · 0 cảnh báo |
-| `flow_check.py` | P1 review: 0 xung đột. `needs_human_decision` 75 → 74, vì REQ-003 (vai trò của AFE) không còn phụ thuộc ADR-001. P2: sinh lại config package (header HAS v0.12), Gate 2 tự ký lại. P3a: 0 xung đột, REQ có tag 253/253 (REQ-324 gắn ở `m_ftel_dphy_rx_sync_search`). VCS 1/2/4 lane 0/0/0, SpyGlass 0/0/0 |
+| `flow_check.py` | P1 review: 0 xung đột. `needs_human_decision` 75 → 74, vì REQ-003 (vai trò của AFE) không còn phụ thuộc ADR-001. P2: sinh lại config package (header HAS v0.12), Gate 2 tự ký lại. P3a: 0 xung đột, REQ có tag 253/253 (REQ-324 gắn ở `m_fpt_dphy_rx_sync_search`). VCS 1/2/4 lane 0/0/0, SpyGlass 0/0/0 |
 | Hình | Không đổi. Figure 2-1 đã ghi "1:8, unaligned" ở phía AFE và "sync search, byte align" ở No.4 |
 | Docx v0.12 | 78 trang, XSD PASS. Script build tự kiểm: 29 hình, 24 caption bảng, 12 dòng lịch sử. Đã xem bằng mắt các trang có nội dung mới (11, 19, 65) |
 
@@ -670,7 +670,7 @@ thông báo ngày 2026-10-03 thành phương án B ở v0.12 là sai. Spec v0.13
 | REQ-256, REQ-259, REQ-260, REQ-261 | Giao diện word, `afe_byteclk`, `afe_hs_word_x`, `afe_cl_clk_active` | Bỏ khỏi Table 5-2 |
 | REQ-325 | Ranh giới B | Thay bằng ranh giới A |
 
-Tag của các ID đã retire chỉ còn trong `logical/m_ftel_dphy_rx_afe_adapter.sv`. RTL chưa sửa: bước RTL
+Tag của các ID đã retire chỉ còn trong `logical/m_fpt_dphy_rx_afe_adapter.sv`. RTL chưa sửa: bước RTL
 cần người duyệt, gồm cả ngoại lệ của rtl_rule cho clock đảo, clock chia, ICG và reset synchronizer
 dùng làm enable của gate.
 
@@ -909,5 +909,32 @@ và history của `req/rtl_scope.json` ghi lại thứ tự đó.
 | Docx v0.17 | 90 trang, XSD PASS. Đã xem bằng mắt trang 41-42 (Figure 4-5, 4-6), 50-51 (4-8, 4-9), 66 (5-1, 5-2), 72 (5-9) và 76 (Table 7-4) |
 
 RTL: header của `_dl_ctrl`, `_hs_datapath`, `_eot`, `_sync`, top, wrapper và package ghi HAS v0.17
-(D-28 trong `doc/rtl_notes.md`). `m_ftel_dphy_rx_tsync.sv` giữ trong repo nhưng ra khỏi `filelist.f`.
+(D-28 trong `doc/rtl_notes.md`). `m_fpt_dphy_rx_tsync.sv` giữ trong repo nhưng ra khỏi `filelist.f`.
 Hồi quy TN1 trên RTL mới: 358 run, mọi capture trùng lần chạy trước trừ cột `stopstate`.
+
+### 7.18 Đồng bộ P1 với spec v0.18 (tiền tố module `m_fpt_`, 2026-11-04)
+
+Team PD gửi quy tắc phối hợp: wrapper `logical/m_fpt_<ip>_wrap.sv`, `logical/filelist.f`,
+`sdc/constraint.sdc`, define `FPT_SIGNOFF`. Người dùng chọn đổi tiền tố của mọi module từ `m_ftel_`
+sang `m_fpt_` (`fpga/PLAN_RENAME_FPT.md`, duyệt cùng ngày). Spec chỉ nhắc tên module ở hai chỗ: dòng
+revision v0.3, giữ nguyên vì là lịch sử, và K6 ở Table 9-1 (inverter của reset nằm trong wrapper).
+v0.18 không đổi kỹ thuật.
+
+- **REQ-302 (K6) viết lại:** chỉ đổi tên wrapper. ID giữ bằng `prev_req_id`.
+- **Luật `NAME` của `validate_req.py` đảo chiều:** tên bị thay nay là `m_ftel_`. Từ v0.3 tới v0.17,
+  tên bị thay là `m_fpt_`, nên lần validate đầu báo đúng 1 lỗi `NAME` ở REQ-302.
+
+| Bước | Kết quả |
+|---|---|
+| `spec_inventory.py` | EXPECTED v0.18 đăng ký **trước** khi sửa spec, cùng số với v0.17. Selftest PASS |
+| `rebase_req.py` | Giữ 377/378 REQ và 3/3 finding; REQ-302 lỗi thời; 3 vùng cần trích: dòng version, dòng revision v0.18 (không sinh REQ), dòng K6 |
+| Chunk bổ sung `30_v18_delta.json` | 1 REQ: REQ-302 viết lại, giữ ID |
+| `assemble_req.py` | 378 REQ, 3 finding: 354 giữ vì cùng câu và chữ, 24 giữ theo liên kết, 0 mới, 0 retire |
+| `validate_req.py` | 0 lỗi, 0 cảnh báo sau khi đảo luật `NAME`. `needs_human_decision` 79 |
+| `validate_config.py` | Package sinh lại, chỉ khác dòng HAS v0.17 → v0.18 ở header. Test âm 29/29 |
+| `flow_check.py` | P1, P2, P3a: 0 xung đột; 304/304 REQ trong phạm vi có tag, 30 tag OPEN. `rtm.json` trùng bản trước ở `requirements` và `summary` sau khi thay tiền tố. Test âm 28/28 |
+| `check_rtl_rules.py` | 22 file, 0 vi phạm; selftest 57/57 |
+| Lint | VCS 0/0/0 ở 1, 2, 4 lane và chế độ 1; SpyGlass `lint_rtl` 0/0/0 với top `m_fpt_dphy_rx_wrap` (đặt ở `ip_config.yaml`), 1 waiver như trước |
+| DC | 4 lần chạy (2 góc × 1500/1792 Mb/s): 68 report và 4 netlist trùng bản 2026-11-03 sau khi thay tiền tố, bỏ khoảng trắng và ngày giờ; diện tích 5948 µm², 2646 flop |
+| `check_spec`, `check_figures` | 0, 0 |
+| Docx v0.18 | XSD PASS; hình không đổi so với v0.17 |

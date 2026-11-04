@@ -8,7 +8,7 @@
 # Author          : Ho Khanh Linh
 # Email           : linhhk26@fpt.com
 # Created Date    : 2026-10-26
-# Description     : Out-of-context synthesis of m_ftel_ppi_act_gate for the XCVP1902 part of the board.
+# Description     : Out-of-context synthesis of m_fpt_ppi_act_gate for the XCVP1902 part of the board.
 #
 # Evolution History:
 # ------------------------------------------------------------------------------
@@ -19,7 +19,7 @@
 # A new version is strictly reserved for major architectural shifts
 # that require software modifications across different chip generations.
 #-------------------------------------------------------------------------------
-# Out-of-context synthesis of m_ftel_ppi_act_gate (fpga/PLAN_TN2B_GATE.md §3) for xcvp1902-vsva6865-2MP-e-S,
+# Out-of-context synthesis of m_fpt_ppi_act_gate (fpga/PLAN_TN2B_GATE.md §3) for xcvp1902-vsva6865-2MP-e-S,
 # 4 lanes, byte clock 224 MHz (1792 Mb/s, the design envelope of ftel_dphy_rx). The PPI inputs come from flip-flops
 # and gates of ftel_dphy_rx and the output goes to flip-flops of the subsystem, so the ports get delays of a third of
 # the period each against the byte clock; the reset is asynchronous, into the reset synchronizer of the block. Not
@@ -28,8 +28,8 @@
 set work  [lindex $argv 0]
 set here  [file dirname [file normalize [info script]]]
 file mkdir $work
-read_verilog -sv [file join $here m_ftel_ppi_act_gate.sv]
-synth_design -top m_ftel_ppi_act_gate -part xcvp1902-vsva6865-2MP-e-S -mode out_of_context \
+read_verilog -sv [file join $here m_fpt_ppi_act_gate.sv]
+synth_design -top m_fpt_ppi_act_gate -part xcvp1902-vsva6865-2MP-e-S -mode out_of_context \
   -generic PARA_NUM_LANES=4
 set period 4.464
 create_clock -name byte_clk -period $period [get_ports i_byte_clk]

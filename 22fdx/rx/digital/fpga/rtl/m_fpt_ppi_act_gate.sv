@@ -8,7 +8,7 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-26
-// Module          : m_ftel_ppi_act_gate
+// Module          : m_fpt_ppi_act_gate
 // Description     : FPGA prototype only. Per data lane, rxactivehs of ftel_dphy_rx towards AMD's
 //                   CSI-2 RX Subsystem without PHY is held Low until rxsynchs, so that it rises with
 //                   rxsynchs as AMD's D-PHY drives it. No delay; the other PPI signals do not pass here.
@@ -31,7 +31,7 @@
 `default_nettype none
 // The inputs are "input var": with `default_nettype none, Vivado synthesis and XSIM without --relax reject an
 // input port that has a data type and no net type ("input logic").
-module m_ftel_ppi_act_gate #(
+module m_fpt_ppi_act_gate #(
   parameter int PARA_NUM_LANES = 4
 ) (
   // ---- clock ----

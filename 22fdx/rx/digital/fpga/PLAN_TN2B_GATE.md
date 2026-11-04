@@ -47,7 +47,7 @@
 - **Có thể lật kết quả:** câu trả lời của team CSI cho F4. Nếu họ coi "`rxactivehs` từ byte hợp lệ đầu tiên" là bắt buộc, chip cũng phải sửa RTL. Chuyện này không thuộc plan này.
 - **Plan này tốn ~1,5 ngày, nhiều hơn mức ~1 ngày dùng trong ma trận**, vì có thêm unit TB, synth và E2b-9. A vẫn đứng đầu: K3 từ 5 xuống 4, tổng còn 100.
 
-## 2. Khối `m_ftel_ppi_act_gate` (`fpga/rtl/`)
+## 2. Khối `m_fpt_ppi_act_gate` (`fpga/rtl/`)
 
 **Chức năng, từng lane:**
 - `o_rxactivehs = i_rxactivehs & (i_rxsynchs | reg_seen)`.
@@ -61,7 +61,7 @@
 |---|---|
 | `PARA_NUM_LANES` | 1, 2, 4 |
 | `i_byte_clk` | `rxbyteclkhs` của `ftel_dphy_rx` |
-| `i_byte_rst_n` | Active-low, bất đồng bộ; nối cùng reset với `ftel_dphy_rx`. Đồng bộ bên trong bằng `m_ftel_dphy_rx_rst_sync` (cell của `logical/`), có tag `CDC_CROSSING` (K3, K4, K5) |
+| `i_byte_rst_n` | Active-low, bất đồng bộ; nối cùng reset với `ftel_dphy_rx`. Đồng bộ bên trong bằng `m_fpt_dphy_rx_rst_sync` (cell của `logical/`), có tag `CDC_CROSSING` (K3, K4, K5) |
 | `i_rxactivehs`, `i_rxsynchs` `[PARA_NUM_LANES-1:0]` | PPI của ftel, sau phần gating `dl_enable` của ftel |
 | `o_rxactivehs` `[PARA_NUM_LANES-1:0]` | Vào `dlN_rxactivehs` của RX SS |
 
@@ -78,12 +78,12 @@
 | Reset | Xoá bất đồng bộ; nhả sau 2 byte clock |
 
 **Tên:**
-- Không dùng tiền tố `m_ftel_dphy_rx_*`, vì tiền tố đó dành cho IP trong `logical/`, và checker profile `ip` bắt theo nó.
+- Không dùng tiền tố `m_fpt_dphy_rx_*`, vì tiền tố đó dành cho IP trong `logical/`, và checker profile `ip` bắt theo nó.
 - Áp mọi luật [M] về tên và code bằng tay, rồi kiểm bằng `req_flow/check_rtl_rules.py --profile construct` cùng lint VCS L1.
 
 **File:**
-- `rtl/m_ftel_ppi_act_gate.sv`;
-- `rtl/tb_m_ftel_ppi_act_gate.sv`;
+- `rtl/m_fpt_ppi_act_gate.sv`;
+- `rtl/tb_m_fpt_ppi_act_gate.sv`;
 - `rtl/run_rtl.sh`, với các lệnh `lint | rules | sim | synth | all`;
 - `rtl/synth_rtl.tcl`.
 
@@ -126,7 +126,7 @@ Output đặt ở `work/rtl/` (đã gitignore).
   - Kết thúc run: chờ R-X đủ line, rồi `drain_quiet` cho R-F.
 
 **Script:**
-- `exp2b.tcl` compile thêm `rtl/m_ftel_ppi_act_gate.sv`.
+- `exp2b.tcl` compile thêm `rtl/m_fpt_ppi_act_gate.sv`.
 - `sources()` của `run_exp2b.sh` và `sources_hash()` của `tn2b_evidence.py` thêm file đó.
 - `run_exp2b.sh`:
   - `shim` dùng `+PPI_ADAPTER=1`, vẫn giữ tag `SH_`;
@@ -280,7 +280,7 @@ Cổng 2c đạt.
 
 ### 9.5 Khác với plan
 
-1. **Reset của khối:** dùng 2 flop `ASYNC_REG` riêng trong khối, thay cho cell `m_ftel_dphy_rx_rst_sync` của
+1. **Reset của khối:** dùng 2 flop `ASYNC_REG` riêng trong khối, thay cho cell `m_fpt_dphy_rx_rst_sync` của
    `logical/` (bạn chọn). Lý do: Vivado synth dừng ở cell ASIC (Synth 8-6735).
 2. **Port `input var logic`.** Với `` `default_nettype none ``, Vivado synth và XSIM không `--relax` không nhận port
    `input logic` (VRFC 10-1103). Khối là code FPGA mới, nên việc này không đụng RTL của `ftel_dphy_rx`.

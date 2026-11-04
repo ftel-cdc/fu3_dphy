@@ -18,7 +18,7 @@
 **Bạn đã quyết (03/11):**
 - Sửa ngay trong RX.
 - Chọn **C-param**: mặc định là B, cộng một tham số để chọn `stopstate_x` "sau khi delay line xả hết".
-- Giữ file `m_ftel_dphy_rx_tsync.sv`, chỉ bỏ khỏi filelist.
+- Giữ file `m_fpt_dphy_rx_tsync.sv`, chỉ bỏ khỏi filelist.
 
 **Đã làm và đo, phần B** ✅ (THS-EXIT + TLPX tối thiểu, mỗi run 32 burst × 4 lane):
 
@@ -37,11 +37,11 @@
 
 ### 1.1 Phần B (đã có trong working tree ✅)
 
-- `m_ftel_dphy_rx_dl_ctrl.sv`:
+- `m_fpt_dphy_rx_dl_ctrl.sv`:
   - `DL_HS_EOT` chỉ còn 1 cycle: gặp LP-00 thì sang `DL_HS_WAIT` (HS RX timeout, đường truyền còn ở HS), còn lại sang `DL_STOP`;
   - bỏ `i_eot_done` và `reg_eot_lp00`.
-- `m_ftel_dphy_rx_hs_datapath.sv`: bỏ `o_eot_done`, khối tsync, `i_core_clk` và `i_core_rst_n`.
-- `m_ftel_dphy_rx.sv`: bỏ các dây tương ứng.
+- `m_fpt_dphy_rx_hs_datapath.sv`: bỏ `o_eot_done`, khối tsync, `i_core_clk` và `i_core_rst_n`.
+- `m_fpt_dphy_rx.sv`: bỏ các dây tương ứng.
 - `filelist.f`: bỏ dòng tsync; file .sv giữ nguyên.
 - Enum giữ nguyên, nên mã trạng thái xuất ra status không đổi.
 
@@ -56,10 +56,10 @@
 - Đường đi: wrapper → core → `dl_ctrl`.
 
 **RTL, chỉ dùng cell và cờ đã có:**
-- `m_ftel_dphy_rx_eot.sv`: thêm output `o_line_busy` = OR các cờ active và skew-cal của delay line.
-- `m_ftel_dphy_rx_hs_datapath.sv`: thêm `reg_busy <= w_start || line_busy`, là thanh ghi nguồn của crossing; ra `o_hs_busy`.
-- `m_ftel_dphy_rx_dl_ctrl.sv`:
-  - `i_hs_busy` đi qua `m_ftel_dphy_rx_sync` (2 flop, `core_clk`), có tag `CDC_CROSSING: byte -> core`;
+- `m_fpt_dphy_rx_eot.sv`: thêm output `o_line_busy` = OR các cờ active và skew-cal của delay line.
+- `m_fpt_dphy_rx_hs_datapath.sv`: thêm `reg_busy <= w_start || line_busy`, là thanh ghi nguồn của crossing; ra `o_hs_busy`.
+- `m_fpt_dphy_rx_dl_ctrl.sv`:
+  - `i_hs_busy` đi qua `m_fpt_dphy_rx_sync` (2 flop, `core_clk`), có tag `CDC_CROSSING: byte -> core`;
   - `reg_stopstate <= (w_state_nxt == DL_STOP) && !((PARA_STOP_DRAIN_EN != 0) && w_hs_busy)`.
 - Không dùng `generate`. Với giá trị 0, phép AND là hằng, nên synthesis bỏ phần busy; về chức năng thì giống hệt B.
 

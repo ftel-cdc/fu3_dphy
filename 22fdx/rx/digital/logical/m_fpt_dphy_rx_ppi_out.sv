@@ -8,11 +8,11 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-03
-// Module          : m_ftel_dphy_rx_ppi_out
+// Module          : m_fpt_dphy_rx_ppi_out
 // Description     : PPI Output Stage (HAS Block No. 7): maps the internal signals to the PPI
 //                   names, forces the inactive value of every output of a disabled lane,
 //                   generates rxclkesc_x and ties the LPDT outputs. Combinational only.
-// Parent          : m_ftel_dphy_rx
+// Parent          : m_fpt_dphy_rx
 // HAS             : draft v0.14, §4.9, Figure 4-12, §5.1, Table 5-1
 // Clock domains   : none (gates core and byte outputs with the core-synchronized enables)
 // REQ-IDs         : REQ-028, REQ-058, REQ-063, REQ-203, REQ-204, REQ-205, REQ-206, REQ-207,
@@ -30,7 +30,7 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_ppi_out
+module m_fpt_dphy_rx_ppi_out
   import ftel_dphy_rx_pkg::*;
 #(
   parameter int PARA_NUM_LANES   = 4,

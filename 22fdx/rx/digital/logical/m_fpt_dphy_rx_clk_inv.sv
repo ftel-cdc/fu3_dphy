@@ -7,13 +7,13 @@
 //------------------------------------------------------------------------------
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
-// Created Date    : 2026-10-10
-// Module          : m_ftel_dphy_rx_clk_inv
-// Description     : Library mapping of the clock inverter for synthesis (rtl_rule K10):
-//                   syn/run_syn.sh uses it in place of logical/m_ftel_dphy_rx_clk_inv.sv. Same
-//                   ports; one clock inverter cell of the library. Cell and pin names:
-//                   FTEL_LIB_CKINV_* of .env, defines from syn/tech.tcl.
-// Parent          : m_ftel_dphy_rx_byte_clk
+// Created Date    : 2026-10-07
+// Module          : m_fpt_dphy_rx_clk_inv
+// Description     : Clock inverter: turns the falling edge of the DDR clock into the rising
+//                   edge of the clock of the falling-edge flip-flops of Block No. 1. Port-
+//                   compatible with m_fpt_lib_clk_inv; behavioural model (rtl_rule K10,
+//                   rtl_notes D-23).
+// Parent          : m_fpt_dphy_rx_byte_clk
 // HAS             : draft v0.14, §4.3
 // Clock domains   : none (clock path)
 // REQ-IDs         : REQ-339
@@ -22,7 +22,7 @@
 // Evolution History:
 // -----------------------------------------------------------------------------
 // Date         Version    Author        Description
-// 2026-10-10   0.1        Ho Khanh Linh Synthesis mapping onto the clock inverter of the library.
+// 2026-10-07   0.1        Ho Khanh Linh Draft against HAS v0.14; open items at their defaults.
 //
 // This section is not intended for routine updates or minor design changes.
 // A new version is strictly reserved for major architectural shifts
@@ -30,15 +30,14 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_clk_inv (
+module m_fpt_dphy_rx_clk_inv (
   input  logic i_in,
   output logic o_out
 );
 
+  // At integration the module is replaced by m_fpt_lib_clk_inv, which maps to a clock inverter
+  // of the target library.
   // REQ-339
-  `FTEL_LIB_CKINV_CELL u_ckinv (
-    .`FTEL_LIB_CKINV_PIN_IN  (i_in),
-    .`FTEL_LIB_CKINV_PIN_OUT (o_out)
-  );
+  assign o_out = ~i_in;
 endmodule
 `default_nettype wire

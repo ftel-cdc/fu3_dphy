@@ -1,6 +1,9 @@
 # Optional per-design overrides. Rename to ip_config.yaml or top_config.yaml.
 
 # top_module: custom_top
+# The wrapper is m_fpt_dphy_rx_wrap, the name the PD flow of fu3 expects (m_fpt_<ip>_wrap); the tool_flow
+# default (naming.ip_module of its project.yaml) still has the FX1 prefix m_ftel.
+top_module: m_fpt_dphy_rx_wrap
 # filelist: logical/custom_filelist.f
 
 # constraint:

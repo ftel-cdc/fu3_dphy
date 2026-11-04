@@ -1,9 +1,9 @@
 {
  "phase": "P1",
  "mode": "review",
- "at": "2026-11-03T17:22:09+07:00",
- "spec_sha256": "1214230ce90d417b502db88544678b2a3afd6b62c432a6fd62d6d74c00b38b8f",
- "structured_spec_sha256": "b474adcc9afdee07e7a8bc862b92027a340d27d51514e6d562e37c7439768c79",
+ "at": "2026-11-04T15:42:59+07:00",
+ "spec_sha256": "27256440269efa5dc71000e63c996695c9a73a081bf061f499f12dd21a130489",
+ "structured_spec_sha256": "d6580aad9c7d9cdac97dde0811a004872be9750c2b2fcfe8a09a1b426f6bc961",
  "conflicts": [],
  "waived": [],
  "rejected_waivers": [],

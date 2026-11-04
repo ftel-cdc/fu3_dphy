@@ -17,7 +17,7 @@ ngữ nội bộ, đặt trong `../exp2/`: [`TN2_DESCRIPTION.md`](../exp2/TN2_DE
 ## Tóm tắt (2026-10-26)
 
 - **Phương án A đã làm** (§6.6, [`../PLAN_TN2B_GATE.md`](../PLAN_TN2B_GATE.md)). Khối FPGA
-  [`../rtl/m_ftel_ppi_act_gate.sv`](../rtl/m_ftel_ppi_act_gate.sv) giữ `rxactivehs` vào R-F ở 0 tới `rxsynchs`. Khối có
+  [`../rtl/m_fpt_ppi_act_gate.sv`](../rtl/m_fpt_ppi_act_gate.sv) giữ `rxactivehs` vào R-F ở 0 tới `rxsynchs`. Khối có
   6 flip-flop với 4 lane, không thêm trễ, và RTL ASIC không đổi. Nó thay shim mode 3 của TB trong mọi run `SH_*`.
   - 31 run `SH_*` chạy lại qua khối: mọi kịch bản PASS; khối trùng model của TB ở 436 865 byte clock.
   - Mọi CSV và `frames.txt` của 39 run cũ trùng từng byte với bản chạy bằng shim mode 3 (282/282 file).
@@ -67,9 +67,9 @@ xtxss: CSI-2 TX SS 2.2 (controller ──PPI──► tx_ppi.csv ──► D-PHY
 xrxss (R-X): RX SS 6.0 có PHY   IBUFDS_DPHY (+AFE=xil, mặc định)              afe_model (TN1):
   cổng theo dõi PPI               │  ┌──────────────────────── +AFE=model;     line state, term_en
   ──► xil_ppi.csv                 ▼  ▼
-  │                             m_ftel_dphy_rx_wrap (RTL ASIC)
+  │                             m_fpt_dphy_rx_wrap (RTL ASIC)
   │                               │ PPI ── +PPI_CORRUPT, +PPI_XFILL, +PPI_SOTSYNCERR (TB)
-  │                               │ rxactivehs: m_ftel_ppi_act_gate (fpga/rtl/, +PPI_ADAPTER=1, run SH_*)
+  │                               │ rxactivehs: m_fpt_ppi_act_gate (fpga/rtl/, +PPI_ADAPTER=1, run SH_*)
   │                               │             hoặc +PPI_AMD_TIMING (TB, chẩn đoán) ──► ftel_ppi.csv
   │                               ▼
   │                             xrxss_np (R-F): RX SS 6.0 không PHY
@@ -148,7 +148,7 @@ HS settle do IP tự chọn theo rate (`C_HS_SETTLE_NS`): 173 ns ở 260 Mb/s, 1
 
     Mode 3 là thay đổi nhỏ nhất làm R-F nhận được: mỗi lane một flop và một cổng, không thêm trễ.
   - `+PPI_ADAPTER=1` (từ 2026-10-26, mọi run `SH_*`): `rxactivehs` vào R-F lấy từ khối FPGA
-    [`../rtl/m_ftel_ppi_act_gate.sv`](../rtl/m_ftel_ppi_act_gate.sv) (phương án A, [`../PLAN_TN2B_GATE.md`](../PLAN_TN2B_GATE.md)).
+    [`../rtl/m_fpt_ppi_act_gate.sv`](../rtl/m_fpt_ppi_act_gate.sv) (phương án A, [`../PLAN_TN2B_GATE.md`](../PLAN_TN2B_GATE.md)).
     Luật của khối như mode 3: `rxactivehs` từ `rxsynchs` đầu tiên tới hết burst. Khối có reset synchronizer riêng
     (2 flop `ASYNC_REG`), nối cùng reset với `ftel_dphy_rx`. TB có model riêng của luật đó, so với khối ở mọi byte
     clock và in `TB ADAPTER CHECK: comparisons N, differences D`. Không dùng chung với `+PPI_AMD_TIMING`;
@@ -416,7 +416,7 @@ chỉnh: **EVIDENCE: PASS (12/12 checks)**, có thêm check `gate`.
 | `front` | Đầu ra LP của hai bộ buffer trùng nhau ở mọi lần đổi sau 2,5 ps; RX mình sau `IBUFDS_DPHY` trừ khi `+AFE=model` | 38 run, 6 770 088 lần so, 0 khác; 13 run sau `afe_model` | 39 run, 6 995 053 lần so, 0 khác; 13 run sau `afe_model` |
 | `afe` | `term_en` không trễ, không thiếu (NEG-front xem `neg`) | 38/38 | 39/39 |
 | `config` | Cấu hình RX mình đúng model HAS ở rate đó; tham số ba subsystem ở 4 build đúng §3 | 39 run, 4 build | 40 run, 4 build |
-| `sources` | Hash nguồn trong `args.txt` từng run bằng hash nguồn hiện tại (RTL theo `filelist.f`, `exp1/afe_model.sv`, `exp1/ppi_csv_mon.sv`, từ 26/10 `rtl/m_ftel_ppi_act_gate.sv`, `exp2b/*.sv`) | 39/39, `1ac03101efd59a1a` | 40/40, `ce12047cbce523a4` |
+| `sources` | Hash nguồn trong `args.txt` từng run bằng hash nguồn hiện tại (RTL theo `filelist.f`, `exp1/afe_model.sv`, `exp1/ppi_csv_mon.sv`, từ 26/10 `rtl/m_fpt_ppi_act_gate.sv`, `exp2b/*.sv`) | 39/39, `1ac03101efd59a1a` | 40/40, `ce12047cbce523a4` |
 | `copy` | Ba khối lấy từ `tb_exp1.sv` khác đúng các dòng đã liệt kê (0, 1 và 6 dòng) | 29, 15, 59 dòng code | 29, 15, 59 dòng code |
 | `neg` | NEG-ecc: bit cài rơi vào header, được sửa; `check.txt` đạt; chỉ R-F báo ECC 1 bit; `regs` là mục duy nhất của `tbcheck` hỏng. NEG-crc: pixel sai duy nhất của R-F đúng là pixel mà bit cài thuộc về (frame 0, line 0, pixel 4: 0x024 thay cho 0x004), chỉ R-F báo CRC, `check.txt` hỏng đúng `pixels-ftel`, `ppi-ftel`, `packets-xil-ftel`. NEG-front: front check đếm ra khác biệt, R-X vẫn đạt | 3/3 đúng chỗ | 3/3 đúng chỗ |
 | `finding` | §6.1: 5 run không chỉnh đúng dấu hiệu (R-X đạt, PPI vào R-F = PPI R-X, R-F 0 line, 0 packet; `rxactivehs` sớm ở mọi burst; D-PHY AMD cùng lúc); 4 run chẩn đoán đúng quy luật; mọi run `SH_*` (trừ NEG-front) có `rxactivehs` cùng `rxsynchs` | đúng, 29 run `SH_*` | đúng, 30 run `SH_*` |

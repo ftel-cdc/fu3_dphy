@@ -8,7 +8,7 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-26
-// Description     : Unit testbench of m_ftel_ppi_act_gate (fpga/PLAN_TN2B_GATE.md §3).
+// Description     : Unit testbench of m_fpt_ppi_act_gate (fpga/PLAN_TN2B_GATE.md §3).
 //
 // Evolution History:
 // -----------------------------------------------------------------------------
@@ -19,7 +19,7 @@
 // A new version is strictly reserved for major architectural shifts
 // that require software modifications across different chip generations.
 //------------------------------------------------------------------------------
-// Unit testbench of m_ftel_ppi_act_gate (fpga/PLAN_TN2B_GATE.md §3), NL lanes (+define+NL=<n>, default 4).
+// Unit testbench of m_fpt_ppi_act_gate (fpga/PLAN_TN2B_GATE.md §3), NL lanes (+define+NL=<n>, default 4).
 // Two checks, written apart from the RTL:
 // - cycle by cycle, against a model with its own copy of the two-stage reset release;
 // - at the end of each burst (run of rxactivehs in) without a reset in it, the property the block stands for:
@@ -31,7 +31,7 @@
 // clock at random times. Every case of the coverage counts must be hit. Prints "TB RESULT: PASS" or FAIL.
 //   +SEED=<n> (default 1)  +BURSTS=<n> random bursts per lane (default 3000)
 `timescale 1ns/1ps
-module tb_m_ftel_ppi_act_gate;
+module tb_m_fpt_ppi_act_gate;
 `ifndef NL
   `define NL 4
 `endif
@@ -43,7 +43,7 @@ module tb_m_ftel_ppi_act_gate;
 
   always #2.5 if (clk_en) clk = ~clk;   // byte clock; its edges stay on the 2.5 ns grid when it stops and runs again
 
-  m_ftel_ppi_act_gate #(.PARA_NUM_LANES(NL)) dut (
+  m_fpt_ppi_act_gate #(.PARA_NUM_LANES(NL)) dut (
     .i_byte_clk   (clk),
     .i_byte_rst_n (rst_n),
     .i_rxactivehs (act),

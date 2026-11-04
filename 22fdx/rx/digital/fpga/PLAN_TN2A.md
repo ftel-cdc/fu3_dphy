@@ -130,7 +130,7 @@ ppi_tx_drv ─PPI─► xtx: mipi_dphy 4.3 MASTER ─┐               dphy_line
   - ba nhánh `g_x` của `xrx`;
   - hookup `afe_model`;
   - `IBUFDS_DPHY` trước RX mình và `TB FRONT END CHECK`;
-  - instance `m_ftel_dphy_rx_wrap` cùng các field cấu hình;
+  - instance `m_fpt_dphy_rx_wrap` cùng các field cấu hình;
   - hai `ppi_csv_mon`;
   - các hàm `make_payload`, `prbs9`, `parse_list`;
   - watchdog;
@@ -185,7 +185,7 @@ ppi_tx_drv ─PPI─► xtx: mipi_dphy 4.3 MASTER ─┐               dphy_line
   | `afe` | như TN1 |
   | `config` | như TN1 |
   | `sources` | như TN1 |
-  | `copy` | các khối copy trong `tb_exp2a.sv` (front end của RX mình, front check, instance `m_ftel_dphy_rx_wrap`) vẫn trùng nguyên văn với `tb_exp1.sv`, để hai bench không lệch nhau |
+  | `copy` | các khối copy trong `tb_exp2a.sv` (front end của RX mình, front check, instance `m_fpt_dphy_rx_wrap`) vẫn trùng nguyên văn với `tb_exp1.sv`, để hai bench không lệch nhau |
 
 ### 3.3 Dùng lại, không sửa
 

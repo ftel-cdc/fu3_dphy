@@ -8,12 +8,12 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-07
-// Module          : m_ftel_dphy_rx_byte_clk
+// Module          : m_fpt_dphy_rx_byte_clk
 // Description     : Clock structure of Block No. 1, the only place of the IP with logic on
 //                   a clock path (rtl_rule K2): inverted DDR clock, divider by 4 with the
 //                   load phases of the deserializer, clock gate of rxbyteclkhs and its enable,
 //                   and the clock-activity toggles of the DDR clock.
-// Parent          : m_ftel_dphy_rx_afe_adapter
+// Parent          : m_fpt_dphy_rx_afe_adapter
 // HAS             : draft v0.14, §4.1, §4.2, §4.3, Table 4-2, Figure 4-2
 // Clock domains   : ddr, ddrn (load phase of the falling edge), core -> ddr (gate enable)
 // REQ-IDs         : REQ-048, REQ-228, REQ-337, REQ-338, REQ-339, REQ-340, REQ-341, REQ-342,
@@ -31,7 +31,7 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_byte_clk
+module m_fpt_dphy_rx_byte_clk
   import ftel_dphy_rx_pkg::*;
 #(
   parameter int PARA_DESER_RATIO = 8
@@ -46,7 +46,7 @@ module m_ftel_dphy_rx_byte_clk
   output logic                     o_ddrn_clk,
   output logic                     o_load,
   output logic                     o_load_fall,
-  // ---- status: clock-activity toggles (m_ftel_dphy_rx_clk_act) ----
+  // ---- status: clock-activity toggles (m_fpt_dphy_rx_clk_act) ----
   output logic [C_ACT_TOGGLES-1:0] o_act_toggle
 );
 
@@ -75,7 +75,7 @@ module m_ftel_dphy_rx_byte_clk
   // CDC_CROSSING: core -> ddr: byteclk_en (HAS §4.1, Table 4-2)
   // CLK_STRUCT (HAS §4.3)
   // REQ-337, REQ-343, REQ-364
-  m_ftel_dphy_rx_rst_sync u_rst_sync_0 (
+  m_fpt_dphy_rx_rst_sync u_rst_sync_0 (
     .i_clk           (i_ddr_clk),
     .i_async_reset_n (i_byteclk_en),
     .o_sync_reset_n  (w_ddr_div_rst_n)
@@ -85,7 +85,7 @@ module m_ftel_dphy_rx_byte_clk
   // The falling-edge flip-flops of the deserializer run on its rising edge (rtl_rule P12).
   // CLK_STRUCT (HAS §4.3)
   // REQ-339, REQ-342
-  m_ftel_dphy_rx_clk_inv u_dont_touch_clk_inv_0 (
+  m_fpt_dphy_rx_clk_inv u_dont_touch_clk_inv_0 (
     .i_in  (i_ddr_clk),
     .o_out (w_ddrn_clk)
   );
@@ -131,7 +131,7 @@ module m_ftel_dphy_rx_byte_clk
   // Low (rtl_notes D-22).
   // CLK_STRUCT (HAS §4.3)
   // REQ-048, REQ-228, REQ-343, REQ-344
-  m_ftel_dphy_rx_cg u_dont_touch_cg_0 (
+  m_fpt_dphy_rx_cg u_dont_touch_cg_0 (
     .i_clk     (w_div_clk),
     .i_en      (w_ddr_div_rst_n),
     .i_scan_en (1'b0),

@@ -243,7 +243,7 @@ module tb_exp1;
   end
 `endif
 
-  m_ftel_dphy_rx_wrap #(.PARA_NUM_LANES(NL), .PARA_STOP_DRAIN_EN(STOP_DRAIN)) u_ftel (
+  m_fpt_dphy_rx_wrap #(.PARA_NUM_LANES(NL), .PARA_STOP_DRAIN_EN(STOP_DRAIN)) u_ftel (
     .i_dphy_rx_core_clk              (core_clk),
     .i_dphy_rx_phy_core_rst_n        (f_rst_n),
     .i_dphy_rx_cl_enable             (1'b1),

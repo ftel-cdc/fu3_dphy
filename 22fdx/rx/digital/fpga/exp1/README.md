@@ -30,7 +30,7 @@ dphy_line_gen (Tx giả, D-PHY v1.1, mức logic trên pad) ──► truth.txt 
    │ clk_p/n, d_p/n[0..3]
    ├─► RX AMD, mipi_dphy 4.3 SLAVE: assign → IBUFDS_DPHY → XPHY → controller ───► PPI ─► xil_ppi.csv  ─┐
    ├─► IBUFDS_DPHY (cùng model, cùng SIM_DEVICE) ─┐ +AFE=xil (mặc định)                                │
-   │                                              ├─► m_ftel_dphy_rx_wrap (RTL ASIC) ─► PPI ─► ftel_ppi.csv ─┤
+   │                                              ├─► m_fpt_dphy_rx_wrap (RTL ASIC) ─► PPI ─► ftel_ppi.csv ─┤
    └─► afe_model (AFE lý tưởng) ──────────────────┘ +AFE=model                                          │
          luôn chạy: kiểm trạng thái line và term_en       csi2_dump.py bursts: mỗi CSV so với truth.txt ┘
 

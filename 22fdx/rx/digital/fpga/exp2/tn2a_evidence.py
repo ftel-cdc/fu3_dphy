@@ -102,7 +102,7 @@ NEGATIVE = ('NEG-tx', 'NEG-front')
 # (block, first line, last line) of the code tb_exp2a.sv takes from tb_exp1.sv
 COPY_BLOCKS = (('front end of ftel_dphy_rx', 'logic [NL-1:0] b_lp_dp', 'assign r_cl_hs_clk'),
                ('front-end check', 'int fe_diffs = 0', '`endif'),
-               ('instance of the wrap', 'm_ftel_dphy_rx_wrap #(.PARA_NUM_LANES(NL)) u_ftel', ');'))
+               ('instance of the wrap', 'm_fpt_dphy_rx_wrap #(.PARA_NUM_LANES(NL)) u_ftel', ');'))
 # the TB TXTIMING lines of pad_truth.sv, in its order
 TIMING = ('data TLPX', 'data THS-PREPARE', 'data THS-ZERO', 'data THS-PREPARE + THS-ZERO', 'data THS-TRAIL',
           'data THS-EXIT', 'clock TLPX', 'clock TCLK-PREPARE', 'clock TCLK-ZERO', 'clock TCLK-PREPARE + TCLK-ZERO',

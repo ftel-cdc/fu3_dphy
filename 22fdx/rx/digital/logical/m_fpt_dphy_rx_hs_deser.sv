@@ -8,11 +8,11 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-07
-// Module          : m_ftel_dphy_rx_hs_deser
+// Module          : m_fpt_dphy_rx_hs_deser
 // Description     : HS deserializer of one physical data lane (HAS Block No. 1): a sampler,
 //                   a shift register and a parallel register on each edge of the DDR clock;
 //                   the two parallel registers hold one word, bit 0 received first.
-// Parent          : m_ftel_dphy_rx_afe_adapter
+// Parent          : m_fpt_dphy_rx_afe_adapter
 // HAS             : draft v0.14, §4.3, Table 4-2, Figure 4-2, Appendix B
 // Clock domains   : ddr, ddrn
 // REQ-IDs         : REQ-328, REQ-332, REQ-334, REQ-339, REQ-340, REQ-341, REQ-342, REQ-349,
@@ -30,13 +30,13 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_hs_deser #(
+module m_fpt_dphy_rx_hs_deser #(
   parameter int PARA_DESER_RATIO = 8
 ) (
   // ---- clock ----
   input  logic                        i_ddr_clk,
   input  logic                        i_ddrn_clk,
-  // ---- control: load phases (m_ftel_dphy_rx_byte_clk) ----
+  // ---- control: load phases (m_fpt_dphy_rx_byte_clk) ----
   input  logic                        i_load,
   input  logic                        i_load_fall,
   // ---- data out: word of the lane, held for four DDR clock periods ----
@@ -71,7 +71,7 @@ module m_ftel_dphy_rx_hs_deser #(
   end
 
   // The load phase of the falling edge comes from the falling-edge flip-flop of
-  // m_ftel_dphy_rx_byte_clk, a full period before this register uses it.
+  // m_fpt_dphy_rx_byte_clk, a full period before this register uses it.
   // SYNC_DDR (HAS §4.3)
   // REQ-334, REQ-339, REQ-340, REQ-342
   always_ff @(posedge i_ddrn_clk) begin : p_fall

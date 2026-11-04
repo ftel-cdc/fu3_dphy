@@ -8,12 +8,12 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-03
-// Module          : m_ftel_dphy_rx_dl_ctrl
+// Module          : m_fpt_dphy_rx_dl_ctrl
 // Description     : Data Lane Control, CIL-SFEN (HAS Block No. 3): data-lane FSM of
 //                   Table 4-5, settle counter, escape decoder, line-state change detector
 //                   and output registers; drives the sync-search start of Block No. 4 and
 //                   takes its HS busy for stopstate_x (PARA_STOP_DRAIN_EN).
-// Parent          : m_ftel_dphy_rx
+// Parent          : m_fpt_dphy_rx
 // HAS             : draft v0.17, §4.1, §4.5, Tables 4-2 and 4-5, Figures 4-5 and 4-6, Appendix B
 // Clock domains   : core
 // REQ-IDs         : REQ-018, REQ-021, REQ-025, REQ-063, REQ-083, REQ-104, REQ-105, REQ-106,
@@ -37,7 +37,7 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_dl_ctrl
+module m_fpt_dphy_rx_dl_ctrl
   import ftel_dphy_rx_pkg::*;
   import ftel_dphy_rx_config_pkg::*;
 #(
@@ -108,7 +108,7 @@ module m_ftel_dphy_rx_dl_ctrl
   assign w_esc_active = (reg_state == DL_ESC_GO) || (reg_state == DL_ESC_CMD);
 
   // REQ-117, REQ-126, REQ-135
-  m_ftel_dphy_rx_esc_decoder u_esc_decoder_0 (
+  m_fpt_dphy_rx_esc_decoder u_esc_decoder_0 (
     .i_core_clk    (i_core_clk),
     .i_core_rst_n  (i_core_rst_n),
     .i_active      (w_esc_active),
@@ -135,7 +135,7 @@ module m_ftel_dphy_rx_dl_ctrl
   // stopstate_x waits for its end, so it rises after the last HS output of the burst at the PPI.
   // CDC_CROSSING: byte -> core: i_hs_busy (HAS §4.1, Table 4-2)
   // REQ-382
-  m_ftel_dphy_rx_sync #(
+  m_fpt_dphy_rx_sync #(
     .PARA_LEVELS (2)
   ) u_sync_0 (
     .i_clk      (i_core_clk),

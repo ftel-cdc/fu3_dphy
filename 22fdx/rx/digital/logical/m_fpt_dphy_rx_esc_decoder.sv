@@ -8,11 +8,11 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-03
-// Module          : m_ftel_dphy_rx_esc_decoder
+// Module          : m_fpt_dphy_rx_esc_decoder
 // Description     : Escape decoder of a data lane (HAS Block No. 3): Spaced-One-Hot bits
 //                   into an 8-bit register, first bit in the MSB, and comparison of the
 //                   entry command with the codes of Table 4-6.
-// Parent          : m_ftel_dphy_rx_dl_ctrl
+// Parent          : m_fpt_dphy_rx_dl_ctrl
 // HAS             : draft v0.14, §4.5, Table 4-6, Figure 4-7
 // Clock domains   : core
 // REQ-IDs         : REQ-117, REQ-125, REQ-135, REQ-136, REQ-137, REQ-138, REQ-139, REQ-140,
@@ -30,7 +30,7 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_esc_decoder
+module m_fpt_dphy_rx_esc_decoder
   import ftel_dphy_rx_pkg::*;
 (
   // ---- clock / reset ----

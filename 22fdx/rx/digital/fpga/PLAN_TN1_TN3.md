@@ -76,7 +76,7 @@ Bạn chia lại thành ba thí nghiệm, theo nguyên tắc: việc nào làm �
 ```
 TB line generator (dummy data, timing D-PHY chỉnh được) ──► file truth (byte đã phát)
    ├─ pad p/n ─────────────────► mipi_dphy 4.3 RX (SLAVE, 4 lane) ─────────► CSV PPI Xilinx ─┐
-   └─ pad p/n ─► mô hình AFE ─► m_ftel_dphy_rx_wrap (RTL ASIC, R1) ─► CSV PPI mình ─────────┴─► so với truth và với nhau
+   └─ pad p/n ─► mô hình AFE ─► m_fpt_dphy_rx_wrap (RTL ASIC, R1) ─► CSV PPI mình ─────────┴─► so với truth và với nhau
 ```
 
 **Các khối của testbench:**

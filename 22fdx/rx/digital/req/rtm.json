@@ -1,31 +1,31 @@
 {
  "ip": "ftel_dphy_rx",
  "generated_by": "flow_check.py --phase P3a",
- "spec_sha256": "1214230ce90d417b502db88544678b2a3afd6b62c432a6fd62d6d74c00b38b8f",
- "structured_spec_sha256": "b474adcc9afdee07e7a8bc862b92027a340d27d51514e6d562e37c7439768c79",
+ "spec_sha256": "27256440269efa5dc71000e63c996695c9a73a081bf061f499f12dd21a130489",
+ "structured_spec_sha256": "d6580aad9c7d9cdac97dde0811a004872be9750c2b2fcfe8a09a1b426f6bc961",
  "rtl": {
-  "logical/ftel_dphy_rx_config_pkg.sv": "a292981d74f5750ae5a20154b51438b76f282ee0c4746f7004f2a64ac488a5f0",
+  "logical/ftel_dphy_rx_config_pkg.sv": "6bd5c09653685dce8ca6afe1a837c3867ad4e77fc66435bde1b1940a4343a428",
   "logical/ftel_dphy_rx_pkg.sv": "f728a8def80c92f27a5cfcd7b38ee2c0438f3b69f6d2de1c3f30fc1fe51599de",
-  "logical/m_ftel_dphy_rx.sv": "dace106dda9b4a9c6c7ef68b06f6cfd7cc6b52ed7013a8cc6ea2a072790debb6",
-  "logical/m_ftel_dphy_rx_afe_adapter.sv": "16e8deff5bc306a19a8f7446bb4480811d5f675230e12b183b5e47b30fabf02e",
-  "logical/m_ftel_dphy_rx_byte_clk.sv": "6d5f62d108991606a774e772ae53b1b35921db4057b2d76da44be0361e7cbb3b",
-  "logical/m_ftel_dphy_rx_cg.sv": "ddef6cc710a59d3c89ac7c06ff53c6dad3da786c905db5de4f483adb86602673",
-  "logical/m_ftel_dphy_rx_cl_ctrl.sv": "2453daacaef1008ee03217606c325b3e754cf0f5fc27e108aca54c1afeee5430",
-  "logical/m_ftel_dphy_rx_clk_act.sv": "6a1b76378efd6a42d3b1bfd5f9a316a6415af6cac745fe701acd226f76ae677b",
-  "logical/m_ftel_dphy_rx_clk_inv.sv": "e69af4fffa58cc2a6ae71797982b8d3a5bb38440560ed6b19e4562e2c8c05410",
-  "logical/m_ftel_dphy_rx_dl_ctrl.sv": "575075944be4a3a0004ffe4957dc06952144b99bed5ede7843ace07502e2c73b",
-  "logical/m_ftel_dphy_rx_eot.sv": "f337a1626a4c3346850dd9972e966cf1036369d2347215f06f0d31358a7fc828",
-  "logical/m_ftel_dphy_rx_esc_decoder.sv": "fa6bd69d035109a16daf90be8a4c14247042cf9337fe8c8f67aea93589852690",
-  "logical/m_ftel_dphy_rx_hs_datapath.sv": "69192566dfaf36ef9d0fadc5d141b8a3c2b80e47af1add8ca86d1bd03558fd71",
-  "logical/m_ftel_dphy_rx_hs_deser.sv": "340822eed0fcda865e750d75b716d6bf43866ed8031404f0e2f62ff4146e486b",
-  "logical/m_ftel_dphy_rx_lp_filter.sv": "90885b949865f081e0386be2832bac5866c375a5c141dda91ae6807498f213f7",
-  "logical/m_ftel_dphy_rx_ppi_out.sv": "74799a514da473ea8f47cc2d7855e01355b09976089946524c108036e53058f5",
-  "logical/m_ftel_dphy_rx_rst_sync.sv": "3da4975d3de554a8880548aa87e0c0d3efe7b2675dc658427c07fe28bd9eabe6",
-  "logical/m_ftel_dphy_rx_sync.sv": "6c5501130e5b78e60da61f4a3d4524494b5d461b07218be918c49f218ff76e2e",
-  "logical/m_ftel_dphy_rx_sync_search.sv": "e056ee7f33c7daf13e07c04f40b6fe76de546e1922ebec9f3da8abc5f3238804",
-  "logical/m_ftel_dphy_rx_timing_init.sv": "4413d3639d283f94ba91fabdc3804e8086f70653e30f8760235a313b7017e66c",
-  "logical/m_ftel_dphy_rx_tsync.sv": "2154fba3dadc9af5b5568090f1fef4657fe58e1722f213ec205b6b1ae882f0f0",
-  "logical/m_ftel_dphy_rx_wrap.sv": "cabd71fc5c235673d8d613438f96b0880dced1dad71affc5a8e8457af3762934"
+  "logical/m_fpt_dphy_rx.sv": "57924ce45bca911bc6b21d40d56f5c204c87c9f2a1d82040be2f940669411934",
+  "logical/m_fpt_dphy_rx_afe_adapter.sv": "b31a87a74a5b52908928a81e96830da7d74bc99e6e9ccb68dbab8693da1c8d94",
+  "logical/m_fpt_dphy_rx_byte_clk.sv": "9b3f5e09178794f4762c23efaa41b3147712c5e8e373c9a53b2fa6f4cb84c8d3",
+  "logical/m_fpt_dphy_rx_cg.sv": "9ebf89c7d22b22ee7ea68a9f2da1a798c18580ebd0b36474c57ba53e5f084ec0",
+  "logical/m_fpt_dphy_rx_cl_ctrl.sv": "89a23cbea019b4527966d11ebd38921328f6302f9f0295fc879d05f890a36adf",
+  "logical/m_fpt_dphy_rx_clk_act.sv": "04a4e41c42bbe185088de7af9fdfe8a7750798e555b1894d8cb21f730d44c5c6",
+  "logical/m_fpt_dphy_rx_clk_inv.sv": "a17a9b0460085d6a6e3b309949cbbf527d16bdac5bac764767a5b4f78a2daf3f",
+  "logical/m_fpt_dphy_rx_dl_ctrl.sv": "cb4001a52991875ec617964c9bcbe2461bc21b104238c17d94794e29cd0ad1ec",
+  "logical/m_fpt_dphy_rx_eot.sv": "8333af954396f6baa8d70b7f23a87a7a38cdb917b451871abef522cc1c315259",
+  "logical/m_fpt_dphy_rx_esc_decoder.sv": "c40875756c59e0d10099d34cf65d5f6549d5b6e1f886f0f8d201b1aec7ababf8",
+  "logical/m_fpt_dphy_rx_hs_datapath.sv": "0e1f9f71094739254cadc250709acf8b9cff7b6554aa839728c90ec95ef6a687",
+  "logical/m_fpt_dphy_rx_hs_deser.sv": "6d41280248dfb8e877df3fb13ef1b27a9c31a7f0ed313c5ddeaa2c228cbca276",
+  "logical/m_fpt_dphy_rx_lp_filter.sv": "e0d24828701d566ec2d0a35ff98c2466de0a8db7d6cc9e7b00a55211fe3a7564",
+  "logical/m_fpt_dphy_rx_ppi_out.sv": "ed1cdce80d6ec9687fe13d1a9ea66bca51d80780f62f93122b9a17ecd1fbb089",
+  "logical/m_fpt_dphy_rx_rst_sync.sv": "074626cb3514eba3d85864b93cdd5fe6fa9df7883a84f6de2fb21444a53465e7",
+  "logical/m_fpt_dphy_rx_sync.sv": "108e26bbc6de5d404a5603af2c0191164b483a106d6d5aaad9bb66ac0f5fb46f",
+  "logical/m_fpt_dphy_rx_sync_search.sv": "190d4c8eefb54c693069adec6b3a6e87dce8d50db85844939f8f6e2c350ab0cc",
+  "logical/m_fpt_dphy_rx_timing_init.sv": "774c8123855e2d44cb294768f3ce6018a9bb204184b5c6ddebcd6c60f0f6b6ba",
+  "logical/m_fpt_dphy_rx_tsync.sv": "6e83b9a5a0ecf9f17a0c85a614efcdad71b69e85c1bd33c3374f4b8097e601b8",
+  "logical/m_fpt_dphy_rx_wrap.sv": "3dbe02c8a0262abe7efb6764500aa05753e1319c44548b27f767ec8ddfe32a03"
  },
  "requirements": [
   {
@@ -37,8 +37,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv",
-    "logical/m_ftel_dphy_rx_wrap.sv"
+    "logical/m_fpt_dphy_rx.sv",
+    "logical/m_fpt_dphy_rx_wrap.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -53,7 +53,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -68,8 +68,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv",
-    "logical/m_ftel_dphy_rx_wrap.sv"
+    "logical/m_fpt_dphy_rx.sv",
+    "logical/m_fpt_dphy_rx_wrap.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -84,8 +84,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv",
-    "logical/m_ftel_dphy_rx_wrap.sv"
+    "logical/m_fpt_dphy_rx.sv",
+    "logical/m_fpt_dphy_rx_wrap.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -100,8 +100,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv",
-    "logical/m_ftel_dphy_rx_wrap.sv"
+    "logical/m_fpt_dphy_rx.sv",
+    "logical/m_fpt_dphy_rx_wrap.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -116,8 +116,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv",
-    "logical/m_ftel_dphy_rx_wrap.sv"
+    "logical/m_fpt_dphy_rx.sv",
+    "logical/m_fpt_dphy_rx_wrap.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -132,14 +132,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "K3"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx.sv:114"
+    "logical/m_fpt_dphy_rx.sv:114"
    ]
   },
   {
@@ -151,7 +151,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -181,14 +181,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "K1"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx.sv:383"
+    "logical/m_fpt_dphy_rx.sv:383"
    ]
   },
   {
@@ -215,7 +215,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -230,7 +230,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -245,7 +245,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -260,7 +260,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -275,7 +275,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -290,7 +290,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -320,7 +320,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -335,7 +335,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -350,7 +350,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -366,7 +366,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_pkg.sv",
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -381,8 +381,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv",
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_eot.sv",
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -397,7 +397,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -412,7 +412,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -440,7 +440,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv"
+    "logical/m_fpt_dphy_rx_ppi_out.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -472,7 +472,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_config_pkg.sv",
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -488,7 +488,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_config_pkg.sv",
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -504,7 +504,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_config_pkg.sv",
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -520,8 +520,8 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_config_pkg.sv",
-    "logical/m_ftel_dphy_rx.sv",
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx.sv",
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -537,7 +537,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_config_pkg.sv",
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": true,
    "open_item_ref": [
@@ -557,7 +557,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_config_pkg.sv",
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -573,7 +573,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_config_pkg.sv",
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": true,
    "open_item_ref": [
@@ -613,7 +613,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_config_pkg.sv",
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -768,7 +768,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -783,8 +783,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv",
-    "logical/m_ftel_dphy_rx_byte_clk.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv",
+    "logical/m_fpt_dphy_rx_byte_clk.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -815,7 +815,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -830,7 +830,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -871,7 +871,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -887,7 +887,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_pkg.sv",
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -902,9 +902,9 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv",
-    "logical/m_ftel_dphy_rx_ppi_out.sv",
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv",
+    "logical/m_fpt_dphy_rx_ppi_out.sv",
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -919,9 +919,9 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv",
-    "logical/m_ftel_dphy_rx_sync.sv",
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv",
+    "logical/m_fpt_dphy_rx_sync.sv",
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -936,7 +936,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_tsync.sv"
+    "logical/m_fpt_dphy_rx_tsync.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -951,7 +951,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_tsync.sv"
+    "logical/m_fpt_dphy_rx_tsync.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -966,14 +966,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "K6"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_timing_init.sv:108"
+    "logical/m_fpt_dphy_rx_timing_init.sv:108"
    ]
   },
   {
@@ -985,10 +985,10 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv",
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv",
-    "logical/m_ftel_dphy_rx_ppi_out.sv",
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv",
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv",
+    "logical/m_fpt_dphy_rx_ppi_out.sv",
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1003,8 +1003,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv",
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv",
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1019,14 +1019,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "K6"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_timing_init.sv:192"
+    "logical/m_fpt_dphy_rx_timing_init.sv:192"
    ]
   },
   {
@@ -1038,8 +1038,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_rst_sync.sv",
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_rst_sync.sv",
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1054,8 +1054,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv",
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv",
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1070,7 +1070,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1085,7 +1085,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1100,7 +1100,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1115,7 +1115,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_lp_filter.sv"
+    "logical/m_fpt_dphy_rx_lp_filter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1130,8 +1130,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv",
-    "logical/m_ftel_dphy_rx_lp_filter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv",
+    "logical/m_fpt_dphy_rx_lp_filter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1146,7 +1146,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1161,7 +1161,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1191,7 +1191,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1219,14 +1219,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "S9"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv:230"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv:230"
    ]
   },
   {
@@ -1238,7 +1238,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1253,7 +1253,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1268,8 +1268,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv",
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv",
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1285,7 +1285,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_pkg.sv",
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1300,7 +1300,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1315,7 +1315,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1330,7 +1330,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1345,7 +1345,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1360,7 +1360,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1375,7 +1375,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1390,7 +1390,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1405,7 +1405,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1420,7 +1420,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1435,7 +1435,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1450,7 +1450,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1465,7 +1465,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1480,7 +1480,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1495,7 +1495,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1510,7 +1510,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1525,7 +1525,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1540,7 +1540,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1555,8 +1555,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv",
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv",
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1571,7 +1571,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_clk_act.sv"
+    "logical/m_fpt_dphy_rx_clk_act.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1587,7 +1587,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_pkg.sv",
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1602,7 +1602,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1617,7 +1617,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1632,7 +1632,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1647,7 +1647,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1662,7 +1662,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1677,7 +1677,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1692,7 +1692,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1707,7 +1707,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1722,7 +1722,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1737,7 +1737,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1752,7 +1752,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1767,7 +1767,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1782,8 +1782,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv",
-    "logical/m_ftel_dphy_rx_esc_decoder.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv",
+    "logical/m_fpt_dphy_rx_esc_decoder.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1798,7 +1798,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1813,7 +1813,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1828,7 +1828,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1843,7 +1843,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1858,7 +1858,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1873,7 +1873,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1888,7 +1888,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1903,14 +1903,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_esc_decoder.sv"
+    "logical/m_fpt_dphy_rx_esc_decoder.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "T1"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_esc_decoder.sv:94"
+    "logical/m_fpt_dphy_rx_esc_decoder.sv:94"
    ]
   },
   {
@@ -1922,7 +1922,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1937,7 +1937,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1952,14 +1952,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-007"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv:242"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv:242"
    ]
   },
   {
@@ -1971,7 +1971,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -1986,7 +1986,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2001,7 +2001,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2016,7 +2016,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2031,7 +2031,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2046,7 +2046,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2061,8 +2061,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv",
-    "logical/m_ftel_dphy_rx_esc_decoder.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv",
+    "logical/m_fpt_dphy_rx_esc_decoder.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2077,7 +2077,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_esc_decoder.sv"
+    "logical/m_fpt_dphy_rx_esc_decoder.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2093,7 +2093,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_pkg.sv",
-    "logical/m_ftel_dphy_rx_esc_decoder.sv"
+    "logical/m_fpt_dphy_rx_esc_decoder.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2108,7 +2108,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_esc_decoder.sv"
+    "logical/m_fpt_dphy_rx_esc_decoder.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2124,7 +2124,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_pkg.sv",
-    "logical/m_ftel_dphy_rx_esc_decoder.sv"
+    "logical/m_fpt_dphy_rx_esc_decoder.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2139,7 +2139,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_esc_decoder.sv"
+    "logical/m_fpt_dphy_rx_esc_decoder.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2154,7 +2154,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_esc_decoder.sv"
+    "logical/m_fpt_dphy_rx_esc_decoder.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2170,14 +2170,14 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_pkg.sv",
-    "logical/m_ftel_dphy_rx_esc_decoder.sv"
+    "logical/m_fpt_dphy_rx_esc_decoder.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "T1"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_esc_decoder.sv:94"
+    "logical/m_fpt_dphy_rx_esc_decoder.sv:94"
    ]
   },
   {
@@ -2190,14 +2190,14 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_pkg.sv",
-    "logical/m_ftel_dphy_rx_esc_decoder.sv"
+    "logical/m_fpt_dphy_rx_esc_decoder.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "T1"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_esc_decoder.sv:94"
+    "logical/m_fpt_dphy_rx_esc_decoder.sv:94"
    ]
   },
   {
@@ -2210,14 +2210,14 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_pkg.sv",
-    "logical/m_ftel_dphy_rx_esc_decoder.sv"
+    "logical/m_fpt_dphy_rx_esc_decoder.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "T1"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_esc_decoder.sv:94"
+    "logical/m_fpt_dphy_rx_esc_decoder.sv:94"
    ]
   },
   {
@@ -2230,14 +2230,14 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_pkg.sv",
-    "logical/m_ftel_dphy_rx_esc_decoder.sv"
+    "logical/m_fpt_dphy_rx_esc_decoder.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "T1"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_esc_decoder.sv:94"
+    "logical/m_fpt_dphy_rx_esc_decoder.sv:94"
    ]
   },
   {
@@ -2249,14 +2249,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-006"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv:149"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv:149"
    ]
   },
   {
@@ -2268,7 +2268,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2283,8 +2283,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv",
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv",
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2299,7 +2299,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2314,7 +2314,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2330,7 +2330,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_pkg.sv",
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2345,7 +2345,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2360,7 +2360,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2375,7 +2375,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2390,7 +2390,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2405,7 +2405,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2420,14 +2420,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-007"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_eot.sv:141"
+    "logical/m_fpt_dphy_rx_eot.sv:141"
    ]
   },
   {
@@ -2439,7 +2439,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [
@@ -2456,7 +2456,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2471,7 +2471,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [
@@ -2488,7 +2488,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2503,7 +2503,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2519,7 +2519,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_pkg.sv",
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2534,8 +2534,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv",
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_eot.sv",
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2550,7 +2550,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2565,7 +2565,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2581,7 +2581,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_pkg.sv",
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2596,7 +2596,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2611,7 +2611,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2626,8 +2626,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv",
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_eot.sv",
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2642,7 +2642,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2657,7 +2657,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2672,7 +2672,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2687,7 +2687,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2702,7 +2702,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2717,7 +2717,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2732,8 +2732,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv",
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv",
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2748,8 +2748,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv",
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv",
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2764,7 +2764,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2779,14 +2779,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-007"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv:171"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv:171"
    ]
   },
   {
@@ -2798,7 +2798,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2813,7 +2813,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2828,7 +2828,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2843,7 +2843,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2858,14 +2858,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "S12"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_eot.sv:164"
+    "logical/m_fpt_dphy_rx_eot.sv:164"
    ]
   },
   {
@@ -2877,7 +2877,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2892,7 +2892,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2907,7 +2907,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2922,7 +2922,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2937,7 +2937,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [
@@ -2954,7 +2954,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -2969,14 +2969,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "K6"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_timing_init.sv:266"
+    "logical/m_fpt_dphy_rx_timing_init.sv:266"
    ]
   },
   {
@@ -2988,7 +2988,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3003,7 +3003,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3018,8 +3018,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv",
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv",
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3088,7 +3088,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv"
+    "logical/m_fpt_dphy_rx_ppi_out.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3103,7 +3103,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv"
+    "logical/m_fpt_dphy_rx_ppi_out.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3118,7 +3118,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv"
+    "logical/m_fpt_dphy_rx_ppi_out.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3133,7 +3133,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv"
+    "logical/m_fpt_dphy_rx_ppi_out.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3148,7 +3148,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv"
+    "logical/m_fpt_dphy_rx_ppi_out.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3163,7 +3163,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv"
+    "logical/m_fpt_dphy_rx_ppi_out.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3178,14 +3178,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv"
+    "logical/m_fpt_dphy_rx_ppi_out.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "K2"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv:132"
+    "logical/m_fpt_dphy_rx_ppi_out.sv:132"
    ]
   },
   {
@@ -3291,7 +3291,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv"
+    "logical/m_fpt_dphy_rx_ppi_out.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3306,7 +3306,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3321,7 +3321,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3336,7 +3336,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3351,9 +3351,9 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv",
-    "logical/m_ftel_dphy_rx_timing_init.sv",
-    "logical/m_ftel_dphy_rx_wrap.sv"
+    "logical/m_fpt_dphy_rx.sv",
+    "logical/m_fpt_dphy_rx_timing_init.sv",
+    "logical/m_fpt_dphy_rx_wrap.sv"
    ],
    "provisional": false,
    "open_item_ref": [
@@ -3370,7 +3370,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3385,7 +3385,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3400,7 +3400,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3415,7 +3415,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3430,7 +3430,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3445,7 +3445,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3460,8 +3460,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv",
-    "logical/m_ftel_dphy_rx_byte_clk.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv",
+    "logical/m_fpt_dphy_rx_byte_clk.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3476,7 +3476,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3491,7 +3491,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3506,7 +3506,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3521,7 +3521,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3536,7 +3536,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3551,7 +3551,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3566,7 +3566,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3581,7 +3581,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv"
+    "logical/m_fpt_dphy_rx_ppi_out.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3596,14 +3596,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv"
+    "logical/m_fpt_dphy_rx_ppi_out.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "K2"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv:132"
+    "logical/m_fpt_dphy_rx_ppi_out.sv:132"
    ]
   },
   {
@@ -3615,7 +3615,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3630,7 +3630,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [
@@ -3647,14 +3647,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv"
+    "logical/m_fpt_dphy_rx_ppi_out.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "K2"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv:132"
+    "logical/m_fpt_dphy_rx_ppi_out.sv:132"
    ]
   },
   {
@@ -3666,14 +3666,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv"
+    "logical/m_fpt_dphy_rx_ppi_out.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "K2"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv:132"
+    "logical/m_fpt_dphy_rx_ppi_out.sv:132"
    ]
   },
   {
@@ -3685,7 +3685,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3700,7 +3700,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3715,7 +3715,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3730,14 +3730,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv"
+    "logical/m_fpt_dphy_rx_ppi_out.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "K2"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_ppi_out.sv:132"
+    "logical/m_fpt_dphy_rx_ppi_out.sv:132"
    ]
   },
   {
@@ -3749,7 +3749,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3764,7 +3764,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3779,7 +3779,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3794,7 +3794,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3809,7 +3809,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3824,7 +3824,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3839,7 +3839,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3854,8 +3854,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv",
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv",
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3870,8 +3870,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv",
-    "logical/m_ftel_dphy_rx_esc_decoder.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv",
+    "logical/m_fpt_dphy_rx_esc_decoder.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3886,7 +3886,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -3901,14 +3901,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-001"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv:74"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv:74"
    ]
   },
   {
@@ -3920,14 +3920,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-001"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv:74"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv:74"
    ]
   },
   {
@@ -3939,14 +3939,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-001"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv:74"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv:74"
    ]
   },
   {
@@ -3958,14 +3958,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-001"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv:74"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv:74"
    ]
   },
   {
@@ -3977,7 +3977,7 @@
    "excluded_reason": "release R2",
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": true,
    "open_item_ref": [
@@ -3985,7 +3985,7 @@
     "ADR-004"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv:226"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv:226"
    ]
   },
   {
@@ -3997,14 +3997,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-001"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv:243"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv:243"
    ]
   },
   {
@@ -4016,7 +4016,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": true,
    "open_item_ref": [
@@ -4024,7 +4024,7 @@
     "ADR-007"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv:171"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv:171"
    ]
   },
   {
@@ -4083,7 +4083,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4098,7 +4098,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4128,7 +4128,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4143,14 +4143,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-006"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_eot.sv:116"
+    "logical/m_fpt_dphy_rx_eot.sv:116"
    ]
   },
   {
@@ -4177,7 +4177,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4523,14 +4523,14 @@
    "excluded_reason": "category decision",
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_wrap.sv"
+    "logical/m_fpt_dphy_rx_wrap.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "K6"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_wrap.sv:126"
+    "logical/m_fpt_dphy_rx_wrap.sv:126"
    ]
   },
   {
@@ -4694,7 +4694,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_lp_filter.sv"
+    "logical/m_fpt_dphy_rx_lp_filter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4709,7 +4709,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4724,7 +4724,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4739,7 +4739,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [
@@ -4756,7 +4756,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [
@@ -4773,7 +4773,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4788,7 +4788,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_clk_act.sv"
+    "logical/m_fpt_dphy_rx_clk_act.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4803,14 +4803,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "S12"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_eot.sv:164"
+    "logical/m_fpt_dphy_rx_eot.sv:164"
    ]
   },
   {
@@ -4822,7 +4822,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4837,7 +4837,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4852,8 +4852,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv",
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv",
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4868,7 +4868,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4909,8 +4909,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv",
-    "logical/m_ftel_dphy_rx_hs_deser.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv",
+    "logical/m_fpt_dphy_rx_hs_deser.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4925,7 +4925,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4953,7 +4953,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4968,7 +4968,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_deser.sv"
+    "logical/m_fpt_dphy_rx_hs_deser.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4983,7 +4983,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -4998,7 +4998,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_deser.sv"
+    "logical/m_fpt_dphy_rx_hs_deser.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5013,7 +5013,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5028,7 +5028,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_clk_act.sv"
+    "logical/m_fpt_dphy_rx_clk_act.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5043,8 +5043,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_byte_clk.sv",
-    "logical/m_ftel_dphy_rx_cl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_byte_clk.sv",
+    "logical/m_fpt_dphy_rx_cl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5059,8 +5059,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_byte_clk.sv",
-    "logical/m_ftel_dphy_rx_timing_init.sv"
+    "logical/m_fpt_dphy_rx_byte_clk.sv",
+    "logical/m_fpt_dphy_rx_timing_init.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5075,10 +5075,10 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv",
-    "logical/m_ftel_dphy_rx_byte_clk.sv",
-    "logical/m_ftel_dphy_rx_clk_inv.sv",
-    "logical/m_ftel_dphy_rx_hs_deser.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv",
+    "logical/m_fpt_dphy_rx_byte_clk.sv",
+    "logical/m_fpt_dphy_rx_clk_inv.sv",
+    "logical/m_fpt_dphy_rx_hs_deser.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5093,8 +5093,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_byte_clk.sv",
-    "logical/m_ftel_dphy_rx_hs_deser.sv"
+    "logical/m_fpt_dphy_rx_byte_clk.sv",
+    "logical/m_fpt_dphy_rx_hs_deser.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5109,9 +5109,9 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv",
-    "logical/m_ftel_dphy_rx_byte_clk.sv",
-    "logical/m_ftel_dphy_rx_hs_deser.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv",
+    "logical/m_fpt_dphy_rx_byte_clk.sv",
+    "logical/m_fpt_dphy_rx_hs_deser.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5126,8 +5126,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_byte_clk.sv",
-    "logical/m_ftel_dphy_rx_hs_deser.sv"
+    "logical/m_fpt_dphy_rx_byte_clk.sv",
+    "logical/m_fpt_dphy_rx_hs_deser.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5142,9 +5142,9 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv",
-    "logical/m_ftel_dphy_rx_byte_clk.sv",
-    "logical/m_ftel_dphy_rx_cg.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv",
+    "logical/m_fpt_dphy_rx_byte_clk.sv",
+    "logical/m_fpt_dphy_rx_cg.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5159,8 +5159,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_byte_clk.sv",
-    "logical/m_ftel_dphy_rx_cg.sv"
+    "logical/m_fpt_dphy_rx_byte_clk.sv",
+    "logical/m_fpt_dphy_rx_cg.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5176,9 +5176,9 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_pkg.sv",
-    "logical/m_ftel_dphy_rx_afe_adapter.sv",
-    "logical/m_ftel_dphy_rx_byte_clk.sv",
-    "logical/m_ftel_dphy_rx_clk_act.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv",
+    "logical/m_fpt_dphy_rx_byte_clk.sv",
+    "logical/m_fpt_dphy_rx_clk_act.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5193,7 +5193,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_clk_act.sv"
+    "logical/m_fpt_dphy_rx_clk_act.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5208,8 +5208,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_byte_clk.sv",
-    "logical/m_ftel_dphy_rx_clk_act.sv"
+    "logical/m_fpt_dphy_rx_byte_clk.sv",
+    "logical/m_fpt_dphy_rx_clk_act.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5224,7 +5224,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5239,14 +5239,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_deser.sv"
+    "logical/m_fpt_dphy_rx_hs_deser.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-001"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_hs_deser.sv:63"
+    "logical/m_fpt_dphy_rx_hs_deser.sv:63"
    ]
   },
   {
@@ -5258,7 +5258,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_deser.sv"
+    "logical/m_fpt_dphy_rx_hs_deser.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5273,7 +5273,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_deser.sv"
+    "logical/m_fpt_dphy_rx_hs_deser.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5288,7 +5288,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_deser.sv"
+    "logical/m_fpt_dphy_rx_hs_deser.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5334,14 +5334,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-001"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv:74"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv:74"
    ]
   },
   {
@@ -5353,14 +5353,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-001"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv:74"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv:74"
    ]
   },
   {
@@ -5372,14 +5372,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-001"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_afe_adapter.sv:74"
+    "logical/m_fpt_dphy_rx_afe_adapter.sv:74"
    ]
   },
   {
@@ -5462,14 +5462,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_deser.sv"
+    "logical/m_fpt_dphy_rx_hs_deser.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-001"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_hs_deser.sv:63"
+    "logical/m_fpt_dphy_rx_hs_deser.sv:63"
    ]
   },
   {
@@ -5481,7 +5481,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_byte_clk.sv"
+    "logical/m_fpt_dphy_rx_byte_clk.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5496,7 +5496,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_byte_clk.sv"
+    "logical/m_fpt_dphy_rx_byte_clk.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5511,7 +5511,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_sync_search.sv"
+    "logical/m_fpt_dphy_rx_sync_search.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5526,7 +5526,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5541,7 +5541,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5556,7 +5556,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5571,7 +5571,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5586,7 +5586,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5601,7 +5601,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5616,7 +5616,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5631,7 +5631,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5646,7 +5646,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5661,7 +5661,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5676,7 +5676,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5691,7 +5691,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv"
+    "logical/m_fpt_dphy_rx_eot.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5706,14 +5706,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-006"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv:109"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv:109"
    ]
   },
   {
@@ -5739,7 +5739,7 @@
    "rtl_traced": true,
    "rtl_files": [
     "logical/ftel_dphy_rx_config_pkg.sv",
-    "logical/m_ftel_dphy_rx.sv"
+    "logical/m_fpt_dphy_rx.sv"
    ],
    "provisional": true,
    "open_item_ref": [
@@ -5759,8 +5759,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv",
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv",
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5775,7 +5775,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5790,7 +5790,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5805,7 +5805,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5820,14 +5820,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "S12"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv:150"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv:150"
    ]
   },
   {
@@ -5839,8 +5839,8 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_eot.sv",
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_eot.sv",
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5855,7 +5855,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5870,7 +5870,7 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_hs_datapath.sv"
+    "logical/m_fpt_dphy_rx_hs_datapath.sv"
    ],
    "provisional": false,
    "open_item_ref": [],
@@ -5885,14 +5885,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-006"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv:192"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv:192"
    ]
   },
   {
@@ -5904,14 +5904,14 @@
    "excluded_reason": null,
    "rtl_traced": true,
    "rtl_files": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv"
    ],
    "provisional": true,
    "open_item_ref": [
     "ADR-006"
    ],
    "open_tags": [
-    "logical/m_ftel_dphy_rx_dl_ctrl.sv:149"
+    "logical/m_fpt_dphy_rx_dl_ctrl.sv:149"
    ]
   },
   {

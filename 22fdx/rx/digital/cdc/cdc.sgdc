@@ -8,7 +8,7 @@
 # Author          : Ho Khanh Linh
 # Email           : linhhk26@fpt.com
 # Created Date    : 2026-09-26
-# Description     : SpyGlass CDC setup of ftel_dphy_rx (tool_flow cdc): top m_ftel_dphy_rx_wrap and its
+# Description     : SpyGlass CDC setup of ftel_dphy_rx (tool_flow cdc): top m_fpt_dphy_rx_wrap and its
 #                   SDC.
 #
 # Evolution History:
@@ -20,5 +20,5 @@
 # A new version is strictly reserved for major architectural shifts
 # that require software modifications across different chip generations.
 #-------------------------------------------------------------------------------
-current_design m_ftel_dphy_rx_wrap
-sdc_data -file ../sdc/m_ftel_dphy_rx_wrap.sdc
+current_design m_fpt_dphy_rx_wrap
+sdc_data -file ../sdc/m_fpt_dphy_rx_wrap.sdc

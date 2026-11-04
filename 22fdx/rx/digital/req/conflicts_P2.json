@@ -1,15 +1,15 @@
 {
  "phase": "P2",
  "mode": "review",
- "at": "2026-11-03T17:45:23+07:00",
+ "at": "2026-11-04T15:43:21+07:00",
  "inputs": {
-  "spec": "1214230ce90d417b502db88544678b2a3afd6b62c432a6fd62d6d74c00b38b8f",
-  "structured_spec": "b474adcc9afdee07e7a8bc862b92027a340d27d51514e6d562e37c7439768c79",
+  "spec": "27256440269efa5dc71000e63c996695c9a73a081bf061f499f12dd21a130489",
+  "structured_spec": "d6580aad9c7d9cdac97dde0811a004872be9750c2b2fcfe8a09a1b426f6bc961",
   "config": "666837756d3d2ed4c3984c33506c9a85a60bb678dfbef427445281c805dd9302",
   "validator": "ed1c597545791525223b1f1b995a3a6f2109c494a4e8447a4ea548e7860dc782"
  },
  "outputs": {
-  "config_pkg": "a292981d74f5750ae5a20154b51438b76f282ee0c4746f7004f2a64ac488a5f0"
+  "config_pkg": "6bd5c09653685dce8ca6afe1a837c3867ad4e77fc66435bde1b1940a4343a428"
  },
  "conflicts": [],
  "waived": [],

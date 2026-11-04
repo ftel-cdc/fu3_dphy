@@ -8,11 +8,11 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-07
-// Module          : m_ftel_dphy_rx_clk_act
+// Module          : m_fpt_dphy_rx_clk_act
 // Description     : Clock-activity detection of Block No. 1 for TCLK-MISS: the two toggles
 //                   of the DDR clock cross into core_clk, and the clock is active while one of
 //                   them changed within the last C_CLK_ACT_WIN_CYC core_clk cycles.
-// Parent          : m_ftel_dphy_rx_afe_adapter
+// Parent          : m_fpt_dphy_rx_afe_adapter
 // HAS             : draft v0.14, §4.1, §4.3, §4.4, Table 4-2, Appendix B
 // Clock domains   : core
 // REQ-IDs         : REQ-103, REQ-319, REQ-336, REQ-345, REQ-346, REQ-347
@@ -29,13 +29,13 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_clk_act
+module m_fpt_dphy_rx_clk_act
   import ftel_dphy_rx_pkg::*;
 (
   // ---- clock / reset ----
   input  logic                     i_core_clk,
   input  logic                     i_core_rst_n,
-  // ---- data in: toggles of the DDR clock (m_ftel_dphy_rx_byte_clk) ----
+  // ---- data in: toggles of the DDR clock (m_fpt_dphy_rx_byte_clk) ----
   input  logic [C_ACT_TOGGLES-1:0] i_act_toggle,
   // ---- data out (Block No. 2) ----
   output logic                     o_clk_active
@@ -53,7 +53,7 @@ module m_ftel_dphy_rx_clk_act
   for (genvar t = 0; t < C_ACT_TOGGLES; t++) begin : g_toggle
     // CDC_CROSSING: ddr -> core: clock-activity toggle (HAS §4.1, Table 4-2)
     // REQ-336
-    m_ftel_dphy_rx_sync #(
+    m_fpt_dphy_rx_sync #(
       .PARA_LEVELS (C_SYNC_STAGES)
     ) u_sync_0 (
       .i_clk      (i_core_clk),

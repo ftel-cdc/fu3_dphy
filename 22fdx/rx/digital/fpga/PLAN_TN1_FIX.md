@@ -19,7 +19,7 @@
 
 | ID | Hiện tượng | Nguyên nhân | Bằng chứng |
 |---|---|---|---|
-| F2 | Mỗi burst, trên mỗi lane, có đúng một `rxvalidhs` nằm ngoài `rxactivehs`, mang byte sau trail | Ở `m_ftel_dphy_rx_sync_search.sv:242-248`, `valid = reg_locked && !w_detect` còn `active = i_start`. Ở chu kỳ `i_start` rơi, entry có valid = 1 và active = 0. `m_ftel_dphy_rx_eot.sv:179-191` đưa entry mới vào line mà không qua phép cắt. Vi phạm REQ-249 | Bản copy có thêm `&& i_start` ở 3 dòng thì hết lỗi ✅ |
+| F2 | Mỗi burst, trên mỗi lane, có đúng một `rxvalidhs` nằm ngoài `rxactivehs`, mang byte sau trail | Ở `m_fpt_dphy_rx_sync_search.sv:242-248`, `valid = reg_locked && !w_detect` còn `active = i_start`. Ở chu kỳ `i_start` rơi, entry có valid = 1 và active = 0. `m_fpt_dphy_rx_eot.sv:179-191` đưa entry mới vào line mà không qua phép cắt. Vi phạm REQ-249 | Bản copy có thêm `&& i_start` ở 3 dòng thì hết lỗi ✅ |
 | F1a | Cắt EoT lệch ở mọi rate khi dùng `eot_skip_bytes` của model | Công thức ở HAS Table 3-2, Appendix B và `Model.eot_skip` trong `config/validate_config.py` không trừ độ trễ đường dữ liệu: Λ + cửa sổ sync search + entry, khoảng 4-5 byte clock. Đây đúng là finding F-003 mà HAS đã ghi | Model cho 800/1440/1500 = 10/15/16. Cửa sổ đo được với trail min: ≤ 5 / ≤ 11 / ≤ 13 ✅ |
 | F1b | Dưới khoảng 800 Mb/s, mất byte cuối với mọi giá trị skip. Ở 80 Mb/s mất 5-6 byte; burst từ 5 byte trở xuống mất hết | Sườn xuống của sync-search start tới Block No. 4 sau khoảng 2-3 byte clock, **sớm hơn** dữ liệu của cùng thời điểm (4-5 byte clock). Sync search xoá cửa sổ và lock ngay lúc đó, nên các byte đang trên đường bị mất; phép quét cũng chưa thấy đủ entry | Không có hold, ở 260 Mb/s chỉ skip 0 đúng, nằm sát mép ✅ |
 
@@ -35,13 +35,13 @@
 ## 2. Cách sửa (đã chạy thử trên bản copy ✅)
 
 **RTL: Block No. 4, sửa 2 file:**
-1. **`m_ftel_dphy_rx_hs_datapath.sv`: giữ burst mở thêm `C_EOT_HOLD_BYTES` = 3 byte clock** sau sườn xuống đã đồng bộ của sync-search start.
+1. **`m_fpt_dphy_rx_hs_datapath.sv`: giữ burst mở thêm `C_EOT_HOLD_BYTES` = 3 byte clock** sau sườn xuống đã đồng bộ của sync-search start.
    - Sync search, cờ active và EoT request đều đi theo mức đã giữ. Nhờ vậy dữ liệu của lúc phát hiện LP-11 kịp vào delay line trước phép cắt.
    - EoT done gửi cho Block No. 3 vẫn ra ở sườn xuống chưa giữ. Vòng ADR-006 và S5 không đổi; thứ tự `stopstate_x` ở PPI cũng không đổi.
    - Nếu có sườn lên mới trong lúc giữ (chỉ xảy ra dưới 260 Mb/s với timing min), việc giữ kết thúc bằng một chu kỳ Low để hai burst không nhập vào nhau.
-2. **`m_ftel_dphy_rx_sync_search.sv` (F2):** valid, sync và soterr thêm điều kiện `&& i_start`.
+2. **`m_fpt_dphy_rx_sync_search.sv` (F2):** valid, sync và soterr thêm điều kiện `&& i_start`.
 
-`m_ftel_dphy_rx_eot.sv` không đổi logic; chỉ sửa comment và tag nếu cần.
+`m_fpt_dphy_rx_eot.sv` không đổi logic; chỉ sửa comment và tag nếu cần.
 
 **Kết quả chạy thử** (chỉ RX mình, mô hình AFE hiện tại, trail min). Tiêu chí chặt: payload đúng **và** 0 byte trailer.
 
@@ -167,8 +167,8 @@ Tổng khoảng 2-2,5 ngày. Bước nào dài sẽ báo trước; build Vivado 
 Chưa commit.
 
 **Đã làm đúng như plan:**
-- F2: `m_ftel_dphy_rx_sync_search.sv` thêm `&& i_start` cho valid, sync và soterr (D-27).
-- F1: `m_ftel_dphy_rx_hs_datapath.sv` giữ sườn xuống 3 byte clock; EoT done vẫn ra ở sườn xuống chưa giữ (D-26).
+- F2: `m_fpt_dphy_rx_sync_search.sv` thêm `&& i_start` cho valid, sync và soterr (D-27).
+- F1: `m_fpt_dphy_rx_hs_datapath.sv` giữ sườn xuống 3 byte clock; EoT done vẫn ra ở sườn xuống chưa giữ (D-26).
 - HAS v0.16; P1, P2, P3a 0 xung đột; test âm 28/28; VCS và SpyGlass sạch; B7 PASS; docx v0.16 XSD PASS.
 - Bench: `+EOT_JUNK`, `+TRAIL_JITTER`, `+TRAIL=min|max`, `+SEED`; `csi2_dump.py --max-trailer`.
 - E1-4a chạy ở 260 Mb/s (timing mặc định và timing min); thêm E1-5 (96 run) và báo cáo R-80.

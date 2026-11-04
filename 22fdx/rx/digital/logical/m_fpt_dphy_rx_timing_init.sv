@@ -8,13 +8,13 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-03
-// Module          : m_ftel_dphy_rx_timing_init
+// Module          : m_fpt_dphy_rx_timing_init
 // Description     : Timing & Init Control (HAS Block No. 6): reset synchronizers of the
 //                   core, DDR and byte domains and of Block No. 4 of each lane, level
 //                   synchronizers of the PPI enables, rising edge of forcerxmode_x, TINIT
 //                   counters, init_done, HS RX and escape watchdogs, distribution of the
 //                   timer values.
-// Parent          : m_ftel_dphy_rx
+// Parent          : m_fpt_dphy_rx
 // HAS             : draft v0.14, §4.1, §4.2, §4.7, Table 4-3, Figure 4-10
 // Clock domains   : core, ddr and byte (reset synchronizers only)
 // REQ-IDs         : REQ-022, REQ-023, REQ-056, REQ-058, REQ-059, REQ-062, REQ-063, REQ-064,
@@ -34,7 +34,7 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_timing_init
+module m_fpt_dphy_rx_timing_init
   import ftel_dphy_rx_pkg::*;
   import ftel_dphy_rx_config_pkg::*;
 #(
@@ -110,7 +110,7 @@ module m_ftel_dphy_rx_timing_init
 
   // CDC_CROSSING: phy_core_rst -> core: reset release (HAS §4.2, Figure 4-1)
   // REQ-066
-  m_ftel_dphy_rx_rst_sync u_rst_sync_0 (
+  m_fpt_dphy_rx_rst_sync u_rst_sync_0 (
     .i_clk           (i_core_clk),
     .i_async_reset_n (w_arst_n),
     .o_sync_reset_n  (w_core_rst_n)
@@ -119,7 +119,7 @@ module m_ftel_dphy_rx_timing_init
   // The byte domain leaves reset only once rxbyteclkhs runs.
   // CDC_CROSSING: phy_core_rst -> byte: reset release (HAS §4.2, Figure 4-1)
   // REQ-066, REQ-067
-  m_ftel_dphy_rx_rst_sync u_rst_sync_1 (
+  m_fpt_dphy_rx_rst_sync u_rst_sync_1 (
     .i_clk           (i_byte_clk),
     .i_async_reset_n (w_arst_n),
     .o_sync_reset_n  (w_byte_rst_n)
@@ -129,7 +129,7 @@ module m_ftel_dphy_rx_timing_init
   // clock edge; the divider of Block No. 1 has its own reset, the byte-clock enable.
   // CDC_CROSSING: phy_core_rst -> ddr: reset release (HAS §4.2, Figure 4-1)
   // REQ-066, REQ-190, REQ-338
-  m_ftel_dphy_rx_rst_sync u_rst_sync_2 (
+  m_fpt_dphy_rx_rst_sync u_rst_sync_2 (
     .i_clk           (i_ddr_clk),
     .i_async_reset_n (w_arst_n),
     .o_sync_reset_n  (o_ddr_rst_n)
@@ -141,7 +141,7 @@ module m_ftel_dphy_rx_timing_init
   // ------------------------------------------------------------------ enables
   // CDC_CROSSING: lite_aclk -> core: i_cl_enable (HAS §4.1, Table 4-2)
   // REQ-056, REQ-059, REQ-190
-  m_ftel_dphy_rx_sync #(
+  m_fpt_dphy_rx_sync #(
     .PARA_LEVELS (2)
   ) u_sync_0 (
     .i_clk      (i_core_clk),
@@ -153,7 +153,7 @@ module m_ftel_dphy_rx_timing_init
   for (genvar x = 0; x < PARA_NUM_LANES; x++) begin : g_lane
     // CDC_CROSSING: lite_aclk -> core: i_dl_enable (HAS §4.1, Table 4-2)
     // REQ-056, REQ-059, REQ-190
-    m_ftel_dphy_rx_sync #(
+    m_fpt_dphy_rx_sync #(
       .PARA_LEVELS (2)
     ) u_sync_0 (
       .i_clk      (i_core_clk),
@@ -164,7 +164,7 @@ module m_ftel_dphy_rx_timing_init
 
     // CDC_CROSSING: lite_aclk -> core: i_forcerxmode (HAS §4.1, Table 4-2)
     // REQ-056, REQ-059, REQ-190
-    m_ftel_dphy_rx_sync #(
+    m_fpt_dphy_rx_sync #(
       .PARA_LEVELS (2)
     ) u_sync_1 (
       .i_clk      (i_core_clk),
@@ -181,7 +181,7 @@ module m_ftel_dphy_rx_timing_init
 
     // CDC_CROSSING: core -> byte: lane enable, reset release of Block No. 4 (HAS §4.2, Table 4-2)
     // REQ-064, REQ-068
-    m_ftel_dphy_rx_rst_sync u_rst_sync_0 (
+    m_fpt_dphy_rx_rst_sync u_rst_sync_0 (
       .i_clk           (i_byte_clk),
       .i_async_reset_n (w_hs_arst_n[x]),
       .o_sync_reset_n  (o_hs_rst_n[x])

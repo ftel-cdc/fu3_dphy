@@ -674,27 +674,27 @@ def selftest_p3a(src, p):
                     [x["code"] for x in c if x["code"] == "CF-COVER"][:2]))
     restore_rtl()
 
-    ok = edit("m_ftel_dphy_rx_timing_init.sv", "// OPEN K6 REQ-195:", "// REQ-195:")
+    ok = edit("m_fpt_dphy_rx_timing_init.sv", "// OPEN K6 REQ-195:", "// REQ-195:")
     c, _ = run3()
     results.append(("P3a-2 OPEN tag of a provisional REQ removed -> CF-TAG/OPEN-COUNT",
                     ok and any(x["rule"] == "OPEN-COUNT" and x["where"] == "REQ-195" for x in c),
                     [x["rule"] for x in c if x["code"] == "CF-TAG"][:3]))
     restore_rtl()
 
-    ok = edit("m_ftel_dphy_rx_timing_init.sv", "  // OPEN K6 REQ-195:", "  // OPEN K6 REQ-195: duplicate\n  // OPEN K6 REQ-195:")
+    ok = edit("m_fpt_dphy_rx_timing_init.sv", "  // OPEN K6 REQ-195:", "  // OPEN K6 REQ-195: duplicate\n  // OPEN K6 REQ-195:")
     c, _ = run3()
     results.append(("P3a-3 OPEN tag duplicated -> CF-TAG/OPEN-COUNT",
                     ok and any(x["rule"] == "OPEN-COUNT" and "has 2 OPEN" in x["evidence"] for x in c),
                     [x["evidence"][:50] for x in c if x["rule"] == "OPEN-COUNT"][:1]))
     restore_rtl()
 
-    ok = edit("m_ftel_dphy_rx_timing_init.sv", "// OPEN K6 REQ-195:", "// OPEN K8 REQ-195:")
+    ok = edit("m_fpt_dphy_rx_timing_init.sv", "// OPEN K6 REQ-195:", "// OPEN K8 REQ-195:")
     c, _ = run3()
     results.append(("P3a-4 OPEN tag with an id the REQ does not have -> CF-TAG/OPEN-ID",
                     ok and any(x["rule"] == "OPEN-ID" for x in c), [x["rule"] for x in c if x["code"] == "CF-TAG"][:3]))
     restore_rtl()
 
-    ok = edit("m_ftel_dphy_rx_cl_ctrl.sv", "`timescale 1ns/1ps", "// edited after the lint\n`timescale 1ns/1ps")
+    ok = edit("m_fpt_dphy_rx_cl_ctrl.sv", "`timescale 1ns/1ps", "// edited after the lint\n`timescale 1ns/1ps")
     c, _ = run3()
     rules = {x["rule"] for x in c}
     results.append(("P3a-5 RTL edited after the lint -> CF-DRIFT (VCS and SpyGlass)",
@@ -709,18 +709,18 @@ def selftest_p3a(src, p):
     shutil.copy2(sq["vcs_manifest"], q["vcs_manifest"])
 
     with open(q["sg_report"], "a", encoding="utf-8") as f:
-        f.write("[2A]     W415a    W415a    Warning    /x/m_ftel_dphy_rx_eot.sv    97    5     Signal w_x is being assigned multiple times\n")
+        f.write("[2A]     W415a    W415a    Warning    /x/m_fpt_dphy_rx_eot.sv    97    5     Signal w_x is being assigned multiple times\n")
     c, _ = run3()
     results.append(("P3a-7 SpyGlass warning -> CF-LINT/SG", any(x["rule"] == "SG-W415a" for x in c), [x["rule"] for x in c][:3]))
     shutil.copy2(sq["sg_report"], q["sg_report"])
 
-    ok = edit("m_ftel_dphy_rx_cl_ctrl.sv", "always_comb begin : p_state_nxt", "always @* begin : p_state_nxt")
+    ok = edit("m_fpt_dphy_rx_cl_ctrl.sv", "always_comb begin : p_state_nxt", "always @* begin : p_state_nxt")
     c, _ = run3()
     results.append(("P3a-8 rule violation (always @*) -> CF-LINT", ok and any(x["code"] == "CF-LINT" and x["rule"] in ("P6", "R2")
                                                                              for x in c), sorted({x["rule"] for x in c})[:4]))
     restore_rtl()
 
-    ok = edit("m_ftel_dphy_rx_ppi_out.sv", "  // REQ-207, REQ-236\n", "  // REQ-207, REQ-236, REQ-999\n")
+    ok = edit("m_fpt_dphy_rx_ppi_out.sv", "  // REQ-207, REQ-236\n", "  // REQ-207, REQ-236, REQ-999\n")
     c, _ = run3()
     results.append(("P3a-9 tag of a REQ that does not exist -> CF-TAG/T6", ok and any(x["rule"] == "T6" for x in c),
                     [x["rule"] for x in c if x["code"] == "CF-TAG"][:3]))

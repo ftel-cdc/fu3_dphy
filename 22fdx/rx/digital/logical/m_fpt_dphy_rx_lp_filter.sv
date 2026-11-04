@@ -8,11 +8,11 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-03
-// Module          : m_ftel_dphy_rx_lp_filter
+// Module          : m_fpt_dphy_rx_lp_filter
 // Description     : LP glitch filter of one lane (Block No. 1): a new line state is
 //                   accepted once it has been sampled PARA_LP_FILTER_CYC + 1 times in a
 //                   row; the output is a register.
-// Parent          : m_ftel_dphy_rx_afe_adapter
+// Parent          : m_fpt_dphy_rx_afe_adapter
 // HAS             : draft v0.14, §4.3, Figure 4-3, Appendix B
 // Clock domains   : core
 // REQ-IDs         : REQ-071, REQ-072, REQ-313
@@ -29,7 +29,7 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_lp_filter
+module m_fpt_dphy_rx_lp_filter
   import ftel_dphy_rx_pkg::*;
 #(
   parameter int PARA_LP_FILTER_CYC = 2

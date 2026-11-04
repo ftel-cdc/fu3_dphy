@@ -8,7 +8,7 @@
 # Author          : Ho Khanh Linh
 # Email           : linhhk26@fpt.com
 # Created Date    : 2026-09-26
-# Description     : Timing constraints of m_ftel_dphy_rx_wrap: clocks, clock relationships, timing
+# Description     : Timing constraints of m_fpt_dphy_rx_wrap: clocks, clock relationships, timing
 #                   exceptions and I/O budgets (design intent only).
 #
 # Evolution History:
@@ -21,7 +21,7 @@
 # that require software modifications across different chip generations.
 #-------------------------------------------------------------------------------
 # ============================================================================
-# Timing constraints of m_ftel_dphy_rx_wrap (ftel_dphy_rx): clocks, clock relationships, timing
+# Timing constraints of m_fpt_dphy_rx_wrap (ftel_dphy_rx): clocks, clock relationships, timing
 # exceptions and I/O budgets, i.e. design intent only. Library-dependent settings (driving cells,
 # loads, margins before clock-tree synthesis) are in syn/dc_syn.tcl.
 #

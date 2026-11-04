@@ -8,7 +8,7 @@
 # Author          : Ho Khanh Linh
 # Email           : linhhk26@fpt.com
 # Created Date    : 2026-10-10
-# Description     : Design Compiler synthesis of ftel_dphy_rx, top m_ftel_dphy_rx_wrap with its default
+# Description     : Design Compiler synthesis of ftel_dphy_rx, top m_fpt_dphy_rx_wrap with its default
 #                   parameters (4 lanes).
 #
 # Evolution History:
@@ -21,10 +21,10 @@
 # that require software modifications across different chip generations.
 #-------------------------------------------------------------------------------
 # ============================================================================
-# Design Compiler synthesis of ftel_dphy_rx, top m_ftel_dphy_rx_wrap with its default parameters
+# Design Compiler synthesis of ftel_dphy_rx, top m_fpt_dphy_rx_wrap with its default parameters
 # (4 lanes). Started by syn/run_syn.sh in syn/work/<run>, which sets SYN_TECH_FILE, SYN_CORNER,
 # SYN_RATE_MBPS, SYN_FILES, SYN_SDC, SYN_RPT_DIR and SYN_OUT_DIR.
-# Design intent comes from sdc/m_ftel_dphy_rx_wrap.sdc. This script adds the synthesis
+# Design intent comes from sdc/m_fpt_dphy_rx_wrap.sdc. This script adds the synthesis
 # environment: library, clock cells mapped onto it, margins before clock-tree synthesis (ideal
 # clocks, no wire load), I/O drive and load.
 # ============================================================================
@@ -47,8 +47,8 @@ set fh [open $::env(SYN_FILES) r]
 set files [split [string trim [read $fh]] "\n"]
 close $fh
 if {![analyze -format sverilog -define $TECH(defines) $files]} { echo "SYN: ANALYZE FAILED"; exit 1 }
-if {![elaborate m_ftel_dphy_rx_wrap]}   { echo "SYN: ELABORATE FAILED"; exit 1 }
-current_design m_ftel_dphy_rx_wrap
+if {![elaborate m_fpt_dphy_rx_wrap]}   { echo "SYN: ELABORATE FAILED"; exit 1 }
+current_design m_fpt_dphy_rx_wrap
 if {![link]} { echo "SYN: LINK FAILED"; exit 1 }
 check_design -summary > $RPT/check_design_pre.rpt
 
@@ -97,8 +97,8 @@ report_timing -to [hpins *u_byte_clk_0/*_reg*/$TECH(pin_reset)] -nosplit -input_
                                                           > $RPT/b1_div_recovery.rpt
 
 # ---- outputs
-write -format verilog -hierarchy -output $OUT/m_ftel_dphy_rx_wrap.v
-write_file -format ddc -hierarchy -output $OUT/m_ftel_dphy_rx_wrap.ddc
-write_sdc $OUT/m_ftel_dphy_rx_wrap.sdc
+write -format verilog -hierarchy -output $OUT/m_fpt_dphy_rx_wrap.v
+write_file -format ddc -hierarchy -output $OUT/m_fpt_dphy_rx_wrap.ddc
+write_sdc $OUT/m_fpt_dphy_rx_wrap.sdc
 echo "SYN DONE"
 exit 0

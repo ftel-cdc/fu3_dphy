@@ -340,7 +340,7 @@ module tb_exp2a;
     fe_events = 0;
   end
 
-  m_ftel_dphy_rx_wrap #(.PARA_NUM_LANES(NL)) u_ftel (
+  m_fpt_dphy_rx_wrap #(.PARA_NUM_LANES(NL)) u_ftel (
     .i_dphy_rx_core_clk              (core_clk),
     .i_dphy_rx_phy_core_rst_n        (f_rst_n),
     .i_dphy_rx_cl_enable             (1'b1),

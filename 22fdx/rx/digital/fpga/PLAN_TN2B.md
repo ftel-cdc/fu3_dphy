@@ -212,7 +212,7 @@ Vivado sinh ra, bằng `tools/bd_summary.py`.
 
 Viết lại từ plan prototype, không nêu tên vendor:
 
-| `m_ftel_dphy_rx_wrap` | Hướng | RX SS không PHY | Ghi chú |
+| `m_fpt_dphy_rx_wrap` | Hướng | RX SS không PHY | Ghi chú |
 |---|---|---|---|
 | `o_dphy_rx_rxbyteclkhs` | → | `rxbyteclkhs_in` | một byte clock cho mọi lane |
 | `i_dphy_rx_core_clk` | ← | cùng nguồn với `dphy_clk_200M` | `core_clk` 200 MHz |
@@ -499,7 +499,7 @@ Ngoài ra còn các check `runs`, `config` (field run-time của RX mình bằng
    - Phương án A (shim chỉ ở FPGA), B (option trong RTL), C (convention chung với team CSI): chờ bạn quyết. Ngày
      23/10 bạn chọn chạy S2 và S3 với shim mode 3 trong TB (run `SH_*`), giữ 9 run không chỉnh làm bằng chứng
      (`run_exp2b.sh finding`).
-   - Cũng ngày 23/10, sau ma trận A/B/C, bạn chọn A. Khối FPGA `fpga/rtl/m_ftel_ppi_act_gate.sv` thay shim mode 3
+   - Cũng ngày 23/10, sau ma trận A/B/C, bạn chọn A. Khối FPGA `fpga/rtl/m_fpt_ppi_act_gate.sv` thay shim mode 3
      của TB trong các run `SH_*` (`+PPI_ADAPTER=1`), thêm kịch bản E2b-9 (lỗi sync ở một lane). Plan, kiểm và kết
      quả: [`PLAN_TN2B_GATE.md`](PLAN_TN2B_GATE.md).
 4. **Hai giả thuyết đã loại:**

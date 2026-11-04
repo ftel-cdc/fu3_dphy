@@ -8,12 +8,12 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-03
-// Module          : m_ftel_dphy_rx_eot
+// Module          : m_fpt_dphy_rx_eot
 // Description     : EoT delay line and trailer removal of one data lane (HAS Block No. 4):
 //                   PARA_EOT_DELAY_BYTES entries of a byte and its flags; on the EoT request
 //                   the stored tail is scanned backwards and cut at the last payload byte.
 //                   Reports whether an HS output of the burst is still in the line (HS busy).
-// Parent          : m_ftel_dphy_rx_hs_datapath
+// Parent          : m_fpt_dphy_rx_hs_datapath
 // HAS             : draft v0.17, §4.6, Figure 4-9, Table 4-7, ADR-006, Appendix B
 // Clock domains   : byte
 // REQ-IDs         : REQ-016, REQ-017, REQ-024, REQ-159, REQ-164, REQ-166, REQ-169, REQ-170,
@@ -34,7 +34,7 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_eot
+module m_fpt_dphy_rx_eot
   import ftel_dphy_rx_pkg::*;
   import ftel_dphy_rx_config_pkg::*;
 #(

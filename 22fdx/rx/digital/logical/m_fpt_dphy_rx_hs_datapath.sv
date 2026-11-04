@@ -8,11 +8,11 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-03
-// Module          : m_ftel_dphy_rx_hs_datapath
+// Module          : m_fpt_dphy_rx_hs_datapath
 // Description     : HS Receive Datapath of one data lane (HAS Block No. 4): crossing of the
 //                   sync-search start into rxbyteclkhs and the hold of its fall, sync search,
 //                   EoT delay line, HS busy for Block No. 3 and the status events of the lane.
-// Parent          : m_ftel_dphy_rx
+// Parent          : m_fpt_dphy_rx
 // HAS             : draft v0.17, §4.1, §4.2, §4.6, Figures 4-8 and 4-9
 // Clock domains   : byte (lane reset of Block No. 4)
 // REQ-IDs         : REQ-020, REQ-024, REQ-052, REQ-058, REQ-064, REQ-067, REQ-150, REQ-172,
@@ -31,7 +31,7 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_hs_datapath
+module m_fpt_dphy_rx_hs_datapath
   import ftel_dphy_rx_pkg::*;
   import ftel_dphy_rx_config_pkg::*;
 #(
@@ -93,7 +93,7 @@ module m_ftel_dphy_rx_hs_datapath
   // order.
   // CDC_CROSSING: core -> byte: i_sync_search_start (HAS §4.1, Table 4-2)
   // REQ-052, REQ-181
-  m_ftel_dphy_rx_sync #(
+  m_fpt_dphy_rx_sync #(
     .PARA_LEVELS (2)
   ) u_sync_0 (
     .i_clk      (i_byte_clk),
@@ -140,7 +140,7 @@ module m_ftel_dphy_rx_hs_datapath
   assign w_eot_req = reg_start_d && !w_start;
 
   // REQ-024, REQ-150
-  m_ftel_dphy_rx_sync_search #(
+  m_fpt_dphy_rx_sync_search #(
     .PARA_SYNC_SEARCH_BYTES (PARA_SYNC_SEARCH_BYTES)
   ) u_sync_search_0 (
     .i_byte_clk   (i_byte_clk),
@@ -153,7 +153,7 @@ module m_ftel_dphy_rx_hs_datapath
   );
 
   // REQ-024, REQ-150, REQ-172
-  m_ftel_dphy_rx_eot #(
+  m_fpt_dphy_rx_eot #(
     .PARA_EOT_DELAY_BYTES (PARA_EOT_DELAY_BYTES)
   ) u_eot_0 (
     .i_byte_clk           (i_byte_clk),

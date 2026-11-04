@@ -8,11 +8,11 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-03
-// Module          : m_ftel_dphy_rx_rst_sync
+// Module          : m_fpt_dphy_rx_rst_sync
 // Description     : Reset synchronizer: asynchronous assertion, release on the second clock
 //                   edge. Port-compatible with m_fpt_lib_reset_sync_rising_edge_async_reset_n
 //                   (rtl_rule K10).
-// Parent          : m_ftel_dphy_rx_timing_init
+// Parent          : m_fpt_dphy_rx_timing_init
 // HAS             : draft v0.14, §4.2, Figure 4-1
 // Clock domains   : clock of the instance
 // REQ-IDs         : REQ-066
@@ -29,7 +29,7 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_rst_sync (
+module m_fpt_dphy_rx_rst_sync (
   input  logic i_clk,
   input  logic i_async_reset_n,
   output logic o_sync_reset_n

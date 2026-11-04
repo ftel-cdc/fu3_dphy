@@ -4,7 +4,7 @@
 |---|---|
 | Ngôn ngữ | SystemVerilog-2012, synthesizable subset |
 | Áp dụng cho | Mọi file trong `logical/` (RTL của IP) |
-| Phiên bản | 1.2 (2026-10-07), duyệt cùng plan RTL theo HAS v0.13/v0.14: cấu trúc clock của Block No. 1. Lịch sử ở cuối tài liệu |
+| Phiên bản | 1.3 (2026-11-04), tiền tố module `m_fpt` theo quy tắc của team PD. Lịch sử ở cuối tài liệu |
 | Kiểm bằng máy | Luật có nhãn **[M]** được `req_flow/check_rtl_rules.py` kiểm |
 
 Tài liệu này quy định **hình thức** của RTL. **Hành vi** do HAS (`doc/spec.md`) quy định. Khi RTL
@@ -17,9 +17,10 @@ cần một hành vi mà HAS chưa định nghĩa thì dừng lại và hỏi (l
 | Ưu tiên | Nguồn | Phần dùng |
 |---|---|---|
 | 1 | IP Wrapper Guideline (FU1, 2026-03-07), Table 1-1 và 1-2 | Tên module, parameter, define, flip-flop, port, instance; port của wrapper; reset active-low ở wrapper |
-| 2 | Tiền lệ FX1 | `ip-dev/hw/utils/tool_flow/config/project.yaml` (tiền tố `m_ftel`, layout), header của các cell `m_fpt_lib_*` trong lib fu2, `ftel_intctl` (sync cell tương thích `m_vlsi_synch`, lệnh lint VCS) |
-| 3 | Bộ luật RTL tham khảo (`rtl_rule.md` của flow sinh RTL ban đầu) | R1-R11, P1-P12, cấu trúc module, đã chuyển thể cho IP nhiều clock domain |
-| 4 | Tài liệu này | Phần các nguồn trên không quy định |
+| 2 | Quy tắc phối hợp của team PD (fu3, 2026-11-04) | Wrapper `logical/m_fpt_<ip>_wrap.sv`, `logical/filelist.f`, `sdc/constraint.sdc`, define `FPT_SIGNOFF` cho synthesis và LEC, tên dont-touch `u_`/`w_`/`i_`/`o_dont_touch_`. Flow DC của fu3 đọc `$<IP>_PATH/logical/filelist.f` và `$<IP>_PATH/sdc/constraint.sdc` |
+| 3 | Tiền lệ FX1 | `ip-dev/hw/utils/tool_flow/config/project.yaml` (tiền tố `m_ftel`, layout), header của các cell `m_fpt_lib_*` trong lib fu2, `ftel_intctl` (sync cell tương thích `m_vlsi_synch`, lệnh lint VCS) |
+| 4 | Bộ luật RTL tham khảo (`rtl_rule.md` của flow sinh RTL ban đầu) | R1-R11, P1-P12, cấu trúc module, đã chuyển thể cho IP nhiều clock domain |
+| 5 | Tài liệu này | Phần các nguồn trên không quy định |
 
 Khi hai nguồn mâu thuẫn, nguồn có ưu tiên cao hơn thắng.
 
@@ -31,10 +32,10 @@ Khi hai nguồn mâu thuẫn, nguồn có ưu tiên cao hơn thắng.
 
 | ID | Đối tượng | Quy tắc | Ví dụ |
 |---|---|---|---|
-| N1 [M] | Module | `m_ftel_dphy_rx` (core), `m_ftel_dphy_rx_<block>` (khối con), `m_ftel_dphy_rx_wrap` (wrapper). Guideline: `m_<prefix>_<functional name>`, tiền tố FX1 là `m_ftel` | `m_ftel_dphy_rx_cl_ctrl` |
+| N1 [M] | Module | `m_fpt_dphy_rx` (core), `m_fpt_dphy_rx_<block>` (khối con), `m_fpt_dphy_rx_wrap` (wrapper). Guideline: `m_<prefix>_<functional name>`. Tiền tố `m_fpt` theo quy tắc của team PD (nguồn 2), wrapper là `m_fpt_<ip>_wrap` với `<ip>` = `dphy_rx`; tới bản 1.2 là tiền tố FX1 `m_ftel` | `m_fpt_dphy_rx_cl_ctrl` |
 | N2 [M] | Parameter | `PARA_<NAME>`, viết hoa | `PARA_NUM_LANES` |
 | N3 [M] | Define | `DEF_<NAME>`, viết hoa | `DEF_DPHY_RX_SIM` |
-| N4 [M] | Flip-flop, latch | `reg_<name>`: mọi biến được gán trong `always_ff`, và trong `always_latch` của cell `m_ftel_dphy_rx_cg` (P6) | `reg_state`, `reg_settle_cnt` |
+| N4 [M] | Flip-flop, latch | `reg_<name>`: mọi biến được gán trong `always_ff`, và trong `always_latch` của cell `m_fpt_dphy_rx_cg` (P6) | `reg_state`, `reg_settle_cnt` |
 | N5 [M] | Port | `i_<name>`, `o_<name>`. IP này không có `inout` | `i_core_clk`, `o_stopstate` |
 | N6 [M] | Instance | `u_<name>_<n>`; số `n` phân biệt các instance cùng loại trong cùng scope | `u_dl_ctrl_0`, `u_sync_2` |
 | N7 [M] | Chữ hoa/thường | Tín hiệu và module viết thường; parameter, define, localparam, thành viên enum viết hoa | - |
@@ -46,13 +47,13 @@ Khi hai nguồn mâu thuẫn, nguồn có ưu tiên cao hơn thắng.
 |---|---|---|---|
 | N9 [M] | localparam | `C_<NAME>` | Phân biệt với `PARA_` (override được). Không dùng `LP_` như bộ luật tham khảo vì trong IP này LP là Low-Power |
 | N10 [M] | Net tổ hợp | `w_<name>`; next-state của `reg_<name>` là `w_<name>_nxt` | Bộ luật tham khảo §2.2; tách được flop và net khi đọc và khi kiểm |
-| N11 [M] | Clock / reset của module con | `i_<domain>_clk`, `i_<domain>_rst_n`; `<domain>` ∈ {`core`, `byte`, `cfg`, `ddr`, `ddrn`} (K1). Áp dụng cho input clock và input reset active-low của khối. Core và wrapper dùng tên HAS (§2.3); các cell dùng chung theo K10; reset do khối sinh ra (output) và yêu cầu reset `phy_core_rst` của PPI (tên HAS, chỉ vào reset synchronizer của No.6) không thuộc luật này. Reset nội bộ lấy từ reset synchronizer của chính module có dạng `w_<domain>[_<tên>]_rst_n`. Riêng `m_ftel_dphy_rx_byte_clk` được dùng clock `w_ddrn_clk` do chính nó sinh qua cell clock inverter (K2) | Theo mẫu `i_i2c_clk`, `i_i2c_rst_n` của Table 1-2 |
+| N11 [M] | Clock / reset của module con | `i_<domain>_clk`, `i_<domain>_rst_n`; `<domain>` ∈ {`core`, `byte`, `cfg`, `ddr`, `ddrn`} (K1). Áp dụng cho input clock và input reset active-low của khối. Core và wrapper dùng tên HAS (§2.3); các cell dùng chung theo K10; reset do khối sinh ra (output) và yêu cầu reset `phy_core_rst` của PPI (tên HAS, chỉ vào reset synchronizer của No.6) không thuộc luật này. Reset nội bộ lấy từ reset synchronizer của chính module có dạng `w_<domain>[_<tên>]_rst_n`. Riêng `m_fpt_dphy_rx_byte_clk` được dùng clock `w_ddrn_clk` do chính nó sinh qua cell clock inverter (K2) | Theo mẫu `i_i2c_clk`, `i_i2c_rst_n` của Table 1-2 |
 | N12 [M] | Package, kiểu | Package `ftel_dphy_rx[_<name>]_pkg` (package không phải module nên không có `m_`); kiểu có hậu tố `_t` | `ftel_dphy_rx_pkg::dl_state_t` |
 | N13 [M] | Nhãn | `g_<name>` cho generate, `p_<name>` cho always, `a_<name>` cho assertion | `g_lane`, `p_state_reg` |
 | N14 | Tên theo HAS | Tín hiệu nội bộ dùng lại tên của HAS khi HAS có tên, bỏ hậu tố `_x` của lane | `reg_stopstate`, `w_sync_search_start` |
 | N15 | Viết tắt | Chỉ các viết tắt HAS đã dùng: `hs lp esc ulps sot eot cl dl cfg sts afe ppi cnt en rst clk nxt dly tap sync ddr div deser act` | - |
 
-### 2.3 Port của wrapper `m_ftel_dphy_rx_wrap`
+### 2.3 Port của wrapper `m_fpt_dphy_rx_wrap`
 
 | Loại (Table 1-2) | Mẫu | Port |
 |---|---|---|
@@ -99,9 +100,9 @@ Theo header của các cell `m_fpt_lib_*` (FX1 lib), thêm các trường truy v
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-03
-// Module          : m_ftel_dphy_rx_cl_ctrl
+// Module          : m_fpt_dphy_rx_cl_ctrl
 // Description     : Clock lane control, CIL-SCNN (HAS Block No. 2).
-// Parent          : m_ftel_dphy_rx
+// Parent          : m_fpt_dphy_rx
 // HAS             : draft v0.14, §4.4, Table 4-4, Figure 4-4
 // Clock domains   : core
 // REQ-IDs         : REQ-086, REQ-087, ...
@@ -126,7 +127,7 @@ Theo header của các cell `m_fpt_lib_*` (FX1 lib), thêm các trường truy v
 
 | ID | Quy tắc |
 |---|---|
-| R1 [M] | Logic tuần tự chỉ dùng `always_ff @(posedge i_<d>_clk or negedge i_<d>_rst_n)`; flip-flop dữ liệu không reset (K4) dùng `always_ff @(posedge i_<d>_clk)`. Block No. 6, nơi sinh reset, dùng reset `w_<d>_rst_n` lấy từ `m_ftel_dphy_rx_rst_sync` của chính nó |
+| R1 [M] | Logic tuần tự chỉ dùng `always_ff @(posedge i_<d>_clk or negedge i_<d>_rst_n)`; flip-flop dữ liệu không reset (K4) dùng `always_ff @(posedge i_<d>_clk)`. Block No. 6, nơi sinh reset, dùng reset `w_<d>_rst_n` lấy từ `m_fpt_dphy_rx_rst_sync` của chính nó |
 | R2 [M] | Logic tổ hợp chỉ dùng `always_comb` hoặc `assign` |
 | R3 | Trong `always_ff` chỉ dùng `<=`; trong `always_comb` chỉ dùng `=` |
 | R4 | Mỗi `always_comb` gán giá trị mặc định cho mọi biến nó lái ngay ở đầu khối, để không sinh latch |
@@ -148,8 +149,8 @@ Theo header của các cell `m_fpt_lib_*` (FX1 lib), thêm các trường truy v
 | P3 [M] | `casex`, `casez` | Lệch giữa mô phỏng và tổng hợp |
 | P4 [M] | `defparam` | Override theo tên ở instance |
 | P5 [M] | Net ngầm định | `` `default_nettype none `` (F2) |
-| P6 [M] | `always @`, `always_latch` | Dùng `always_ff`/`always_comb` (R1, R2). Ngoại lệ duy nhất: `always_latch` trong cell `m_ftel_dphy_rx_cg`, latch của ICG (K2, K10) |
-| P7 | Latch | Ngoại lệ duy nhất: latch của ICG trong `m_ftel_dphy_rx_cg` (P6) |
+| P6 [M] | `always @`, `always_latch` | Dùng `always_ff`/`always_comb` (R1, R2). Ngoại lệ duy nhất: `always_latch` trong cell `m_fpt_dphy_rx_cg`, latch của ICG (K2, K10) |
+| P7 | Latch | Ngoại lệ duy nhất: latch của ICG trong `m_fpt_dphy_rx_cg` (P6) |
 | P8 | Một net nhiều nơi lái | - |
 | P9 | Function có side effect hoặc biến `static` | - |
 | P10 [M] | `$display`, `$random` và system task khác ngoài `` `ifndef SYNTHESIS `` | Chỉ cho TB và kiểm tra tĩnh |
@@ -163,17 +164,17 @@ Theo header của các cell `m_fpt_lib_*` (FX1 lib), thêm các trường truy v
 | ID | Quy tắc |
 |---|---|
 | K1 | Năm domain: `core` (`core_clk`, 200 MHz), `byte` (`rxbyteclkhs`, line rate / 8), `cfg` (clock cấu hình, chưa có cho tới khi đóng K3), `ddr` (DDR clock `afe_cl_hs_clk`, line rate / 2, chỉ trong Block No. 1) và `ddrn` (DDR clock đảo, ra từ cell clock inverter; các flop cạnh xuống của Block No. 1, HAS §4.3). Mỗi flip-flop thuộc đúng một domain; header ghi các domain của module |
-| K2 | Không clock theo cạnh xuống, không gate clock, không logic trên đường clock. Ngoại lệ duy nhất là cấu trúc clock của Block No. 1 (HAS §4.3). Nó chỉ được nằm trong `m_ftel_dphy_rx_byte_clk`, và mỗi chỗ mang tag `// CLK_STRUCT (HAS §4.3)`: (1) DDR clock đảo `ddrn`, sinh bằng cell `m_ftel_dphy_rx_clk_inv`: cạnh xuống của DDR clock thành cạnh lên của `ddrn`, nên vẫn không dùng `negedge` (P12); (2) flop của bộ chia 4 dùng làm clock; (3) ICG `m_ftel_dphy_rx_cg` sinh `rxbyteclkhs`; (4) output của reset synchronizer byte-clock enable làm enable của ICG (đồng thời là reset của bộ chia và pha load, K3). `rxclkesc_x` là XOR của LP line đã sync, chỉ xuất ra PPI; bên trong IP không có gì chạy bằng nó (HAS §4.9, ADR-002) |
-| K3 | Reset nội bộ active-low: assert bất đồng bộ, release đồng bộ. Mỗi domain có một `m_ftel_dphy_rx_rst_sync` trong No.6; Block No. 4 của mỗi lane có thêm một bộ trong domain `byte`, bị clear khi lane bị tắt (HAS §4.2). Bộ chia và pha load của Block No. 1 dùng reset synchronizer của byte-clock enable trong `m_ftel_dphy_rx_byte_clk`, nên bị giữ reset khi gate đóng (HAS §4.1, §4.3). Flop của domain `ddrn` dùng reset của domain `ddr`: reset release ở cạnh lên, flop `ddrn` nhận ở cạnh xuống sau đó nửa chu kỳ (K11) |
+| K2 | Không clock theo cạnh xuống, không gate clock, không logic trên đường clock. Ngoại lệ duy nhất là cấu trúc clock của Block No. 1 (HAS §4.3). Nó chỉ được nằm trong `m_fpt_dphy_rx_byte_clk`, và mỗi chỗ mang tag `// CLK_STRUCT (HAS §4.3)`: (1) DDR clock đảo `ddrn`, sinh bằng cell `m_fpt_dphy_rx_clk_inv`: cạnh xuống của DDR clock thành cạnh lên của `ddrn`, nên vẫn không dùng `negedge` (P12); (2) flop của bộ chia 4 dùng làm clock; (3) ICG `m_fpt_dphy_rx_cg` sinh `rxbyteclkhs`; (4) output của reset synchronizer byte-clock enable làm enable của ICG (đồng thời là reset của bộ chia và pha load, K3). `rxclkesc_x` là XOR của LP line đã sync, chỉ xuất ra PPI; bên trong IP không có gì chạy bằng nó (HAS §4.9, ADR-002) |
+| K3 | Reset nội bộ active-low: assert bất đồng bộ, release đồng bộ. Mỗi domain có một `m_fpt_dphy_rx_rst_sync` trong No.6; Block No. 4 của mỗi lane có thêm một bộ trong domain `byte`, bị clear khi lane bị tắt (HAS §4.2). Bộ chia và pha load của Block No. 1 dùng reset synchronizer của byte-clock enable trong `m_fpt_dphy_rx_byte_clk`, nên bị giữ reset khi gate đóng (HAS §4.1, §4.3). Flop của domain `ddrn` dùng reset của domain `ddr`: reset release ở cạnh lên, flop `ddrn` nhận ở cạnh xuống sau đó nửa chu kỳ (K11) |
 | K4 | Flip-flop điều khiển (FSM, cờ valid/active, counter, enable, output) bắt buộc có reset. Flip-flop dữ liệu (word, byte, byte trong delay line; sampler, shift register và parallel register của deserializer) được bỏ reset vì luôn đi kèm cờ valid đã reset |
-| K5 [M] | Mọi crossing đi qua một trong ba cell: level sync `m_ftel_dphy_rx_sync`, toggle sync `m_ftel_dphy_rx_tsync`, reset sync `m_ftel_dphy_rx_rst_sync`. Mỗi instance có tag `// CDC_CROSSING: <src> -> <dst>: <signal> (HAS §4.1, Table 4-2)` |
+| K5 [M] | Mọi crossing đi qua một trong ba cell: level sync `m_fpt_dphy_rx_sync`, toggle sync `m_fpt_dphy_rx_tsync`, reset sync `m_fpt_dphy_rx_rst_sync`. Mỗi instance có tag `// CDC_CROSSING: <src> -> <dst>: <signal> (HAS §4.1, Table 4-2)` |
 | K6 [M] | Trường cấu hình quasi-static đi thẳng không qua sync và mang tag `// CDC_QUASI_STATIC: <field> (HAS §4.1)`. Phần mềm chỉ đổi chúng khi các lane liên quan đang tắt |
 | K7 [M] | Output PPI của domain `byte` được gate tổ hợp bằng enable đã sync trong `core`, chỉ trong No.7, kèm tag `// CDC_GATING (HAS §4.9)` |
 | K8 | Input bất đồng bộ từ AFE (LP-RX) chỉ vào qua level sync `PARA_LP_SYNC_STAGES` tầng. `afe_hs_bit_x` là input source-synchronous: sampler của Block No. 1 lấy mẫu thẳng bằng DDR clock, không qua sync (HAS §4.1, Table 4-2) |
 | K9 | Không có đường tổ hợp từ domain này vào flip-flop của domain khác, ngoài các trường hợp K5-K7 |
-| K10 [M] | Ngoại lệ của N11 cho năm cell dùng chung, vì chúng nằm ở nhiều domain hoặc giữ port của cell lib fu2: `m_ftel_dphy_rx_sync` giữ port của `m_vlsi_synch` (`PARA_LEVELS`, `i_clk`, `i_rstn`, `i_data_in`, `o_data_out`) và `m_ftel_dphy_rx_rst_sync` giữ port của `m_fpt_lib_reset_sync_rising_edge_async_reset_n` (`i_clk`, `i_async_reset_n`, `o_sync_reset_n`), để lúc tích hợp chỉ cần thay tên module (như `ftel_intctl_sync`); `m_ftel_dphy_rx_tsync` nối hai domain nên đặt tên theo vai trò: `i_src_clk`, `i_src_rst_n`, `i_dst_clk`, `i_dst_rst_n`. Hai cell clock giữ port của cell lib fu2: `m_ftel_dphy_rx_cg` theo `m_fpt_lib_cg` (`i_clk`, `i_en`, `i_scan_en`, `o_clk`) và `m_ftel_dphy_rx_clk_inv` theo `m_fpt_lib_clk_inv` (`i_in`, `o_out`) |
+| K10 [M] | Ngoại lệ của N11 cho năm cell dùng chung, vì chúng nằm ở nhiều domain hoặc giữ port của cell lib fu2: `m_fpt_dphy_rx_sync` giữ port của `m_vlsi_synch` (`PARA_LEVELS`, `i_clk`, `i_rstn`, `i_data_in`, `o_data_out`) và `m_fpt_dphy_rx_rst_sync` giữ port của `m_fpt_lib_reset_sync_rising_edge_async_reset_n` (`i_clk`, `i_async_reset_n`, `o_sync_reset_n`), để lúc tích hợp chỉ cần thay tên module (như `ftel_intctl_sync`); `m_fpt_dphy_rx_tsync` nối hai domain nên đặt tên theo vai trò: `i_src_clk`, `i_src_rst_n`, `i_dst_clk`, `i_dst_rst_n`. Hai cell clock giữ port của cell lib fu2: `m_fpt_dphy_rx_cg` theo `m_fpt_lib_cg` (`i_clk`, `i_en`, `i_scan_en`, `o_clk`) và `m_fpt_dphy_rx_clk_inv` theo `m_fpt_lib_clk_inv` (`i_in`, `o_out`) |
 | K11 | `ddr`, `ddrn` và `byte` là một họ clock đồng bộ, cùng sinh từ DDR clock. Đường giữa chúng đi thẳng flop → flop, không qua cell sync, và do STA kiểm (HAS §4.3): `ddr` → `ddrn` nửa chu kỳ (chỉ đường pha load), `ddr`/`ddrn` → `byte` nhiều chu kỳ DDR. Flop nhận mang tag `// SYNC_DDR (HAS §4.3)` |
-| K12 [M] | Instance của hai cell clock `m_ftel_dphy_rx_cg` và `m_ftel_dphy_rx_clk_inv` chỉ được đặt trong `m_ftel_dphy_rx_byte_clk`. Tên instance theo quy ước của lib fu2 `u_dont_touch_<name>_<n>`, để flow tổng hợp không tối ưu chúng. Mỗi instance mang tag `// CLK_STRUCT (HAS §4.3)` (K2) |
+| K12 [M] | Instance của hai cell clock `m_fpt_dphy_rx_cg` và `m_fpt_dphy_rx_clk_inv` chỉ được đặt trong `m_fpt_dphy_rx_byte_clk`. Tên instance theo quy ước của lib fu2 `u_dont_touch_<name>_<n>`, để flow tổng hợp không tối ưu chúng. Mỗi instance mang tag `// CLK_STRUCT (HAS §4.3)` (K2) |
 
 ---
 
@@ -208,13 +209,13 @@ giải thích trong `rtl_notes.md`; header đủ trường.
 
 | Sai | Đúng | Luật |
 |---|---|---|
-| `module dl_ctrl` | `module m_ftel_dphy_rx_dl_ctrl` | N1 |
+| `module dl_ctrl` | `module m_fpt_dphy_rx_dl_ctrl` | N1 |
 | `parameter LANES = 4` | `parameter int PARA_NUM_LANES = 4` | N2 |
 | `localparam LP_ULPS = 8'b00011110` | `localparam logic [7:0] C_ESC_ULPS = 8'b00011110` | N9, R11 |
 | `logic [3:0] state;` gán trong `always_ff` | `dl_state_t reg_state;` | N4, R12 |
 | `always @(posedge clk)` | `always_ff @(posedge i_core_clk or negedge i_core_rst_n) begin : p_state_reg` | R1, R8, N11 |
 | `u_sync (clk, rstn, d, q)` | `u_sync_0 (.i_clk(i_core_clk), .i_rstn(i_core_rst_n), .i_data_in(w_d), .o_data_out(w_q))` | F6, N6, K10 |
-| Flop `core` lấy thẳng tín hiệu `byte` | Qua `m_ftel_dphy_rx_tsync` / `m_ftel_dphy_rx_sync`, kèm tag `CDC_CROSSING` | K5 |
+| Flop `core` lấy thẳng tín hiệu `byte` | Qua `m_fpt_dphy_rx_tsync` / `m_fpt_dphy_rx_sync`, kèm tag `CDC_CROSSING` | K5 |
 | `if (cnt == 19)` | `if (reg_settle_cnt == i_cfg.hs_settle_cyc)` | R11 |
 
 ---
@@ -227,3 +228,4 @@ giải thích trong `rtl_notes.md`; header đủ trường.
 | 1.0 | 2026-10-03 | Đã duyệt; Author và Email của header. Bổ sung khi viết `check_rtl_rules.py`, ba chỗ bản 0.1 chưa phủ: K10 thêm cell reset sync (port của cell lib fu2) và cell toggle sync (tên theo vai trò src/dst); R1 ghi rõ dạng của flip-flop dữ liệu không reset (K4); F2 áp dụng cả cho package |
 | 1.1 | 2026-10-03 | Làm rõ khi viết RTL (M2): N11 áp dụng cho input clock và input reset active-low, không cho reset sinh ra hay `phy_core_rst` của PPI; R1 cho phép Block No. 6 dùng reset do chính nó đồng bộ. Checker sửa theo |
 | 1.2 | 2026-10-07 | Duyệt cùng plan RTL theo HAS v0.13/v0.14 (ADR-001 phương án A): Block No. 1 có sampler, deserializer, byte clock và clock activity. K1 và N11 thêm domain `ddr`, `ddrn`; K2 cho phép đúng bốn cấu trúc clock trong `m_ftel_dphy_rx_byte_clk`, tag `CLK_STRUCT`; K3 thêm reset của bộ chia và pha load; K4 thêm flop dữ liệu của deserializer; K8 bỏ `afe_cl_clk_active`, thêm `afe_hs_bit_x`; K10 thêm hai cell clock; K11 mới (họ clock đồng bộ, tag `SYNC_DDR`); K12 [M] mới (cell clock chỉ trong `byte_clk`); N4, P6, P7 cho phép latch của ICG; N15 thêm `ddr div deser act`; §2.3 ví dụ port AFE. Checker sửa theo |
+| 1.3 | 2026-11-04 | Tiền tố module `m_ftel` thành `m_fpt` theo quy tắc của team PD (nguồn 2 mới, `fpga/PLAN_RENAME_FPT.md`): N1, mọi tên và ví dụ trong tài liệu, `MODULE_RE` của checker. Không đổi luật nào khác. Tên IP, package và tên file tài liệu giữ `ftel_dphy_rx` |

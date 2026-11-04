@@ -57,7 +57,7 @@
 //                                      D-PHY (1: rxsynchs before the first byte and rxactivehs from rxsynchs, as
 //                                      AMD's D-PHY; 2: rxsynchs before the first byte only; 3: rxactivehs from
 //                                      rxsynchs only, rxsynchs still with the first byte)
-//   +PPI_ADAPTER=1                     rxactivehs into xrxss_np from m_ftel_ppi_act_gate (fpga/rtl/), the gate of
+//   +PPI_ADAPTER=1                     rxactivehs into xrxss_np from m_fpt_ppi_act_gate (fpga/rtl/), the gate of
 //                                      the FPGA prototype (fpga/PLAN_TN2B_GATE.md), checked against a model here
 //                                      at every byte clock; not with +PPI_AMD_TIMING
 //   +PPI_SOTSYNCERR=<lane>,<packet>    in that burst of that lane (counted as for +PPI_CORRUPT), no rxsynchs and no
@@ -323,7 +323,7 @@ module tb_exp2b;
     fe_events = 0;
   end
 
-  m_ftel_dphy_rx_wrap #(.PARA_NUM_LANES(NL)) u_ftel (
+  m_fpt_dphy_rx_wrap #(.PARA_NUM_LANES(NL)) u_ftel (
     .i_dphy_rx_core_clk              (core_clk),
     .i_dphy_rx_phy_core_rst_n        (f_rst_n),
     .i_dphy_rx_cl_enable             (np_cl_enable),
@@ -494,7 +494,7 @@ module tb_exp2b;
   // The gate of the FPGA prototype on the PPI of ftel_dphy_rx, reset with it; checked at every byte clock against a
   // model of its rule: rxactivehs from the first rxsynchs of a burst to the end of the burst. The model clears with
   // the reset of ftel_dphy_rx, the gate two byte clocks later (its reset synchronizer), before any burst.
-  m_ftel_ppi_act_gate #(.PARA_NUM_LANES(NL)) u_act_gate (
+  m_fpt_ppi_act_gate #(.PARA_NUM_LANES(NL)) u_act_gate (
     .i_byte_clk   (f_byteclk),
     .i_byte_rst_n (f_rst_n),
     .i_rxactivehs (f_active),
@@ -844,7 +844,7 @@ module tb_exp2b;
     if (c_xfill || amd_timing != 0)
       $display("TB DIAG: on the PPI into xrxss_np, X fill %0d, AMD timing mode %0d (diagnosis only)", c_xfill,
                amd_timing);
-    if (adapter) $display("TB ADAPTER: rxactivehs into xrxss_np from m_ftel_ppi_act_gate (fpga/rtl/)");
+    if (adapter) $display("TB ADAPTER: rxactivehs into xrxss_np from m_fpt_ppi_act_gate (fpga/rtl/)");
     $display("TB FRONT END: ftel_dphy_rx behind %s%s",
              afe_xil ? string'("IBUFDS_DPHY (SIM_DEVICE VERSAL_PREMIUM), the input buffer of AMD's receiver") :
                        string'("afe_model"),

@@ -140,7 +140,7 @@ close $f
 foreach n {afe_model.sv ppi_csv_mon.sv} {
   lappend files [file join $exp1 $n]
 }
-lappend files [file join $fpga rtl m_ftel_ppi_act_gate.sv]
+lappend files [file join $fpga rtl m_fpt_ppi_act_gate.sv]
 foreach n [lsort [glob [file join $here *.sv]]] {
   lappend files $n
 }

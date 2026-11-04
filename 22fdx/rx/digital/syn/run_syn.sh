@@ -29,8 +29,8 @@
 #   run_syn.sh --corner <corner>    one corner of the library (repeatable), named as in its .db files
 #
 # The standard-cell library comes from .env of the IP folder (see .env.example); syn/tech.tcl reads it.
-# Constraints: sdc/m_ftel_dphy_rx_wrap.sdc (design intent) and syn/dc_syn.tcl (environment). The
-# clock cells m_ftel_dphy_rx_cg and m_ftel_dphy_rx_clk_inv are replaced by syn/cells/ (rtl_rule K10).
+# Constraints: sdc/m_fpt_dphy_rx_wrap.sdc (design intent) and syn/dc_syn.tcl (environment). The
+# clock cells m_fpt_dphy_rx_cg and m_fpt_dphy_rx_clk_inv are replaced by syn/cells/ (rtl_rule K10).
 # Run <corner>_<rate>Mbps writes syn/work/<run>/ (DC), syn/output/<run>/ (reports) and
 # syn/netlist/<run>/ (netlist, ddc, sdc), all gitignored; syn/summarize.sh prints the key numbers.
 # Pass: every run ends with "SYN DONE", no Error- message.
@@ -63,7 +63,7 @@ mkdir -p "$HERE/work"
 FILES="$HERE/work/files.lst"
 grep -v '^\s*//' "$IP/logical/filelist.f" | grep '\.sv\s*$' \
   | sed "s#\${FTEL_DPHY_RX_PATH}#$IP#; s#\$FTEL_DPHY_RX_PATH#$IP#" | tr -d ' ' \
-  | sed "s#^$IP/logical/\(m_ftel_dphy_rx_cg\|m_ftel_dphy_rx_clk_inv\)\.sv#$CELLS/\1.sv#" > "$FILES"
+  | sed "s#^$IP/logical/\(m_fpt_dphy_rx_cg\|m_fpt_dphy_rx_clk_inv\)\.sv#$CELLS/\1.sv#" > "$FILES"
 [[ $(grep -c "^$CELLS/" "$FILES") -eq 2 ]] || { echo "clock cells not replaced in $FILES"; exit 1; }
 
 rc=0
@@ -73,7 +73,7 @@ for rate in "${RATES[@]}"; do
     wd="$HERE/work/$run"
     mkdir -p "$wd"
     ( cd "$wd" && SYN_TECH_FILE="$TECH_FILE" SYN_CORNER="$corner" SYN_RATE_MBPS="$rate" \
-        SYN_FILES="$FILES" SYN_SDC="$IP/sdc/m_ftel_dphy_rx_wrap.sdc" \
+        SYN_FILES="$FILES" SYN_SDC="$IP/sdc/m_fpt_dphy_rx_wrap.sdc" \
         SYN_RPT_DIR="$HERE/output/$run" SYN_OUT_DIR="$HERE/netlist/$run" \
         dc_shell -f "$HERE/dc_syn.tcl" -output_log_file dc.log > /dev/null 2>&1 )
     err=$(grep -c '^Error' "$wd/dc.log")

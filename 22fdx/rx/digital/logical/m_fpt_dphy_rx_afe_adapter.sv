@@ -8,12 +8,12 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-03
-// Module          : m_ftel_dphy_rx_afe_adapter
+// Module          : m_fpt_dphy_rx_afe_adapter
 // Description     : AFE Adapter (HAS Block No. 1): LP path (synchronizers, polarity swap,
 //                   glitch filter); HS deserializers, byte clock and clock-activity detection;
 //                   HS path (two rxbyteclkhs stages, polarity inversion); lane mapping; AFE
 //                   enables. The only block that changes when the AFE changes.
-// Parent          : m_ftel_dphy_rx
+// Parent          : m_fpt_dphy_rx
 // HAS             : draft v0.14, §4.1, §4.3, Table 4-2, Figure 4-2, §5.2, Table 5-2
 // Clock domains   : core (LP path, clock activity, AFE enables), ddr and ddrn (deserializers,
 //                   divider), byte (HS path)
@@ -35,7 +35,7 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_afe_adapter
+module m_fpt_dphy_rx_afe_adapter
   import ftel_dphy_rx_pkg::*;
 #(
   parameter int PARA_NUM_LANES      = 4,
@@ -117,7 +117,7 @@ module m_ftel_dphy_rx_afe_adapter
     // 10 samples (ADR-002).
     // CDC_CROSSING: afe -> core: i_afe_lp_dp (HAS §4.1, Table 4-2)
     // REQ-050, REQ-059, REQ-270, REQ-271, REQ-322
-    m_ftel_dphy_rx_sync #(
+    m_fpt_dphy_rx_sync #(
       .PARA_LEVELS (PARA_LP_SYNC_STAGES)
     ) u_sync_0 (
       .i_clk      (i_core_clk),
@@ -128,7 +128,7 @@ module m_ftel_dphy_rx_afe_adapter
 
     // CDC_CROSSING: afe -> core: i_afe_lp_dn (HAS §4.1, Table 4-2)
     // REQ-050, REQ-059
-    m_ftel_dphy_rx_sync #(
+    m_fpt_dphy_rx_sync #(
       .PARA_LEVELS (PARA_LP_SYNC_STAGES)
     ) u_sync_1 (
       .i_clk      (i_core_clk),
@@ -142,7 +142,7 @@ module m_ftel_dphy_rx_afe_adapter
     assign w_phy_lp_sync[p] = i_cfg_lane_pol[p] ? {w_dn_sync[p], w_dp_sync[p]} : {w_dp_sync[p], w_dn_sync[p]};
 
     // REQ-050, REQ-070, REQ-072
-    m_ftel_dphy_rx_lp_filter #(
+    m_fpt_dphy_rx_lp_filter #(
       .PARA_LP_FILTER_CYC (PARA_LP_FILTER_CYC)
     ) u_lp_filter_0 (
       .i_core_clk   (i_core_clk),
@@ -154,7 +154,7 @@ module m_ftel_dphy_rx_afe_adapter
     // Samplers and 1:8 deserializer of the physical lane, on both edges of the DDR clock. The
     // words of all lanes are cut at the same load phase.
     // REQ-328, REQ-339, REQ-341
-    m_ftel_dphy_rx_hs_deser #(
+    m_fpt_dphy_rx_hs_deser #(
       .PARA_DESER_RATIO (PARA_DESER_RATIO)
     ) u_hs_deser_0 (
       .i_ddr_clk    (i_ddr_clk),
@@ -230,7 +230,7 @@ module m_ftel_dphy_rx_afe_adapter
   // OPEN S9 REQ-079: the clock lane is neither inverted nor remapped
   // CDC_CROSSING: afe -> core: i_afe_cl_lp_dp (HAS §4.1, Table 4-2)
   // REQ-050, REQ-059
-  m_ftel_dphy_rx_sync #(
+  m_fpt_dphy_rx_sync #(
     .PARA_LEVELS (PARA_LP_SYNC_STAGES)
   ) u_sync_0 (
     .i_clk      (i_core_clk),
@@ -241,7 +241,7 @@ module m_ftel_dphy_rx_afe_adapter
 
   // CDC_CROSSING: afe -> core: i_afe_cl_lp_dn (HAS §4.1, Table 4-2)
   // REQ-050, REQ-059
-  m_ftel_dphy_rx_sync #(
+  m_fpt_dphy_rx_sync #(
     .PARA_LEVELS (PARA_LP_SYNC_STAGES)
   ) u_sync_1 (
     .i_clk      (i_core_clk),
@@ -251,7 +251,7 @@ module m_ftel_dphy_rx_afe_adapter
   );
 
   // REQ-050, REQ-070
-  m_ftel_dphy_rx_lp_filter #(
+  m_fpt_dphy_rx_lp_filter #(
     .PARA_LP_FILTER_CYC (PARA_LP_FILTER_CYC)
   ) u_lp_filter_0 (
     .i_core_clk   (i_core_clk),
@@ -269,7 +269,7 @@ module m_ftel_dphy_rx_afe_adapter
   // Inverted DDR clock, divider by 4 with the load phases, clock gate of rxbyteclkhs and the
   // clock-activity toggles: the clock structure of rtl_rule K2.
   // REQ-026, REQ-048, REQ-228, REQ-343
-  m_ftel_dphy_rx_byte_clk #(
+  m_fpt_dphy_rx_byte_clk #(
     .PARA_DESER_RATIO (PARA_DESER_RATIO)
   ) u_byte_clk_0 (
     .i_ddr_clk    (i_ddr_clk),
@@ -284,7 +284,7 @@ module m_ftel_dphy_rx_afe_adapter
 
   // Clock activity for Block No. 2 (TCLK-MISS), in core_clk.
   // REQ-047, REQ-102, REQ-345
-  m_ftel_dphy_rx_clk_act u_clk_act_0 (
+  m_fpt_dphy_rx_clk_act u_clk_act_0 (
     .i_core_clk   (i_core_clk),
     .i_core_rst_n (i_core_rst_n),
     .i_act_toggle (w_act_toggle),

@@ -34,7 +34,8 @@ Checks (each issue carries a code consumed by flow_check.py):
            row, open_item_ref of an open line, 'open' or needs_human_decision without an open basis
   CONSIST  flag rules: ⚠️ line => ambiguity >= 0.35 + needs_review; needs_human_decision =>
            needs_review; (ambiguity > 0.3) == needs_review
-  NAME     superseded names (m_fpt_) in REQ text
+  NAME     superseded names in REQ text: m_ftel_, the module prefix from HAS v0.3 to v0.17 (since v0.18
+           the prefix is m_fpt_, after the naming rules of the PD team)
 Warnings (never blocking): block vs section mismatch, R2 without a deskew cue.
 In --mode gate every REQ still needing a human decision is reported as GATE_OPEN.
 
@@ -152,8 +153,8 @@ def check(doc, spec_path, mode):
         for o in r["open_item_ref"]:
             if o not in known_open_ids:
                 add("SCHEMA", w, f"open_item_ref: {o!r} does not appear in the spec")
-        if "m_fpt_" in r["text"]:
-            add("NAME", w, "superseded name m_fpt_ in text")
+        if "m_ftel_" in r["text"]:
+            add("NAME", w, "superseded name m_ftel_ in text")
         m = BLOCK_IN_SECTION.search(r["source_section"])
         if m and r["block"] not in (f"No.{m.group(1)}", "all", "top", "wrap"):
             warnings.append({"where": w, "msg": f"section says Block No.{m.group(1)}, REQ block is {r['block']}"})

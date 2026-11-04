@@ -66,7 +66,7 @@
 2. **X đầu mô phỏng.** `HSRX_O` của model là X khi `HSRX_DISABLE` là X. Nếu X lọt vào RTL mình mà AMD không bị,
    đó là hiện tượng chỉ có trong mô phỏng; tôi báo bạn trước khi xử lý. Probe chưa thấy X ✅.
 3. **RX mình gặp LP đổi trong HS.** Probe: 110/110 PASS không sửa RTL ✅. Lý do: `dl_ctrl` ở trạng thái HS chỉ
-   phản ứng với LP-11, và LP-11 phải ổn định 3 mẫu `core_clk` (`m_ftel_dphy_rx_lp_filter`).
+   phản ứng với LP-11, và LP-11 phải ổn định 3 mẫu `core_clk` (`m_fpt_dphy_rx_lp_filter`).
 4. **Đường hierarchy vào IP AMD** đổi theo phiên bản IP. Nếu Vivado sinh IP khác tên, check `front` báo lỗi
    compile thay vì im lặng.
 

@@ -176,6 +176,8 @@ EXPECTED = {
                   c_ids=16),
     "v0.17": dict(_V03, param=11, runtime=6, clock=4, cdc=11, fsm_cl=11, fsm_dl=17, afe=7, open=16,
                   timing=11, c_ids=16),
+    "v0.18": dict(_V03, param=11, runtime=6, clock=4, cdc=11, fsm_cl=11, fsm_dl=17, afe=7, open=16,
+                  timing=11, c_ids=16),
 }
 REVISION_RE = re.compile(r"\*\*DRAFT (v[0-9]+\.[0-9]+)\*\*")
 

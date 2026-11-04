@@ -8,11 +8,11 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-03
-// Module          : m_ftel_dphy_rx_tsync
+// Module          : m_fpt_dphy_rx_tsync
 // Description     : Toggle synchronizer: a one-cycle event inverts a flip-flop in the source
 //                   clock; the level crosses through two flip-flops and a third
 //                   flip-flop with an XOR turns each change into a one-cycle pulse.
-// Parent          : m_ftel_dphy_rx_hs_datapath
+// Parent          : m_fpt_dphy_rx_hs_datapath
 // HAS             : draft v0.14, §4.1, Figure 4-1
 // Clock domains   : source and destination clocks of the instance
 // REQ-IDs         : REQ-060, REQ-061
@@ -29,7 +29,7 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_tsync (
+module m_fpt_dphy_rx_tsync (
   input  logic i_src_clk,
   input  logic i_src_rst_n,
   input  logic i_dst_clk,
@@ -54,7 +54,7 @@ module m_ftel_dphy_rx_tsync (
   end
 
   // CDC_CROSSING: src -> dst: reg_src_tgl, toggle level (HAS §4.1, Figure 4-1)
-  m_ftel_dphy_rx_sync #(
+  m_fpt_dphy_rx_sync #(
     .PARA_LEVELS (2)
   ) u_sync_0 (
     .i_clk      (i_dst_clk),

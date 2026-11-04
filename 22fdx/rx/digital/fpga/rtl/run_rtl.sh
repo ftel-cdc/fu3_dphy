@@ -9,7 +9,7 @@
 # Author          : Ho Khanh Linh
 # Email           : linhhk26@fpt.com
 # Created Date    : 2026-10-26
-# Description     : Checks of the FPGA-only RTL of fpga/rtl/ (m_ftel_ppi_act_gate, fpga/PLAN_TN2B_GATE.md §3).
+# Description     : Checks of the FPGA-only RTL of fpga/rtl/ (m_fpt_ppi_act_gate, fpga/PLAN_TN2B_GATE.md §3).
 #
 # Evolution History:
 # ------------------------------------------------------------------------------
@@ -20,7 +20,7 @@
 # A new version is strictly reserved for major architectural shifts
 # that require software modifications across different chip generations.
 #-------------------------------------------------------------------------------
-# Checks of m_ftel_ppi_act_gate (fpga/PLAN_TN2B_GATE.md §3). Outputs in fpga/work/rtl (gitignored).
+# Checks of m_fpt_ppi_act_gate (fpga/PLAN_TN2B_GATE.md §3). Outputs in fpga/work/rtl (gitignored).
 #   fpga/rtl/run_rtl.sh lint     # VCS +lint=all,noVCDE with 1, 2 and 4 lanes (doc/rtl_rule.md L1): 0 Error,
 #                                # Warning, Lint
 #   fpga/rtl/run_rtl.sh rules    # req_flow/check_rtl_rules.py, profile construct (the block is not part of the IP)
@@ -35,8 +35,8 @@ FPGA=$(dirname "$HERE")
 IP=$(dirname "$FPGA")
 W=$FPGA/work/rtl
 VIVADO=${VIVADO:-/opt/xilinx/2025.2/Vivado/bin/vivado}
-SRC=("$HERE/m_ftel_ppi_act_gate.sv")
-TOP=m_ftel_ppi_act_gate
+SRC=("$HERE/m_fpt_ppi_act_gate.sv")
+TOP=m_fpt_ppi_act_gate
 mkdir -p "$W"
 
 lint() {

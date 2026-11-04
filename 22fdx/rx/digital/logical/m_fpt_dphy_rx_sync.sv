@@ -8,12 +8,12 @@
 // Author          : Ho Khanh Linh
 // Email           : linhhk26@fpt.com
 // Created Date    : 2026-10-03
-// Module          : m_ftel_dphy_rx_sync
+// Module          : m_fpt_dphy_rx_sync
 // Description     : Level synchronizer: a chain of PARA_LEVELS flip-flops in the destination
 //                   clock. Port-compatible with m_vlsi_synch, so that integration swaps
 //                   the module name only (rtl_rule K10).
-// Parent          : m_ftel_dphy_rx_afe_adapter, m_ftel_dphy_rx_timing_init, m_ftel_dphy_rx_dl_ctrl,
-//                   m_ftel_dphy_rx_hs_datapath
+// Parent          : m_fpt_dphy_rx_afe_adapter, m_fpt_dphy_rx_timing_init, m_fpt_dphy_rx_dl_ctrl,
+//                   m_fpt_dphy_rx_hs_datapath
 // HAS             : draft v0.17, §4.1, Figure 4-1
 // Clock domains   : destination clock of the instance
 // REQ-IDs         : REQ-059
@@ -30,7 +30,7 @@
 //------------------------------------------------------------------------------
 `timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_sync #(
+module m_fpt_dphy_rx_sync #(
   parameter int PARA_LEVELS = 2
 ) (
   input  logic i_clk,
@@ -55,7 +55,7 @@ module m_ftel_dphy_rx_sync #(
 
 `ifndef SYNTHESIS
   initial begin : p_check
-    if (PARA_LEVELS < 2) $fatal(1, "m_ftel_dphy_rx_sync: PARA_LEVELS must be >= 2");
+    if (PARA_LEVELS < 2) $fatal(1, "m_fpt_dphy_rx_sync: PARA_LEVELS must be >= 2");
   end
 `endif
 endmodule

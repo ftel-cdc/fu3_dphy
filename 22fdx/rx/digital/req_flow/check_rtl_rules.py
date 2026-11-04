@@ -33,7 +33,7 @@ IP_DIR = REPO   # the IP files sit directly in the IP folder (22fdx/rx/digital),
 RULE_DOC = os.path.join(IP_DIR, "doc", "rtl_rule.md")
 
 RULES = {
-    "N1": "module name m_ftel_dphy_rx[_<block>]",
+    "N1": "module name m_fpt_dphy_rx[_<block>]",
     "N2": "parameter PARA_<NAME>",
     "N3": "define DEF_<NAME>",
     "N4": "flip-flop / latch reg_<name>: assigned in always_ff (always_latch in the clock-gate cell)",
@@ -64,9 +64,9 @@ RULES = {
     "P12": "negedge only for the asynchronous reset of an always_ff",
     "K5": "CDC_CROSSING tag on each synchronizer cell instance",
     "K6": "CDC_QUASI_STATIC tag on each configuration input",
-    "K7": "CDC_GATING only in m_ftel_dphy_rx_ppi_out",
+    "K7": "CDC_GATING only in m_fpt_dphy_rx_ppi_out",
     "K10": "ports of the shared cells",
-    "K12": "clock cells only in m_ftel_dphy_rx_byte_clk, as u_dont_touch_<name>_<n> with a CLK_STRUCT tag",
+    "K12": "clock cells only in m_fpt_dphy_rx_byte_clk, as u_dont_touch_<name>_<n> with a CLK_STRUCT tag",
     "T1": "header REQ-IDs = REQs tagged in the body; HAS field",
     "T2": "trace tag on each always block, assign group and instance",
     "T3": "OPEN tag format, id in Table 9-1",
@@ -74,7 +74,7 @@ RULES = {
 }
 CONSTRUCT = {"R1", "R2", "R7", "P1", "P2", "P3", "P4", "P6", "P10", "P11", "P12", "F6"}
 
-MODULE_RE = re.compile(r"^m_ftel_dphy_rx(_[a-z0-9]+)*$")
+MODULE_RE = re.compile(r"^m_fpt_dphy_rx(_[a-z0-9]+)*$")
 PACKAGE_RE = re.compile(r"^ftel_dphy_rx(_[a-z0-9]+)*_pkg$")
 PARAM_RE = re.compile(r"^PARA_[A-Z0-9_]+$")
 DEFINE_RE = re.compile(r"^DEF_[A-Z0-9_]+$")
@@ -90,22 +90,22 @@ BLOCK_CLK_RE = re.compile(rf"^i_{DOMAINS}_clk$")
 BLOCK_RST_RE = re.compile(rf"^i_{DOMAINS}_rst_n$")
 LOCAL_RST_RE = re.compile(rf"^w_{DOMAINS}(_[a-z0-9]+)*_rst_n$")
 
-CORE, WRAP = "m_ftel_dphy_rx", "m_ftel_dphy_rx_wrap"
+CORE, WRAP = "m_fpt_dphy_rx", "m_fpt_dphy_rx_wrap"
 CELL_PORTS = {  # K10
-    "m_ftel_dphy_rx_sync": {"i_clk", "i_rstn", "i_data_in", "o_data_out"},
-    "m_ftel_dphy_rx_rst_sync": {"i_clk", "i_async_reset_n", "o_sync_reset_n"},
-    "m_ftel_dphy_rx_tsync": {"i_src_clk", "i_src_rst_n", "i_dst_clk", "i_dst_rst_n", "i_pulse", "o_pulse"},
-    "m_ftel_dphy_rx_cg": {"i_clk", "i_en", "i_scan_en", "o_clk"},  # ports of m_fpt_lib_cg (fu2 lib)
-    "m_ftel_dphy_rx_clk_inv": {"i_in", "o_out"},  # ports of m_fpt_lib_clk_inv (fu2 lib)
+    "m_fpt_dphy_rx_sync": {"i_clk", "i_rstn", "i_data_in", "o_data_out"},
+    "m_fpt_dphy_rx_rst_sync": {"i_clk", "i_async_reset_n", "o_sync_reset_n"},
+    "m_fpt_dphy_rx_tsync": {"i_src_clk", "i_src_rst_n", "i_dst_clk", "i_dst_rst_n", "i_pulse", "o_pulse"},
+    "m_fpt_dphy_rx_cg": {"i_clk", "i_en", "i_scan_en", "o_clk"},  # ports of m_fpt_lib_cg (fu2 lib)
+    "m_fpt_dphy_rx_clk_inv": {"i_in", "o_out"},  # ports of m_fpt_lib_clk_inv (fu2 lib)
 }
 # K2, K12: the clock structure of Block No. 1 (HAS §4.3) lives in one module, from two clock cells
-CLK_MODULE = "m_ftel_dphy_rx_byte_clk"
-CLK_CELLS = {"m_ftel_dphy_rx_cg", "m_ftel_dphy_rx_clk_inv"}
-LATCH_MODULE = "m_ftel_dphy_rx_cg"  # P6, P7: the latch of the clock gate is the only latch
+CLK_MODULE = "m_fpt_dphy_rx_byte_clk"
+CLK_CELLS = {"m_fpt_dphy_rx_cg", "m_fpt_dphy_rx_clk_inv"}
+LATCH_MODULE = "m_fpt_dphy_rx_cg"  # P6, P7: the latch of the clock gate is the only latch
 GEN_CLK_RE = re.compile(r"^w_ddrn_clk$")  # N11: clock made in CLK_MODULE by the clock inverter
 DONT_TOUCH_RE = re.compile(r"^u_dont_touch_[a-z0-9_]+_[0-9]+$")
 CLK_STRUCT_RE = re.compile(r"CLK_STRUCT \(HAS §4\.3\)")
-GATING_MODULE = "m_ftel_dphy_rx_ppi_out"
+GATING_MODULE = "m_fpt_dphy_rx_ppi_out"
 N11_EXEMPT = {CORE, WRAP, *CELL_PORTS}
 HEADER_FIELDS = ("Author", "Email", "Created Date", "Module", "Description", "Parent", "HAS",
                  "Clock domains", "REQ-IDs", "OPEN")
@@ -605,8 +605,8 @@ class Checker:
                     self.add(src, self.ports[p][2], "N11", f"reset input {p}")
         self.module = name
         self.decls, self.ff_written, self.comb_written, self.assign_groups = {}, set(), set(), []
-        self.has_rst_sync = any(t.text == "m_ftel_dphy_rx_rst_sync" for t in toks[k:end])
-        self.has_clk_inv = any(t.text == "m_ftel_dphy_rx_clk_inv" for t in toks[k:end])
+        self.has_rst_sync = any(t.text == "m_fpt_dphy_rx_rst_sync" for t in toks[k:end])
+        self.has_clk_inv = any(t.text == "m_fpt_dphy_rx_clk_inv" for t in toks[k:end])
         self.items(src, toks, i + 1, end, generate=False)
         for nm, line in self.decls.items():
             if nm.startswith("reg_") and nm not in self.ff_written:
@@ -958,7 +958,7 @@ endpackage
 
 FIX_SYNC = """`timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_sync #(
+module m_fpt_dphy_rx_sync #(
   parameter int PARA_LEVELS = 2
 ) (
   input  logic i_clk,
@@ -985,7 +985,7 @@ endmodule
 
 FIX_DEMO = """`timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_demo
+module m_fpt_dphy_rx_demo
   import ftel_dphy_rx_demo_pkg::*;
 #(
   parameter int PARA_DEMO_W = C_DEMO_W
@@ -1034,7 +1034,7 @@ module m_ftel_dphy_rx_demo
   end
 
   // CDC_CROSSING: async -> core: i_async_req (HAS §4.1, Table 4-2)
-  m_ftel_dphy_rx_sync #(
+  m_fpt_dphy_rx_sync #(
     .PARA_LEVELS (2)
   ) u_sync_0 (
     .i_clk      (i_core_clk),
@@ -1057,7 +1057,7 @@ endmodule
 
 FIX_CG = """`timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_cg (
+module m_fpt_dphy_rx_cg (
   input  logic i_clk,
   input  logic i_en,
   input  logic i_scan_en,
@@ -1078,7 +1078,7 @@ endmodule
 
 FIX_INV = """`timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_clk_inv (
+module m_fpt_dphy_rx_clk_inv (
   input  logic i_in,
   output logic o_out
 );
@@ -1090,7 +1090,7 @@ endmodule
 
 FIX_BCLK = """`timescale 1ns/1ps
 `default_nettype none
-module m_ftel_dphy_rx_byte_clk (
+module m_fpt_dphy_rx_byte_clk (
   // ---- clock / reset ----
   input  logic i_ddr_clk,
   input  logic i_ddr_rst_n,
@@ -1106,7 +1106,7 @@ module m_ftel_dphy_rx_byte_clk (
 
   // CLK_STRUCT (HAS §4.3)
   // {R1}
-  m_ftel_dphy_rx_clk_inv u_dont_touch_clk_inv_0 (
+  m_fpt_dphy_rx_clk_inv u_dont_touch_clk_inv_0 (
     .i_in  (i_ddr_clk),
     .o_out (w_ddrn_clk)
   );
@@ -1131,7 +1131,7 @@ module m_ftel_dphy_rx_byte_clk (
 
   // CLK_STRUCT (HAS §4.3)
   // {R1}
-  m_ftel_dphy_rx_cg u_dont_touch_cg_0 (
+  m_fpt_dphy_rx_cg u_dont_touch_cg_0 (
     .i_clk     (reg_div_cnt),
     .i_en      (i_ddr_rst_n),
     .i_scan_en ('0),
@@ -1146,7 +1146,7 @@ endmodule
 
 # Pre-registered negative tests: (name, file, old text, new text, rule that must be reported).
 NEGATIVE = [
-    ("N1 module without m_", "demo", "module m_ftel_dphy_rx_demo", "module ftel_dphy_rx_demo", "N1"),
+    ("N1 module without m_", "demo", "module m_fpt_dphy_rx_demo", "module ftel_dphy_rx_demo", "N1"),
     ("N2 parameter without PARA_", "demo", "PARA_DEMO_W", "DEMO_W", "N2"),
     ("N3 define without DEF_", "demo", "`default_nettype none\n", "`default_nettype none\n`define DEMO_X 1\n", "N3"),
     ("N4 flop without reg_", "demo", "reg_cnt", "cnt_q", "N4"),
@@ -1165,7 +1165,7 @@ NEGATIVE = [
     ("N12 package name", "pkg", "package ftel_dphy_rx_demo_pkg;", "package dphy_demo_pkg;", "N12"),
     ("N13 always label without p_", "demo", "p_state_reg", "state_reg", "N13"),
     ("N13 assertion label without a_", "demo", "a_done_in_run", "done_in_run", "N13"),
-    ("F1 two units in one file", "demo", "endmodule\n", "endmodule\nmodule m_ftel_dphy_rx_extra;\nendmodule\n", "F1"),
+    ("F1 two units in one file", "demo", "endmodule\n", "endmodule\nmodule m_fpt_dphy_rx_extra;\nendmodule\n", "F1"),
     ("F2 `default_nettype none missing", "demo", "`default_nettype none\n", "", "F2"),
     ("F2 `default_nettype wire missing at the end", "demo", "endmodule\n`default_nettype wire\n", "endmodule\n", "F2"),
     ("F3 header field REQ-IDs missing", "demo", "// REQ-IDs         :", "// REQ-LIST        :", "F3"),
@@ -1198,11 +1198,11 @@ NEGATIVE = [
     ("K7 CDC_GATING outside the PPI stage", "demo", "  // {R2}\n  assign o_done", "  // {R2} CDC_GATING (HAS §4.9)\n  assign o_done", "K7"),
     ("K10 sync cell port renamed", "sync", "i_rstn", "i_rst_n", "K10"),
     ("K10 clock-gate cell port renamed", "cg", "input  logic i_scan_en,", "input  logic i_test_en,", "K10"),
-    ("K12 clock cell outside m_ftel_dphy_rx_byte_clk", "demo", "  // {R2}\n  assign o_done",
-     "  // CLK_STRUCT (HAS §4.3)\n  // {R2}\n  m_ftel_dphy_rx_clk_inv u_dont_touch_clk_inv_0 (\n    .i_in  (i_core_clk),\n"
+    ("K12 clock cell outside m_fpt_dphy_rx_byte_clk", "demo", "  // {R2}\n  assign o_done",
+     "  // CLK_STRUCT (HAS §4.3)\n  // {R2}\n  m_fpt_dphy_rx_clk_inv u_dont_touch_clk_inv_0 (\n    .i_in  (i_core_clk),\n"
      "    .o_out (w_req)\n  );\n  // {R2}\n  assign o_done", "K12"),
-    ("K12 clock cell without CLK_STRUCT tag", "bclk", "  // CLK_STRUCT (HAS §4.3)\n  // {R1}\n  m_ftel_dphy_rx_cg",
-     "  // {R1}\n  m_ftel_dphy_rx_cg", "K12"),
+    ("K12 clock cell without CLK_STRUCT tag", "bclk", "  // CLK_STRUCT (HAS §4.3)\n  // {R1}\n  m_fpt_dphy_rx_cg",
+     "  // {R1}\n  m_fpt_dphy_rx_cg", "K12"),
     ("K12 clock cell instance not u_dont_touch_", "bclk", "u_dont_touch_cg_0", "u_cg_0", "K12"),
     ("T1 header REQ-IDs misses a tagged REQ", "demo", "// REQ-IDs         : {R1}, {R2}", "// REQ-IDs         : {R1}", "T1"),
     ("T2 always_comb without tag", "demo", "  // {R1}\n  always_comb", "  always_comb", "T2"),
@@ -1231,15 +1231,15 @@ def selftest_negative(workdir):
     base = {
         "pkg": ("ftel_dphy_rx_demo_pkg.sv", HEADER.format(unit="ftel_dphy_rx_demo_pkg", dom="none",
                 reqs="{R1}, {RO}", open="{OID}") + FIX_PKG),
-        "sync": ("m_ftel_dphy_rx_sync.sv", HEADER.format(unit="m_ftel_dphy_rx_sync", dom="any (one)",
+        "sync": ("m_fpt_dphy_rx_sync.sv", HEADER.format(unit="m_fpt_dphy_rx_sync", dom="any (one)",
                  reqs="{R1}", open="none") + FIX_SYNC),
-        "demo": ("m_ftel_dphy_rx_demo.sv", HEADER.format(unit="m_ftel_dphy_rx_demo", dom="core",
+        "demo": ("m_fpt_dphy_rx_demo.sv", HEADER.format(unit="m_fpt_dphy_rx_demo", dom="core",
                  reqs="{R1}, {R2}", open="none") + FIX_DEMO),
-        "cg": ("m_ftel_dphy_rx_cg.sv", HEADER.format(unit="m_ftel_dphy_rx_cg", dom="any (one)",
+        "cg": ("m_fpt_dphy_rx_cg.sv", HEADER.format(unit="m_fpt_dphy_rx_cg", dom="any (one)",
                reqs="{R1}", open="none") + FIX_CG),
-        "inv": ("m_ftel_dphy_rx_clk_inv.sv", HEADER.format(unit="m_ftel_dphy_rx_clk_inv", dom="any (one)",
+        "inv": ("m_fpt_dphy_rx_clk_inv.sv", HEADER.format(unit="m_fpt_dphy_rx_clk_inv", dom="any (one)",
                 reqs="{R1}", open="none") + FIX_INV),
-        "bclk": ("m_ftel_dphy_rx_byte_clk.sv", HEADER.format(unit="m_ftel_dphy_rx_byte_clk", dom="ddr, ddrn",
+        "bclk": ("m_fpt_dphy_rx_byte_clk.sv", HEADER.format(unit="m_fpt_dphy_rx_byte_clk", dom="ddr, ddrn",
                  reqs="{R1}", open="none") + FIX_BCLK),
     }
     work = os.path.join(workdir, "check_rtl_rules_selftest")

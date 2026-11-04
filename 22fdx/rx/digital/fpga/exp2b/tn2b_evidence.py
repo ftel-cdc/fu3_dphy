@@ -37,7 +37,7 @@
                                       chosen by the TX controller, latency from the TX input to video_out, memory
                                       and length of the simulations
 
-The runs (run_exp2b.sh): SH_* take rxactivehs into R-F through the gate of fpga/rtl/m_ftel_ppi_act_gate.sv
+The runs (run_exp2b.sh): SH_* take rxactivehs into R-F through the gate of fpga/rtl/m_fpt_ppi_act_gate.sv
 (+PPI_ADAPTER=1, tb_exp2b.sv, fpga/PLAN_TN2B_GATE.md) and are the scenarios of PLAN_TN2B.md §6 with E2b-9 of
 PLAN_TN2B_GATE.md §4, their afe_model runs (SH_M_*) and the negative tests (SH_NEG-*); E2b-* without SH_ and DBG-*
 are the runs of the finding: AMD's controller without PHY takes no packet of ftel_dphy_rx unless rxactivehs rises
@@ -111,7 +111,7 @@ evidence prints one line per check, then the verdict line EVIDENCE:
             exp2b.tcl in each build used (EXP2B lines of build_<rate>/vivado.out) are those of PLAN_TN2B.md §4.2
             (BUILD_PARAMS)
   sources   every run was made from the current sources (RTL filelist, exp1/afe_model.sv, exp1/ppi_csv_mon.sv,
-            rtl/m_ftel_ppi_act_gate.sv, exp2b/*.sv): the hash in its args.txt
+            rtl/m_fpt_ppi_act_gate.sv, exp2b/*.sv): the hash in its args.txt
   copy      the blocks of tb_exp2b.sv taken from exp1/tb_exp1.sv (front end of ftel_dphy_rx, front-end check,
             instance of the wrap) differ from it in exactly the lines of PLAN_TN2B.md §4.3 (COPY_ALLOWED),
             comments, blank lines and runs of white space aside
@@ -326,7 +326,7 @@ def tbcheck(run):
         m = re.search(r'^TB CORRUPT: (\d+) bytes flipped', tb, re.M)
         items.append(('corrupt', bool(m) and m[1] == '1', f'{m[1]} bytes flipped' if m else 'no TB CORRUPT line'))
     if plus(args, 'PPI_ADAPTER', '0') != '0':
-        g = re.search(r'^TB ADAPTER: rxactivehs into xrxss_np from m_ftel_ppi_act_gate', tb, re.M)
+        g = re.search(r'^TB ADAPTER: rxactivehs into xrxss_np from m_fpt_ppi_act_gate', tb, re.M)
         m = re.search(r'^TB ADAPTER CHECK: comparisons (\d+), differences (\d+)', tb, re.M)
         items.append(('adapter', bool(g and m) and int(m[1]) > 0 and m[2] == '0',
                       (f'the gate against the model of the testbench: {m[1]} comparisons, {m[2]} differences'
@@ -822,11 +822,11 @@ def selftest():
 
 def sources_hash():
     """The hash run_exp2b.sh keeps in build_*/src.sha and in args.txt: sha256sum of the RTL filelist sources,
-    exp1/afe_model.sv, exp1/ppi_csv_mon.sv, rtl/m_ftel_ppi_act_gate.sv and exp2b/*.sv, in the order of ls."""
+    exp1/afe_model.sv, exp1/ppi_csv_mon.sv, rtl/m_fpt_ppi_act_gate.sv and exp2b/*.sv, in the order of ls."""
     files = [IP + line.rstrip('\n')[len('${FTEL_DPHY_RX_PATH}'):]
              for line in open(os.path.join(IP, 'logical', 'filelist.f')) if line.startswith('${FTEL_DPHY_RX_PATH}')]
     files += sorted([os.path.join(EXP1, f) for f in ('afe_model.sv', 'ppi_csv_mon.sv')]
-                    + [os.path.join(FPGA, 'rtl', 'm_ftel_ppi_act_gate.sv')] + glob.glob(os.path.join(HERE, '*.sv')))
+                    + [os.path.join(FPGA, 'rtl', 'm_fpt_ppi_act_gate.sv')] + glob.glob(os.path.join(HERE, '*.sv')))
     text = ''.join(f'{hashlib.sha256(open(f, "rb").read()).hexdigest()}  {f}\n' for f in files)
     return hashlib.sha256(text.encode()).hexdigest()[:16]
 
