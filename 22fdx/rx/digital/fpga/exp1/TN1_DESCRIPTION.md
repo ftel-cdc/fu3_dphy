@@ -1,13 +1,14 @@
 # TN1 - Mô tả thí nghiệm: so RX D-PHY `ftel_dphy_rx` với RX D-PHY của AMD trong mô phỏng XSIM
 
 > Tài liệu cho team FPGA: lấy RTL và testbench ở đâu, bench gồm những gì, so theo luật nào, chạy và đọc kết quả ra
-> sao. Kết quả lần chạy ngày 2026-10-20 và các lần chạy lại ngày 2026-10-26 và 2026-11-03 nằm ở
-> [`TN1_REPORT.md`](TN1_REPORT.md). Phiên bản 1.3, ngày 2026-11-04: module của RTL đổi tiền tố `m_ftel_` thành `m_fpt_`
-> (wrapper `m_fpt_dphy_rx_wrap`), theo quy tắc đặt tên của team PD; bench, lệnh và luật so không đổi. Phiên bản 1.2,
-> ngày 2026-11-03: thêm các kịch bản burst sát nhau ở mọi rate
-> (`lowgap`, `drain`, §7, §8), luật `stopstate` của `drain` (§6) và check thứ 9 (§9). Phiên bản 1.1, ngày
-> 2026-10-26: thêm hai luật timing ở PPI (§6), ba kịch bản lệch lane (§7), lệnh `skew` và `evselftest` (§8). Phiên
-> bản 1.0: 2026-10-22. Nhóm D-PHY RX viết.
+> sao. Kết quả lần chạy ngày 2026-10-20 và các lần chạy lại ngày 2026-10-26, 2026-11-03 và 2026-11-04 nằm ở
+> [`TN1_REPORT.md`](TN1_REPORT.md). Phiên bản 1.4, ngày 2026-11-04: thứ tự compile của RTL chuyển sang
+> `logical/filelist_rtl.f`, đường dẫn viết `$DPHY_RX_PATH`; `logical/filelist.f` nay là filelist của flow tổng hợp của
+> team PD; bench, lệnh và luật so không đổi. Phiên bản 1.3, ngày 2026-11-04: module của RTL đổi tiền tố `m_ftel_`
+> thành `m_fpt_` (wrapper `m_fpt_dphy_rx_wrap`), theo quy tắc đặt tên của team PD; bench, lệnh và luật so không đổi.
+> Phiên bản 1.2, ngày 2026-11-03: thêm các kịch bản burst sát nhau ở mọi rate (`lowgap`, `drain`, §7, §8), luật
+> `stopstate` của `drain` (§6) và check thứ 9 (§9). Phiên bản 1.1, ngày 2026-10-26: thêm hai luật timing ở PPI (§6),
+> ba kịch bản lệch lane (§7), lệnh `skew` và `evselftest` (§8). Phiên bản 1.0: 2026-10-22. Nhóm D-PHY RX viết.
 
 ## 1. Thí nghiệm làm gì
 
@@ -42,7 +43,7 @@ cd fu3_dphy/22fdx/rx/digital          # mọi lệnh trong tài liệu này ch�
 
 | Thành phần | Đường dẫn | Ghi chú |
 |---|---|---|
-| RTL `ftel_dphy_rx` | [`logical/`](../../logical/) | 22 file SystemVerilog. Thứ tự compile ở [`logical/filelist.f`](../../logical/filelist.f); đường dẫn trong đó bắt đầu bằng `${FTEL_DPHY_RX_PATH}`, script tự thay. Top là [`m_fpt_dphy_rx_wrap.sv`](../../logical/m_fpt_dphy_rx_wrap.sv) |
+| RTL `ftel_dphy_rx` | [`logical/`](../../logical/) | 22 file SystemVerilog. Thứ tự compile ở [`logical/filelist_rtl.f`](../../logical/filelist_rtl.f); đường dẫn trong đó bắt đầu bằng `$DPHY_RX_PATH`, script tự thay. Top là [`m_fpt_dphy_rx_wrap.sv`](../../logical/m_fpt_dphy_rx_wrap.sv) |
 | Package cấu hình | [`logical/ftel_dphy_rx_config_pkg.sv`](../../logical/ftel_dphy_rx_config_pkg.sv) | Sinh từ [`config/ftel_dphy_rx.yaml`](../../config/ftel_dphy_rx.yaml) bằng [`config/validate_config.py`](../../config/validate_config.py); đã có sẵn, không cần sinh lại |
 | Testbench top | [`fpga/exp1/tb_exp1.sv`](tb_exp1.sv) | Danh sách plusarg nằm ở đầu file |
 | Line generator | [`fpga/exp1/dphy_line_gen.sv`](dphy_line_gen.sv) | TX giả: phát tín hiệu D-PHY và ghi file truth |
@@ -287,6 +288,7 @@ bản, 113 run của bộ `M_*`, R-80, E1-6a, E1-6b, NEG-skew, 24 LG-*, 24 DR-* 
   - pha 2: E1-5 ở 260/800/1440/1500 Mb/s.
 - Lần chạy lại 2026-10-26 chạy năm lệnh nối tiếp, ở mức ưu tiên thấp và cùng lúc với việc khác, trong 59 phút.
 - Lần chạy lại 2026-11-03 chạy bảy lệnh nối tiếp, cùng lúc với TN2, trong 58 phút.
+- Hai lần chạy lại 2026-11-04 cũng chạy bảy lệnh nối tiếp, cùng lúc với TN2, mỗi lần trong 60-61 phút.
 
 ## 9. Đọc kết quả
 

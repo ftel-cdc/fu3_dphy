@@ -2,13 +2,19 @@
 
 > Báo cáo kết quả TN2 cho team FPGA. Cách dựng bench và cách chạy lại nằm ở
 > [`TN2_DESCRIPTION.md`](TN2_DESCRIPTION.md).
-> RTL `ftel_dphy_rx` theo HAS v0.16, là RTL của TN1, giống RTL trên nhánh `dev` của repo fu3_dphy từ commit `66f9f39`.
+> Lần chạy đầu dùng RTL `ftel_dphy_rx` theo HAS v0.16, là RTL của TN1, giống RTL trên nhánh `dev` của repo fu3_dphy
+> từ commit `66f9f39`.
 > - TN2a: chạy ngày 2026-10-22, 60 run. Kiểm lại ngày 2026-10-26, không mô phỏng lại, với bộ so có thêm hai luật timing
 >   ở PPI: kết quả không đổi.
 > - TN2b: chạy ngày 2026-10-23, 39 run. Chạy lại ngày 2026-10-26 với khối chỉnh `rxactivehs` thay cho testbench, thêm
 >   kịch bản lỗi SoT sync E2b-9: 40 run.
+> - Chạy lại toàn bộ ngày 2026-11-03 trên RTL theo HAS v0.17, trong đó lane về trạng thái Stop ngay sau mỗi burst:
+>   ngoài cột `stopstate` của RX mình, mọi output trùng lần chạy trước (§5.5).
+> - Chạy lại toàn bộ hai lần ngày 2026-11-04, sau hai thay đổi không đổi chức năng: output trùng từng byte lần chạy
+>   trước (§5.5).
 >
-> Phiên bản 1.0, ngày 2026-10-26. Nhóm D-PHY RX viết.
+> Phiên bản 1.1, ngày 2026-11-04: các lần chạy lại 2026-11-03 và 2026-11-04 (§1, §5.5, §8). Phiên bản 1.0, ngày
+> 2026-10-26. Nhóm D-PHY RX viết.
 
 ## 1. Tóm tắt
 
@@ -35,6 +41,12 @@
     line, và một line sai vẫn ra `video_out`; chỉ ISR có cờ CRC (§4.5).
 - **Kiểm chứng:** script kiểm chứng riêng của mỗi bench đạt mọi check (TN2a 10/10, TN2b 12/12). Tự thử của chúng bắt
   đủ các lỗi cài sẵn, kể cả ba lỗi giống các lỗi tester team FPGA đã cài vào capture của TN1 (§5).
+- **Chạy lại trên RTL mới (2026-11-03, 2026-11-04):** toàn bộ TN2a và TN2b chạy lại ba lần, và không kết luận nào đổi
+  (§5.5).
+  - RTL theo HAS v0.17 sửa lỗi bỏ lỡ burst khi hai burst sát nhau ở rate thấp, lỗi mà TN1 tìm ra. Ở TN2 chỉ cột
+    `stopstate` của RX mình đổi, và bench không so cột này.
+  - Sau đó có hai thay đổi không đổi chức năng: tên module đổi sang `m_fpt_`, và hai cell clock có thêm nhánh cho
+    flow tổng hợp của team PD. Output trùng từng byte lần chạy trước.
 - **Giới hạn chính:** TX, RX AMD, ba subsystem và front end đều là model mô phỏng của AMD. Kết luận cho board còn cần
   TN3.
 
@@ -329,7 +341,8 @@ chu kỳ của `rxsynchs`. Đó là PPI của `ftel_dphy_rx` sau một lỗi SoT
 ## 5. Vì sao tin được kết quả
 
 Mỗi bench có một script kiểm chứng, kiểm lại toàn bộ output bằng code riêng, không dùng chung với bộ so `csi2_dump.py`.
-Ngày 2026-10-26 cả hai được chạy lại trên output đã lưu.
+Ngày 2026-10-26 cả hai được chạy lại trên output đã lưu. Ngày 2026-11-03 và 2026-11-04 chúng chạy trên output của các
+lần chạy lại ở §5.5, và đều đạt.
 
 ### 5.1 TN2a: [`tn2a_evidence.py`](tn2a_evidence.py), **EVIDENCE: PASS (10/10 checks)**
 
@@ -371,7 +384,7 @@ Ngày 2026-10-26 cả hai được chạy lại trên output đã lưu.
   thử trên các ví dụ CRC và ECC của CSI-2 v1.3 và trên capture giả.
 - **`evselftest`:** mỗi script kiểm chứng được thử trên bản copy của output thật, mỗi lần cài một lỗi; mỗi lỗi phải làm
   hỏng đúng check của nó, không thừa, không thiếu, và khi không cài lỗi thì mọi check đạt. Ngày 2026-10-26: TN2a 12
-  lỗi, PASS; TN2b 19 lỗi, PASS. Ví dụ ở TN2b: một pixel lật bit, một line bị bỏ, một bit CRC bật trong ISR, khối chỉnh
+  lỗi, PASS; TN2b 19 lỗi, PASS. Sau mỗi lần chạy lại ở §5.5: như vậy. Ví dụ ở TN2b: một pixel lật bit, một line bị bỏ, một bit CRC bật trong ISR, khối chỉnh
   khác model một lần, `rxactivehs` lên trong burst có lỗi sync.
 - **Kiểm lại không mô phỏng** (`recheck`): TN2a 6 s, TN2b 31 s. Ngày 2026-10-26, 80 file của TN2b viết lại trùng từng
   byte với bản trước.
@@ -384,6 +397,31 @@ lệch giữa các lane ([`../exp1/TN1_REPORT.md`](../exp1/TN1_REPORT.md) §5).
 - Ba lỗi giống các lỗi tester đã cài nằm trong `evselftest` của TN2a và TN2b, và đều bị bắt.
 - Mọi run của TN2a và TN2b đạt cả hai luật (§3.5). Ở PPI vào R-F của TN2b, `rxsynchs` cùng chu kỳ với byte đầu, và
   lệch giữa các lane bằng 0 ở mọi run `SH_*` có nhiều lane, trừ NEG-front.
+
+### 5.5 Chạy lại trên RTL mới (2026-11-03, 2026-11-04)
+
+Mỗi lần, toàn bộ TN2a (60 run) và TN2b (40 run) chạy lại, build lại từ đầu, và output được so từng byte với lần
+chạy ngay trước. Phép so bỏ qua dòng ghi mã băm nguồn, vì mã này phải đổi khi nguồn đổi; check `sources` kiểm nó.
+
+| Ngày | RTL đổi gì | TN2a | TN2b | Kiểm chứng |
+|---|---|---|---|---|
+| 2026-11-03 | HAS v0.17: lane về Stop ngay sau burst, không đợi burst ra hết PPI; tham số tổng hợp mới `PARA_STOP_DRAIN_EN`, mặc định 0 ([`../exp1/TN1_REPORT.md`](../exp1/TN1_REPORT.md) §3.6) | 0 khác ngoài cột `stopstate` của RX mình; cột này khác ở 59/60 run, trừ NEG-front (RX mình không nhận burst nào) | 0 khác ngoài cột `stopstate`, kể cả `frames.txt`; cột này khác ở 39/40 run, trừ SH_NEG-front | TN2a 10/10, TN2b 12/12 |
+| 2026-11-04 | Tên module đổi tiền tố `m_ftel_` thành `m_fpt_`, theo quy tắc đặt tên của team PD | 0 khác ở mọi cột kể cả `stopstate` (486 file), sau khi thay tên cũ bằng tên mới | Như TN2a (449 file) | TN2a 10/10, TN2b 12/12 |
+| 2026-11-04 | Hai cell clock (clock gate, bộ đảo clock) có thêm nhánh cho flow tổng hợp của team PD, gọi cell của thư viện SoC; mô phỏng không dùng nhánh này | 0 khác ở mọi cột kể cả `stopstate` (486 file) | Như TN2a (449 file) | TN2a 10/10, TN2b 12/12 |
+
+Ở lần chạy cuối, mọi check ra đúng các con số của bảng §5.1 và §5.2, trừ mã băm nguồn. Ở cả ba lần, `evselftest` đạt
+với cùng các lỗi cài sẵn (§5.3). Mỗi lần, TN2a chạy trong khoảng 1,5 giờ, TN2b trong khoảng 1,6 giờ, nối tiếp nhau và cùng lúc với
+TN1.
+
+**Cột `stopstate` ở lần 2026-11-03.** Bench ghi cột này nhưng không so ([`TN2_DESCRIPTION.md`](TN2_DESCRIPTION.md)
+§6.1, §11). Mẫu lấy theo byte clock của RX mình.
+- Ở mọi run, trừ ba run ở 260 Mb/s của TN2b, số xung Stop không đổi. Mỗi xung lên sớm hơn RTL cũ 2-5 byte clock ở
+  TN2a, 3-5 ở TN2b, như ở TN1.
+- Ba run ở 260 Mb/s của TN2b (E2b-4a, SH_E2b-4a, SH_M_E2b-4a) có 35 burst mỗi lane, tức 34 khe giữa các burst.
+  - Với RTL cũ, xung Stop trong khe ngắn hơn một mẫu (30,8 ns): lane 0 và 1 không thấy xung nào, lane 2 và 3 thấy
+    31/34 xung, mỗi xung 1 mẫu.
+  - Với RTL mới, xung dài 3-4 mẫu và thấy ở 34/34 khe trên mọi lane.
+  - Dữ liệu, `rxactivehs` và `frames.txt` của ba run này không đổi.
 
 ## 6. Giới hạn
 
@@ -425,7 +463,7 @@ lệch giữa các lane ([`../exp1/TN1_REPORT.md`](../exp1/TN1_REPORT.md) §5).
 
 - Output nằm ở `fpga/work/exp2/` và `fpga/work/exp2b/` trên máy của nhóm D-PHY RX, không có trong repo (git bỏ qua):
   khoảng 0,5 GB cho TN2a và 0,8 GB cho TN2b, kể cả build. Bản lưu của 39 run TN2b ngày 2026-10-23 nặng thêm khoảng
-  0,45 GB.
+  0,45 GB. Mỗi bản lưu của một lần chạy, dùng cho phép so ở §5.5, nặng khoảng 0,05 GB cho TN2a và 0,45 GB cho TN2b.
 - Có hai cách lấy số liệu:
   - chạy lại theo [`TN2_DESCRIPTION.md`](TN2_DESCRIPTION.md);
   - xin nhóm một bản copy.

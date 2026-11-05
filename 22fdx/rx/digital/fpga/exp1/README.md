@@ -85,7 +85,7 @@ Mô phỏng chạy trong XSIM của Vivado 2025.2, part xcvp1902.
 - Trên xcvp1902, IP này chỉ chạy 260-3200 Mb/s.
 
 **RX mình:**
-- RTL lấy nguyên từ [`logical/filelist.f`](../../logical/filelist.f).
+- RTL lấy nguyên từ [`logical/filelist_rtl.f`](../../logical/filelist_rtl.f).
 - Field run-time (`hs_settle_cyc`, `clk_settle_cyc`, `eot_skip_bytes`) lấy từ model của
   [`validate_config.py`](../../config/validate_config.py) theo rate
   ([`cfg_for_rate.py`](cfg_for_rate.py)). `tinit` là 100 µs.
@@ -269,6 +269,16 @@ mâu thuẫn: HAS Table 1-3 hứa 80-1792 Mb/s, nhưng §4.5 để lane bỏ l�
   ở mọi cột trừ `stopstate_x`; `stopstate_x` lên sớm hơn 2-5 byte clock, số xung không đổi. Các lần chạy trước
   được giữ ở `fpga/work/exp1/_pre_nowait/` (gitignored).
 
+**Lần chạy 2026-11-04 (không đổi chức năng).** Cả bộ TN1 (407 run, 2442 file) chạy lại hai lần, build lại từ đầu, và
+được so bằng [`../tools/compare_runs.py`](../tools/compare_runs.py) ở mọi cột kể cả `stopstate_x`, bỏ dòng `sources`.
+Cả hai lần: 0 khác, 0 run chưa chạy lại; evidence 9/9; evselftest PASS.
+- Đổi tên module `m_ftel_` thành `m_fpt_` ([`../PLAN_RENAME_FPT.md`](../PLAN_RENAME_FPT.md)): so với
+  `fpga/work/exp1/_pre_rename/`, bản lưu của lần chạy 2026-11-03, sau khi thay tên cũ bằng tên mới
+  (`--subst m_ftel_=m_fpt_`).
+- Bản sign-off cho flow PD ([`../PLAN_PD_SIGNOFF.md`](../PLAN_PD_SIGNOFF.md)): bench đọc `logical/filelist_rtl.f`;
+  hai cell clock có nhánh `FPT_SIGNOFF` mà bench không định nghĩa. So với `fpga/work/exp1/_pre_signoff/`, bản lưu
+  của lần đổi tên.
+
 ## 7. Kiểm chứng: vì sao tin được kết quả
 
 Kết quả chỉ đáng tin khi trả lời được sáu câu hỏi dưới đây, mỗi lớp kiểm một câu.
@@ -283,7 +293,8 @@ python3 fpga/exp1/tn1_evidence.py          # mỗi check một dòng PASS/FAIL, 
 
 Kết quả ngày 2026-10-20: **EVIDENCE: PASS (8/8 checks)**. Ngày 2026-10-26, trên lần chạy lại trong fu3_dphy với
 timing ở PPI: **EVIDENCE: PASS (8/8 checks)**. Ngày 2026-11-03, trên RTL của HAS v0.17: **EVIDENCE: PASS (9/9
-checks)**, thêm check `lowgap`.
+checks)**, thêm check `lowgap`. Ngày 2026-11-04, sau mỗi lần chạy lại ở §6: **EVIDENCE: PASS (9/9 checks)**, cùng số
+với cột 2026-11-03; riêng mã băm `sources` đổi theo nguồn.
 
 | Check | Kiểm gì | 2026-10-20 | 2026-10-26 | 2026-11-03 |
 |---|---|---|---|---|
@@ -355,7 +366,7 @@ mô phỏng lại): 355 run không đổi kết luận, bảng `window` (Table 4
 ### 7.4 Lớp 4: thứ được test có đúng là thứ đã commit không?
 
 - **Nguồn đã chạy trùng với repo.**
-  - Mã băm nguồn của mọi build (RTL theo `filelist.f`, và `exp1/*.sv`) bằng mã băm nguồn hiện tại.
+  - Mã băm nguồn của mọi build (RTL theo `filelist_rtl.f`, và `exp1/*.sv`) bằng mã băm nguồn hiện tại.
   - RTL không đổi kể từ commit `465ff69`.
   - Mọi build tự compile lại khi một file nguồn đổi.
 - **Cấu hình mỗi run đúng giá trị model HAS cho rate đó.** Ví dụ E1-4b (800 Mb/s) chạy `eot_skip_bytes` 6; E1-1
@@ -440,6 +451,7 @@ Script kiểm chứng cũng phải biết báo FAIL. Các phép thử ngày 2026
 | NEG-drain PASS trong `check.txt` | `runs` | đúng |
 
 Kết quả: `evselftest: PASS` (1 ca sạch, 15 lỗi), 3 s. Ngày 2026-11-03: `evselftest: PASS` (1 ca sạch, 18 lỗi), 6 s.
+Ngày 2026-11-04, sau mỗi lần chạy lại: như 2026-11-03.
 
 ### 7.8 Giới hạn của phần kiểm chứng
 

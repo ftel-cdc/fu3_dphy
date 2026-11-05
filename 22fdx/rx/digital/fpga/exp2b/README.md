@@ -233,7 +233,7 @@ Mặc định: 2 frame 640 × 16 (WC 800 byte), `counter`, 1440 Mb/s, 4 lane.
 - **Phát hiện** (`run_exp2b.sh finding`, 9 run): E2b-1, E2b-4a/b/c, E2b-6 không chỉnh PPI, và 4 run chẩn đoán
   `DBG-E2b-1-xfill`, `DBG-E2b-1-amd1..3`.
 
-## 6. Kết quả lần chạy 2026-10-23 (lần chạy lại qua khối chỉnh ngày 2026-10-26: §6.6)
+## 6. Kết quả lần chạy 2026-10-23 (lần chạy lại qua khối chỉnh ngày 2026-10-26: §6.6; trên RTL mới: §6.7)
 
 39/39 run ra đúng kỳ vọng, cùng hash nguồn `1ac03101efd59a1a`. RTL `logical/` và `config/` không đổi so với commit
 `cd1f0b2`.
@@ -394,6 +394,23 @@ TN2b không gặp trường hợp đó.
 - 🔍 Chưa biết D-PHY của AMD xử lý lỗi sync ra sao (TN2b không cài được lỗi đó vào line của TX AMD).
 - Quy tắc khác cho burst lỗi sync (nâng `rxactivehs` cùng `errsotsynchs`) chưa thử: chờ bạn quyết có cần so không.
 
+### 6.7 Chạy lại trên RTL mới (2026-11-03, 2026-11-04)
+
+Cả 40 run (`shim` và `finding`) chạy lại ba lần, build lại từ đầu, và được so bằng
+[`../tools/compare_runs.py`](../tools/compare_runs.py) với bản lưu của lần trước, bỏ dòng `sources`:
+- 2026-11-03, HAS v0.17 ([`../PLAN_EOT_NOWAIT.md`](../PLAN_EOT_NOWAIT.md)): 0 khác ngoài cột `stopstate` của RX mình,
+  kể cả `frames.txt`; cột này khác ở 39 run (trừ SH_NEG-front). Bản lưu: `fpga/work/exp2b/_pre_nowait/`.
+  - Ở 36 run còn lại, mỗi xung lên sớm hơn 3-5 byte clock, số xung không đổi.
+  - Ở E2b-4a, SH_E2b-4a và SH_M_E2b-4a (260 Mb/s, 35 burst mỗi lane, 34 khe): với RTL cũ, xung Stop trong khe ngắn
+    hơn một mẫu (byte clock, 30,8 ns), nên lane 0 và 1 không thấy xung nào, lane 2 và 3 thấy 31/34 xung rộng 1 mẫu;
+    với RTL mới, xung rộng 3-4 mẫu, thấy ở 34/34 khe trên mọi lane. Dữ liệu và `rxactivehs` không đổi.
+- 2026-11-04, đổi tên `m_fpt_` ([`../PLAN_RENAME_FPT.md`](../PLAN_RENAME_FPT.md)): 449 file, 0 khác ở mọi cột sau
+  `--subst m_ftel_=m_fpt_`. Bản lưu: `fpga/work/exp2b/_pre_rename/`.
+- 2026-11-04, bản sign-off cho flow PD ([`../PLAN_PD_SIGNOFF.md`](../PLAN_PD_SIGNOFF.md)): 449 file, 0 khác ở mọi
+  cột. Bản lưu: `fpga/work/exp2b/_pre_signoff/`.
+
+Mỗi lần, `shim` rồi `finding` chạy nối tiếp trong khoảng 1,6 giờ, sau TN2a và cùng lúc với TN1.
+
 ## 7. Kiểm chứng: vì sao tin được kết quả
 
 [`tn2b_evidence.py`](tn2b_evidence.py) kiểm lại tự động từ output trong `fpga/work/exp2b`:
@@ -405,7 +422,8 @@ python3 fpga/exp2b/tn2b_evidence.py selftest   # bộ giải mã tự thử trê
 ```
 
 Kết quả ngày 2026-10-23: **EVIDENCE: PASS (11/11 checks)**. Ngày 2026-10-26, trên 40 run của lần chạy lại qua khối
-chỉnh: **EVIDENCE: PASS (12/12 checks)**, có thêm check `gate`.
+chỉnh: **EVIDENCE: PASS (12/12 checks)**, có thêm check `gate`. Sau mỗi lần chạy lại ở §6.7: **PASS (12/12
+checks)**; lần cuối cho đúng các con số của cột 2026-10-26, trừ mã băm `sources`.
 
 | Check | Kiểm gì | 2026-10-23 (shim mode 3) | 2026-10-26 (khối chỉnh) |
 |---|---|---|---|
@@ -416,7 +434,7 @@ chỉnh: **EVIDENCE: PASS (12/12 checks)**, có thêm check `gate`.
 | `front` | Đầu ra LP của hai bộ buffer trùng nhau ở mọi lần đổi sau 2,5 ps; RX mình sau `IBUFDS_DPHY` trừ khi `+AFE=model` | 38 run, 6 770 088 lần so, 0 khác; 13 run sau `afe_model` | 39 run, 6 995 053 lần so, 0 khác; 13 run sau `afe_model` |
 | `afe` | `term_en` không trễ, không thiếu (NEG-front xem `neg`) | 38/38 | 39/39 |
 | `config` | Cấu hình RX mình đúng model HAS ở rate đó; tham số ba subsystem ở 4 build đúng §3 | 39 run, 4 build | 40 run, 4 build |
-| `sources` | Hash nguồn trong `args.txt` từng run bằng hash nguồn hiện tại (RTL theo `filelist.f`, `exp1/afe_model.sv`, `exp1/ppi_csv_mon.sv`, từ 26/10 `rtl/m_fpt_ppi_act_gate.sv`, `exp2b/*.sv`) | 39/39, `1ac03101efd59a1a` | 40/40, `ce12047cbce523a4` |
+| `sources` | Hash nguồn trong `args.txt` từng run bằng hash nguồn hiện tại (RTL theo `filelist_rtl.f`, `exp1/afe_model.sv`, `exp1/ppi_csv_mon.sv`, từ 26/10 `rtl/m_fpt_ppi_act_gate.sv`, `exp2b/*.sv`) | 39/39, `1ac03101efd59a1a` | 40/40, `ce12047cbce523a4` |
 | `copy` | Ba khối lấy từ `tb_exp1.sv` khác đúng các dòng đã liệt kê (0, 1 và 6 dòng) | 29, 15, 59 dòng code | 29, 15, 59 dòng code |
 | `neg` | NEG-ecc: bit cài rơi vào header, được sửa; `check.txt` đạt; chỉ R-F báo ECC 1 bit; `regs` là mục duy nhất của `tbcheck` hỏng. NEG-crc: pixel sai duy nhất của R-F đúng là pixel mà bit cài thuộc về (frame 0, line 0, pixel 4: 0x024 thay cho 0x004), chỉ R-F báo CRC, `check.txt` hỏng đúng `pixels-ftel`, `ppi-ftel`, `packets-xil-ftel`. NEG-front: front check đếm ra khác biệt, R-X vẫn đạt | 3/3 đúng chỗ | 3/3 đúng chỗ |
 | `finding` | §6.1: 5 run không chỉnh đúng dấu hiệu (R-X đạt, PPI vào R-F = PPI R-X, R-F 0 line, 0 packet; `rxactivehs` sớm ở mọi burst; D-PHY AMD cùng lúc); 4 run chẩn đoán đúng quy luật; mọi run `SH_*` (trừ NEG-front) có `rxactivehs` cùng `rxsynchs` | đúng, 29 run `SH_*` | đúng, 30 run `SH_*` |
@@ -442,7 +460,8 @@ chỉnh: **EVIDENCE: PASS (12/12 checks)**, có thêm check `gate`.
 `evselftest` chạy `evidence` trên các run thật, mỗi lần cài một lỗi; các run được link vào thư mục tạm, chỉ run bị
 sửa được chép sang rồi mới sửa (của build thì chỉ chép file bị sửa). Mỗi lỗi phải làm hỏng đúng các check ghi dưới.
 Ngày 23/10 cả 14 ca đúng (`evselftest: PASS`, 7,5 s). Ngày 26/10 cả 20 ca đúng (`evselftest: PASS`, 8,7 s), trên 40
-run của lần chạy lại. `checker` không có ca cài lỗi, vì bản thân nó là selftest của `csi2_dump.py`.
+run của lần chạy lại. Sau mỗi lần chạy lại ở §6.7, cũng 20 ca đúng. `checker` không có ca cài lỗi, vì bản thân nó
+là selftest của `csi2_dump.py`.
 
 | Lỗi cài | Check phải hỏng |
 |---|---|

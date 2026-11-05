@@ -8,7 +8,9 @@
 > run cho kết quả như cũ, output trùng từng byte với lần chạy 2026-10-20; thêm 3 run lệch lane (§3.4); kiểm chứng 8/8.
 > Chạy lại toàn bộ ngày 2026-11-03 trên RTL theo HAS v0.17, trong đó lane về trạng thái Stop ngay sau mỗi burst (§4):
 > ngoài cột `stopstate`, mọi capture trùng lần chạy 2026-10-26; thêm 49 run burst sát nhau (§3.6); kiểm chứng 9/9.
-> Phiên bản 1.2, ngày 2026-11-03 (1.1: 2026-10-26, 1.0: 2026-10-22). Nhóm D-PHY RX viết.
+> Chạy lại toàn bộ hai lần ngày 2026-11-04, sau hai thay đổi không đổi chức năng (§5): output trùng từng byte lần
+> chạy trước; kiểm chứng 9/9.
+> Phiên bản 1.3, ngày 2026-11-04 (1.2: 2026-11-03, 1.1: 2026-10-26, 1.0: 2026-10-22). Nhóm D-PHY RX viết.
 
 ## 1. Tóm tắt
 
@@ -43,6 +45,11 @@
     ở `stopstate` (§3.6).
   - Toàn bộ TN1 chạy lại trên RTL mới: ngoài cột `stopstate`, mọi capture trùng lần chạy trước (§3.6); kiểm chứng 9/9
     (§5).
+- **Cập nhật 2026-11-04:** hai thay đổi RTL không đổi chức năng, mỗi thay đổi kèm một lần chạy lại toàn bộ TN1 (§5).
+  - Tên module đổi tiền tố từ `m_ftel_` sang `m_fpt_`, theo quy tắc đặt tên của team PD.
+  - Hai cell clock (clock gate và bộ đảo clock) có thêm nhánh cho flow tổng hợp của team PD, nhánh này gọi cell của
+    thư viện SoC. Mô phỏng không dùng nhánh đó, nên vẫn chạy đúng mô hình hành vi cũ.
+  - Cả hai lần, output của 407 run trùng từng byte lần chạy trước, kể cả cột `stopstate`; kiểm chứng 9/9.
 
 ## 2. Thí nghiệm
 
@@ -293,6 +300,15 @@ lần chạy lại, với cả hai luật timing ở PPI: vẫn **PASS (8/8 chec
 Các con số của 2026-11-03: 279 run = 230 + 24 LG-* + 24 DR-* + NEG-drain; 508 capture = 459 + 49, vì mỗi run mới chỉ
 có capture của RX mình; build thứ 12 là bản build với `PARA_STOP_DRAIN_EN` = 1.
 
+Ngày 2026-11-04 toàn bộ TN1 chạy lại hai lần, mỗi lần build lại từ đầu: một lần sau khi đổi tên module, một lần sau
+khi hai cell clock có nhánh cho flow tổng hợp của team PD.
+- Mỗi lần, 407 run (279 run ở trên và 128 run đo cửa sổ cắt trailer, 2442 file) được so từng byte với lần chạy ngay
+  trước, ở mọi cột kể cả `stopstate`: 0 khác, 0 run thiếu.
+- Phép so bỏ qua dòng ghi mã băm nguồn, vì mã này phải đổi khi nguồn đổi; check `sources` kiểm nó. Ở lần đổi tên,
+  tên module cũ trong output được thay bằng tên mới trước khi so.
+- Kiểm chứng: **PASS (9/9 checks)** cả hai lần, với đúng các con số của cột 2026-11-03.
+- `tn1_evidence.py evselftest` (18 lỗi cài sẵn và một ca sạch, xem dưới) cũng đạt cả hai lần.
+
 Các bộ kiểm cũng được thử xem có biết báo FAIL không:
 - Bộ so bắt đủ 4 lỗi cài sẵn: đảo một byte, mất một burst, cờ lỗi SoT, sync hai lần. Luật thời gian bắt được ca mất một
   burst rồi thừa một burst cùng payload. Từ 2026-10-26, bộ so bắt thêm ba lỗi tester đã cài, mỗi lỗi đúng luật của nó.
@@ -361,7 +377,8 @@ CSI-2 RX. Kết quả nằm ở [`../exp2/TN2_REPORT.md`](../exp2/TN2_REPORT.md)
 - Output của lần chạy nằm ở `fpga/work/exp1/` trên máy của nhóm D-PHY RX. Thư mục này không có trong repo (git bỏ qua).
   Lần chạy 2026-10-20, kèm bản lưu của lần chạy đầu, nặng khoảng 1,7 GB. Lần chạy lại 2026-10-26 trong repo fu3_dphy
   nặng khoảng 0,8 GB. Lần chạy 2026-11-03 nặng khoảng 0,9 GB; bản lưu của lần chạy 2026-10-26, dùng cho phép so ở
-  §3.6, nặng khoảng 0,6 GB.
+  §3.6, nặng khoảng 0,6 GB. Lần chạy lại cuối của 2026-11-04 nặng khoảng 0,9 GB; bản lưu của lần chạy ngay trước,
+  dùng cho phép so ở §5, nặng khoảng 0,6 GB.
 - Có hai cách lấy số liệu:
   - chạy lại theo [`TN1_DESCRIPTION.md`](TN1_DESCRIPTION.md);
   - xin nhóm một bản copy.

@@ -56,6 +56,16 @@ IP and of the device, and the tools that check the captures.
 > - TN1 was run again on the new RTL (230 runs and the 128 of `window`): every capture equals that of 2026-10-26 in
 >   every column but `stopstate`. `exp1/tn1_evidence.py` passes 9/9 with the new check `lowgap`.
 >
+> On 2026-11-04 two changes without a functional change were made for the PD team, each followed by a full rerun of
+> TN1 and TN2:
+> - the modules take the prefix `m_fpt_` of the PD naming rules ([`PLAN_RENAME_FPT.md`](PLAN_RENAME_FPT.md));
+> - a sign-off view for the synthesis and LEC flow of the PD team ([`PLAN_PD_SIGNOFF.md`](PLAN_PD_SIGNOFF.md)): the
+>   benches read the compile order from `logical/filelist_rtl.f`, and the two clock cells gain an `FPT_SIGNOFF`
+>   branch that no bench defines.
+> - Each time, all 507 runs (TN1 407, TN2a 60, TN2b 40) equal the runs before byte for byte in every column,
+>   `stopstate` included (`tools/compare_runs.py`, the `sources` line aside). The evidence passes 9/9, 10/10 and
+>   12/12, and the three evselftests pass.
+>
 > TN2a (`exp2/`, [`PLAN_TN2A.md`](PLAN_TN2A.md)) drives both receivers with AMD's own D-PHY TX (`mipi_dphy` 4.3
 > MASTER, driven at its PPI) instead of the line generator.
 > - Both receivers pass all 29 scenarios, at eight rates from 260 to 1500 Mb/s and with 1, 2 and 4 lanes. The same
@@ -100,6 +110,9 @@ fpga/
 │                          PARA_STOP_DRAIN_EN), the lowgap and drain runs, TN1 and TN2 run again
 ├── PLAN_RENAME_FPT.md   ← plan and results of the module prefix m_fpt_ of the PD naming rules (HAS v0.18),
 │                          sdc/constraint.sdc, TN1 and TN2 run again
+├── PLAN_PD_SIGNOFF.md   ← plan and results of the sign-off view for the synthesis and LEC flow of the PD team
+│                          (DPHY_RX_PATH, filelist_rtl.f and filelist.f, FPT_SIGNOFF branch of the two clock
+│                          cells), TN1 and TN2 run again
 ├── exp1/                ← TN1: D-PHY line generator, AFE model, PPI monitor, testbench, run_exp1.sh (XSIM),
 │                          eot_window.py (table of the eot_skip_bytes window); README.md describes the tests;
 │                          TN1_DESCRIPTION.md and TN1_REPORT.md: description and report for the FPGA team;

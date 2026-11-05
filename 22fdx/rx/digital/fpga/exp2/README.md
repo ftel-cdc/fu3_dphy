@@ -228,6 +228,18 @@ E1-5 của TN1.
 
 Kết quả chạy trên RTL của commit `5fa890b` (HAS v0.16). `logical/` và `config/` không đổi so với commit đó.
 
+**Chạy lại trên RTL mới.** Cả 60 run chạy lại ba lần, build lại từ đầu, và được so bằng
+[`../tools/compare_runs.py`](../tools/compare_runs.py) với bản lưu của lần trước, bỏ dòng `sources`:
+- 2026-11-03, HAS v0.17 ([`../PLAN_EOT_NOWAIT.md`](../PLAN_EOT_NOWAIT.md)): 0 khác ngoài cột `stopstate` của RX mình;
+  cột này khác ở 59 run (trừ NEG-front), mỗi xung lên sớm hơn 2-5 byte clock, số xung không đổi. Bản lưu:
+  `fpga/work/exp2/_pre_nowait/`.
+- 2026-11-04, đổi tên `m_fpt_` ([`../PLAN_RENAME_FPT.md`](../PLAN_RENAME_FPT.md)): 486 file, 0 khác ở mọi cột sau
+  `--subst m_ftel_=m_fpt_`. Bản lưu: `fpga/work/exp2/_pre_rename/`.
+- 2026-11-04, bản sign-off cho flow PD ([`../PLAN_PD_SIGNOFF.md`](../PLAN_PD_SIGNOFF.md)): 486 file, 0 khác ở mọi cột.
+  Bản lưu: `fpga/work/exp2/_pre_signoff/`.
+
+Mỗi lần, `all`, `model` và `neg` chạy nối tiếp trong khoảng 1,5 giờ, cùng lúc với TN1.
+
 **Trả lời ba câu hỏi ở §1:**
 1. **Có.** Với TX thật, cả hai RX nhận đủ, đúng thứ tự, toàn bộ payload, 0 cờ lỗi. Điều này đúng ở 8 rate từ 260 tới
    1500 Mb/s, ở 1, 2 và 4 lane, và cả với lane kết thúc lệch nhau, payload giống sync, PRBS-9, burst sát nhau.
@@ -301,7 +313,8 @@ python3 fpga/exp2/tn2a_evidence.py evselftest    # script kiểm chứng tự th
 ```
 
 Kết quả ngày 2026-10-22: **EVIDENCE: PASS (10/10 checks)**. Ngày 2026-10-26, sau khi thêm timing ở PPI vào cả
-`csi2_dump.py` lẫn bộ giải mã của `tn1_evidence.py`: vẫn **PASS (10/10 checks)**.
+`csi2_dump.py` lẫn bộ giải mã của `tn1_evidence.py`: vẫn **PASS (10/10 checks)**. Sau mỗi lần chạy lại ở §6 (2026-11-03,
+hai lần 2026-11-04): **PASS (10/10 checks)**; lần cuối cho đúng các con số của bảng dưới, trừ mã băm `sources`.
 
 | Check | Kiểm gì | Kết quả 2026-10-22 |
 |---|---|---|
@@ -313,7 +326,7 @@ Kết quả ngày 2026-10-22: **EVIDENCE: PASS (10/10 checks)**. Ngày 2026-10-2
 | `front` | Đầu ra LP của hai bộ buffer trùng nhau ở mọi lần đổi sau 2,5 ps; RX mình sau `IBUFDS_DPHY` trừ khi đặt `+AFE=model`. NEG-front phải đếm ra khác biệt, trong khi RX AMD vẫn đạt | 59 run, 2 812 162 lần so, 0 khác; NEG-front 25 744 / 32 674 |
 | `afe` | `afe_model` không lỗi trạng thái; `term_en` không trễ, không thiếu (trừ NEG-front, §7.6) | 59/59 run |
 | `config` | Cấu hình RX mình đúng giá trị model HAS ở rate đó, hoặc giá trị kịch bản đặt | 60/60 run |
-| `sources` | Hash nguồn ghi trong `args.txt` của từng run bằng hash nguồn hiện tại (RTL theo `filelist.f`, ba khối của `exp1/`, `exp2/*.sv`) | 60/60 run, `4029acbab7d90fa3` |
+| `sources` | Hash nguồn ghi trong `args.txt` của từng run bằng hash nguồn hiện tại (RTL theo `filelist_rtl.f`, ba khối của `exp1/`, `exp2/*.sv`) | 60/60 run, `4029acbab7d90fa3` |
 | `copy` | Ba khối `tb_exp2a.sv` lấy từ `tb_exp1.sv` vẫn trùng nguyên văn, không kể comment và dòng trống | 29, 15, 59 dòng code trùng |
 
 ### 7.1 Lớp 1: tín hiệu phát vào có đúng không?
@@ -418,9 +431,9 @@ Mỗi lỗi phải làm hỏng đúng các check ghi dưới đây, không thừ
 | Thiếu run E2a-3 | `runs` | đúng |
 | Sửa một dòng của instance wrap trong bản copy `tb_exp2a.sv` | `copy` | đúng |
 
-Kết quả: `evselftest: PASS`, 11 s (2026-10-22, 10 lỗi); 2026-10-26, 13 lỗi: PASS, 3 s (kết quả giải mã của mỗi
-capture được giữ lại giữa các lần cài lỗi). Riêng `checker` không có ca cài lỗi, vì bản thân nó là selftest của
-`csi2_dump.py`.
+Kết quả: `evselftest: PASS`, 11 s (2026-10-22, 10 lỗi); 2026-10-26, 13 ca (1 ca sạch, 12 lỗi): PASS, 3 s (kết quả giải
+mã của mỗi capture được giữ lại giữa các lần cài lỗi); sau mỗi lần chạy lại 2026-11-03 và 2026-11-04: như 2026-10-26.
+Riêng `checker` không có ca cài lỗi, vì bản thân nó là selftest của `csi2_dump.py`.
 
 ### 7.8 Giới hạn của phần kiểm chứng
 

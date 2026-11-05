@@ -6,6 +6,9 @@
 > - **TN2b** ([`fpga/exp2b/`](../exp2b/)): CSI-2 TX Subsystem của AMD phát frame RAW10 vào hai đường nhận CSI-2 đầy
 >   đủ, một trong hai đường dùng `ftel_dphy_rx`.
 >
+> Phiên bản 1.3, ngày 2026-11-04: thứ tự compile của RTL chuyển sang `logical/filelist_rtl.f` (§2); `logical/filelist.f`
+> nay là filelist của flow tổng hợp của team PD; §2 ghi thêm lần chạy lại sau thay đổi này; bench, lệnh và luật so
+> không đổi.
 > Phiên bản 1.2, ngày 2026-11-04: module của RTL đổi tiền tố `m_ftel_` thành `m_fpt_` (wrapper `m_fpt_dphy_rx_wrap`,
 > khối chỉnh `m_fpt_ppi_act_gate`), theo quy tắc đặt tên của team PD; dòng RTL ở §2 nay ghi đúng phiên bản HAS.
 > Phiên bản 1.1, ngày 2026-11-03: check `copy` so với TN1 ở build mặc định (§5). Phiên bản 1.0, ngày 2026-10-26.
@@ -49,8 +52,9 @@ Cả hai bench chạy trong XSIM của Vivado, không cần board.
 
 Repo `https://github.com/ftel-cdc/fu3_dphy`, nhánh `dev`.
 - RTL `ftel_dphy_rx` (`logical/`, `config/`) là RTL TN1 dùng, hiện theo HAS v0.18. Lần chạy đầu của TN2 dùng RTL theo
-  HAS v0.16 (từ commit `66f9f39`); các lần chạy lại ngày 2026-11-03 (HAS v0.17) và 2026-11-04 (HAS v0.18, chỉ đổi
-  tên module) ghi ở [`TN2_REPORT.md`](TN2_REPORT.md).
+  HAS v0.16 (từ commit `66f9f39`); các lần chạy lại ngày 2026-11-03 (HAS v0.17) và hai lần ngày 2026-11-04 (HAS
+  v0.18: đổi tên module, rồi nhánh cho flow tổng hợp của team PD ở hai cell clock; không đổi chức năng) ghi ở
+  [`TN2_REPORT.md`](TN2_REPORT.md).
 - Bench TN2a có trên nhánh từ commit `cd1f0b2`, bench TN2b từ commit `e456f21`. Khối chỉnh `rxactivehs` và hai luật
   timing ở PPI (§6.1) có trên nhánh cùng lúc với tài liệu này.
 
@@ -63,7 +67,7 @@ cd fu3_dphy/22fdx/rx/digital          # mọi lệnh trong tài liệu này ch�
 
 | Thành phần | Đường dẫn | Ghi chú |
 |---|---|---|
-| RTL `ftel_dphy_rx` | [`logical/`](../../logical/) | Như TN1: thứ tự compile ở [`logical/filelist.f`](../../logical/filelist.f), top là [`m_fpt_dphy_rx_wrap.sv`](../../logical/m_fpt_dphy_rx_wrap.sv). Không sửa gì cho mô phỏng |
+| RTL `ftel_dphy_rx` | [`logical/`](../../logical/) | Như TN1: thứ tự compile ở [`logical/filelist_rtl.f`](../../logical/filelist_rtl.f), top là [`m_fpt_dphy_rx_wrap.sv`](../../logical/m_fpt_dphy_rx_wrap.sv). Không sửa gì cho mô phỏng |
 | Khối chỉnh `rxactivehs` | [`fpga/rtl/m_fpt_ppi_act_gate.sv`](../rtl/m_fpt_ppi_act_gate.sv) | Chỉ dùng ở FPGA, không thuộc RTL ASIC. Nằm giữa `ftel_dphy_rx` và CSI-2 RX Subsystem không PHY, ở TN2b và ở R-F của TN3 (§5.3) |
 | Kiểm riêng khối chỉnh | [`fpga/rtl/tb_m_fpt_ppi_act_gate.sv`](../rtl/tb_m_fpt_ppi_act_gate.sv), [`fpga/rtl/run_rtl.sh`](../rtl/run_rtl.sh), [`fpga/rtl/synth_rtl.tcl`](../rtl/synth_rtl.tcl) | Unit testbench, lint, kiểm luật viết RTL, synth out-of-context bằng Vivado |
 | TN2a: testbench top | [`fpga/exp2/tb_exp2a.sv`](tb_exp2a.sv) | Danh sách plusarg nằm ở đầu file |
