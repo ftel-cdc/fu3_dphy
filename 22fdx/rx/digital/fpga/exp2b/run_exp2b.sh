@@ -68,7 +68,7 @@ export PATH="$XBIN:$PATH"     # the XSIM scripts Vivado writes call xvlog, xelab
 DEBUG=${EXP2B_DEBUG:-off}
 
 sources() {
-  sed -n 's#^${FTEL_DPHY_RX_PATH}#'"$REPO"'#p' "$REPO/logical/filelist.f"
+  sed -n 's#^\$DPHY_RX_PATH#'"$REPO"'#p' "$REPO/logical/filelist_rtl.f"
   ls "$EXP1/afe_model.sv" "$EXP1/ppi_csv_mon.sv" "$FPGA/rtl/m_fpt_ppi_act_gate.sv" "$HERE"/*.sv
 }
 

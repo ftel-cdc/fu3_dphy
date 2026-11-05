@@ -61,8 +61,8 @@ mkdir -p "$HERE/work"
 
 # RTL in compile order, as sim/vcs_lint.sh reads it, with the clock cells of the library
 FILES="$HERE/work/files.lst"
-grep -v '^\s*//' "$IP/logical/filelist.f" | grep '\.sv\s*$' \
-  | sed "s#\${FTEL_DPHY_RX_PATH}#$IP#; s#\$FTEL_DPHY_RX_PATH#$IP#" | tr -d ' ' \
+grep -v '^\s*//' "$IP/logical/filelist_rtl.f" | grep '\.sv\s*$' \
+  | sed "s#\${DPHY_RX_PATH}#$IP#; s#\$DPHY_RX_PATH#$IP#" | tr -d ' ' \
   | sed "s#^$IP/logical/\(m_fpt_dphy_rx_cg\|m_fpt_dphy_rx_clk_inv\)\.sv#$CELLS/\1.sv#" > "$FILES"
 [[ $(grep -c "^$CELLS/" "$FILES") -eq 2 ]] || { echo "clock cells not replaced in $FILES"; exit 1; }
 

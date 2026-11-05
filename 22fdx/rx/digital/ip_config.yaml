@@ -4,7 +4,13 @@
 # The wrapper is m_fpt_dphy_rx_wrap, the name the PD flow of fu3 expects (m_fpt_<ip>_wrap); the tool_flow
 # default (naming.ip_module of its project.yaml) still has the FX1 prefix m_ftel.
 top_module: m_fpt_dphy_rx_wrap
-# filelist: logical/custom_filelist.f
+# The compile order is logical/filelist_rtl.f; logical/filelist.f is the filelist of the PD flow, which
+# adds the SoC library ($LIB_PATH) for the define FPT_SIGNOFF (rtl_notes D-30).
+filelist: logical/filelist_rtl.f
+vcs:
+  filelist:
+    rtl: logical/filelist_rtl.f
+    cell: logical/filelist_rtl.f
 
 # constraint:
 #   lint: lint/custom_constraint.tcl

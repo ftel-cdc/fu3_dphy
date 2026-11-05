@@ -12,7 +12,8 @@
 // Description     : Clock inverter: turns the falling edge of the DDR clock into the rising
 //                   edge of the clock of the falling-edge flip-flops of Block No. 1. Port-
 //                   compatible with m_fpt_lib_clk_inv; behavioural model (rtl_rule K10,
-//                   rtl_notes D-23).
+//                   rtl_notes D-23). With the define FPT_SIGNOFF (PD flow) it instantiates
+//                   m_fpt_lib_clk_inv (rtl_notes D-30).
 // Parent          : m_fpt_dphy_rx_byte_clk
 // HAS             : draft v0.14, §4.3
 // Clock domains   : none (clock path)
@@ -35,9 +36,18 @@ module m_fpt_dphy_rx_clk_inv (
   output logic o_out
 );
 
-  // At integration the module is replaced by m_fpt_lib_clk_inv, which maps to a clock inverter
-  // of the target library.
+`ifdef FPT_SIGNOFF
+  // Sign-off view, read by the PD flow with the define FPT_SIGNOFF: the clock inverter of the SoC
+  // library (rtl_notes D-30).
+  // REQ-339
+  m_fpt_lib_clk_inv u_lib_clk_inv_0 (
+    .i_in  (i_in),
+    .o_out (o_out)
+  );
+`else
+  // Behavioural model of the clock inverter, for simulation and lint.
   // REQ-339
   assign o_out = ~i_in;
+`endif
 endmodule
 `default_nettype wire

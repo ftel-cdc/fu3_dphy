@@ -23,7 +23,7 @@
 #-------------------------------------------------------------------------------
 # ============================================================================
 # Directed simulation of Block No. 1 (RTL plan of 2026-10-07, B7): compiles the RTL of
-# logical/filelist.f with tb_afe_adapter.sv and runs it at 80, 800, 1500, 1600 and 1792 Mb/s.
+# logical/filelist_rtl.f with tb_afe_adapter.sv and runs it at 80, 800, 1500, 1600 and 1792 Mb/s.
 # Pass: every run prints "TB RESULT: PASS". Output stays in out/ (gitignored).
 # ============================================================================
 set -o pipefail
@@ -34,8 +34,8 @@ IP="$(cd "$HERE/../.." && pwd)"
 OUT="$HERE/out"
 rm -rf "$OUT"; mkdir -p "$OUT"
 # RTL files in compile order, as sim/vcs_lint.sh reads them
-mapfile -t FILES < <(grep -v '^\s*//' "$IP/logical/filelist.f" | grep '\.sv\s*$' \
-                     | sed "s#\${FTEL_DPHY_RX_PATH}#$IP#; s#\$FTEL_DPHY_RX_PATH#$IP#" | tr -d ' ')
+mapfile -t FILES < <(grep -v '^\s*//' "$IP/logical/filelist_rtl.f" | grep '\.sv\s*$' \
+                     | sed "s#\${DPHY_RX_PATH}#$IP#; s#\$DPHY_RX_PATH#$IP#" | tr -d ' ')
 ( cd "$OUT" && vcs -full64 -sverilog -q -timescale=1ns/1ps +incdir+"$IP/logical" "${FILES[@]}" \
     "$HERE/tb_afe_adapter.sv" -top tb_afe_adapter -Mdir="$OUT/csrc" -o "$OUT/simv" ) > "$OUT/compile.log" 2>&1 \
   || { echo "compile FAILED (see $OUT/compile.log)"; exit 1; }

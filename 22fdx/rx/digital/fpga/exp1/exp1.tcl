@@ -21,7 +21,7 @@
 # that require software modifications across different chip generations.
 #-------------------------------------------------------------------------------
 # TN1 build (fpga/PLAN_TN1_TN3.md §1): a Vivado project with AMD's D-PHY RX (mipi_dphy 4.3, SLAVE, module
-# xrx) for one line rate and lane count, the ftel_dphy_rx RTL (compile order of logical/filelist.f) and the
+# xrx) for one line rate and lane count, the ftel_dphy_rx RTL (compile order of logical/filelist_rtl.f) and the
 # TN1 testbench, then the XSIM scripts only. run_exp1.sh compiles and elaborates once per build and runs
 # every scenario of that build from the same snapshot with its own plusargs.
 # Usage: vivado -mode batch -source exp1.tcl -tclargs <build dir> <rate Mb/s> <lanes> [<debug level>]
@@ -54,11 +54,11 @@ puts "EXP1 xrx: [get_property CONFIG.C_HS_LINE_RATE $x] Mb/s, [get_property CONF
 
 # ftel_dphy_rx RTL in the order of filelist.f, then the testbench
 set files {}
-set f [open [file join $ip logical filelist.f] r]
+set f [open [file join $ip logical filelist_rtl.f] r]
 foreach line [split [read $f] \n] {
   set line [string trim $line]
-  if {$line eq "" || [string match "//*" $line] || [string match "+incdir*" $line]} continue
-  lappend files [string map [list {${FTEL_DPHY_RX_PATH}} $ip] $line]
+  if {![string match {$DPHY_RX_PATH/*.sv} $line]} continue
+  lappend files [string map [list {$DPHY_RX_PATH} $ip] $line]
 }
 close $f
 foreach t {dphy_line_gen.sv afe_model.sv ppi_csv_mon.sv tb_exp1.sv} {

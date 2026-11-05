@@ -17,7 +17,7 @@
   "P2": {
    "status": "pass",
    "mode": "review",
-   "at": "2026-11-04T15:43:21+07:00",
+   "at": "2026-11-04T18:57:52+07:00",
    "inputs": {
     "spec": "27256440269efa5dc71000e63c996695c9a73a081bf061f499f12dd21a130489",
     "structured_spec": "d6580aad9c7d9cdac97dde0811a004872be9750c2b2fcfe8a09a1b426f6bc961",
@@ -32,25 +32,25 @@
    "gate_2": {
     "status": "auto-signed",
     "by": "flow_check.py (0 conflicts)",
-    "at": "2026-11-04T15:43:21+07:00"
+    "at": "2026-11-04T18:57:52+07:00"
    }
   },
   "P3a": {
    "status": "pass",
    "mode": "review",
-   "at": "2026-11-04T15:43:45+07:00",
+   "at": "2026-11-04T18:57:52+07:00",
    "inputs": {
     "spec": "27256440269efa5dc71000e63c996695c9a73a081bf061f499f12dd21a130489",
     "structured_spec": "d6580aad9c7d9cdac97dde0811a004872be9750c2b2fcfe8a09a1b426f6bc961",
     "config_pkg": "6bd5c09653685dce8ca6afe1a837c3867ad4e77fc66435bde1b1940a4343a428",
-    "rtl_rule": "effc2c96dcecac1a1df8f3041cd9ef3a811aa29232096ec239fdf6e29c466ad0",
+    "rtl_rule": "5fe28664d36113a179405deb886cb294e0ada57762bba145b3ce1fac4ee5a844",
     "rtl_scope": "3d19856f5e79f99fab1f7f1ae0d8a24db78c520aada324d53b19db8afe815249",
-    "vcs_manifest": "c497ddbcc76d651efdc34e73dcfcd9809a3ee170b17c80c81a77af76f364d838",
-    "spyglass_report": "620f2bfb097f9b5d000ba5185ec76ae2df0c24480df475e669fbbb67f3322add"
+    "vcs_manifest": "0b1ffc23e2fda4549c9cfe71e943d76ce1101716e31aa7135c95113902583d07",
+    "spyglass_report": "10934d71d1e5e76f524e2bc27da7f218ff88155a6f7fdfb279a039bbf0e0869b"
    },
    "outputs": {
-    "rtl": "7c771679b4579d23b7974004fab64e32d6c1a75369c913e7de4cf4832d84978e",
-    "rtm": "a4412d5b48947567e6c982cdcca8d95b4411c450abfc290b3afc630408b1d574"
+    "rtl": "5f7fd560ee0bd9494eb6a414e6dfb8d03d78e65921ce5faefe52cd71c0c931f5",
+    "rtm": "8112fcb158ea60d6b4fd3a35450bcb01fc320aa38ae98cfa5698c07cbd36d1ca"
    },
    "conflicts": 0,
    "waived": 0

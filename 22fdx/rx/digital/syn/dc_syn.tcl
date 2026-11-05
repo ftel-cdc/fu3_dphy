@@ -41,7 +41,7 @@ set_app_var link_library   [list * $DB]
 set_app_var enable_recovery_removal_arcs true
 define_design_lib WORK -path ./WORK
 
-# ---- RTL: logical/filelist.f with the clock cells of the library (rtl_rule K10); their cell and pin
+# ---- RTL: logical/filelist_rtl.f with the clock cells of the library (rtl_rule K10); their cell and pin
 # names are the defines of syn/tech.tcl
 set fh [open $::env(SYN_FILES) r]
 set files [split [string trim [read $fh]] "\n"]

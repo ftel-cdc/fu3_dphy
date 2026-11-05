@@ -27,10 +27,10 @@
 #   vcs_lint.sh                    wrapper m_fpt_dphy_rx_wrap with PARA_NUM_LANES = 1, 2 and 4, and with
 #                                  PARA_STOP_DRAIN_EN = 1 (4 lanes);
 #                                  writes sim/vcs_lint/manifest.json (sha256 of the RTL linted, counts per run)
-#   vcs_lint.sh --module <name>    one module or package: the files of logical/filelist.f up to its own
+#   vcs_lint.sh --module <name>    one module or package: the files of logical/filelist_rtl.f up to its own
 #                                  (compile order), top = <name>; writes sim/vcs_lint/module_<name>.json
 #
-# Compile order comes from logical/filelist.f. Pass criterion: exit 0 and no Error-, Warning- or Lint-
+# Compile order comes from logical/filelist_rtl.f. Pass criterion: exit 0 and no Error-, Warning- or Lint-
 # message. Output stays in sim/vcs_lint/ (gitignored).
 # ============================================================================
 set -o pipefail
@@ -41,12 +41,12 @@ export PATH="$VCS_HOME/bin:$PATH"
 HERE="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
 IP="$(cd "$HERE/.." && pwd)"
 OUT="$HERE/vcs_lint"
-export FTEL_DPHY_RX_PATH="$IP"
+export DPHY_RX_PATH="$IP"
 mkdir -p "$OUT"
 
-# RTL files in compile order: the source lines of logical/filelist.f, ${FTEL_DPHY_RX_PATH} expanded
-mapfile -t FILES < <(grep -v '^\s*//' "$IP/logical/filelist.f" | grep '\.sv\s*$' \
-                     | sed "s#\${FTEL_DPHY_RX_PATH}#$IP#; s#\$FTEL_DPHY_RX_PATH#$IP#" | tr -d ' ')
+# RTL files in compile order: the source lines of logical/filelist_rtl.f, ${DPHY_RX_PATH} expanded
+mapfile -t FILES < <(grep -v '^\s*//' "$IP/logical/filelist_rtl.f" | grep '\.sv\s*$' \
+                     | sed "s#\${DPHY_RX_PATH}#$IP#; s#\$DPHY_RX_PATH#$IP#" | tr -d ' ')
 
 # run <name> <top or -> [extra vcs options...]: compile into $OUT/<name>, log to $OUT/<name>.log
 run() {
@@ -93,7 +93,7 @@ if [ "$1" = "--module" ]; then
     [ -f "$f" ] && SRC+=("$f")
     [ "$(basename "$f" .sv)" = "$mod" ] && break
   done
-  [ "$(basename "${SRC[-1]}" .sv)" = "$mod" ] || { echo "module $mod not found in logical/filelist.f"; exit 2; }
+  [ "$(basename "${SRC[-1]}" .sv)" = "$mod" ] || { echo "module $mod not found in logical/filelist_rtl.f"; exit 2; }
   top="$mod"; case "$mod" in *_pkg) top="-";; esac
   run "module_$mod" "$top"; rc=$?
   manifest "$OUT/module_$mod.json"

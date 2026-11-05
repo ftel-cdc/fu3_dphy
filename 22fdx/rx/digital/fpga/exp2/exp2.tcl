@@ -22,7 +22,7 @@
 #-------------------------------------------------------------------------------
 # TN2a build (fpga/PLAN_TN2A.md §3.2): a Vivado project with AMD's D-PHY TX (mipi_dphy 4.3, MASTER, module xtx)
 # and RX (SLAVE, module xrx, as in TN1) for one line rate and lane count, the ftel_dphy_rx RTL (compile order of
-# logical/filelist.f), the TN1 blocks that the bench reuses (exp1/dphy_line_gen.sv, afe_model.sv,
+# logical/filelist_rtl.f), the TN1 blocks that the bench reuses (exp1/dphy_line_gen.sv, afe_model.sv,
 # ppi_csv_mon.sv) and the TN2a sources (exp2/*.sv), then the XSIM scripts only. run_exp2.sh compiles and
 # elaborates once per build and runs every scenario of that build from the same snapshot with its own plusargs.
 # Usage: vivado -mode batch -source exp2.tcl -tclargs <build dir> <rate Mb/s> <lanes> [<debug level>]
@@ -72,11 +72,11 @@ puts "EXP2 xtx: [get_property CONFIG.C_HS_LINE_RATE $t] Mb/s, [get_property CONF
 
 # ftel_dphy_rx RTL in the order of filelist.f, the TN1 blocks, then the TN2a sources
 set files {}
-set f [open [file join $ip logical filelist.f] r]
+set f [open [file join $ip logical filelist_rtl.f] r]
 foreach line [split [read $f] \n] {
   set line [string trim $line]
-  if {$line eq "" || [string match "//*" $line] || [string match "+incdir*" $line]} continue
-  lappend files [string map [list {${FTEL_DPHY_RX_PATH}} $ip] $line]
+  if {![string match {$DPHY_RX_PATH/*.sv} $line]} continue
+  lappend files [string map [list {$DPHY_RX_PATH} $ip] $line]
 }
 close $f
 foreach n {dphy_line_gen.sv afe_model.sv ppi_csv_mon.sv} {

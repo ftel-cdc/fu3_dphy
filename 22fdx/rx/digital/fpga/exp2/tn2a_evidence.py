@@ -271,8 +271,8 @@ def selftest():
 def sources_hash():
     """The hash run_exp2.sh keeps in build_*/src.sha and in args.txt: sha256sum of the RTL filelist sources, the
     three blocks of exp1/ and exp2/*.sv, in the order of ls."""
-    files = [IP + line.rstrip('\n')[len('${FTEL_DPHY_RX_PATH}'):]
-             for line in open(os.path.join(IP, 'logical', 'filelist.f')) if line.startswith('${FTEL_DPHY_RX_PATH}')]
+    files = [IP + line.rstrip('\n')[len('$DPHY_RX_PATH'):]
+             for line in open(os.path.join(IP, 'logical', 'filelist_rtl.f')) if line.startswith('$DPHY_RX_PATH')]
     files += sorted([os.path.join(EXP1, f) for f in ('dphy_line_gen.sv', 'afe_model.sv', 'ppi_csv_mon.sv')]
                     + glob.glob(os.path.join(HERE, '*.sv')))
     text = ''.join(f'{hashlib.sha256(open(f, "rb").read()).hexdigest()}  {f}\n' for f in files)

@@ -68,7 +68,7 @@ DEBUG=${EXP1_DEBUG:-off}
 LANE_SPREAD=6                 # C10 of the HAS: inter-lane byte divergence budget of the CSI-2 Rx controller
 
 sources() {
-  sed -n 's#^${FTEL_DPHY_RX_PATH}#'"$REPO"'#p' "$REPO/logical/filelist.f"
+  sed -n 's#^\$DPHY_RX_PATH#'"$REPO"'#p' "$REPO/logical/filelist_rtl.f"
   ls "$HERE"/*.sv
 }
 

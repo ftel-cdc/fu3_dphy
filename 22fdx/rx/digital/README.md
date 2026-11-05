@@ -96,8 +96,9 @@ in v1.2 (data rates above 1.5 Gbps, the deskew calibration sequence) are defined
 │                           conflicts_<phase>.json, flow_state.json, waivers.yaml, spec_review.md)
 ├── req_flow/             ← requirement tooling of the flow (spec inventory, REQ assembly, flow_check.py,
 │                           check_rtl_rules.py), see its README
-├── logical/              ← RTL (flat, 22 files: 2 packages, 20 modules) + filelist.f (compile order) /
-│                           filelist_sim.f / filelist_netlist.f
+├── logical/              ← RTL (flat, 22 files: 2 packages, 20 modules) + filelist_rtl.f (compile order,
+│                           read by every flow here) / filelist.f (the PD flow: filelist_rtl.f and the
+│                           SoC library for FPT_SIGNOFF) / filelist_sim.f / filelist_netlist.f
 ├── sim/                  ← vcs_lint.sh (VCS +lint=all, 1/2/4 lanes); tb_afe_adapter/ (directed TB of
 │                           Block No. 1, run.sh); later the unit testbenches, BFM, models
 ├── lint/                 ← lint_constraint.tcl, lint_waiver.tcl (SpyGlass lint_rtl)
@@ -115,16 +116,22 @@ in v1.2 (data rates above 1.5 Gbps, the deskew calibration sequence) are defined
 
 The lint/cdc/rdc/sdc/logical skeleton was created by the FX1 common flow
 (`ip-dev/hw/utils/tool_flow`, `--tool init`, 2026-09-26). tool_flow takes the IP folder from
-`FTEL_DPHY_RX_PATH` before it looks into its own `hw/rtl/ip/` layout, so it runs on this folder as it
-is (`IP_DEV`: a checkout of the FX1 ip-dev repository):
+`DPHY_RX_PATH` before it looks into its own `hw/rtl/ip/` layout, so it runs on this folder as it
+is (`IP_DEV`: a checkout of the FX1 ip-dev repository). `ip_config.yaml` points it to
+`logical/filelist_rtl.f`:
 
 ```bash
-export FTEL_DPHY_RX_PATH=$PWD
+export DPHY_RX_PATH=$PWD
 python3 -B $IP_DEV/hw/utils/tool_flow/bin/run_ip_tool.py --ip dphy_rx --tool <lint|cdc|rdc|vcs|vcs-run>
 ```
 
 `lint` (SpyGlass `lint_rtl`, 2026-10-07: 0 Fatal / 0 Error / 0 Warning, one waiver for the clock
 structure of Block No. 1, rtl_notes D-19) has been exercised; `cdc`, `rdc` and `vcs-run` come later.
+
+The PD flow of fu3 reads this folder as `$DPHY_RX_PATH` (naming rules of the PD team, 2026-11-04):
+`logical/filelist.f` with the define `FPT_SIGNOFF`, under which the two clock cells take
+`m_fpt_lib_cg` and `m_fpt_lib_clk_inv` of the SoC library from `$LIB_PATH/gate`, and
+`sdc/constraint.sdc`; the top is `m_fpt_dphy_rx_wrap` (rtl_notes D-30).
 VCS lint of the RTL and the directed simulation of Block No. 1:
 
 ```bash
@@ -179,7 +186,7 @@ is never committed. `.env.example` lists every variable with a placeholder and s
 
 ```bash
 cp .env.example .env                                  # then replace each placeholder with the local value
-export FTEL_DPHY_RX_PATH=<path of 22fdx/rx/digital>   # read by the filelists and by tool_flow
+export DPHY_RX_PATH=<path of 22fdx/rx/digital>        # read by the filelists and by tool_flow
 export VERDI_HOME=/opt/synopsys/verdi/X-2025.06
 ```
 

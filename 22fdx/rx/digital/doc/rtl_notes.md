@@ -75,6 +75,11 @@
   `sdc/constraint.sdc` links to `sdc/m_fpt_dphy_rx_wrap.sdc` (D-29). No technical change; the
   package header says HAS v0.18, the headers of the other files keep the version they were written
   against.
+- **Sign-off view for the PD flow, 2026-11-04** (`fpga/PLAN_PD_SIGNOFF.md`, approved the same day). The
+  compile order moves to `logical/filelist_rtl.f`, `logical/filelist.f` becomes the filelist of the PD
+  flow, the folder variable is `DPHY_RX_PATH`, and the two clock cells gain a branch for the define
+  `FPT_SIGNOFF` (D-30). Simulation and lint read the behavioural branch, whose code is unchanged. No
+  HAS change.
 - **Checked:** VCS `+lint=all`, SpyGlass `lint_rtl` (one waiver, D-19), `check_rtl_rules.py`,
   `flow_check.py --phase P1|P2|P3a` (§7). **Simulated:** Block No. 1 with a directed TB at five line
   rates (§8), and the whole receiver behind an AFE model in XSIM by TN1 (§9): dummy bursts, not
@@ -282,7 +287,8 @@ DFT flow connects the scan enable of the `m_fpt_lib_cg` cell.
 **D-23 Clock cells** (HIGH). `m_fpt_dphy_rx_cg` and `m_fpt_dphy_rx_clk_inv` keep the ports of
 `m_fpt_lib_cg` and `m_fpt_lib_clk_inv` of the fu2 lib and their behavioural model. At integration only
 the module name changes, as for the synchronizer cells. The instances are named `u_dont_touch_*`, the
-fu2 convention that keeps synthesis from optimizing them (rtl_rule K10, K12).
+fu2 convention that keeps synthesis from optimizing them (rtl_rule K10, K12). In the PD flow of fu3 the
+define `FPT_SIGNOFF` selects the cells of the library instead (D-30).
 - For synthesis, `syn/run_syn.sh` replaces the two files with `syn/cells/`, which instantiate the
   clock-gating cell and the clock inverter of the library with the same ports; the cell and pin names
   come from `.env` (`FTEL_LIB_CG_*`, `FTEL_LIB_CKINV_*`). The script stops if either file is not
@@ -290,8 +296,8 @@ fu2 convention that keeps synthesis from optimizing them (rtl_rule K10, K12).
 - fu3 (checked 2026-11-04): its `m_fpt_lib_cg` has no `i_scan_en` (test enable tied Low inside), so
   there the port list differs by `i_scan_en`. Its PD flow analyzes `logical/filelist.f` as it is, with
   the define `FPT_SIGNOFF` and without the replacement that `syn/run_syn.sh` makes, and sets
-  `dont_touch` on `u_dont_touch*`: the two cells would reach it as behavioural models. Open with the PD
-  team (D-29).
+  `dont_touch` on `u_dont_touch*`. Behavioural models stayed unmapped there, so the cells have a
+  `FPT_SIGNOFF` branch since 2026-11-04 (D-30).
 - Do not use `m_fpt_lib_dff_falling_edge_async_reset_n` for the falling-edge flip-flops: in its
   GF130 branch it maps to `DFFRQ`, a rising-edge flip-flop.
 
@@ -373,15 +379,62 @@ REQ-147, REQ-381 to REQ-391).
   of `m_fpt_<ip>_wrap` names. The user chose to rename every module rather than the wrapper only: a
   name, no function, and one command.
 - `<ip>` = `dphy_rx`, the token of the wrapper ports (N8) and of `--ip dphy_rx` in tool_flow; the
-  IP name `ftel_dphy_rx` stays on the folder, the packages, the documents and `FTEL_DPHY_RX_PATH`.
+  IP name `ftel_dphy_rx` stays on the folder, the packages and the documents. The folder variable is
+  `DPHY_RX_PATH`, the `<IP>_PATH` of the PD flow (D-30).
   tool_flow would derive the top `m_ftel_dphy_rx_wrap` (FX1 default), so `ip_config.yaml` sets
   `top_module`.
 - `sdc/constraint.sdc` is a link to `sdc/m_fpt_dphy_rx_wrap.sdc`, as in the IPs of fu2 and fu3;
   `syn/`, `cdc/` and `rdc/` keep reading the file by its own name.
 - Same function, checked: `rtm.json` and the DC reports and netlists equal to the previous ones once
-  the old prefix is replaced (whitespace and run dates aside).
-- Open with the PD team (plan §6): the `<ip_name>` and `<IP>_PATH` of fu3, how the IP folder enters
-  fu3, the two clock cells under `FPT_SIGNOFF` (D-23), `ifndef SYNTHESIS` against `FPT_SIGNOFF`.
+  the old prefix is replaced (whitespace and run dates aside); the 507 runs of TN1 and TN2 made again
+  equal to the earlier ones byte for byte, `stopstate` included, with the evidence of TN1 (9/9), TN2a
+  (10/10) and TN2b (12/12).
+- The open points of plan §6 are settled by D-30, except how the IP folder enters fu3.
+
+**D-30 Sign-off view for the PD flow** (HIGH, measured; `fpga/PLAN_PD_SIGNOFF.md`, rtl_rule 1.4 F9, K10).
+- Why: the PD flow of fu3 reads `$<IP>_PATH/logical/filelist.f` with `analyze -define {FPT_SIGNOFF}
+  -vcs "-f ..."`, sources `$<IP>_PATH/sdc/constraint.sdc`, sets `dont_touch` on `u_dont_touch*` and
+  runs `compile_ultra -gate_clock`; its Formality step reads the same filelist with the same define.
+  Its DC flow, run on this IP on 2026-11-04 as it is (one row added to its table of IPs, the defaults
+  of its launcher), gave:
+
+  | Run | Setting | Result |
+  |---|---|---|
+  | A | only `<IP>_PATH` set; filelist with `${FTEL_DPHY_RX_PATH}` | `analyze` reads no file |
+  | B | `FTEL_DPHY_RX_PATH` set as well | the same: `analyze -vcs` does not expand `${...}`, only `$VAR` |
+  | B2 | `$DPHY_RX_PATH`; clock cells unchanged | flow completes with 8 unmapped cells (LINT-61) in the two clock cells: `dont_touch` keeps their behavioural models from being mapped |
+  | C | B2 and the `FPT_SIGNOFF` branch, `-y $LIB_PATH/gate` | 0 unmapped cells; setup slack 248 ps (`ddr_clk`), 940 ps (`byte_clk`), 2852 ps (`core_clk`) before clock-tree synthesis; 6 removal violations of -2.8 to -6.6 ps |
+
+- Checked from this folder after the change (2026-11-04): the PD DC flow, with only `DPHY_RX_PATH`
+  and `LIB_PATH` set, gives 0 unmapped cells and the QoR of run C; its LEC step (RTL with
+  `FPT_SIGNOFF` against that netlist, with the SVF of the run) succeeds: 2854 compare points (209
+  ports, 2645 flip-flops) equivalent, 0 failing, 0 aborted. The 46 latches of the clock gates that DC
+  inserted are implementation-only points, as usual for inserted clock gating.
+- Simulation unchanged, checked the same day: the 507 runs of TN1 and TN2, made again from scratch,
+  equal those of D-29 byte for byte in every column, `stopstate` included (the `sources` line
+  aside), with the evidence of TN1 (9/9), TN2a (10/10) and TN2b (12/12).
+- Change: `<ip_name>` = `dphy_rx` (our choice), so the variable is `DPHY_RX_PATH`, written without
+  braces. The compile order is in `logical/filelist_rtl.f`, which every flow of ours reads;
+  `logical/filelist.f` is the filelist of the PD flow: `+libext+.v+.sv`, `-y $LIB_PATH/gate`,
+  `-f $DPHY_RX_PATH/logical/filelist_rtl.f`. One filelist with `-y $LIB_PATH/gate` would break the
+  SpyGlass lint of a checkout without the SoC library: unset `LIB_PATH` is fatal, a missing folder a
+  Warning (checkCMD_dirfile03).
+- The clock cells: under `` `ifdef FPT_SIGNOFF `` `m_fpt_lib_cg u_lib_cg_0` and
+  `m_fpt_lib_clk_inv u_lib_clk_inv_0`; the `` `else `` branch is the behavioural model, its code
+  unchanged. `m_fpt_lib_cg` of fu3 has no `i_scan_en` (test enable tied Low inside); the only
+  instance of `m_fpt_dphy_rx_cg` ties `i_scan_en` Low, so the branch is equivalent.
+- The branch depends on the ports of the two cells of the fu3 library. A change there breaks only
+  this branch, which no simulation reads; a run of the PD flow finds it.
+- Seen in the PD flow, for the PD team: `-gate_clock` also gates the parallel registers of the DDR
+  clock (`reg_half_rise`, `reg_half_fall`; enable slack 971 ps setup, 44 ps hold before clock-tree
+  synthesis); the removal checks above, on the asynchronous resets of the divider and the toggle
+  counter of Block No. 1 (its flow enables recovery and removal arcs, `syn/` of this IP does not);
+  its `setup_lib.tcl` sets `ROM`, which its `user_setup.tcl` uses as an array (an error in every run).
+- `` `ifndef SYNTHESIS `` guards only simulation checks (`initial` with `$fatal`); the RTL of fu3 uses
+  the same guard. No conflict with `FPT_SIGNOFF`.
+- Open with the PD team: how the IP folder enters fu3 (each IP is a submodule whose root is the IP
+  folder; here it is `22fdx/rx/digital` of this repository); dont-touch for the hand-placed samplers
+  (HAS §4.3).
 
 ## 5. Notes for the HAS (no RTL question pending)
 

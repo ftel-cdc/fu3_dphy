@@ -166,7 +166,10 @@
   - VCS 0/0/0 ở 1, 2, 4 lane và chế độ 1; SpyGlass 0/0/0 với top `m_fpt_dphy_rx_wrap`;
   - P1/P2/P3a 0 xung đột; `rtm.json` trùng ở `requirements` và `summary`;
   - DC trùng như mục 6 ở trên; diện tích 5948 µm², 2646 flop.
-- **Bước 4:** đang chạy, luồng A (TN1) và luồng B (TN2a rồi TN2b), từ 15:44.
+- **Bước 4:** đạt ✅. Luồng A (TN1) chạy 15:44 đến 16:45, luồng B (TN2a rồi TN2b) 15:44 đến 18:55, build lại từ đầu.
+  - `compare_runs.py --pre _pre_rename --drop-lines '^sources ' --subst m_ftel_=m_fpt_`, mọi cột kể cả `stopstate`:
+    TN1 407 run (2442 file), TN2a 60 run (486 file), TN2b 40 run (449 file); 0 khác, 0 run chưa chạy lại.
+  - Evidence: TN1 9/9, TN2a 10/10, TN2b 12/12; evselftest của cả ba PASS.
 - **Bước 5:**
   - HAS v0.18: K6 và dòng revision;
   - `EXPECTED` v0.18 đăng ký trước;
@@ -175,4 +178,4 @@
   - chi tiết ở `req/spec_review.md` §7.18.
 - **Bước 6:** đã sửa `TN1_DESCRIPTION` 1.3, `TN2_DESCRIPTION` 1.2 (dòng RTL ở §2 nay đúng), `TN3_SPEC` v0.3,
   câu hỏi cho team CSI, `fpga/README.md`, D-29 và ghi chú fu3 ở D-23 trong `doc/rtl_notes.md`. `TN1_REPORT` và
-  `TN2_REPORT` chờ kết quả bước 4.
+  `TN2_REPORT` ghi lần chạy lại này cùng lần chạy lại sau `fpga/PLAN_PD_SIGNOFF.md`, khi lần đó xong.

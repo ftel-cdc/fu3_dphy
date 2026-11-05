@@ -130,11 +130,11 @@ if {$only_ips} {
 }
 
 set files {}
-set f [open [file join $ip logical filelist.f] r]
+set f [open [file join $ip logical filelist_rtl.f] r]
 foreach line [split [read $f] \n] {
   set line [string trim $line]
-  if {$line eq "" || [string match "//*" $line] || [string match "+incdir*" $line]} continue
-  lappend files [string map [list {${FTEL_DPHY_RX_PATH}} $ip] $line]
+  if {![string match {$DPHY_RX_PATH/*.sv} $line]} continue
+  lappend files [string map [list {$DPHY_RX_PATH} $ip] $line]
 }
 close $f
 foreach n {afe_model.sv ppi_csv_mon.sv} {

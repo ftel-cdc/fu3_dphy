@@ -259,8 +259,8 @@ def decode_selftest():
 
 def sources_hash():
     """The hash run_exp1.sh keeps in build_*/src.sha: sha256sum of the RTL filelist sources and exp1/*.sv."""
-    files = [IP + line.strip()[len('${FTEL_DPHY_RX_PATH}'):] for line in open(os.path.join(IP, 'logical', 'filelist.f'))
-             if line.startswith('${FTEL_DPHY_RX_PATH}')]
+    files = [IP + line.strip()[len('$DPHY_RX_PATH'):] for line in open(os.path.join(IP, 'logical', 'filelist_rtl.f'))
+             if line.startswith('$DPHY_RX_PATH')]
     files += sorted(glob.glob(os.path.join(HERE, '*.sv')))
     text = ''.join(f'{hashlib.sha256(open(f, "rb").read()).hexdigest()}  {f}\n' for f in files)
     return hashlib.sha256(text.encode()).hexdigest()[:16]
