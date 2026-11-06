@@ -4,8 +4,8 @@
 |---|---|
 | Gửi | Đội phát triển phía Tx (CSI-2 transmitter / D-PHY Tx của sensor) |
 | Từ | Nhóm thiết kế D-PHY Rx (`ftel_dphy_rx`) |
-| Ngày | 2026-09-26, cập nhật 2026-09-29 (S9: clock lane; S5: THS-EXIT + TLPX ở tốc độ thấp), 2026-09-30 (S3: vì sao Rx cần continuous clock), 2026-10-02 (S5: THS-ZERO không còn ảnh hưởng việc tìm sync; S12 mới: HS clock sau burst cuối) và 2026-11-03 (S5: bỏ ràng buộc THS-EXIT + TLPX ở tốc độ thấp, Rx nhận được burst kế tiếp ở mọi tốc độ) |
-| Căn cứ | MIPI CSI-2 v1.3, MIPI D-PHY v1.1 (Table 14); HAS của `ftel_dphy_rx` bản nháp v0.11 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.11.docx`) |
+| Ngày | 2026-09-26, cập nhật 2026-09-29 (S9: clock lane; S5: THS-EXIT + TLPX ở tốc độ thấp), 2026-09-30 (S3: vì sao Rx cần continuous clock), 2026-10-02 (S5: THS-ZERO không còn ảnh hưởng việc tìm sync; S12 mới: HS clock sau burst cuối), 2026-11-03 (S5: bỏ ràng buộc THS-EXIT + TLPX ở tốc độ thấp, Rx nhận được burst kế tiếp ở mọi tốc độ) và 2026-11-06 (Căn cứ lên HAS v0.18; S12: thêm một byte clock nếu `stopstate_x` chờ hết burst) |
+| Căn cứ | MIPI CSI-2 v1.3, MIPI D-PHY v1.1 (Table 14); HAS của `ftel_dphy_rx` bản nháp v0.18 (`doc/spec.md`; bản Word `FTEL_IP_MIPI_D-PHY_RX_HAS_v0.18.docx`) |
 
 ## Bối cảnh
 
@@ -203,6 +203,9 @@ tôi sẽ chạy thêm model đó để bắt các khác biệt ngoài đời th
 - 288·UI = (`PARA_EOT_DELAY_BYTES` + Λ + 2) byte clock × 8 UI, với độ trễ word của AFE Λ = 2. Pipeline
   của CSI-2 Rx controller có thể cần thêm vài byte clock; team CSI được hỏi riêng, và con số đó sẽ cộng
   thêm vào.
+- Rx có một tuỳ chọn tổng hợp, `PARA_STOP_DRAIN_EN`, mà team CSI đang chọn. Với giá trị 1, `stopstate_x`
+  chỉ lên sau khi byte cuối của burst đã ra PPI, nên Rx cần thêm một byte clock: 296·UI ở R1, 328·UI ở
+  R2 (HAS Appendix B, TCLK-POST). Với giá trị 0, mặc định, con số ở câu 2 giữ nguyên.
 
 **Giả định hiện tại.** Tx dùng TCLK-POST tối thiểu của spec. Khi đó đuôi của burst cuối tới controller
 trễ, vào lúc clock lane chạy lại (HAS mục mở S12).

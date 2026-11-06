@@ -4,8 +4,8 @@
 |---|---|
 | Gửi | Team AFE (analog front-end của D-PHY Rx: HS-RX, LP-RX, termination) |
 | Từ | Nhóm thiết kế D-PHY Rx digital (`ftel_dphy_rx`) |
-| Ngày | 2026-10-02; cập nhật 2026-10-03 và 2026-10-06 theo các thông báo của team AFE về ranh giới (A1); 2026-10-10: số timing theo thư viện cell 22 nm (Bối cảnh, A4, A8) |
-| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.15 (`hw/rtl/ip/ftel_dphy_rx/doc/spec.md`) §1, §2.1 (Figure 2-1, 2-2), §4.1, §4.3, §4.4, §4.6, §4.8, §5.2 (Figure 5-9), ADR-001, ADR-004, ADR-007, Appendix B; MIPI D-PHY v1.1 Table 14 (timing) và Table 27 (setup/hold của receiver) |
+| Ngày | 2026-10-02; cập nhật 2026-10-03 và 2026-10-06 theo các thông báo của team AFE về ranh giới (A1); 2026-10-10: số timing theo thư viện cell 22 nm (Bối cảnh, A4, A8); 2026-11-06: Căn cứ lên HAS v0.18, thêm A12 |
+| Căn cứ | HAS của `ftel_dphy_rx` bản nháp v0.18 (`doc/spec.md`) §1, §2.1 (Figure 2-1, 2-2), §3 (Table 3-1, 3-2), §4.1, §4.3, §4.4, §4.6, §4.8, §5.2 (Figure 5-9), ADR-001, ADR-004, ADR-007, Appendix B; MIPI D-PHY v1.1 Table 14 (timing) và Table 27 (setup/hold của receiver) |
 
 ## Bối cảnh
 
@@ -85,6 +85,7 @@ A6 và A11 không chặn cấu trúc RTL:
 | A9 | Đầu ra HS-RX khi tắt, khi khởi động và khi dừng | **Cao** | ADR-001 | Chờ (mới) |
 | A10 | Một hay hai enable cho mỗi lane | **Cao** | ADR-001 | Chờ (mới) |
 | A11 | Đảo cực P/N và map lane trong AFE | Trung bình | ADR-001 | Chờ (trước là A1 ý 5) |
+| A12 | Chênh lệch trễ giữa LP-RX và HS-RX | **Cao** | ADR-001 | Chờ (mới) |
 
 Trong HAS v0.13, 22 yêu cầu chờ ADR-001, trong đó 4 yêu cầu chờ cả ADR-004 (delay line, A4). Hai
 trong 22 yêu cầu chỉ chờ physical design (corner sign-off, đặt tay sampler), nên 20 yêu cầu chờ
@@ -317,6 +318,25 @@ lần.
 
 **Giả định hiện tại.** AFE không đảo cực và không map lane.
 
+## A12: Chênh lệch trễ giữa LP-RX và HS-RX (mới)
+
+**Câu hỏi.** Trên cùng một data lane, trễ từ đầu vào AFE tới đầu ra LP-RX (`afe_lp_dp_x`, `afe_lp_dn_x`)
+và trễ tới đầu ra HS-RX (`afe_hs_bit_x`) chênh nhau bao nhiêu? Cần min/max qua process, điện áp và
+nhiệt độ.
+
+**Vì sao cần.** Ở cuối mỗi burst, Rx giữ các byte HS mới nhất trong một delay line và cắt trailer vào
+lúc LP-RX báo LP-11. Vì vậy trễ của LP-RX so với HS-RX dời điểm cắt:
+- Công thức của `eot_skip_bytes` (HAS Table 3-2) dùng 24 ns, trễ ngắn nhất từ LP-11 tới lúc Rx bắt đầu
+  cắt, khớp trên RTL khi chưa có trễ của AFE. Chênh lệch giữa hai trễ cộng thẳng vào 24 ns này.
+- Nếu HS-RX chậm hơn LP-RX: `eot_skip_bytes` chừa ít nhất một byte, nên chênh lệch dưới một byte
+  (5,3 ns ở 1500 Mb/s, 4,5 ns ở 1792 Mb/s) không ảnh hưởng. Lớn hơn thì Rx có thể cắt mất byte cuối
+  của payload.
+- Nếu LP-RX chậm hơn HS-RX: Rx thấy LP-11 muộn hơn, nên delay line phải chứa thêm chừng ấy byte. Độ sâu
+  mặc định (HAS Table 3-1, `PARA_EOT_DELAY_BYTES` = 32) dư khoảng 2 byte ở 1500 Mb/s so với 30 byte cần,
+  tức khoảng 10,7 ns ⚠️.
+
+**Giả định hiện tại.** Hai trễ bằng nhau ⚠️.
+
 ---
 
 ## Trả lời
@@ -335,3 +355,4 @@ lần.
 | A9 | | | |
 | A10 | | | |
 | A11 | | | |
+| A12 | | | |
