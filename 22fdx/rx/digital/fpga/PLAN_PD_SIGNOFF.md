@@ -75,6 +75,9 @@ không nằm trong `CELL_PORTS` hay `CLK_CELLS`, nên K10 và K12 không bắt �
 
 - IP folder: `<ip_name>` = `dphy_rx`, biến `DPHY_RX_PATH`; dòng bảng `DPHY_RX(module_name) "m_fpt_dphy_rx_wrap"`.
 - Filelist cần `LIB_PATH` của fu3 (`-y $LIB_PATH/gate`).
+- Bổ sung 2026-11-06: `22fdx/rx/digital/set_env.sh` đặt `DPHY_RX_PATH` theo chỗ của chính nó, nên đúng
+  trên mọi máy. Trong bash, `source` env của workspace SoC trước (để có `LIB_PATH`), rồi tới file này. File
+  này chỉ kiểm `LIB_PATH` và hai cell của nó, không đặt chúng.
 - **Kết quả DC và LEC trên flow của họ:**
   - removal vài ps trước CTS;
   - `-gate_clock` chèn clock gate trên các thanh ghi song song của miền DDR (đạt trước CTS);

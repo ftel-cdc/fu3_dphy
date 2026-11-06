@@ -73,6 +73,7 @@ in v1.2 (data rates above 1.5 Gbps, the deskew calibration sequence) are defined
 ```
 22fdx/rx/digital/
 ├── README.md             ← this file
+├── set_env.sh            ← source it in bash: exports DPHY_RX_PATH = this folder, for the PD flow and tool_flow
 ├── ip_config.yaml        ← tool_flow design overrides: top_module m_fpt_dphy_rx_wrap, the rest default
 ├── .gitignore            ← tool outputs, flow work files, local HAS .docx builds, .env
 ├── .env.example          ← the local environment to copy to .env and fill in (see Environment Setup)
@@ -80,7 +81,7 @@ in v1.2 (data rates above 1.5 Gbps, the deskew calibration sequence) are defined
 │   ├── ftel_dphy_rx.yaml ← configuration: Table 3-1 parameters, Table 3-2 field widths and reset values
 │   └── validate_config.py ← checks the YAML against the HAS formulas, emits logical/ftel_dphy_rx_config_pkg.sv
 ├── doc/
-│   ├── spec.md           ← architecture specification (HAS), draft v0.16 (source of the docx); standalone:
+│   ├── spec.md           ← architecture specification (HAS), draft v0.18 (source of the docx); standalone:
 │   │                       cites no other file or document, the MIPI standards by name only (§1.5)
 │   ├── doc_kit.yaml      ← settings of the document scripts: docx name, rule checks, figure names
 │   ├── md2docx.py        ← spec.md → FTEL_IP_MIPI_D-PHY_RX_HAS_v<x.y>.docx in the FTEL HAS format
@@ -121,7 +122,7 @@ is (`IP_DEV`: a checkout of the FX1 ip-dev repository). `ip_config.yaml` points 
 `logical/filelist_rtl.f`:
 
 ```bash
-export DPHY_RX_PATH=$PWD
+source set_env.sh
 python3 -B $IP_DEV/hw/utils/tool_flow/bin/run_ip_tool.py --ip dphy_rx --tool <lint|cdc|rdc|vcs|vcs-run>
 ```
 
@@ -131,7 +132,15 @@ structure of Block No. 1, rtl_notes D-19) has been exercised; `cdc`, `rdc` and `
 The PD flow of fu3 reads this folder as `$DPHY_RX_PATH` (naming rules of the PD team, 2026-11-04):
 `logical/filelist.f` with the define `FPT_SIGNOFF`, under which the two clock cells take
 `m_fpt_lib_cg` and `m_fpt_lib_clk_inv` of the SoC library from `$LIB_PATH/gate`, and
-`sdc/constraint.sdc`; the top is `m_fpt_dphy_rx_wrap` (rtl_notes D-30).
+`sdc/constraint.sdc`; the top is `m_fpt_dphy_rx_wrap` (rtl_notes D-30). The folder differs from
+machine to machine, so `set_env.sh` sets `DPHY_RX_PATH` from where it is. In bash, source the
+`set_env.sh` of the SoC workspace first, for `LIB_PATH`, then this one:
+
+```bash
+source <SoC workspace>/set_env.sh            # LIB_PATH and the tools of the SoC
+source <path of 22fdx/rx/digital>/set_env.sh # DPHY_RX_PATH; warns when LIB_PATH or its two cells are missing
+```
+
 VCS lint of the RTL and the directed simulation of Block No. 1:
 
 ```bash
@@ -186,7 +195,7 @@ is never committed. `.env.example` lists every variable with a placeholder and s
 
 ```bash
 cp .env.example .env                                  # then replace each placeholder with the local value
-export DPHY_RX_PATH=<path of 22fdx/rx/digital>        # read by the filelists and by tool_flow
+source set_env.sh                                     # DPHY_RX_PATH, read by the filelists and by tool_flow
 export VERDI_HOME=/opt/synopsys/verdi/X-2025.06
 ```
 
