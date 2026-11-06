@@ -279,6 +279,9 @@ Cả hai lần: 0 khác, 0 run chưa chạy lại; evidence 9/9; evselftest PASS
   hai cell clock có nhánh `FPT_SIGNOFF` mà bench không định nghĩa. So với `fpga/work/exp1/_pre_signoff/`, bản lưu
   của lần đổi tên.
 
+Hai bản lưu `_pre_rename` và `_pre_signoff` đã được xoá ngày 2026-11-05, sau phép so: output của chúng trùng output
+hiện tại, ngoài tên module và dòng `sources`.
+
 ## 7. Kiểm chứng: vì sao tin được kết quả
 
 Kết quả chỉ đáng tin khi trả lời được sáu câu hỏi dưới đây, mỗi lớp kiểm một câu.

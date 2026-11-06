@@ -463,7 +463,9 @@ TN1.
 
 - Output nằm ở `fpga/work/exp2/` và `fpga/work/exp2b/` trên máy của nhóm D-PHY RX, không có trong repo (git bỏ qua):
   khoảng 0,5 GB cho TN2a và 0,8 GB cho TN2b, kể cả build. Bản lưu của 39 run TN2b ngày 2026-10-23 nặng thêm khoảng
-  0,45 GB. Mỗi bản lưu của một lần chạy, dùng cho phép so ở §5.5, nặng khoảng 0,05 GB cho TN2a và 0,45 GB cho TN2b.
+  0,45 GB. Bản lưu của lần chạy 2026-10-26, dùng cho phép so 2026-11-03 ở §5.5, nặng khoảng 0,05 GB cho TN2a và
+  0,45 GB cho TN2b. Bản lưu của hai lần chạy sau đó đã được xoá sau phép so, vì output của chúng trùng lần chạy cuối,
+  ngoài tên module.
 - Có hai cách lấy số liệu:
   - chạy lại theo [`TN2_DESCRIPTION.md`](TN2_DESCRIPTION.md);
   - xin nhóm một bản copy.

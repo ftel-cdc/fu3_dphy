@@ -147,6 +147,7 @@
    - `write_sdc` chỉ khác ở dòng ngày "Created by write_sdc on".
 
    Output DC tên cũ của 03/11 vẫn nằm lại trong `syn/netlist` (gitignored); bản để so ở `syn/work/_pre_rename/`.
+   Cả hai, cùng `fpga/work/*/_pre_rename/`, đã xoá ngày 2026-11-05 ([`PLAN_PD_SIGNOFF.md`](PLAN_PD_SIGNOFF.md) §10).
 7. **Package cấu hình sinh lại** chỉ khác dòng HAS v0.17 → v0.18 ở header. P3a báo CF-DRIFT vì package đổi sau
    lint, nên đã chạy lại VCS lint và SpyGlass. Đó là đúng hành vi của cổng.
 

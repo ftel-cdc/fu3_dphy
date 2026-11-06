@@ -377,8 +377,8 @@ CSI-2 RX. Kết quả nằm ở [`../exp2/TN2_REPORT.md`](../exp2/TN2_REPORT.md)
 - Output của lần chạy nằm ở `fpga/work/exp1/` trên máy của nhóm D-PHY RX. Thư mục này không có trong repo (git bỏ qua).
   Lần chạy 2026-10-20, kèm bản lưu của lần chạy đầu, nặng khoảng 1,7 GB. Lần chạy lại 2026-10-26 trong repo fu3_dphy
   nặng khoảng 0,8 GB. Lần chạy 2026-11-03 nặng khoảng 0,9 GB; bản lưu của lần chạy 2026-10-26, dùng cho phép so ở
-  §3.6, nặng khoảng 0,6 GB. Lần chạy lại cuối của 2026-11-04 nặng khoảng 0,9 GB; bản lưu của lần chạy ngay trước,
-  dùng cho phép so ở §5, nặng khoảng 0,6 GB.
+  §3.6, nặng khoảng 0,6 GB. Lần chạy lại cuối của 2026-11-04 nặng khoảng 0,9 GB. Bản lưu của hai lần chạy trước đó,
+  dùng cho phép so ở §5, đã được xoá sau phép so, vì output của chúng trùng lần chạy cuối, ngoài tên module.
 - Có hai cách lấy số liệu:
   - chạy lại theo [`TN1_DESCRIPTION.md`](TN1_DESCRIPTION.md);
   - xin nhóm một bản copy.

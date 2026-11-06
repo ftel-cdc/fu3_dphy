@@ -238,6 +238,9 @@ Kết quả chạy trên RTL của commit `5fa890b` (HAS v0.16). `logical/` và 
 - 2026-11-04, bản sign-off cho flow PD ([`../PLAN_PD_SIGNOFF.md`](../PLAN_PD_SIGNOFF.md)): 486 file, 0 khác ở mọi cột.
   Bản lưu: `fpga/work/exp2/_pre_signoff/`.
 
+Hai bản lưu `_pre_rename` và `_pre_signoff` đã được xoá ngày 2026-11-05, sau phép so: output của chúng trùng output
+hiện tại, ngoài tên module và dòng `sources`.
+
 Mỗi lần, `all`, `model` và `neg` chạy nối tiếp trong khoảng 1,5 giờ, cùng lúc với TN1.
 
 **Trả lời ba câu hỏi ở §1:**

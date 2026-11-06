@@ -138,3 +138,25 @@ Ghi chú của bước 5:
 - `exp2/README.md` §7 ghi evselftest 2026-10-26 là "13 lỗi"; thật ra là 13 ca: 1 ca sạch và 12 lỗi, như `TN2_REPORT`
   ghi. Đã sửa.
 - Thời gian máy: luồng A 1 giờ, luồng B 3,1 giờ, trong ước lượng 3,5 giờ.
+
+## 10. Dọn dẹp (2026-11-05)
+
+Bạn chọn mức (1), chỉ xoá bản trùng. Mọi thứ dưới đây đều gitignored hoặc nằm trong scratchpad, và đã xoá:
+
+| Đã xoá | Kích thước | Vì sao không cần nữa |
+|---|---|---|
+| `fpga/work/{exp1,exp2,exp2b}/_pre_rename/` | 1,1 GB | Bản lưu lần chạy 03/11; trùng output hiện tại, ngoài tên module và dòng `sources` (cổng của `PLAN_RENAME_FPT.md`, 0 khác) |
+| `fpga/work/{exp1,exp2,exp2b}/_pre_signoff/` | 1,1 GB | Bản lưu lần chạy đổi tên; trùng output hiện tại, ngoài dòng `sources` (bước 4, 0 khác) |
+| `fpga/work/exp2/LG-E2a3-{260,400,800}/` | 0,7 MB | Run thăm dò ngày 03/11 trên RTL v0.16; không tài liệu nào dùng làm bằng chứng |
+| `syn/netlist/*/m_ftel_dphy_rx_wrap.{v,ddc,sdc}` (12 file) | trong 17 MB | Output DC mang tên cũ; bản tên mới trùng sau khi thay tên |
+| `syn/work/*/WORK/` mang tên cũ (240 file: 160 `.pvl`/`.syn`, 80 `.mr` viết hoa) | trong 36 MB | Thư viện analyze của DC cho các module tên cũ; DC dựng lại ở mỗi run |
+| `syn/work/_pre_rename/` | 9,6 MB | Bản để so DC của lần đổi tên; đã so xong (72/72 file trùng) |
+| Scratchpad của phiên, trừ `pd_dc/run_pd.sh` và `pd_dc/run_lec.sh` | khoảng 200 MB | Run DC và LEC của PD, các bản sao IP, log của luồng chạy, script đo một lần |
+
+Giữ lại:
+- `fpga/work/*/_pre_nowait/`: bản duy nhất của output RTL v0.16;
+- `fpga/work/exp2b/_pre_gate/`: run 23/10 dùng adapter của testbench;
+- `fpga/work/exp2/DBG-*`: bằng chứng trong `PLAN_TN2A.md`;
+- `req/_work/`: lần resync spec tới cần `P1/`; `P1_v16/`, `P1_v17/` khác `P1/`.
+
+Đĩa trống của phân vùng chứa repo tăng từ 152 GB lên 154 GB. Các README và §8 của hai report đã sửa câu nói về bản lưu.

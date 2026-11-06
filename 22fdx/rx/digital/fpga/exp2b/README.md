@@ -409,6 +409,9 @@ Cả 40 run (`shim` và `finding`) chạy lại ba lần, build lại từ đầ
 - 2026-11-04, bản sign-off cho flow PD ([`../PLAN_PD_SIGNOFF.md`](../PLAN_PD_SIGNOFF.md)): 449 file, 0 khác ở mọi
   cột. Bản lưu: `fpga/work/exp2b/_pre_signoff/`.
 
+Hai bản lưu `_pre_rename` và `_pre_signoff` đã được xoá ngày 2026-11-05, sau phép so: output của chúng trùng output
+hiện tại, ngoài tên module và dòng `sources`.
+
 Mỗi lần, `shim` rồi `finding` chạy nối tiếp trong khoảng 1,6 giờ, sau TN2a và cùng lúc với TN1.
 
 ## 7. Kiểm chứng: vì sao tin được kết quả
